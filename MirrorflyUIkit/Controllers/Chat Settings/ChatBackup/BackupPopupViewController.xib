@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21225" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_0" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21207"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <customFonts key="customFonts">
+        <array key="SF-UI-Display-Semibold.otf">
+            <string>SFUIDisplay-Semibold</string>
+        </array>
+    </customFonts>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="BackupPopupViewController" customModule="UiKitQa" customModuleProvider="target">
+            <connections>
+                <outlet property="backgroundView" destination="NRj-E6-9N2" id="O6K-80-UwN"/>
+                <outlet property="cancelButton" destination="d10-6E-rJG" id="dNu-oK-oxp"/>
+                <outlet property="dailyButton" destination="oij-cI-XnQ" id="c35-Ia-SS7"/>
+                <outlet property="monthlyButton" destination="n4X-4f-eog" id="fuL-0n-EYv"/>
+                <outlet property="optionBaseView" destination="N4m-Fj-UML" id="Y1f-mD-jMH"/>
+                <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
+                <outlet property="weeklyButton" destination="y5s-fl-SRa" id="Kfq-tb-NlR"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" restorationIdentifier="BackupPopupViewController" id="i5M-Pr-FkT">
+            <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="NRj-E6-9N2">
+                    <rect key="frame" x="0.0" y="47" width="390" height="763"/>
+                    <subviews>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="N4m-Fj-UML">
+                            <rect key="frame" x="55" y="245.66666666666669" width="280" height="272.00000000000006"/>
+                            <subviews>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Schedule to run backups automatically" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="BhR-67-W1n">
+                                    <rect key="frame" x="40" y="16.999999999999996" width="200" height="33.666666666666657"/>
+                                    <fontDescription key="fontDescription" name="SFUIDisplay-Semibold" family="SF UI Display" pointSize="14"/>
+                                    <nil key="textColor"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="vdA-xM-fJI">
+                                    <rect key="frame" x="0.0" y="66.666666666666629" width="280" height="0.3333333333333286"/>
+                                    <color key="backgroundColor" systemColor="separatorColor"/>
+                                    <constraints>
+                                        <constraint firstAttribute="height" constant="0.40000000000000002" id="0m1-LX-KjU"/>
+                                    </constraints>
+                                </view>
+                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="qRA-I5-MEr">
+                                    <rect key="frame" x="0.0" y="117" width="280" height="0.3333333333333286"/>
+                                    <color key="backgroundColor" systemColor="separatorColor"/>
+                                    <constraints>
+                                        <constraint firstAttribute="height" constant="0.40000000000000002" id="iFo-ja-J04"/>
+                                    </constraints>
+                                </view>
+                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="iwr-Kp-WXl">
+                                    <rect key="frame" x="0.0" y="167.33333333333331" width="280" height="0.66666666666665719"/>
+                                    <color key="backgroundColor" systemColor="separatorColor"/>
+                                    <constraints>
+                                        <constraint firstAttribute="height" constant="0.80000000000000004" id="tiF-AN-yrZ"/>
+                                    </constraints>
+                                </view>
+                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="s6u-Du-Qzg">
+                                    <rect key="frame" x="0.0" y="218" width="280" height="0.66666666666665719"/>
+                                    <color key="backgroundColor" systemColor="separatorColor"/>
+                                    <constraints>
+                                        <constraint firstAttribute="height" constant="0.40000000000000002" id="yYi-AP-Hpw"/>
+                                    </constraints>
+                                </view>
+                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="oij-cI-XnQ">
+                                    <rect key="frame" x="0.0" y="67" width="280" height="50"/>
+                                    <constraints>
+                                        <constraint firstAttribute="height" constant="50" id="u2a-qq-Apg"/>
+                                    </constraints>
+                                    <state key="normal" title="Button"/>
+                                    <buttonConfiguration key="configuration" style="plain" title="Daily">
+                                        <color key="baseForegroundColor" name="color_767676"/>
+                                    </buttonConfiguration>
+                                    <connections>
+                                        <action selector="dailyAction:" destination="-1" eventType="touchUpInside" id="NUe-lj-za4"/>
+                                    </connections>
+                                </button>
+                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="y5s-fl-SRa">
+                                    <rect key="frame" x="0.0" y="117.33333333333331" width="280" height="50"/>
+                                    <constraints>
+                                        <constraint firstAttribute="height" constant="50" id="Mos-e1-imh"/>
+                                    </constraints>
+                                    <state key="normal" title="Button"/>
+                                    <buttonConfiguration key="configuration" style="plain" title="Weekly">
+                                        <color key="baseForegroundColor" name="color_767676"/>
+                                    </buttonConfiguration>
+                                    <connections>
+                                        <action selector="weeklyAction:" destination="-1" eventType="touchUpInside" id="Qf7-VD-KSo"/>
+                                    </connections>
+                                </button>
+                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="d10-6E-rJG">
+                                    <rect key="frame" x="0.0" y="218.66666666666663" width="280" height="53.333333333333314"/>
+                                    <state key="normal" title="Button"/>
+                                    <buttonConfiguration key="configuration" style="plain" title="Cancel">
+                                        <color key="baseForegroundColor" name="color_blue_3276E2"/>
+                                    </buttonConfiguration>
+                                    <connections>
+                                        <action selector="cancelAction:" destination="-1" eventType="touchUpInside" id="Zam-qJ-dtW"/>
+                                    </connections>
+                                </button>
+                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="n4X-4f-eog">
+                                    <rect key="frame" x="0.0" y="168" width="280" height="50"/>
+                                    <constraints>
+                                        <constraint firstAttribute="height" constant="50" id="MqG-T3-nOV"/>
+                                    </constraints>
+                                    <state key="normal" title="Button"/>
+                                    <buttonConfiguration key="configuration" style="plain" title="Monthly">
+                                        <color key="baseForegroundColor" name="color_767676"/>
+                                    </buttonConfiguration>
+                                    <connections>
+                                        <action selector="monthlyAction:" destination="-1" eventType="touchUpInside" id="QDA-Tu-jIM"/>
+                                    </connections>
+                                </button>
+                            </subviews>
+                            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                            <constraints>
+                                <constraint firstAttribute="trailing" secondItem="d10-6E-rJG" secondAttribute="trailing" id="68r-Dw-F38"/>
+                                <constraint firstAttribute="trailing" secondItem="y5s-fl-SRa" secondAttribute="trailing" id="7w9-Z6-ZkX"/>
+                                <constraint firstItem="d10-6E-rJG" firstAttribute="top" secondItem="s6u-Du-Qzg" secondAttribute="bottom" id="8Am-mj-6qh"/>
+                                <constraint firstItem="qRA-I5-MEr" firstAttribute="leading" secondItem="N4m-Fj-UML" secondAttribute="leading" id="DDB-lC-wn2"/>
+                                <constraint firstItem="iwr-Kp-WXl" firstAttribute="top" secondItem="y5s-fl-SRa" secondAttribute="bottom" id="Gfj-hi-dlC"/>
+                                <constraint firstAttribute="trailing" secondItem="n4X-4f-eog" secondAttribute="trailing" id="GzJ-aJ-NdC"/>
+                                <constraint firstItem="BhR-67-W1n" firstAttribute="top" secondItem="N4m-Fj-UML" secondAttribute="top" constant="17" id="Hg7-Z7-RLe"/>
+                                <constraint firstItem="vdA-xM-fJI" firstAttribute="top" secondItem="BhR-67-W1n" secondAttribute="bottom" constant="16" id="Isc-XV-4T0"/>
+                                <constraint firstItem="y5s-fl-SRa" firstAttribute="leading" secondItem="N4m-Fj-UML" secondAttribute="leading" id="Mt9-kA-d7f"/>
+                                <constraint firstItem="s6u-Du-Qzg" firstAttribute="leading" secondItem="N4m-Fj-UML" secondAttribute="leading" id="N0r-Mf-Z4n"/>
+                                <constraint firstItem="n4X-4f-eog" firstAttribute="top" secondItem="iwr-Kp-WXl" secondAttribute="bottom" id="Obt-ET-Qq2"/>
+                                <constraint firstAttribute="trailing" secondItem="vdA-xM-fJI" secondAttribute="trailing" id="OqV-KU-0Rh"/>
+                                <constraint firstAttribute="trailing" secondItem="qRA-I5-MEr" secondAttribute="trailing" id="PP4-hk-iaN"/>
+                                <constraint firstItem="oij-cI-XnQ" firstAttribute="leading" secondItem="N4m-Fj-UML" secondAttribute="leading" id="QPy-HQ-egl"/>
+                                <constraint firstAttribute="trailing" secondItem="BhR-67-W1n" secondAttribute="trailing" constant="40" id="UAR-qC-ePL"/>
+                                <constraint firstItem="s6u-Du-Qzg" firstAttribute="top" secondItem="n4X-4f-eog" secondAttribute="bottom" id="WEk-tT-V0g"/>
+                                <constraint firstAttribute="trailing" secondItem="iwr-Kp-WXl" secondAttribute="trailing" id="Wga-xZ-2B7"/>
+                                <constraint firstItem="y5s-fl-SRa" firstAttribute="leading" secondItem="N4m-Fj-UML" secondAttribute="leading" id="YF3-0E-glh"/>
+                                <constraint firstItem="n4X-4f-eog" firstAttribute="leading" secondItem="N4m-Fj-UML" secondAttribute="leading" id="YKP-mN-dQA"/>
+                                <constraint firstItem="d10-6E-rJG" firstAttribute="leading" secondItem="N4m-Fj-UML" secondAttribute="leading" id="ZS0-LM-bQx"/>
+                                <constraint firstAttribute="trailing" secondItem="oij-cI-XnQ" secondAttribute="trailing" id="bV8-fl-788"/>
+                                <constraint firstAttribute="trailing" secondItem="s6u-Du-Qzg" secondAttribute="trailing" id="c05-Y3-Fzh"/>
+                                <constraint firstAttribute="bottom" secondItem="d10-6E-rJG" secondAttribute="bottom" id="dtS-Hl-QTJ"/>
+                                <constraint firstItem="oij-cI-XnQ" firstAttribute="top" secondItem="vdA-xM-fJI" secondAttribute="bottom" id="f2M-Yn-Uif"/>
+                                <constraint firstItem="BhR-67-W1n" firstAttribute="leading" secondItem="N4m-Fj-UML" secondAttribute="leading" constant="40" id="fBt-A9-BNj"/>
+                                <constraint firstItem="iwr-Kp-WXl" firstAttribute="leading" secondItem="N4m-Fj-UML" secondAttribute="leading" id="g1y-cE-Zhw"/>
+                                <constraint firstItem="qRA-I5-MEr" firstAttribute="top" secondItem="oij-cI-XnQ" secondAttribute="bottom" id="geA-gI-RAA"/>
+                                <constraint firstAttribute="height" constant="272" id="gmP-7F-D2R"/>
+                                <constraint firstItem="vdA-xM-fJI" firstAttribute="leading" secondItem="N4m-Fj-UML" secondAttribute="leading" id="qRc-kq-ZeU"/>
+                                <constraint firstAttribute="trailing" secondItem="y5s-fl-SRa" secondAttribute="trailing" id="sFB-cV-1fv"/>
+                                <constraint firstItem="y5s-fl-SRa" firstAttribute="top" secondItem="qRA-I5-MEr" secondAttribute="bottom" id="spN-VI-8oQ"/>
+                            </constraints>
+                        </view>
+                    </subviews>
+                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <color key="tintColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <gestureRecognizers/>
+                    <constraints>
+                        <constraint firstItem="N4m-Fj-UML" firstAttribute="leading" secondItem="NRj-E6-9N2" secondAttribute="leading" constant="55" id="WbD-ro-BlG"/>
+                        <constraint firstAttribute="trailing" secondItem="N4m-Fj-UML" secondAttribute="trailing" constant="55" id="iZK-Xp-YJg"/>
+                    </constraints>
+                </view>
+            </subviews>
+            <viewLayoutGuide key="safeArea" id="fnl-2z-Ty3"/>
+            <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.52606823979591832" colorSpace="custom" customColorSpace="displayP3"/>
+            <constraints>
+                <constraint firstItem="NRj-E6-9N2" firstAttribute="height" secondItem="i5M-Pr-FkT" secondAttribute="height" multiplier="0.904028" id="0ug-t2-JPQ"/>
+                <constraint firstItem="N4m-Fj-UML" firstAttribute="centerX" secondItem="fnl-2z-Ty3" secondAttribute="centerX" id="6c7-LO-L7h"/>
+                <constraint firstItem="NRj-E6-9N2" firstAttribute="top" secondItem="fnl-2z-Ty3" secondAttribute="top" id="9fP-YL-TAE"/>
+                <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="NRj-E6-9N2" secondAttribute="trailing" id="CIN-7r-UFh"/>
+                <constraint firstItem="N4m-Fj-UML" firstAttribute="centerY" secondItem="fnl-2z-Ty3" secondAttribute="centerY" id="Ryq-8v-bni"/>
+                <constraint firstItem="NRj-E6-9N2" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" id="oi7-sA-dhL"/>
+                <constraint firstItem="NRj-E6-9N2" firstAttribute="width" secondItem="i5M-Pr-FkT" secondAttribute="width" id="xEI-Gs-jjx"/>
+            </constraints>
+            <point key="canvasLocation" x="127.69230769230769" y="20.616113744075829"/>
+        </view>
+    </objects>
+    <resources>
+        <namedColor name="color_767676">
+            <color red="0.46274509803921571" green="0.46274509803921571" blue="0.46274509803921571" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="color_blue_3276E2">
+            <color red="0.19607843137254902" green="0.46274509803921571" blue="0.88627450980392153" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <systemColor name="separatorColor">
+            <color red="0.23529411764705882" green="0.23529411764705882" blue="0.2627450980392157" alpha="0.28999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>

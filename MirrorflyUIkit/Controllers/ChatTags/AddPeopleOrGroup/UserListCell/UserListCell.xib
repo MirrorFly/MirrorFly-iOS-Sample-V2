@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21225" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_0" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21207"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <customFonts key="customFonts">
+        <array key="SF-UI-Display-Regular.otf">
+            <string>SFUIDisplay-Regular</string>
+        </array>
+        <array key="SF-UI-Display-Semibold.otf">
+            <string>SFUIDisplay-Semibold</string>
+        </array>
+    </customFonts>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" restorationIdentifier="UserListCell" selectionStyle="default" indentationWidth="10" rowHeight="100" id="KGk-i7-Jjw" customClass="UserListCell" customModule="Mirrorfly" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="70"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
+                <rect key="frame" x="0.0" y="0.0" width="320" height="70"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="user" translatesAutoresizingMaskIntoConstraints="NO" id="oSm-oH-Aog">
+                        <rect key="frame" x="20" y="10" width="50" height="50"/>
+                        <color key="backgroundColor" name="ImageBackgroundGray"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="50" id="cbg-vo-3Zh"/>
+                            <constraint firstAttribute="width" constant="50" id="fRI-2g-4Og"/>
+                        </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="number" keyPath="cornerRadius">
+                                <integer key="value" value="25"/>
+                            </userDefinedRuntimeAttribute>
+                        </userDefinedRuntimeAttributes>
+                    </imageView>
+                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="select_user" translatesAutoresizingMaskIntoConstraints="NO" id="7pv-eC-cyt">
+                        <rect key="frame" x="280" y="25" width="20" height="20"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="20" id="PNb-Fy-GY0"/>
+                            <constraint firstAttribute="width" constant="20" id="cJE-6p-MI0"/>
+                        </constraints>
+                    </imageView>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Sm4-cc-e69">
+                        <rect key="frame" x="78" y="69" width="222" height="1"/>
+                        <color key="backgroundColor" name="dividerColor"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="1" id="MHq-3i-RYN"/>
+                        </constraints>
+                    </view>
+                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="fWu-22-D8E">
+                        <rect key="frame" x="78" y="10" width="194" height="50"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Contus User" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DMb-Zg-yM3">
+                                <rect key="frame" x="0.0" y="0.0" width="194" height="25"/>
+                                <fontDescription key="fontDescription" name="SFUIDisplay-Semibold" family="SF UI Display" pointSize="14"/>
+                                <color key="textColor" name="PrimaryTextColor1"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="members" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fHI-eJ-bvY">
+                                <rect key="frame" x="0.0" y="25" width="194" height="25"/>
+                                <fontDescription key="fontDescription" name="SFUIDisplay-Regular" family="SF UI Display" pointSize="12"/>
+                                <color key="textColor" name="PrimaryTextColor2"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="50" id="fFs-le-8Tk"/>
+                        </constraints>
+                    </stackView>
+                </subviews>
+                <color key="backgroundColor" red="0.94509803921568625" green="0.94901960784313721" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                <constraints>
+                    <constraint firstAttribute="bottom" secondItem="Sm4-cc-e69" secondAttribute="bottom" id="6zg-ju-ejB"/>
+                    <constraint firstItem="7pv-eC-cyt" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="25" id="I8r-ag-I2o"/>
+                    <constraint firstItem="fWu-22-D8E" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="10" id="IDw-rY-py2"/>
+                    <constraint firstAttribute="trailing" secondItem="7pv-eC-cyt" secondAttribute="trailing" constant="20" id="PaH-Gr-xqr"/>
+                    <constraint firstItem="oSm-oH-Aog" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="10" id="aXz-Vm-eiY"/>
+                    <constraint firstItem="fWu-22-D8E" firstAttribute="leading" secondItem="oSm-oH-Aog" secondAttribute="trailing" constant="8" symbolic="YES" id="b09-WA-fVz"/>
+                    <constraint firstAttribute="trailing" secondItem="Sm4-cc-e69" secondAttribute="trailing" constant="20" id="bLO-KV-9JV"/>
+                    <constraint firstItem="7pv-eC-cyt" firstAttribute="leading" secondItem="fWu-22-D8E" secondAttribute="trailing" constant="8" id="hEH-xy-jx6"/>
+                    <constraint firstAttribute="bottom" secondItem="fWu-22-D8E" secondAttribute="bottom" constant="10" id="hMD-xd-rim"/>
+                    <constraint firstItem="Sm4-cc-e69" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="78" id="iNC-tU-rAK"/>
+                    <constraint firstAttribute="bottom" secondItem="7pv-eC-cyt" secondAttribute="bottom" constant="25" id="rmA-DF-Xqe"/>
+                    <constraint firstItem="oSm-oH-Aog" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="20" id="w2e-Ka-tZ5"/>
+                    <constraint firstAttribute="bottom" secondItem="oSm-oH-Aog" secondAttribute="bottom" constant="10" id="xo0-yq-lKd"/>
+                </constraints>
+            </tableViewCellContentView>
+            <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
+            <connections>
+                <outlet property="checkBoxImage" destination="7pv-eC-cyt" id="3yM-mH-Z9m"/>
+                <outlet property="profileImage" destination="oSm-oH-Aog" id="nEu-7h-Nq3"/>
+                <outlet property="subTitleLabel" destination="fHI-eJ-bvY" id="Ow7-Gy-lJd"/>
+                <outlet property="titleLabel" destination="DMb-Zg-yM3" id="rai-aV-WAq"/>
+            </connections>
+            <point key="canvasLocation" x="89.230769230769226" y="40.521327014218009"/>
+        </tableViewCell>
+    </objects>
+    <resources>
+        <image name="select_user" width="16" height="16"/>
+        <image name="user" width="21.666666030883789" height="24.666666030883789"/>
+        <namedColor name="ImageBackgroundGray">
+            <color red="0.77999997138977051" green="0.77999997138977051" blue="0.77999997138977051" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="PrimaryTextColor1">
+            <color red="0.094117647058823528" green="0.094117647058823528" blue="0.094117647058823528" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="PrimaryTextColor2">
+            <color red="0.46274509803921571" green="0.46274509803921571" blue="0.46274509803921571" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="dividerColor">
+            <color red="0.88627450980392153" green="0.88627450980392153" blue="0.88627450980392153" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+    </resources>
+</document>

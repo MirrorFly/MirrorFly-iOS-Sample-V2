@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21225" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_0" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21207"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <customFonts key="customFonts">
+        <array key="SF-UI-Display-Medium.otf">
+            <string>SFUIDisplay-Medium</string>
+        </array>
+    </customFonts>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="AutoBackupPopupViewController" customModule="UiKitQa" customModuleProvider="target">
+            <connections>
+                <outlet property="backgroundView" destination="i5M-Pr-FkT" id="Rci-f9-T7S"/>
+                <outlet property="cancelButton" destination="Es1-dN-OCd" id="McP-Qa-5Py"/>
+                <outlet property="cellularButton" destination="pPU-id-LMG" id="9XF-N4-Q5U"/>
+                <outlet property="optionBaseView" destination="mlV-08-Ivg" id="qxJ-TE-7s7"/>
+                <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
+                <outlet property="wifiButton" destination="bnj-eh-oWy" id="BRu-a5-VCd"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
+            <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="XWT-F6-KZ7">
+                    <rect key="frame" x="0.0" y="0.0" width="390" height="810"/>
+                    <subviews>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="mlV-08-Ivg">
+                            <rect key="frame" x="55" y="313.66666666666669" width="280" height="230.00000000000006"/>
+                            <subviews>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Schedule to run backups over" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Nsq-uO-PW0">
+                                    <rect key="frame" x="40" y="17" width="200" height="17"/>
+                                    <fontDescription key="fontDescription" name="SFUIDisplay-Medium" family="SF UI Display" pointSize="14"/>
+                                    <nil key="textColor"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="LuX-dI-Bct">
+                                    <rect key="frame" x="0.0" y="50" width="280" height="0.3333333333333357"/>
+                                    <color key="backgroundColor" systemColor="separatorColor"/>
+                                    <constraints>
+                                        <constraint firstAttribute="height" constant="0.40000000000000002" id="l42-Sf-GTF"/>
+                                    </constraints>
+                                </view>
+                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="SRO-lS-wI8">
+                                    <rect key="frame" x="0.0" y="100.33333333333331" width="280" height="0.3333333333333286"/>
+                                    <color key="backgroundColor" systemColor="separatorColor"/>
+                                    <constraints>
+                                        <constraint firstAttribute="height" constant="0.40000000000000002" id="MIv-wj-mGa"/>
+                                    </constraints>
+                                </view>
+                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="lNi-gG-1Yu">
+                                    <rect key="frame" x="0.0" y="150.66666666666663" width="280" height="0.66666666666665719"/>
+                                    <color key="backgroundColor" systemColor="separatorColor"/>
+                                    <constraints>
+                                        <constraint firstAttribute="height" constant="0.80000000000000004" id="Wh3-G7-Z0Q"/>
+                                    </constraints>
+                                </view>
+                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bnj-eh-oWy">
+                                    <rect key="frame" x="0.0" y="50.333333333333314" width="280" height="50"/>
+                                    <state key="normal" title="Button"/>
+                                    <buttonConfiguration key="configuration" style="plain" title="Wi-Fi">
+                                        <color key="baseForegroundColor" name="color_767676"/>
+                                    </buttonConfiguration>
+                                    <connections>
+                                        <action selector="wifiAction:" destination="-1" eventType="touchUpInside" id="uSG-gG-Len"/>
+                                    </connections>
+                                </button>
+                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="pPU-id-LMG">
+                                    <rect key="frame" x="0.0" y="100.66666666666663" width="280" height="50"/>
+                                    <state key="normal" title="Button"/>
+                                    <buttonConfiguration key="configuration" style="plain" title="Wi-Fi or Cellular">
+                                        <color key="baseForegroundColor" name="color_767676"/>
+                                    </buttonConfiguration>
+                                    <connections>
+                                        <action selector="cellularAction:" destination="-1" eventType="touchUpInside" id="KiM-2X-vDw"/>
+                                    </connections>
+                                </button>
+                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Es1-dN-OCd">
+                                    <rect key="frame" x="0.0" y="151.33333333333331" width="280" height="78.666666666666686"/>
+                                    <state key="normal" title="Button"/>
+                                    <buttonConfiguration key="configuration" style="plain" title="Cancel">
+                                        <color key="baseForegroundColor" name="color_blue_3276E2"/>
+                                    </buttonConfiguration>
+                                    <connections>
+                                        <action selector="cancelAction:" destination="-1" eventType="touchUpInside" id="2NL-7k-oTv"/>
+                                    </connections>
+                                </button>
+                            </subviews>
+                            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                            <constraints>
+                                <constraint firstAttribute="trailing" secondItem="pPU-id-LMG" secondAttribute="trailing" id="4Si-9q-Hun"/>
+                                <constraint firstAttribute="trailing" secondItem="Nsq-uO-PW0" secondAttribute="trailing" constant="40" id="814-Na-5Yt"/>
+                                <constraint firstAttribute="bottom" secondItem="Es1-dN-OCd" secondAttribute="bottom" id="9zo-zY-Xgc"/>
+                                <constraint firstItem="pPU-id-LMG" firstAttribute="top" secondItem="SRO-lS-wI8" secondAttribute="bottom" id="C8i-La-RLQ"/>
+                                <constraint firstItem="bnj-eh-oWy" firstAttribute="top" secondItem="LuX-dI-Bct" secondAttribute="bottom" id="CaX-0h-wcH"/>
+                                <constraint firstItem="pPU-id-LMG" firstAttribute="leading" secondItem="mlV-08-Ivg" secondAttribute="leading" id="Cjv-E7-zf8"/>
+                                <constraint firstItem="Nsq-uO-PW0" firstAttribute="top" secondItem="mlV-08-Ivg" secondAttribute="top" constant="17" id="Dvd-sI-18t"/>
+                                <constraint firstItem="lNi-gG-1Yu" firstAttribute="top" secondItem="SRO-lS-wI8" secondAttribute="bottom" constant="50" id="Eo1-zc-qC7"/>
+                                <constraint firstItem="SRO-lS-wI8" firstAttribute="leading" secondItem="mlV-08-Ivg" secondAttribute="leading" id="JLL-oS-XBa"/>
+                                <constraint firstItem="LuX-dI-Bct" firstAttribute="top" secondItem="Nsq-uO-PW0" secondAttribute="bottom" constant="16" id="RAe-vM-4Hi"/>
+                                <constraint firstItem="Nsq-uO-PW0" firstAttribute="leading" secondItem="mlV-08-Ivg" secondAttribute="leading" constant="40" id="YF8-p7-Buh"/>
+                                <constraint firstItem="bnj-eh-oWy" firstAttribute="leading" secondItem="mlV-08-Ivg" secondAttribute="leading" id="bJN-pc-ucF"/>
+                                <constraint firstAttribute="trailing" secondItem="SRO-lS-wI8" secondAttribute="trailing" id="bJZ-t8-Mu4"/>
+                                <constraint firstItem="lNi-gG-1Yu" firstAttribute="top" secondItem="pPU-id-LMG" secondAttribute="bottom" id="czm-O6-5aI"/>
+                                <constraint firstAttribute="trailing" secondItem="lNi-gG-1Yu" secondAttribute="trailing" id="dZw-WZ-V9f"/>
+                                <constraint firstAttribute="trailing" secondItem="Es1-dN-OCd" secondAttribute="trailing" id="fkq-fC-iKr"/>
+                                <constraint firstItem="SRO-lS-wI8" firstAttribute="top" secondItem="bnj-eh-oWy" secondAttribute="bottom" id="hgo-ah-XJl"/>
+                                <constraint firstItem="SRO-lS-wI8" firstAttribute="top" secondItem="LuX-dI-Bct" secondAttribute="bottom" constant="50" id="hjH-uc-UnM"/>
+                                <constraint firstItem="LuX-dI-Bct" firstAttribute="leading" secondItem="mlV-08-Ivg" secondAttribute="leading" id="jF1-8m-fB7"/>
+                                <constraint firstAttribute="trailing" secondItem="bnj-eh-oWy" secondAttribute="trailing" id="mgR-Jt-FWb"/>
+                                <constraint firstItem="lNi-gG-1Yu" firstAttribute="leading" secondItem="mlV-08-Ivg" secondAttribute="leading" id="oGS-Tk-pyF"/>
+                                <constraint firstAttribute="trailing" secondItem="LuX-dI-Bct" secondAttribute="trailing" id="pb1-Kk-WKr"/>
+                                <constraint firstItem="Es1-dN-OCd" firstAttribute="leading" secondItem="mlV-08-Ivg" secondAttribute="leading" id="qOQ-L9-4va"/>
+                                <constraint firstAttribute="height" constant="230" id="sxO-wl-d0g"/>
+                                <constraint firstItem="Es1-dN-OCd" firstAttribute="top" secondItem="lNi-gG-1Yu" secondAttribute="bottom" id="wDQ-J5-mWS"/>
+                            </constraints>
+                        </view>
+                    </subviews>
+                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <color key="tintColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <gestureRecognizers/>
+                    <constraints>
+                        <constraint firstItem="mlV-08-Ivg" firstAttribute="leading" secondItem="XWT-F6-KZ7" secondAttribute="leading" constant="55" id="8NN-ER-dqw"/>
+                        <constraint firstAttribute="trailing" secondItem="mlV-08-Ivg" secondAttribute="trailing" constant="55" id="Esw-c3-4NC"/>
+                    </constraints>
+                </view>
+            </subviews>
+            <viewLayoutGuide key="safeArea" id="fnl-2z-Ty3"/>
+            <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.52606823979999995" colorSpace="custom" customColorSpace="displayP3"/>
+            <constraints>
+                <constraint firstItem="mlV-08-Ivg" firstAttribute="centerY" secondItem="fnl-2z-Ty3" secondAttribute="centerY" id="26X-AT-jPc"/>
+                <constraint firstItem="XWT-F6-KZ7" firstAttribute="width" secondItem="i5M-Pr-FkT" secondAttribute="width" id="Nu3-9c-TLo"/>
+                <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="XWT-F6-KZ7" secondAttribute="trailing" id="RBo-qj-aK9"/>
+                <constraint firstItem="XWT-F6-KZ7" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" id="ZCf-mv-QYb"/>
+                <constraint firstItem="mlV-08-Ivg" firstAttribute="centerX" secondItem="fnl-2z-Ty3" secondAttribute="centerX" id="iwf-Ez-M9r"/>
+                <constraint firstItem="XWT-F6-KZ7" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" id="t36-tW-gpq"/>
+                <constraint firstItem="XWT-F6-KZ7" firstAttribute="height" secondItem="i5M-Pr-FkT" secondAttribute="height" multiplier="0.959716" id="wK1-kn-W63"/>
+            </constraints>
+            <point key="canvasLocation" x="109" y="21"/>
+        </view>
+    </objects>
+    <resources>
+        <namedColor name="color_767676">
+            <color red="0.46274509803921571" green="0.46274509803921571" blue="0.46274509803921571" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="color_blue_3276E2">
+            <color red="0.19607843137254902" green="0.46274509803921571" blue="0.88627450980392153" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <systemColor name="separatorColor">
+            <color red="0.23529411764705882" green="0.23529411764705882" blue="0.2627450980392157" alpha="0.28999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>
