@@ -61,6 +61,36 @@ class ShareKitUtility {
         }
         print("urlExtension \(url)")
     }
+    public func getMentionTextContent(message: String, uiLabel: UILabel? = nil, isMessageSentByMe: Bool, mentionedUsers: [String], searchedText: String? = "") -> NSMutableAttributedString {
+        let attributedString = NSMutableAttributedString(string: message)
+        for user in mentionedUsers {
+            let JID = user + "@" + FlyDefaults.xmppDomain
+            let myJID = try? FlyUtils.getMyJid()
+            if let profileDetail = ContactManager.shared.getUserProfileDetails(for: JID) {
+                let userName = "@\(FlyUtils.getGroupUserName(profile: profileDetail))"
+                let messageString: String = attributedString.string
+                let mentionRange = (messageString as NSString).range(of: "@[?]")
+                if mentionRange.location < attributedString.string.count {
+                    attributedString.replaceCharacters(in: mentionRange, with: userName)
+                }
+                let mentionRange2 = ((attributedString.string) as NSString).range(of: userName)
+                if mentionRange2.location < attributedString.string.count {
+                    attributedString.addAttributes(uiLabel != nil ? (uiLabel?.font)! : .systemFont(ofSize: 15), color: ShareKitColor.muteSwitchColor, range: mentionRange2)
+                    attributedString.addAttributes(uiLabel != nil ? (uiLabel?.font)! : .systemFont(ofSize: 15), color: ShareKitColor.mentionColor!, range: NSRange(location: mentionRange2.location, length: 1))
+                    if !isMessageSentByMe , JID == myJID {
+                        attributedString.addBGAttributes(uiLabel != nil ? (uiLabel?.font)! : .systemFont(ofSize: 15), color: ShareKitColor.mentionBackgroundColor!, range: mentionRange2)
+                    } else {
+                        attributedString.addAttribute(NSAttributedString.Key.backgroundColor, value: UIColor.clear, range: mentionRange2)
+                    }
+                }
+            }
+        }
+        let attributeTxt = NSMutableAttributedString(string: attributedString.string)
+        let range: NSRange = attributeTxt.mutableString.range(of: searchedText ?? "", options: .caseInsensitive)
+        
+        attributedString.addAttribute(NSAttributedString.Key.backgroundColor, value: ShareKitColor.color_3276E2 ?? UIColor.systemBlue, range: range)
+        return attributedString
+    }
 }
 
 
@@ -404,5 +434,34 @@ public class ShareMediaUtils {
         UIGraphicsEndImageContext()
 
         return newImage
+    }
+    
+    
+}
+extension NSMutableAttributedString {
+    
+    @discardableResult public func appendText(_ text: String, font: UIFont, color: UIColor) -> NSMutableAttributedString {
+        let attributes = [NSAttributedString.Key.foregroundColor: color,
+                          NSAttributedString.Key.font: font] as [NSAttributedString.Key : Any]
+        let attributedText = NSAttributedString(string: text, attributes: attributes)
+        self.append(attributedText)
+        
+        return self
+    }
+    
+    @discardableResult public func addAttributes(_ font: UIFont, color: UIColor, range: NSRange) -> NSMutableAttributedString {
+        let attributes = [NSAttributedString.Key.foregroundColor: color,
+                          NSAttributedString.Key.font: font] as [NSAttributedString.Key : Any]
+        self.addAttributes(attributes, range: range)
+        
+        return self
+    }
+    
+    @discardableResult public func addBGAttributes(_ font: UIFont, color: UIColor, range: NSRange) -> NSMutableAttributedString {
+        let attributes = [NSAttributedString.Key.backgroundColor: color,
+                          NSAttributedString.Key.font: font] as [NSAttributedString.Key : Any]
+        self.addAttributes(attributes, range: range)
+        
+        return self
     }
 }

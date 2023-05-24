@@ -403,6 +403,7 @@ public struct ErrorMessage {
     public static let validateAppLock = NSLocalizedString("Invalid PIN! Try again", comment: "")
     public static let fingerPrintIsNotRegisteredinDevice = NSLocalizedString("Fingerprint/Face ID is not registered in device", comment: "")
     public static let pleaseEnablefingerPrintonYourdevice = NSLocalizedString("Please enable fingerprint/faceID on your device", comment: "")
+    public static let fileNoLongerExists = NSLocalizedString("File no longer exists", comment: "")
 
     
 }

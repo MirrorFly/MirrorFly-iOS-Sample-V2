@@ -64,7 +64,7 @@ class ChatTextView: UIView, UITextViewDelegate {
         contactNameLabel?.isHidden = true
         titleLabel?.text = message.isMessageSentByMe ? "You" : getUserName(jid: message.senderUserJid, name: message.senderUserName, nickName: message.senderNickName, contactType: contactType)
         messageTypeImage?.isHidden = message.messageType == .text || message.isMessageRecalled == true ? true : false
-        if message.messageType != .text {
+        if message.messageType == .image || message.messageType == .video || message.messageType == .location {
             let thumbImage = message.mediaChatMessage?.mediaThumbImage ?? ""
             if let mediaMessage = ChatManager.getMessageOfId(messageId: message.messageId) {
                 if mediaMessage.isMessageSentByMe {
@@ -109,6 +109,10 @@ class ChatTextView: UIView, UITextViewDelegate {
                                     } catch let error {
                                         print("Error loading image : \(error)")
                                     }
+                                }else {
+                                    if let thumImage = message.mediaChatMessage?.mediaThumbImage {
+                                        ChatUtils.setThumbnail(imageContainer: mediaMessageImageView ?? UIImageView(), base64String: thumImage)
+                                    }
                                 }
                             }
                         }
@@ -119,7 +123,7 @@ class ChatTextView: UIView, UITextViewDelegate {
                     }
                 }
             }
-            mediaMessageImageView?.contentMode = .redraw
+            //mediaMessageImageView?.contentMode = .redraw
             mediaMessageImageView?.isHidden = false
         } else {
             mediaMessageImageView?.isHidden = true
@@ -128,6 +132,9 @@ class ChatTextView: UIView, UITextViewDelegate {
             mediaMessageImageView?.isHidden = true
         }
         
+        let isMessageSentByMe = message.isMessageSentByMe
+        let mentionedUsers = message.mentionedUsersIds
+        
         if message.isMessageRecalled == true || message.isMessageDeleted == true {
             messageTypeLabel?.text = "Original message not available"
             messageTypeWidthCons?.constant = 0
@@ -135,11 +142,20 @@ class ChatTextView: UIView, UITextViewDelegate {
         } else {
             switch message.messageType {
             case .text:
-                messageTypeLabel?.text = message.messageTextContent
+                if !mentionedUsers.isEmpty {
+                    let replyMessage = message.messageTextContent
+                    messageTypeLabel?.text = ChatUtils.getMentionTextContent(message: replyMessage, uiLabel: messageTypeLabel, isMessageSentByMe: isMessageSentByMe, mentionedUsers: mentionedUsers).string
+                } else {
+                    messageTypeLabel?.text = message.messageTextContent
+                }
                 messageTypeWidthCons?.constant = 0
                 spacierView?.isHidden = true
             case .image:
-                messageTypeLabel?.text = !(message.mediaChatMessage?.mediaCaptionText.isEmpty ?? false) ? message.mediaChatMessage?.mediaCaptionText : "Photo"
+                if !mentionedUsers.isEmpty, let replyMessage = message.mediaChatMessage?.mediaCaptionText, replyMessage.isNotEmpty {
+                    messageTypeLabel?.text = ChatUtils.getMentionTextContent(message: replyMessage, uiLabel: messageTypeLabel, isMessageSentByMe: isMessageSentByMe, mentionedUsers: mentionedUsers).string
+                } else {
+                    messageTypeLabel?.text = "Photo"
+                }
                 messageTypeWidthCons?.constant = 13
                 spacierView?.isHidden = false
             case .audio:

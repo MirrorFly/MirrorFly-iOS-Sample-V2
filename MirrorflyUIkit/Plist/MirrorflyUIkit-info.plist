@@ -2,11 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsArbitraryLoads</key>
-		<true/>
-	</dict>
 	<key>BaseURL</key>
 	<string>$(BaseURL)</string>
 	<key>CFBundleDevelopmentRegion</key>
@@ -53,6 +48,8 @@
 		<string>SF-UI-Display-Bold.otf</string>
 		<string>SF-UI-Display-Heavy.otf</string>
 	</array>
+	<key>googleApiKey</key>
+	<string>xxxx</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>comgooglemaps</string>
@@ -63,10 +60,19 @@
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>We need this permission to capture and share photos and videos to your friends as well as to make video calls to your friends within MirrorFly</string>
 	<key>NSContactsUsageDescription</key>
 	<string>This app relies on read access to your contacts. We require access to this permission to find your contacts in our database and suggest people you know. We will not store any contact info in our database if they are not a part of our platform. For further info read our privacy policy.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Identify Yourself!</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>We need this permission to share your location to your friends within MirrorFly</string>
 	<key>NSLocationAlwaysUsageDescription</key>
@@ -79,6 +85,18 @@
 	<string>We need this permission to share your photos and videos to your friends from your photo library within MirrorFly</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>We need this permission to share your photos and videos to your friends from your photo library within MirrorFly</string>
+	<key>NSUbiquitousContainers</key>
+	<dict>
+		<key>iCloud.$(PRODUCT_BUNDLE_IDENTIFIER)</key>
+		<dict>
+			<key>NSUbiquitousContainerIsDocumentScopePublic</key>
+			<true/>
+			<key>NSUbiquitousContainerName</key>
+			<string>${PRODUCT_NAME}</string>
+			<key>NSUbiquitousContainerSupportedFolderLevels</key>
+			<string>Any</string>
+		</dict>
+	</dict>
 	<key>PHPhotoLibraryPreventAutomaticLimitedAccessAlert</key>
 	<true/>
 	<key>Privacy - Face ID Usage Description</key>
@@ -111,6 +129,8 @@
 		<string>remote-notification</string>
 		<string>voip</string>
 	</array>
+	<key>UIFileSharingEnabled</key>
+	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -136,23 +156,7 @@
 	</array>
 	<key>UIUserInterfaceStyle</key>
 	<string>Light</string>
-	<key>UIFileSharingEnabled</key>
-	<true/>
-	<key>LSSupportsOpeningDocumentsInPlace</key>
-	<true/>
-	<key>NSFaceIDUsageDescription</key>
-	<string>Identify Yourself!</string>
-	<key>NSUbiquitousContainers</key>
-	<dict>
-		<key>iCloud.$(PRODUCT_BUNDLE_IDENTIFIER)</key>
-		<dict>
-			<key>NSUbiquitousContainerIsDocumentScopePublic</key>
-			<true/>
-			<key>NSUbiquitousContainerName</key>
-			<string>${PRODUCT_NAME}</string>
-			<key>NSUbiquitousContainerSupportedFolderLevels</key>
-			<string>Any</string>
-		</dict>
-	</dict>
+	<key>googleApiKey_Translation</key>
+	<string>xxxx</string>
 </dict>
 </plist>

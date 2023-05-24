@@ -7,7 +7,6 @@
 
 import UIKit
 import Contacts
-import Toaster
 import RxSwift
 import MirrorFlySDK
 
@@ -102,7 +101,7 @@ class ContactSyncController: UIViewController {
                     if isSuccess{
                         Utility.saveInPreference(key: isLoginContactSyncDone, value: true)
                         if authorizationStatus == .authorized{
-                            Toast.init(text: "Contacts synced successfully  ").show()
+                            AppAlert.shared.showToast(message: "Contacts synced successfully  ")
                             self?.progressInfoLabel.text = "Contacts Synced"
                             self?.syncImage.stopRotating()
                         }

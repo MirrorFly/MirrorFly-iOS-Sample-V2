@@ -10,11 +10,47 @@ import AVFoundation
 import AudioToolbox
 import MirrorFlySDK
 
-let BASE_URL =  "https://api-preprod-sandbox.mirrorfly.com/api/v1/"
-let CONTAINER_ID = "group.com.mirrorfly.qa"
-let LICENSE_KEY = "lu3Om85JYSghcsB6vgVoSgTlSQArL5"
-let IS_LIVE = false
-let APP_NAME = "UiKit"
+//#if QA
+//    let BASE_URL = "https://api-qa19.mirrorfly.com/api/v1/"
+//    let LICENSE_KEY = "HNNQTJnERZF80L0lxmqC0EINq5su7X"
+//    let CONTAINER_ID = "group.com.mirrorfly.qa"
+//    let IS_LIVE = false
+//    let APP_NAME = "MirrorFlyQA"
+//#elseif DEV
+//    let BASE_URL = "https://api-dev19.mirrorfly.com/api/v1/"
+//    let LICENSE_KEY = "M2tdon7syA0MRH7ar1gR069fcCAgue"
+//    let CONTAINER_ID = "group.com.mirrorfly.qa"
+//    let IS_LIVE = true
+//    let APP_NAME = "MirrorFlyDev"
+//#elseif LIVE
+//    let BASE_URL =  "https://api-beta.mirrorfly.com/api/v1/"
+//    let CONTAINER_ID = "group.com.mirror.flyZ
+//    let APP_NAME = "MirrorFly"
+//#elseif UIKITQA
+//    let BASE_URL =  "https://api-uikit-qa.contus.us/api/v1/"
+//    let CONTAINER_ID = "group.com.mirrorfly.qa"
+//    let LICENSE_KEY = "ckIjaccWBoMNvxdbql8LJ2dmKqT5bp"
+//    let IS_LIVE = false
+//    let APP_NAME = "UiKitQa"
+////#else UIKITQA
+    let BASE_URL =  "https://api-uikit-qa.contus.us/api/v1/"
+    let CONTAINER_ID = "group.com.mirrorfly.qa"
+    let LICENSE_KEY = "ckIjaccWBoMNvxdbql8LJ2dmKqT5bp"
+    let IS_LIVE = false
+    let APP_NAME = "UiKitQa"
+//#else
+//    let BASE_URL = "https://api-uikit-dev.contus.us/api/v1/"
+//    let CONTAINER_ID = "group.com.mirrorfly.qa"
+//    let LICENSE_KEY = "2sdgNtr3sFBSM3bYRa7RKDPEiB38Xo"
+//    let IS_LIVE = false
+//    let APP_NAME = "UiKitDev"
+//#endif
+//let BASE_URL = "https://api-beta.mirrorfly.com/api/v1/"
+//let LICENSE_KEY = "lu3Om85JYSghcsB6vgVoSgTlSQArL5"
+//let CONTAINER_ID = "group.com.mirror.fly"
+//let XMPP_PORT = 5222
+//let IS_LIVE = true
+//let APP_NAME = "UiKit"
 
 class NotificationService: UNNotificationServiceExtension {
     
@@ -113,11 +149,28 @@ class NotificationService: UNNotificationServiceExtension {
                         self.bestAttemptContent?.sound = FlyDefaults.vibrationEnable ? UNNotificationSound(named: UNNotificationSoundName(rawValue: "1-second-of-silence.mp3"))  : nil
                     }
                 }
+                if let message = ChatManager.getMessageOfId(messageId: messageId), !message.mentionedUsersIds.isEmpty {
+                    self.bestAttemptContent?.body = convertMentionUser(message: message.messageTextContent, mentionedUsersIds: message.mentionedUsersIds)
+                }
                 
                 contentHandler(self.bestAttemptContent!)
                 FlyDefaults.lastNotificationId = request.identifier
             })
         }
+    }
+    func convertMentionUser(message: String, mentionedUsersIds: [String]) -> String {
+        var replyMessage = message
+
+        for user in mentionedUsersIds {
+            let JID = user + "@" + FlyDefaults.xmppDomain
+            let myJID = try? FlyUtils.getMyJid()
+            if let profileDetail = ContactManager.shared.getUserProfileDetails(for: JID) {
+                let userName = "@\(FlyUtils.getGroupUserName(profile: profileDetail))"
+                let mentionRange = (replyMessage as NSString).range(of: "@[?]")
+                replyMessage = replyMessage.replacing(userName, range: mentionRange)
+            }
+        }
+        return replyMessage
     }
     
     override func serviceExtensionTimeWillExpire() {
@@ -126,5 +179,33 @@ class NotificationService: UNNotificationServiceExtension {
         if let contentHandler = contentHandler, let bestAttemptContent =  bestAttemptContent {
             contentHandler(bestAttemptContent)
         }
+    }
+}
+extension String {
+    func replacing(_ withString: String, range: NSRange) -> String {
+        if let textRange = self.rangeFromNSRange(range) {
+            return self.replacingCharacters(in: textRange, with: withString)
+        }
+        
+        return self
+    }
+    func rangeFromNSRange(_ nsRange : NSRange) -> Range<String.Index>? {
+        guard
+            let from16 = utf16.index(utf16.startIndex, offsetBy: nsRange.location, limitedBy: utf16.endIndex),
+            let to16 = utf16.index(utf16.startIndex, offsetBy: nsRange.location + nsRange.length, limitedBy: utf16.endIndex),
+            let from = from16.samePosition(in: self),
+            let to = to16.samePosition(in: self)
+            else { return nil }
+        return from ..< to
+    }
+    
+    func substringFromNSRange(_ nsRange : NSRange) -> String {
+        guard
+            let from16 = utf16.index(utf16.startIndex, offsetBy: nsRange.location, limitedBy: utf16.endIndex),
+            let to16 = utf16.index(utf16.startIndex, offsetBy: nsRange.location + nsRange.length, limitedBy: utf16.endIndex),
+            let from = from16.samePosition(in: self),
+            let to = to16.samePosition(in: self)
+            else { return self }
+        return String(self[from..<to])
     }
 }

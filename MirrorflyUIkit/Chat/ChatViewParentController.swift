@@ -29,7 +29,6 @@ import NicoProgress
 import SwiftUI
 import PDFKit
 import QuickLook
-import Toaster
 import RxSwift
 import UniformTypeIdentifiers
 import KMPlaceholderTextView
@@ -83,7 +82,7 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
     @IBOutlet weak var textToolBarView: UIView?
     @IBOutlet weak var textToolBarViewHeight: NSLayoutConstraint?
     @IBOutlet weak var chatTextView: UIView?
-    @IBOutlet weak var messageTextView: KMPlaceholderTextView!
+    @IBOutlet weak var messageTextView: MentionTextView!
     @IBOutlet weak var messageTextViewHeight: NSLayoutConstraint?
     @IBOutlet weak var sendButton: UIButton?
     
@@ -151,6 +150,7 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
     var isStarredMessagePage:Bool = false
     var selectedMessageId: String? = ""
     var isStarredSearchEnabled: Bool? = false
+    var searchMessageId: String = ""
     
     var chatTextViewXib:ChatTextView?
     var growingTextViewHandler:GrowingTextViewHandler?
@@ -296,11 +296,20 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
     var currentSelectedIndexPath: IndexPath?
     var isSearchDidChange: Bool = false
     
+    var isMention = false
+    var mentionSearch = ""
+    var mentionRange: NSRange!
+    var mentionUsersList: [String] = []
+    var mentionRanges: [(String, NSRange)] = []
+    var searchGroupMembers = [GroupParticipantDetail]()
+        
+    @IBOutlet weak var mentionBaseView: UIView!
+    @IBOutlet weak var mentionBottom: NSLayoutConstraint!
+    @IBOutlet weak var mentionTableView: UITableView!
+    @IBOutlet weak var mentionHeight: NSLayoutConstraint!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        if !isStarredMessagePage {
-            messageText = FlyMessenger.getUnsentMessageOf(id: getProfileDetails.jid)
-        }
         checkifStarredMessages()
     }
     
@@ -342,6 +351,13 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
     
     func checkifStarredMessages() {
         if !isStarredMessagePage {
+            searchGroupMembers = groupMembers.sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() }).filter({$0.memberJid != FlyDefaults.myJid})
+            mentionBaseView.isHidden = true
+            mentionBaseView.addBorder(toSide: .Top, withColor: .lightGray.withAlphaComponent(0.8), andThickness: 0.5)
+            mentionTableView.register(UINib(nibName: "MentionTableViewCell",
+                                            bundle: nil), forCellReuseIdentifier: "MentionTableViewCell")
+            mentionTableView.delegate = self
+            mentionTableView.dataSource = self
             setUpUI()
             callDurationTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(updateCallDuration), userInfo: nil, repeats: true)
             getInitialMessages()
@@ -373,6 +389,33 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
             self.navigationController?.removeViewController(ProfileViewController.self)
             self.navigationController?.removeViewController(ViewAllMediaController.self)
             self.navigationController?.removeViewController(GroupInfoViewController.self)
+            if !isStarredMessagePage {
+                let unsentMessage = FlyMessenger.getUnsentMessageOf(id: getProfileDetails.jid)
+                if unsentMessage.mentionedUsers.isEmpty && unsentMessage.mentionSearch.isEmpty {
+                    messageText = unsentMessage.textContent
+                } else {
+                    if !unsentMessage.mentionedUsers.isEmpty {
+                        var dataArray = [String]()
+                        let message = ChatUtils.convertMentionUser(message: unsentMessage.textContent, mentionedUsersIds: unsentMessage.mentionedUsers).replacingOccurrences(of: "\\", with: "", options: .literal, range: nil)
+                        dataArray.append(message)
+                        dataArray.append(unsentMessage.mentionedUsers.joined(separator: ","))
+                        messageTextView?.convertAndInsert(to: dataArray, with: NSRange(location: 0, length: 0))
+                        messageTextView?.textViewEnd()
+                    } else {
+                        messageText = unsentMessage.textContent
+                        mentionSearch = unsentMessage.mentionSearch.joined(separator: "")
+                        searchGroupMembers = groupMembers.filter{ $0.displayName.lowercased().contains(mentionSearch.lowercased())}.sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() })
+                        mentionTableView.reloadData()
+                        isMention = true
+                        mentionRange = NSRange(location: 0, length: 0)
+                        self.view.bringSubviewToFront(mentionBaseView)
+                        self.viewDidLayoutSubviews()
+                        mentionBaseView.isHidden = false
+                    }
+                }
+            }
+            let tap = UITapGestureRecognizer(target: self, action: #selector(self.handleTap(_:)))
+            chatTableView.addGestureRecognizer(tap)
         } else {
             registerNibs()
             loadBottomView()
@@ -382,8 +425,8 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
         chatTableView.delegate = self
         if !isStarredMessagePage && !(isStarredSearchEnabled ?? false) {
             chatTableView.transform = CGAffineTransform(rotationAngle: -.pi)
+            chatTableView.scrollIndicatorInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right:  UIScreen.main.bounds.size.width - CGFloat(constraintsConstant))
         }
-        chatTableView.scrollIndicatorInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right:  UIScreen.main.bounds.size.width - CGFloat(constraintsConstant))
         chatTableView.rowHeight = UITableView.automaticDimension
         chatTableView.estimatedRowHeight = UITableView.automaticDimension
         tableViewBottomConstraint?.constant = CGFloat(chatBottomConstant)
@@ -426,7 +469,8 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
     
     @objc override func willCometoForeground() {
         print("ChatViewParentController ABC appComestoForeground")
-        
+        self.viewDidLayoutSubviews()
+        self.mentionBaseView.isHidden = !isMention
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
             if self?.isReplyViewOpen == true {
                 self?.view.endEditing(true)
@@ -546,6 +590,21 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
 
     override func viewDidLayoutSubviews() {
         pushChatId = nil
+        if !isStarredMessagePage {
+            self.chatTableView.backgroundView = UIImageView(image: UIImage(named: "chat_background"))
+        }
+        self.mentionBottom.constant = -((self.chatTextView?.bounds.height ?? 0) + 10)
+        if getProfileDetails.profileChatType == .groupChat {
+            if searchGroupMembers.isEmpty {
+                mentionHeight.constant = 0
+            } else {
+                let constantTextvieHeight:CGFloat = 40
+                let groupHeight = CGFloat(searchGroupMembers.count * 50) + constantTextvieHeight
+                let groupCustomHeight = CGFloat(containerView.bounds.height/2) + constantTextvieHeight
+                print("groupHeight \(groupHeight) groupCustomHeight \(groupCustomHeight)")
+                mentionHeight.constant = groupHeight > groupCustomHeight ? groupCustomHeight : groupHeight
+            }
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -646,7 +705,22 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
         view.backgroundColor = .white
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(notification:)), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)
-
+        if !isStarredMessagePage {
+            let unsentMessage = FlyMessenger.getUnsentMessageOf(id: getProfileDetails.jid)
+            if !unsentMessage.mentionSearch.isEmpty {
+                for i in 0..<unsentMessage.mentionLocation.count {
+                    mentionRanges.append((unsentMessage.mentionSearch[i], NSRange(location: unsentMessage.mentionLocation[i], length: unsentMessage.mentionLength[i])))
+                }
+                mentionSearch = unsentMessage.mentionSearch.joined(separator: "")
+                searchGroupMembers = groupMembers.filter{ $0.displayName.lowercased().contains(mentionSearch.lowercased())}.sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() })
+                mentionTableView.reloadData()
+                isMention = true
+                mentionRange = NSRange(location: 0, length: 0)
+                self.view.bringSubviewToFront(mentionBaseView)
+                self.viewDidLayoutSubviews()
+                mentionBaseView.isHidden = false
+            }
+        }
     }
     
     private func presentPreviewScreen() {
@@ -678,7 +752,12 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
             ChatManager.shared.availableFeaturesDelegate = self
             getProfileDetails = ChatManager.getContact(jid: getProfileDetails.jid)
             setProfile()
-	       queryInitialMessage()
+            queryInitialMessage()
+            if self.searchMessageId != "" {
+                self.scrollToSearchMessage(id: self.searchMessageId)
+                self.searchMessageId = ""
+                self.chatTableView.endUpdates()
+            }
         }
         ContactManager.shared.profileDelegate = self
         ChatManager.shared.availableFeaturesDelegate = self
@@ -999,9 +1078,26 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
             NotificationCenter.default.removeObserver(self, name: NSNotification.Name(FlyConstants.contactSyncState), object: nil)
             ChatManager.setOnGoingChatUser(jid: "")
             toolTipController.isMenuVisible = false
-            if let message = messageTextView?.text {
-                FlyMessenger.saveUnsentMessage(id: getProfileDetails.jid, message: message.isEmpty ? emptyString() : message)
+            if let messageText = messageTextView, let message = messageText.text {
+                messageText.textViewEnd()
+                if self.getProfileDetails.profileChatType == .groupChat, let mentionMessage = messageText.mentionText {
+                    let mentions = mentionRanges.compactMap({$0.1})
+                    var length = [Int]()
+                    var location = [Int]()
+                    if mentions.isEmpty {
+                        FlyMessenger.saveUnsentMessage(id: getProfileDetails.jid, message: mentionMessage.isEmpty ? emptyString() : mentionMessage, mentionedUsers: messageText.mentionedUsers, mentionSearch: mentionRanges.compactMap({$0.0}), mentionLocation: location, mentionLength: length)
+                    } else {
+                        for mention in mentions {
+                            location.append(mention.location)
+                            length.append(mention.length)
+                        }
+                        FlyMessenger.saveUnsentMessage(id: getProfileDetails.jid, message: mentionMessage.isEmpty ? emptyString() : mentionMessage, mentionedUsers: messageText.mentionedUsers, mentionSearch: mentionRanges.compactMap({$0.0}), mentionLocation: location, mentionLength: length)
+                    }
+                } else {
+                    FlyMessenger.saveUnsentMessage(id: getProfileDetails.jid, message: message.isEmpty ? emptyString() : message, mentionedUsers: messageText.mentionedUsers, mentionSearch: [])
+                }
             }
+            resetGroupMention()
         }
     }
     
@@ -1034,6 +1130,25 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
         if let cell = self.chatTableView.cellForRow(at: indexPath) {
             cell.contentView.backgroundColor = .clear
             isCellLongPressed = false
+        }
+    }
+
+    func scrollToSearchMessage(id: String) {
+        if isStarredMessagePage {
+            return
+        }
+        if let replyMessage = FlyMessenger.getMessageOfId(messageId: id) {
+            let (indexPath, shouldPaginate) = checkReplyMessageAvailability(replyMessageId: id)
+            if replyMessage.isMessageRecalled == true || replyMessage.isMessageDeleted == true {
+                AppAlert.shared.showToast(message: messageNoLongerAvailable)
+                return
+            }
+            if let scrollToRow = indexPath {
+                scrollLogic(indexPath: scrollToRow)
+            } else if shouldPaginate{
+                fetchMessageListParams.messageId = id
+                queryInitialMessage(shouldScrollToMessage: true, messageId: id)
+            }
         }
     }
     
@@ -1476,7 +1591,7 @@ extension ChatViewParentController {
         }
     }
     
-    func setProfile() {
+    func setProfile(jid: String? = emptyString()) {
         if getProfileDetails != nil {
             userNameLabel.text = getUserName(jid : getProfileDetails.jid ,name: getProfileDetails.name, nickName: getProfileDetails.nickName, contactType: getProfileDetails.contactType)
             let imageUrl = (getProfileDetails?.thumbImage.isEmpty ?? true) ? getProfileDetails?.image : getProfileDetails.thumbImage
@@ -1486,6 +1601,13 @@ extension ChatViewParentController {
             var placeholder = UIImage()
             if getProfileDetails.profileChatType == .groupChat {
                 placeholder = UIImage(named: ImageConstant.ic_group_small_placeholder) ?? UIImage()
+                if let profileId = jid, let searchMember = searchGroupMembers.filter({$0.memberJid == profileId}).first, let member = searchGroupMembers.filter({$0.memberJid == profileId}).first {
+                    if let profile = ChatManager.profileDetaisFor(jid: profileId) {
+                        member.profileDetail = profile
+                        searchMember.profileDetail = profile
+                        mentionTableView.reloadData()
+                    }
+                }
             }else if getProfileDetails.contactType == .deleted || getProfileDetails.isBlockedByAdmin || getisBlockedMe() {
                 placeholder = UIImage(named: "ic_profile_placeholder") ?? UIImage()
                 url = URL(string: "")
@@ -1586,7 +1708,10 @@ extension ChatViewParentController {
     
     @objc func reportItemAction() {
         let tempMessage = chatMessages[previousIndexPath.section][previousIndexPath.row]
-        reportFromMessage(chatMessage: tempMessage)
+        if let profileDetails = self.getProfileDetails {
+            self.reportFromMessage(chatMessage: tempMessage, profileDetail: profileDetails)
+        }
+        
         audioPlayer?.pause()
         stopPlayer(isBecomeBackGround: true)
     }
@@ -1622,12 +1747,24 @@ extension ChatViewParentController {
     @objc func copyItemAction() {
         let getMessage = isStarredMessagePage ? isStarredSearchEnabled == true ? starredSearchMessages?[previousIndexPath.row] : getStarredMessageList()[previousIndexPath.row] : chatMessages[previousIndexPath.section][previousIndexPath.row]
         let board = UIPasteboard.general
-        if getMessage?.messageType == .text {
-            board.string = getMessage?.messageTextContent
-        } else if getMessage?.messageType == .video || getMessage?.messageType == .image {
-            board.string = getMessage?.mediaChatMessage?.mediaCaptionText
+        if let chatMessage = getMessage {
+            if getMessage?.messageType == .text {
+                if !chatMessage.mentionedUsersIds.isEmpty {
+                    let message = ChatUtils.convertMentionUser(message: chatMessage.messageTextContent, mentionedUsersIds: chatMessage.mentionedUsersIds)
+                    board.strings = [message, chatMessage.mentionedUsersIds.joined(separator: ",")]
+                } else {
+                    board.string = chatMessage.messageTextContent
+                }
+            } else if getMessage?.messageType == .video || getMessage?.messageType == .image {
+                if !chatMessage.mentionedUsersIds.isEmpty {
+                    let message = ChatUtils.convertMentionUser(message: chatMessage.mediaChatMessage?.mediaCaptionText ?? "", mentionedUsersIds: chatMessage.mentionedUsersIds)
+                    board.strings = [message, chatMessage.mentionedUsersIds.joined(separator: ",")]
+                } else {
+                    board.string = getMessage?.mediaChatMessage?.mediaCaptionText
+                }
+            }
+            AppAlert.shared.showToast(message: "1 \(copyAlert.localized)")
         }
-        AppAlert.shared.showToast(message: "1 \(copyAlert.localized)")
     }
     
     @objc func infoItemAction(dismissClosure:(()->())?) {
@@ -1641,6 +1778,7 @@ extension ChatViewParentController {
             let messageInfoVC = storyboard.instantiateViewController(withIdentifier: Identifiers.messageInfoViewController) as! MessageInfoViewController
             messageInfoVC.chatMessage = infoMessage
             messageInfoVC.refreshDelegate = self
+            messageInfoVC.profileDetails = getProfileDetails
             self.messageDelegate = messageInfoVC as MessageDelegate
             navigationController?.pushViewController(messageInfoVC, animated: true)
             view.endEditing(true)
@@ -1973,7 +2111,7 @@ extension ChatViewParentController {
             chatTextView?.layer.borderColor = Color.borderColor?.cgColor
             chatTextView?.layer.cornerRadius = CGFloat(cornerRadius)
             messageTextView?.delegate = self
-            messageTextView?.placeholder = startTyping.localized
+            //messageTextView?.placeholder = startTyping.localized
             messageTextView?.text = (messageText?.isNotEmpty == true && replyJid == getProfileDetails.jid) ? messageText : emptyString()
             growingTextViewHandler = GrowingTextViewHandler(textView: messageTextView ?? UITextView(), heightConstraint: messageTextViewHeight ?? NSLayoutConstraint())
             growingTextViewHandler?.minimumNumberOfLines = chatTextMinimumLines
@@ -1993,25 +2131,27 @@ extension ChatViewParentController {
                 lastSeenLabel.isHidden = true
                 return
             }
-            ChatManager.getUserLastSeen(for: getProfileDetails.jid) { [self] isSuccess, flyError, flyData in
-                var data  = flyData
-                if isSuccess {
-                    
-                    guard let lastSeenTime = data.getData() as? String else{
-                        return
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
+                ChatManager.getUserLastSeen(for: self.getProfileDetails.jid) { [weak self] isSuccess, flyError, flyData in
+                    var data  = flyData
+                    guard let self else {return}
+                    if isSuccess {
+                        guard let lastSeenTime = data.getData() as? String else{
+                            return
+                        }
+                        self.lastSeenLabel.isHidden = false
+                        if (Int(lastSeenTime) == 0) {
+                            self.lastSeenLabel.text = online.localized
+                        }
+                        else {
+                            self.setLastSeen(lastSeenTime: lastSeenTime)
+                        }
+                    } else {
+                        print(data.getMessage() as! String )
+                        self.lastSeenLabel.isHidden = true
                     }
-                    lastSeenLabel.isHidden = false
-                    if (Int(lastSeenTime) == 0) {
-                        lastSeenLabel.text = online.localized
-                    }
-                    else {
-                        self.setLastSeen(lastSeenTime: lastSeenTime)
-                    }
-                } else{
-                    print(data.getMessage() as! String )
-                    lastSeenLabel.isHidden = true
                 }
-            }
+            })
         }
         
         func setLastSeen(lastSeenTime : String){
@@ -2079,6 +2219,9 @@ extension ChatViewParentController : QLPreviewControllerDataSource {
         if let isNotEmpty =  messageTextView?.text.isNotEmpty,  isNotEmpty {
             ChatManager.sendTypingStatus(to: getProfileDetails.jid, chatType: getProfileDetails.profileChatType)
         }
+        if getProfileDetails.profileChatType == .groupChat && !isMention {
+            messageTextView.textDidChange(textView)
+        }
     }
     
     func resizeMessageTextView() {
@@ -2105,10 +2248,16 @@ extension ChatViewParentController : QLPreviewControllerDataSource {
     
     func textViewDidBeginEditing(_ textView: UITextView) {
         toolTipController.menuItems = []
-        if  messageTextView?.textColor == UIColor.lightGray {
+        if messageTextView?.textColor == UIColor.lightGray {
             messageTextView?.textColor = UIColor.black
             chatTextView?.translatesAutoresizingMaskIntoConstraints = true
             chatTextView?.sizeToFit()
+        }
+        if getProfileDetails.profileChatType == .groupChat {
+            if (textView.text.last == "@") {
+                mentionBaseView.isHidden = false
+                setGroupmention(range: textView.selectedRange)
+            }
         }
         if let isNotEmpty =  messageTextView?.text.isNotEmpty,  isNotEmpty{
             ChatManager.sendTypingStatus(to: getProfileDetails.jid, chatType: getProfileDetails.profileChatType)
@@ -2117,6 +2266,7 @@ extension ChatViewParentController : QLPreviewControllerDataSource {
     
     func textViewDidEndEditing(_ textView: UITextView) {
         print("textViewDidEndEditing")
+        print("textViewDidEndEditing3", messageTextView.textViewEnd())
         toolTipController.menuItems = []
         ChatManager.sendTypingGoneStatus(to: getProfileDetails.jid, chatType: getProfileDetails.profileChatType)
         if isReplyViewOpen == false {
@@ -2130,10 +2280,69 @@ extension ChatViewParentController : QLPreviewControllerDataSource {
         }
     }
     
+    func textViewDidChangeSelection(_ textView: UITextView) {
+        if textView.text.utf16.count > textView.selectedRange.location && isMention {
+            textView.selectedRange = NSRange(location: (mentionRange.location+mentionRanges.count+1), length: 0)
+        }
+    }
+    
     func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
         print("shouldChangeTextIn \(range) text \(text) textCount \(text.count)" )
+        if text.trim().utf16.count > 1 && !isMention {
+            return clipboardCopyAction(textView, shouldChangeTextIn: range, replacementText: text)
+        } else if text.trim().count > 1 && isMention{
+            mentionBaseView.isHidden = true
+            resetGroupMention()
+            mentionTableView.reloadData()
+            self.viewDidLayoutSubviews()
+            return clipboardCopyAction(textView, shouldChangeTextIn: range, replacementText: text)
+        }
+        if getProfileDetails.profileChatType == .groupChat {
+            self.mentionshouldChangeTextIn(textView, shouldChangeTextIn: range, replacementText: text)
+        }
         NSObject.cancelPreviousPerformRequests(withTarget: self, selector: #selector(self.getHintsFromTextField), object: textView)
         self.perform(#selector(self.getHintsFromTextField), with: textView, afterDelay: 0.5)
+        return true
+    }
+    
+    func clipboardCopyAction(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+        if let clipBoardStrings = UIPasteboard.general.strings, !clipBoardStrings.isEmpty, getProfileDetails.profileChatType == .groupChat {
+            if "\(clipBoardStrings.joined(separator: " ").utf16)" != "\(text.trim().utf16)" {
+                if getProfileDetails.profileChatType == .groupChat {
+                    self.messageTextView.shouldChangeTextIn(textView, shouldChangeTextIn: range, replacementText: text)
+                }
+                return true
+            } else {
+                if clipBoardStrings.count == 2 {
+                    messageTextView.convertAndInsert(to: clipBoardStrings, with: range)
+                    UIPasteboard.general.strings = []
+                    self.handleSendButton()
+                    DispatchQueue.main.asyncAfter(deadline: .now()+0.5, execute: {
+                        let endPosition = self.messageTextView.endOfDocument
+                        self.messageTextView.selectedTextRange = self.messageTextView.textRange(from: endPosition, to: endPosition)
+                    })
+                    return false
+                } else {
+                    if getProfileDetails.profileChatType == .groupChat {
+                        self.messageTextView.shouldChangeTextIn(textView, shouldChangeTextIn: range, replacementText: text)
+                    }
+                    return true
+                }
+            }
+        } else if let clipBoardStrings = UIPasteboard.general.strings, !clipBoardStrings.isEmpty, getProfileDetails.profileChatType == .singleChat {
+            if "\(clipBoardStrings.joined(separator: " ").utf16)" != "\(text.trim().utf16)" {
+                if getProfileDetails.profileChatType == .groupChat {
+                    self.messageTextView.shouldChangeTextIn(textView, shouldChangeTextIn: range, replacementText: text)
+                }
+                return true
+            } else {
+                self.handleSendButton()
+                return true
+            }
+        }
+        if getProfileDetails.profileChatType == .groupChat {
+            self.messageTextView.shouldChangeTextIn(textView, shouldChangeTextIn: range, replacementText: text)
+        }
         return true
     }
     
@@ -2993,26 +3202,39 @@ extension ChatViewParentController {
     }
     
     @IBAction func onSendButton(_ sender: Any) {
+        messageTextView.textViewEnd()
+        resetGroupMention()
+        mentionBaseView.isHidden = true
+        self.isMention = false
         if((messageTextView?.text.isBlank ?? false) || messageTextView?.text == startTyping.localized) {
             AppAlert.shared.showToast(message: emptyChatMessage.localized)
         }
         else {
             checkUserBusyStatusEnabled(self) { [weak self] status in
                 if status {
-                    self?.sendTextMessage(message: self?.messageTextView?.text.trimmingCharacters(in: .whitespacesAndNewlines) ?? "", jid: self?.getProfileDetails.jid)
+                    var message = "", mentionedUsers:[String] = []
+                    if self?.getProfileDetails.profileChatType == .groupChat {
+                        message = self?.messageTextView?.mentionText?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+                        mentionedUsers = self?.messageTextView?.mentionedUsers ?? []
+                    } else {
+                        message = self?.messageTextView?.text.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+                    }
+                    self?.sendTextMessage(message: message, jid: self?.getProfileDetails.jid, mentionedUsersIds: mentionedUsers)
                     self?.resetMessageTextView()
                     self?.resetUnreadMessages()
+                    self?.scrollToTableViewBottom()
                 }
             }
         }
+        messageTextView.resetMentionTextView()
     }
     
-    func sendImageMessage(mediaData : MediaData, completionHandler :  @escaping (ChatMessage) -> Void) {
+    func sendImageMessage(mediaData : MediaData, mentionedUsersIds: [String], completionHandler :  @escaping (ChatMessage) -> Void) {
         print("#loss sendImageMessage \(chatMessages.count)")
         selectedIndexs.removeAll()
         view.endEditing(true)
         resetUnreadMessages()
-        FlyMessenger.sendImageMessage(toJid: getProfileDetails.jid , mediaData: mediaData, replyMessageId: replyMessageId) { [weak self] isSuccess, error, sendMessage in
+        FlyMessenger.sendImageMessage(toJid: getProfileDetails.jid , mediaData: mediaData, replyMessageId: replyMessageId, mentionedUsersIds: mentionedUsersIds) { [weak self] isSuccess, error, sendMessage in
                 if let chatMessage = sendMessage {
                     self?.setLastMessage(messageId: chatMessage.messageId)
                     chatMessage.mediaChatMessage?.mediaThumbImage =  mediaData.base64Thumbnail
@@ -3088,9 +3310,16 @@ extension ChatViewParentController {
         controller.imageAray = images
         controller.iscamera = false
         controller.delegate = self
-        controller.captionText = (messageTextView?.text != placeHolder) ? messageTextView?.text : ""
+        if messageTextView.mentionedUsers.isEmpty {
+            controller.captionText = (messageTextView?.text != placeHolder) ? messageTextView?.text : ""
+        } else {
+            controller.captionText = (messageTextView?.text != placeHolder) ? messageTextView?.mentionText : ""
+        }
+        controller.textMentioned = messageTextView.mentionedUsers
         controller.selectedAssets = self.selectedAssets
         controller.profileName = getProfileDetails.name
+        controller.groupMembers = groupMembers.filter({$0.memberJid != FlyDefaults.myJid})
+        controller.getProfileDetails = getProfileDetails
         navigationController?.navigationBar.isHidden = true
         navigationController?.pushViewController(controller, animated: false)
     }
@@ -3247,14 +3476,13 @@ extension ChatViewParentController {
     func downloadUploadedAudio(sender: UIButton) {
         
         let indexPath = getIndexPath(sender: sender)
-
-        if indexPath.section < chatMessages.count {
-            let message = chatMessages[indexPath.section][indexPath.row]
+        
+        if let message = isStarredMessagePage ? (isStarredSearchEnabled ?? false ? starredSearchMessages?[indexPath.row] : getStarredMessageList()[indexPath.row]) : chatMessages[indexPath.section][indexPath.row] {
             FlyMessenger.downloadMedia(messageId: message.messageId) { (success, error, chatMessage) in
                 //                if let cell = self?.chatTableView.cellForRow(at: indexPath) as? AudioReceiver {
-//                    cell.getCellFor(message, at: indexPath, isPlaying: self?.currenAudioIndexPath == indexPath ? self?.audioPlayer?.isPlaying ?? false : false, audioClosureCallBack: { (_) in
-//                    }, isShowForwardView: self?.isShowForwardView, isDeletedMessageSelected: self?.isDeleteSelected)
-//                }
+                //                    cell.getCellFor(message, at: indexPath, isPlaying: self?.currenAudioIndexPath == indexPath ? self?.audioPlayer?.isPlaying ?? false : false, audioClosureCallBack: { (_) in
+                //                    }, isShowForwardView: self?.isShowForwardView, isDeletedMessageSelected: self?.isDeleteSelected)
+                //                }
             }
         }
     }
@@ -3309,6 +3537,8 @@ extension ChatViewParentController {
         checkUserBusyStatusEnabled(self) { [weak self] status in
             if status {
                 self?.dismissKeyboard()
+                self?.resetGroupMention()
+                self?.mentionBaseView.isHidden = true
                 self?.showOptions()
             }
         }
@@ -3334,6 +3564,7 @@ extension ChatViewParentController {
     @IBAction func onDeleteButton(_ sender: Any) {
     }
     @IBAction func recordAudio(_ sender: Any) {
+        messageTextView.resetMentionTextView()
         startAudioRecord()
     }
 
@@ -3462,11 +3693,12 @@ extension ChatViewParentController : UITableViewDataSource ,UITableViewDelegate,
         if isStarredMessagePage {
             return getStarredMessageList().count == 0 ? 0 : 1
         }
-        if chatMessages.isEmpty {
-            return 0
-        } else {
-            return chatMessages.count
-        }
+        return tableView == mentionTableView ? 1 : chatMessages.count
+//        if chatMessages.isEmpty {
+//            return 0
+//        } else {
+//            return chatMessages.count
+//        }
     }
     
     func openBottomView(indexPath: IndexPath) {
@@ -3484,7 +3716,7 @@ extension ChatViewParentController : UITableViewDataSource ,UITableViewDelegate,
     }
     
     func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
-        if isStarredMessagePage {
+        if isStarredMessagePage || tableView == mentionTableView {
             return nil
         }
         if chatMessages.count == 0 {
@@ -3514,7 +3746,7 @@ extension ChatViewParentController : UITableViewDataSource ,UITableViewDelegate,
     }
     
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-        if isStarredMessagePage {
+        if isStarredMessagePage || tableView == mentionTableView {
             return 0
         }
         return 50
@@ -3524,11 +3756,11 @@ extension ChatViewParentController : UITableViewDataSource ,UITableViewDelegate,
         if isStarredMessagePage {
             return (isStarredSearchEnabled == true ? starredSearchMessages?.count ?? 0 : getStarredMessageList().count )
         }
-        return chatMessages[section].count
+        return tableView == mentionTableView ? searchGroupMembers.count : chatMessages[section].count
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return UITableView.automaticDimension
+        return tableView == mentionTableView ? 70 : UITableView.automaticDimension
     }
     
     func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -3536,594 +3768,665 @@ extension ChatViewParentController : UITableViewDataSource ,UITableViewDelegate,
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        var cell : ChatViewParentMessageCell!
-        //Handl
-        guard isStarredMessagePage ? isStarredSearchEnabled == true ? starredSearchMessages?.count ?? 0 > 0 : getStarredMessageList().count > 0 : chatMessages.count > 0 else { return UITableViewCell() }
-        let starredMessageList = getStarredMessageList()
-        let message = isStarredMessagePage ? isStarredSearchEnabled == true ? starredSearchMessages?[indexPath.row] : starredMessageList[indexPath.row] : chatMessages[indexPath.section][indexPath.row]
-        let  textReplyTap = UITapGestureRecognizer(target: self, action: #selector(self.replyViewTapGesture(_:)))
-        if message?.isMessageRecalled == true && !isStarredMessagePage {
-            if message?.isMessageSentByMe == true {
-            let cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.deleteEveryOneCell, for: indexPath) as? DeleteForEveryOneViewCell
-            cell?.transform = CGAffineTransform(rotationAngle: -.pi)
-            cell?.refreshDelegate = self
-            cell?.selectedForwardMessage = selectedMessages
-            cell?.forwardButton?.addTarget(self, action: #selector(forwardAction(sender:)), for: .touchUpInside)
-            cell?.setDeleteForMeMessage(message: message!, isShowForwardMessage: isStarredMessageSelected ? false : isShowForwardView, isDeleteSelected: isDeleteSelected)
-            cell?.contentView.accessibilityIdentifier = "\(indexPath.section)_\(indexPath.row)"
-            configureGesture(view: cell?.contentView ?? UIView())
-            return cell!
-            } else {
-                let cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.deleteEveryOneReceiverCell, for: indexPath) as? DeleteForEveryOneReceiverCell
-                cell?.transform = CGAffineTransform(rotationAngle: -.pi)
-                cell?.refreshDelegate = self
-                cell?.forwardButton?.addTarget(self, action: #selector(forwardAction(sender:)), for: .touchUpInside)
-                cell?.contentView.accessibilityIdentifier = "\(indexPath.section)_\(indexPath.row)"
-                configureGesture(view: cell?.contentView ?? UIView())
-                cell?.selectedForwardMessage = selectedMessages
-                cell?.setDeleteForEveryOneMessage(message: message!, isShowForwardMessage: isStarredMessageSelected ? false : isShowForwardView, isDeleteSelected: isDeleteSelected)
-                if getProfileDetails.profileChatType == .groupChat {
-                    if hideSenderNameToGroup(indexPath: indexPath) {
-                        cell?.groupNameView?.isHidden = true
-                        cell?.groupChatNameLabel?.text = ""
-                        cell?.groupNameTopCons?.constant = 0
-                        cell?.groupNameBottomCons?.constant = 0
-                        cell?.groupChatNameLabel?.isHidden = true
-                        cell?.groupNameViewHeightCons?.isActive = false
-                        cell?.hideGroupNameViewCons?.isActive = true
-                    } else {
-                        cell?.groupNameView?.isHidden = false
-                        cell?.groupChatNameLabel?.textColor = ChatUtils.getColorForUser(userName: message?.senderUserName)
-                        cell?.groupChatNameLabel?.isHidden = false
-                        cell?.groupNameTopCons?.constant = 8
-                        cell?.groupNameBottomCons?.constant = 8
-                        cell?.groupNameViewHeightCons?.isActive = true
-                        cell?.hideGroupNameViewCons?.isActive = false
-                    }
-                }
-                return cell!
-            }
-        }
         
-        switch(message?.messageType) {
-        case .text:
-            if(message?.isMessageSentByMe == true) {
-                cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.chatViewTextOutgoingCell, for: indexPath) as? ChatViewParentMessageCell
-                if !isStarredMessagePage && !(isStarredSearchEnabled ?? false) {
-                    cell.transform = CGAffineTransform(rotationAngle: -.pi)
+        if tableView == mentionTableView  {
+            let mentionCell = tableView.dequeueReusableCell(withIdentifier: "MentionTableViewCell", for: indexPath) as? MentionTableViewCell
+            if let profileDetail = searchGroupMembers[indexPath.row].profileDetail {
+                if profileDetail.contactType == .deleted || profileDetail.isBlockedMe || profileDetail.isBlockedByAdmin {
+                    mentionCell?.userImageView?.image = UIImage(named: "ic_profile_placeholder") ?? UIImage()
+                } else {
+                    let imageUrl = profileDetail.thumbImage.isEmpty ? profileDetail.image : profileDetail.thumbImage
+                    mentionCell?.userImageView.sd_setImage(with: ChatUtils.getUserImaeUrl(imageUrl: imageUrl),
+                                                           placeholderImage: UIImage(named: "ic_profile_placeholder"))
                 }
-                cell?.refreshDelegate = self
-                cell.selectedForwardMessage = selectedMessages
-                cell.isStarredMessagePage = isStarredMessagePage
-                cell.searchText = searchBar?.text ?? ""
-                cell.showHideStarredMessageView()
-                let message = isStarredMessagePage ? isStarredSearchEnabled == true ? starredSearchMessages?[indexPath.row] : starredMessageList[indexPath.row] : chatMessages[indexPath.section][indexPath.row]
-                if isStarredMessagePage {
-                    cell.setUserProfileInfo(message: message, isBlocked: false)
-                }
-
-                cell = cell?.getCellFor(message, at: indexPath, isShowForwardView: isShowForwardView, fromChat: true, isMessageSearch: messageSearchEnabled, searchText: isStarredMessagePage == true && isStarredSearchEnabled == true ? searchBar?.text ?? "" : messageSearchBar?.text ?? "")
-                cell.replyView?.addGestureRecognizer(textReplyTap)
             }
-            else {
-                cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.chatViewTextIncomingCell, for: indexPath) as? ChatViewParentMessageCell
-                if !isStarredMessagePage && !(isStarredSearchEnabled ?? false) {
+            //if let profileDetail = searchGroupMembers[indexPath.row].profileDetail {
+            mentionCell?.userNameLabel.text = searchGroupMembers[indexPath.row].displayName
+            //}
+            return mentionCell ?? UITableViewCell()
+        } else {
+            var cell : ChatViewParentMessageCell!
+            //Handl
+            guard isStarredMessagePage ? isStarredSearchEnabled == true ? starredSearchMessages?.count ?? 0 > 0 : getStarredMessageList().count > 0 : chatMessages.count > 0 else { return UITableViewCell() }
+            let starredMessageList = getStarredMessageList()
+            let message = isStarredMessagePage ? isStarredSearchEnabled == true ? starredSearchMessages?[indexPath.row] : starredMessageList[indexPath.row] : chatMessages[indexPath.section][indexPath.row]
+            let  textReplyTap = UITapGestureRecognizer(target: self, action: #selector(self.replyViewTapGesture(_:)))
+            if message?.isMessageRecalled == true && !isStarredMessagePage {
+                if message?.isMessageSentByMe == true {
+                    let cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.deleteEveryOneCell, for: indexPath) as? DeleteForEveryOneViewCell
                     cell?.transform = CGAffineTransform(rotationAngle: -.pi)
-                }
-                cell?.refreshDelegate = self
-                cell?.selectedForwardMessage = selectedMessages
-                cell?.isStarredMessagePage = isStarredMessagePage
-                cell.searchText = searchBar?.text ?? ""
-                cell?.showHideStarredMessageView()
-                let message = isStarredMessagePage ? isStarredSearchEnabled == true ? starredSearchMessages?[indexPath.row] : starredMessageList[indexPath.row] : chatMessages[indexPath.section][indexPath.row]
-                if isStarredMessagePage {
-                    cell.setUserProfileInfo(message: message, isBlocked: false)
-                }
-
-                cell = cell?.getCellFor(message, at: indexPath, isShowForwardView: isShowForwardView, fromChat: true, isMessageSearch: messageSearchEnabled, searchText: isStarredMessagePage == true && isStarredSearchEnabled == true ? searchBar?.text ?? "" : messageSearchBar?.text ?? "")
-                cell.replyView?.addGestureRecognizer(textReplyTap)
-
-                //MARK: - Adding Double Tap Gesture for the Incoming Messages
-                
-                if  FlyDefaults.isTranlationEnabled {
-                    let  tap = UITapGestureRecognizer(target: self, action: #selector(self.translationLanguage(_:)))
-                    tap.numberOfTapsRequired = 2
-                    cell.addGestureRecognizer(tap)
-                }
-                if !isStarredMessagePage {
+                    cell?.refreshDelegate = self
+                    cell?.selectedForwardMessage = selectedMessages
+                    if let view = cell?.forwardBubbleView, let image = cell?.forwardCheckBoxImage {
+                        image.tag = 10023
+                        view.tag = 10024
+                    }
+                    cell?.forwardButton?.addTarget(self, action: #selector(forwardAction(sender:)), for: .touchUpInside)
+                    cell?.setDeleteForMeMessage(message: message!, isShowForwardMessage: isStarredMessageSelected ? false : isShowForwardView, isDeleteSelected: isDeleteSelected)
+                    cell?.contentView.accessibilityIdentifier = "\(indexPath.section)_\(indexPath.row)"
+                    configureGesture(view: cell?.contentView ?? UIView())
+                    cell?.backgroundColor = .clear
+                    cell?.contentView.backgroundColor = .clear
+                    return cell!
+                } else {
+                    let cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.deleteEveryOneReceiverCell, for: indexPath) as? DeleteForEveryOneReceiverCell
+                    cell?.transform = CGAffineTransform(rotationAngle: -.pi)
+                    cell?.refreshDelegate = self
+                    if let view = cell?.forwardBubbleView, let image = cell?.forwardCheckBoxImage {
+                        image.tag = 10023
+                        view.tag = 10024
+                    }
+                    cell?.forwardButton?.addTarget(self, action: #selector(forwardAction(sender:)), for: .touchUpInside)
+                    cell?.contentView.accessibilityIdentifier = "\(indexPath.section)_\(indexPath.row)"
+                    configureGesture(view: cell?.contentView ?? UIView())
+                    cell?.selectedForwardMessage = selectedMessages
+                    cell?.setDeleteForEveryOneMessage(message: message!, isShowForwardMessage: isStarredMessageSelected ? false : isShowForwardView, isDeleteSelected: isDeleteSelected)
                     if getProfileDetails.profileChatType == .groupChat {
                         if hideSenderNameToGroup(indexPath: indexPath) {
-                            cell.hideGroupMsgNameView()
-                            cell.baseViewTopConstraint.constant = 1
+                            cell?.groupNameView?.isHidden = true
+                            cell?.groupChatNameLabel?.text = ""
+                            cell?.groupNameTopCons?.constant = 0
+                            cell?.groupNameBottomCons?.constant = 0
+                            cell?.groupChatNameLabel?.isHidden = true
+                            cell?.groupNameViewHeightCons?.isActive = false
+                            cell?.hideGroupNameViewCons?.isActive = true
                         } else {
-                            cell.groupMsgNameView?.isHidden = false
-                            cell.groupMsgSenderName?.textColor = ChatUtils.getColorForUser(userName: message?.senderUserName)
-                            cell.baseViewTopConstraint.constant = 3
+                            cell?.groupNameView?.isHidden = false
+                            cell?.groupChatNameLabel?.textColor = ChatUtils.getColorForUser(userName: message?.senderUserName)
+                            cell?.groupChatNameLabel?.isHidden = false
+                            cell?.groupNameTopCons?.constant = 8
+                            cell?.groupNameBottomCons?.constant = 8
+                            cell?.groupNameViewHeightCons?.isActive = true
+                            cell?.hideGroupNameViewCons?.isActive = false
                         }
                     }
-                } else {
-                   cell.hideGroupMsgNameView()
+                    cell?.backgroundColor = .clear
+                    cell?.contentView.backgroundColor = .clear
+                    return cell!
                 }
             }
-
-            if isShareMediaSelected == true && message?.messageTextContent.isURL == false {
-                cell.forwardButton?.isHidden = true
-                cell.forwardView?.isHidden = true
-            }
-            cell.forwardButton?.tag = (indexPath.section * 1000) + indexPath.row
-
-            cell?.forwardButton?.addTarget(self, action: #selector(forwardAction(sender:)), for: .touchUpInside)
-            cell?.contentView.accessibilityIdentifier = "\(indexPath.section)_\(indexPath.row)"
-            configureGesture(view: cell?.contentView ?? UIView())
-            cell?.refreshDelegate = self
-            cell.delegate = self
-            cell.selectionStyle = .none
-            cell?.contentView.backgroundColor = .clear
-            return cell
             
-        case.location:
-            let gestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(onLocationMessage(sender:)))
-            if(message?.isMessageSentByMe == true) {
-                cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.chatViewLocationOutgoingCell, for: indexPath) as? ChatViewParentMessageCell
-                if !isStarredMessagePage && !(isStarredSearchEnabled ?? false) {
-                    cell.transform = CGAffineTransform(rotationAngle: -.pi)
+            switch(message?.messageType) {
+            case .text:
+                if(message?.isMessageSentByMe == true) {
+                    cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.chatViewTextOutgoingCell, for: indexPath) as? ChatViewParentMessageCell
+                    if !isStarredMessagePage && !(isStarredSearchEnabled ?? false) {
+                        cell.transform = CGAffineTransform(rotationAngle: -.pi)
+                    }
+                    cell?.refreshDelegate = self
+                    cell.selectedForwardMessage = selectedMessages
+                    cell.isStarredMessagePage = isStarredMessagePage
+                    cell.searchText = searchBar?.text ?? ""
+                    cell.showHideStarredMessageView()
+                    let message = isStarredMessagePage ? isStarredSearchEnabled == true ? starredSearchMessages?[indexPath.row] : starredMessageList[indexPath.row] : chatMessages[indexPath.section][indexPath.row]
+                    if isStarredMessagePage {
+                        cell.setUserProfileInfo(message: message, isBlocked: false)
+                    }
+                    
+                    cell = cell?.getCellFor(message, at: indexPath, isShowForwardView: isShowForwardView, fromChat: true, isMessageSearch: messageSearchEnabled, searchText: isStarredMessagePage == true && isStarredSearchEnabled == true ? searchBar?.text ?? "" : messageSearchBar?.text ?? "", profileDetails: getProfileDetails)
+                    cell.replyView?.addGestureRecognizer(textReplyTap)
                 }
-                cell.selectedForwardMessage = selectedMessages
-                cell.isStarredMessagePage = isStarredMessagePage
-                cell.showHideStarredMessageView()
-                cell.quickForwardButton?.addTarget(self, action: #selector(quickForwardAction(sender:)), for: .touchUpInside)
-                let message = isStarredMessagePage ? isStarredSearchEnabled == true ? starredSearchMessages?[indexPath.row] : starredMessageList[indexPath.row] : chatMessages[indexPath.section][indexPath.row]
-                if isStarredMessagePage {
-                    cell.setUserProfileInfo(message: message, isBlocked: false)
-                }
-                cell = cell.getCellFor(message, at: indexPath, isShowForwardView: isShowForwardView, fromChat: true, isMessageSearch: messageSearchEnabled, searchText: messageSearchBar?.text ?? "")
-
-                cell.locationOutgoingView?.isUserInteractionEnabled = true
-                cell.locationOutgoingView?.addGestureRecognizer(gestureRecognizer)
-                cell?.contentView.accessibilityIdentifier = "\(indexPath.section)_\(indexPath.row)"
-                configureGesture(view: cell?.contentView ?? UIView())
-            }
-            else {
-                cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.chatViewLocationIncomingCell, for: indexPath) as? ChatViewParentMessageCell
-                if !isStarredMessagePage && !(isStarredSearchEnabled ?? false) {
-                    cell.transform = CGAffineTransform(rotationAngle: -.pi)
-                }
-                cell.selectedForwardMessage = selectedMessages
-                cell?.isStarredMessagePage = isStarredMessagePage
-                cell?.showHideStarredMessageView()
-                cell.quickForwardButton?.addTarget(self, action: #selector(quickForwardAction(sender:)), for: .touchUpInside)
-                let message = isStarredMessagePage ? isStarredSearchEnabled == true ? starredSearchMessages?[indexPath.row] : starredMessageList[indexPath.row] : chatMessages[indexPath.section][indexPath.row]
-                if isStarredMessagePage {
-                    cell.setUserProfileInfo(message: message, isBlocked: false)
-                }
-               
-                cell = cell.getCellFor(message, at: indexPath, isShowForwardView: isShowForwardView, fromChat: true, isMessageSearch: messageSearchEnabled, searchText: messageSearchBar?.text ?? "")
-                if !isStarredMessagePage {
-                    if getProfileDetails.profileChatType == .groupChat {
-                        if hideSenderNameToGroup(indexPath: indexPath) {
-                            cell.hideGroupMsgNameView()
-                            cell.baseViewTopConstraint.constant = 1
-                        } else {
-                            cell.groupMsgNameView?.isHidden = false
-                            cell.groupMsgSenderName?.textColor = ChatUtils.getColorForUser(userName: message?.senderUserName)
-                            cell.baseViewTopConstraint.constant = 3
-                            
+                else {
+                    cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.chatViewTextIncomingCell, for: indexPath) as? ChatViewParentMessageCell
+                    if !isStarredMessagePage && !(isStarredSearchEnabled ?? false) {
+                        cell?.transform = CGAffineTransform(rotationAngle: -.pi)
+                    }
+                    cell?.refreshDelegate = self
+                    cell?.selectedForwardMessage = selectedMessages
+                    cell?.isStarredMessagePage = isStarredMessagePage
+                    cell.searchText = searchBar?.text ?? ""
+                    cell?.showHideStarredMessageView()
+                    let message = isStarredMessagePage ? isStarredSearchEnabled == true ? starredSearchMessages?[indexPath.row] : starredMessageList[indexPath.row] : chatMessages[indexPath.section][indexPath.row]
+                    if isStarredMessagePage {
+                        cell.setUserProfileInfo(message: message, isBlocked: false)
+                    }
+                    
+                    cell = cell?.getCellFor(message, at: indexPath, isShowForwardView: isShowForwardView, fromChat: true, isMessageSearch: messageSearchEnabled, searchText: isStarredMessagePage == true && isStarredSearchEnabled == true ? searchBar?.text ?? "" : messageSearchBar?.text ?? "", profileDetails: getProfileDetails)
+                    cell.replyView?.addGestureRecognizer(textReplyTap)
+                    
+                    //MARK: - Adding Double Tap Gesture for the Incoming Messages
+                    
+                    if  FlyDefaults.isTranlationEnabled {
+                        let  tap = UITapGestureRecognizer(target: self, action: #selector(self.translationLanguage(_:)))
+                        tap.numberOfTapsRequired = 2
+                        cell.addGestureRecognizer(tap)
+                    }
+                    if !isStarredMessagePage {
+                        if getProfileDetails.profileChatType == .groupChat {
+                            if hideSenderNameToGroup(indexPath: indexPath) {
+                                cell.hideGroupMsgNameView()
+                                cell.baseViewTopConstraint.constant = 1
+                            } else {
+                                cell.groupMsgNameView?.isHidden = false
+                                cell.groupMsgSenderName?.textColor = ChatUtils.getColorForUser(userName: message?.senderUserName)
+                                cell.baseViewTopConstraint.constant = 3
+                            }
                         }
                     } else {
                         cell.hideGroupMsgNameView()
                     }
                 }
-                cell.locationImageView?.addGestureRecognizer(gestureRecognizer)
-                cell.contentView.accessibilityIdentifier = "\(indexPath.section)_\(indexPath.row)"
-                configureGesture(view: cell?.contentView ?? UIView())
-            }
-
-            if isShareMediaSelected == true{
-                cell.forwardButton?.isHidden = true
-                cell.forwardView?.isHidden = true
-            }
-            cell.forwardButton?.tag = (indexPath.section * 1000) + indexPath.row
-
-            cell?.forwardButton?.addTarget(self, action: #selector(forwardAction(sender:)), for: .touchUpInside)
-            cell.delegate = self
-            cell?.refreshDelegate = self
-            cell.selectionStyle = .none
-            cell?.contentView.backgroundColor = .clear
-            cell?.replyView?.addGestureRecognizer(textReplyTap)
-            return cell
-            
-        case .contact:
-            if(message?.isMessageSentByMe == true) {
-                cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.chatViewContactOutgoingCell, for: indexPath) as? ChatViewParentMessageCell
-                if !isStarredMessagePage && !(isStarredSearchEnabled ?? false) {
-                    cell.transform = CGAffineTransform(rotationAngle: -.pi)
-                }
-                cell.selectedForwardMessage = selectedMessages
-                cell.isStarredMessagePage = isStarredMessagePage
-                cell.showHideStarredMessageView()
-                let message = isStarredMessagePage ? isStarredSearchEnabled == true ? starredSearchMessages?[indexPath.row] : starredMessageList[indexPath.row] : chatMessages[indexPath.section][indexPath.row]
-                if isStarredMessagePage {
-                    cell.setUserProfileInfo(message: message, isBlocked: false)
-                }
-
-                cell.contentView.tag = (indexPath.section * 1000) + indexPath.row
-                cell = cell.getCellFor(message, at: indexPath, isShowForwardView: isShowForwardView, fromChat: true, isMessageSearch: isStarredMessagePage ? isStarredSearchEnabled ?? false : messageSearchEnabled, searchText: isStarredMessagePage ? searchBar?.text ?? "" : messageSearchBar?.text ?? "")
-                cell.contentView.accessibilityIdentifier = "\(indexPath.section)_\(indexPath.row)"
-                configureGesture(view: cell?.contentView ?? UIView())
-            }
-            else {
-                cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.chatViewContactIncomingCell, for: indexPath) as? ChatViewParentMessageCell
-                if !isStarredMessagePage && !(isStarredSearchEnabled ?? false) {
-                    cell?.transform = CGAffineTransform(rotationAngle: -.pi)
-                }
-                cell.selectedForwardMessage = selectedMessages
-                cell?.isStarredMessagePage = isStarredMessagePage
-                cell?.showHideStarredMessageView()
-                let message = isStarredMessagePage ? isStarredSearchEnabled == true ? starredSearchMessages?[indexPath.row] : starredMessageList[indexPath.row] : chatMessages[indexPath.section][indexPath.row]
-                if isStarredMessagePage {
-                    cell.setUserProfileInfo(message: message, isBlocked: false)
-                }
-                cell = cell.getCellFor(message, at: indexPath, isShowForwardView: isShowForwardView, fromChat: true, isMessageSearch: isStarredMessagePage ? isStarredSearchEnabled ?? false : messageSearchEnabled, searchText: isStarredMessagePage ? searchBar?.text ?? "" : messageSearchBar?.text ?? "")!
-                let gestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(onsaveContact(sender:)))
-                cell.saveContactButton?.addGestureRecognizer(gestureRecognizer)
-                cell.saveContactButton?.addGestureRecognizer(gestureRecognizer)
-                if !isStarredMessagePage {
-                    if getProfileDetails.profileChatType == .groupChat {
-                        if hideSenderNameToGroup(indexPath: indexPath) {
-                            cell.hideGroupMsgNameView()
-                            cell.baseViewTopConstraint.constant = 1
-                        } else {
-                            cell.groupMsgNameView?.isHidden = false
-                            cell.groupMsgSenderName?.textColor = ChatUtils.getColorForUser(userName: message?.senderUserName)
-                            cell.baseViewTopConstraint.constant = 3
-                        }
-                    }
-                } else {
-                    cell.hideGroupMsgNameView()
-                }
-                cell.contentView.accessibilityIdentifier = "\(indexPath.section)_\(indexPath.row)"
-                configureGesture(view: cell?.contentView ?? UIView())
-            }
-
-            if isShareMediaSelected == true{
-                cell.forwardButton?.isHidden = true
-                cell.forwardView?.isHidden = true
-            }
-            cell.forwardButton?.tag = (indexPath.section * 1000) + indexPath.row
-
-            cell?.forwardButton?.addTarget(self, action: #selector(forwardAction(sender:)), for: .touchUpInside)
-            cell.quickForwardButton?.addTarget(self, action: #selector(quickForwardAction(sender:)), for: .touchUpInside)
-            cell?.refreshDelegate = self
-            cell.selectionStyle = .none
-            cell?.delegate = self
-            cell?.contentView.backgroundColor = .clear
-            cell?.replyView?.addGestureRecognizer(textReplyTap)
-            return cell
-            
-        case .audio:
-            if(message?.isMessageSentByMe == true) {
-                var cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.audioSender, for: indexPath) as? AudioSender
-                cell?.selectedForwardMessage = selectedMessages
-                cell?.isShowAudioLoadingIcon = isShowAudioLoadingIcon
-                cell?.uploadingMediaObjects = uploadingMediaObjects
-                cell?.isStarredMessagePage = isStarredMessagePage
-                cell?.showHideStarredMessageView()
-                let message = isStarredMessagePage ? isStarredSearchEnabled == true ? starredSearchMessages?[indexPath.row] : starredMessageList[indexPath.row] : chatMessages[indexPath.section][indexPath.row]
-                if isStarredMessagePage {
-                    cell?.setUserProfileInfo(message: message, isBlocked: false)
-                }
-                cell = cell?.getCellFor(message, at: indexPath, isPlaying: currenAudioIndexPath == indexPath ? audioPlayer?.isPlaying ?? false : false, audioClosureCallBack: { [weak self] (sliderValue)  in
-                    self?.forwardAudio(sliderValue: sliderValue,indexPath:indexPath)
-                }, isShowForwardView: isShowForwardView, isDeleteMessageSelected: isStarredMessageSelected ? true : isDeleteSelected, fromChat: true, isMessageSearch: messageSearchEnabled, searchText: messageSearchBar?.text ?? "")
-                cell?.audioPlaySlider?.value = Float((indexPath == currenAudioIndexPath) ? (audioPlayer?.currentTime ?? 0.0) : 0.0)
-                cell?.updateCancelButton?.tag = indexPath.row
-                cell?.playButton?.tag = indexPath.row
-                cell?.delegate = self
-                cell?.refreshDelegate = self
-                cell?.playButton?.addTarget(self, action: #selector(audioAction(sender:)), for: .touchUpInside)
-                cell?.updateCancelButton?.addTarget(self, action: #selector(uploadCancelaudioAction(sender:)), for: .touchUpInside)
-                cell?.forwardButton?.tag = (indexPath.section * 1000) + indexPath.row
-
-                cell?.forwardButton?.addTarget(self, action: #selector(forwardAction(sender:)), for: .touchUpInside)
-                cell?.fwdBtn?.addTarget(self, action: #selector(quickForwardAction(sender:)), for: .touchUpInside)
-                if let audioUrl = currentAudioUrl, audioUrl == message?.mediaChatMessage?.mediaFileName {
-                    if let minuteSeconds = audioPlayer?.currentTime.minuteSecondMS {
-                        cell?.autioDuration?.text = minuteSeconds
-                        cell?.audioPlaySlider?.value = Float(audioPlayer?.currentTime ?? 0.0)
-                        currenAudioIndexPath = indexPath
-                    }
-                }
-                if let mediaFileName = message?.mediaChatMessage?.mediaFileName, let duration = ChatUtils.getAudiofileDuration(mediaFileName: mediaFileName){
-                    cell?.audioPlaySlider?.maximumValue = Float(duration)
-                }
-                cell?.audioPlaySlider?.addTarget(self, action: #selector(audioPlaySliderAction(sender:)), for: .valueChanged)
-                if !isStarredMessagePage && !(isStarredSearchEnabled ?? false) {
-                    cell?.transform = CGAffineTransform(rotationAngle: -.pi)
-                }
-                cell?.selectionStyle = .none
-                cell?.contentView.backgroundColor = .clear
-                cell?.replyView?.addGestureRecognizer(textReplyTap)
-                cell?.contentView.accessibilityIdentifier = "\(indexPath.section)_\(indexPath.row)"
-                configureGesture(view: cell?.contentView ?? UIView())
-                return cell ?? UITableViewCell()
-            } else {
-                var cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.audioReceiver, for: indexPath) as? AudioReceiver
-                if !isStarredMessagePage && !(isStarredSearchEnabled ?? false) {
-                    cell?.transform = CGAffineTransform(rotationAngle: -.pi)
-                }
-                cell?.selectedForwardMessage = selectedMessages
-                cell?.isStarredMessagePage = isStarredMessagePage
-                cell?.showHideStarredMessageView()
-                let message = isStarredMessagePage ? isStarredSearchEnabled == true ? starredSearchMessages?[indexPath.row] : starredMessageList[indexPath.row] : chatMessages[indexPath.section][indexPath.row]
-                if isStarredMessagePage {
-                    cell?.setUserProfileInfo(message: message, isBlocked: false)
-                }
-                cell = cell?.getCellFor(message, at: indexPath, isPlaying: currenAudioIndexPath == indexPath ? audioPlayer?.isPlaying ?? false : false, audioClosureCallBack: { [weak self] (sliderValue)  in
-                    self?.forwardAudio(sliderValue: sliderValue, indexPath: indexPath)
-                }, isShowForwardView: isShowForwardView, isDeletedMessageSelected: isStarredMessageSelected ? true : isDeleteSelected, fromChat: true, isMessageSearch: messageSearchEnabled, searchText: messageSearchBar?.text ?? "")!
-                cell?.slider?.value = Float((indexPath == currenAudioIndexPath) ? (audioPlayer?.currentTime ?? 0.0) : 0.0)
-                cell?.delegate = self
-                cell?.refreshDelegate = self
-                cell?.downloadButton?.addTarget(self, action:#selector(uploadCancelaudioAction(sender: )), for: .touchUpInside)
-
-                cell?.playBtn?.addTarget(self, action: #selector(audioAction(sender:)), for: .touchUpInside)
-                cell?.forwardButton?.tag = (indexPath.section * 1000) + indexPath.row
-
-                cell?.forwardButton?.addTarget(self, action: #selector(forwardAction(sender:)), for: .touchUpInside)
-                cell?.fwdBtn?.addTarget(self, action: #selector(quickForwardAction(sender:)), for: .touchUpInside)
-                cell?.selectionStyle = .none
-                hideSenderNameToGroup(indexPath: indexPath)
-                if !isStarredMessagePage {
-                    if getProfileDetails.profileChatType == .groupChat {
-                        if hideSenderNameToGroup(indexPath: indexPath) {
-                            cell?.hideSenderGroupName()
-                            cell?.bubbleImageViewTopConstraint.constant = 1
-                        } else {
-                            cell?.senderNameContainer?.isHidden = false
-                            cell?.senderNameLabel?.textColor = ChatUtils.getColorForUser(userName: message?.senderUserName)
-                            cell?.bubbleImageViewTopConstraint.constant = 3                            
-                        }
-                    }
-                } else {
-                    cell?.hideSenderGroupName()
-                }
-                if let audioUrl = currentAudioUrl, audioUrl == message?.mediaChatMessage?.mediaFileName {
-                    if let minuteSeconds = audioPlayer?.currentTime.minuteSecondMS {
-                        cell?.audioDuration?.text = minuteSeconds
-                        cell?.slider?.value = Float(audioPlayer?.currentTime ?? 0.0)
-                        currenAudioIndexPath = indexPath
-                    }
-                }
-                if let mediaFileName = message?.mediaChatMessage?.mediaFileName, let duration = ChatUtils.getAudiofileDuration(mediaFileName: mediaFileName){
-                    cell?.slider?.maximumValue = Float(duration)
-                }
-                cell?.slider?.addTarget(self, action: #selector(audioPlaySliderAction(sender:)), for: .valueChanged)
-                cell?.contentView.backgroundColor = .clear
-                cell?.replyView?.addGestureRecognizer(textReplyTap)
-                cell?.contentView.accessibilityIdentifier = "\(indexPath.section)_\(indexPath.row)"
-                configureGesture(view: cell?.contentView ?? UIView())
-                return cell ?? UITableViewCell()
-            }
-      
-        case .image, .video:
-            
-            let message = isStarredMessagePage ? isStarredSearchEnabled == true ? starredSearchMessages?[indexPath.row] : starredMessageList[indexPath.row] : chatMessages[indexPath.section][indexPath.row]
-            print("count nnnn \(message) inexpath \(indexPath.row)")
-            if indexPath.row == 0 {
-                print("las row")
-            }
-            
-            if(message?.isMessageSentByMe == true) {
-                var cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.videoOutgoingCell, for: indexPath) as! ChatViewVideoOutgoingCell
-                cell.isFromBack = isFromBackground
-                if !isStarredMessagePage && !(isStarredSearchEnabled ?? false) {
-                    cell.transform = CGAffineTransform(rotationAngle: -.pi)
-                }
-                cell.selectedForwardMessage = selectedMessages
-                cell.sendMediaMessages = sendMediaMessages
-                cell.isStarredMessagePage = isStarredMessagePage
-                cell.showHideStarredMessageView()
-                let message = isStarredMessagePage ? isStarredSearchEnabled == true ? starredSearchMessages?[indexPath.row] : starredMessageList[indexPath.row] : chatMessages[indexPath.section][indexPath.row]
-                if isStarredMessagePage {
-                    cell.setUserProfileInfo(message: message, isBlocked: false)
-                }
-                cell.downloadButton?.tag = (indexPath.section * 1000) + indexPath.row
-                cell.downloadButton?.addTarget(self, action: #selector(uploadedMediaDownload(sender:)), for: .touchUpInside)
-                cell.imageContainer.tag = (indexPath.section * 1000) + indexPath.row
-                cell.playButton.tag = (indexPath.section * 1000) + indexPath.row
-                print("fileExists", FileManager.default.fileExists(atPath: message?.mediaChatMessage?.mediaLocalStoragePath ?? ""))
-                cell = cell.getCellFor(message, at: indexPath, isShowForwardView: isShowForwardView, isDeleteMessageSelected: isStarredMessageSelected == true ? true : isDeleteSelected, fromChat: true, isMessageSearch: isStarredMessagePage == true && isStarredSearchEnabled == true ? true : messageSearchEnabled, searchText: isStarredMessagePage == true && isStarredSearchEnabled == true ? searchBar?.text ?? "" :  messageSearchBar?.text ?? "")!
-                cell.downloadButton?.addTarget(self, action: #selector(uploadedMediaDownload(sender:)), for: .touchUpInside)
-                cell.playButton.addTarget(self, action: #selector(playVideoGestureAction(sender:)), for: .touchUpInside)
-                cell.imageContainer?.tag = indexPath.row
-                cell.imageContainer?.isUserInteractionEnabled = (message?.messageType == .image) ? true : false
-                cell.imageGeasture.addTarget(self, action: #selector(imageGestureAction(_:)))
-                cell.cancelUploadButton.addTarget(self, action: #selector(cancelVideoUpload(sender:)), for: .touchUpInside)
-                cell.retryButton?.tag = (indexPath.section * 1000) + indexPath.row
-                cell.downloadButton?.tag = (indexPath.section * 1000) + indexPath.row
-                if message?.isCarbonMessage == true {
-                    cell.downloadButton?.addTarget(self, action: #selector(videoDownload(sender:)), for: .touchUpInside)
-                    cell.cancelUploadButton.addTarget(self, action: #selector(cancelVideoDownload(sender:)), for: .touchUpInside)
-                } else {
-                    cell.cancelUploadButton.addTarget(self, action: #selector(cancelVideoUpload(sender:)), for: .touchUpInside)
-                    cell.retryButton?.addTarget(self, action: #selector(retryVideoUpload(sender:)), for: .touchUpInside)
-                }
-              
                 
-                cell.quickFwdBtn?.addTarget(self, action: #selector(quickForwardAction(sender:)), for: .touchUpInside)
-
+                if isShareMediaSelected == true && message?.messageTextContent.isURL == false {
+                    cell.forwardButton?.isHidden = true
+                    cell.forwardView?.isHidden = true
+                }
                 cell.forwardButton?.tag = (indexPath.section * 1000) + indexPath.row
-
-                cell.forwardButton?.addTarget(self, action: #selector(forwardAction(sender:)), for: .touchUpInside)
+                
+                if let view = cell?.forwardView, let image = cell?.forwardImageView {
+                    image.tag = 10023
+                    view.tag = 10024
+                }
+                
+                cell?.forwardButton?.addTarget(self, action: #selector(forwardAction(sender:)), for: .touchUpInside)
+                cell?.contentView.accessibilityIdentifier = "\(indexPath.section)_\(indexPath.row)"
+                configureGesture(view: cell?.contentView ?? UIView())
+                cell?.refreshDelegate = self
                 cell.delegate = self
-                cell.refreshDelegate = self
                 cell.selectionStyle = .none
-                cell.contentView.backgroundColor = .clear
-                cell.replyView?.addGestureRecognizer(textReplyTap)
-                cell.contentView.accessibilityIdentifier = "\(indexPath.section)_\(indexPath.row)"
-                configureGesture(view: cell.contentView)
+                cell?.backgroundColor = .clear
+                cell?.contentView.backgroundColor = .clear
                 return cell
-            }else {
-                var cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.videoIncomingCell, for: indexPath) as! ChatViewVideoIncomingCell
-                if !isStarredMessagePage && !(isStarredSearchEnabled ?? false) {
-                    cell.transform = CGAffineTransform(rotationAngle: -.pi)
+                
+            case.location:
+                let gestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(onLocationMessage(sender:)))
+                if(message?.isMessageSentByMe == true) {
+                    cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.chatViewLocationOutgoingCell, for: indexPath) as? ChatViewParentMessageCell
+                    if !isStarredMessagePage && !(isStarredSearchEnabled ?? false) {
+                        cell.transform = CGAffineTransform(rotationAngle: -.pi)
+                    }
+                    cell.selectedForwardMessage = selectedMessages
+                    cell.isStarredMessagePage = isStarredMessagePage
+                    cell.showHideStarredMessageView()
+                    cell.quickForwardButton?.addTarget(self, action: #selector(quickForwardAction(sender:)), for: .touchUpInside)
+                    let message = isStarredMessagePage ? isStarredSearchEnabled == true ? starredSearchMessages?[indexPath.row] : starredMessageList[indexPath.row] : chatMessages[indexPath.section][indexPath.row]
+                    if isStarredMessagePage {
+                        cell.setUserProfileInfo(message: message, isBlocked: false)
+                    }
+                    cell = cell.getCellFor(message, at: indexPath, isShowForwardView: isShowForwardView, fromChat: true, isMessageSearch: messageSearchEnabled, searchText: messageSearchBar?.text ?? "", profileDetails: getProfileDetails)
+                    
+                    cell.locationOutgoingView?.isUserInteractionEnabled = true
+                    cell.locationOutgoingView?.addGestureRecognizer(gestureRecognizer)
+                    cell?.contentView.accessibilityIdentifier = "\(indexPath.section)_\(indexPath.row)"
+                    configureGesture(view: cell?.contentView ?? UIView())
                 }
-                cell.selectedForwardMessage = selectedMessages
-                cell.isStarredMessagePage = isStarredMessagePage
-                cell.showHideStarredMessageView()
-                let message = isStarredMessagePage ? isStarredSearchEnabled == true ? starredSearchMessages?[indexPath.row] : starredMessageList[indexPath.row] : chatMessages[indexPath.section][indexPath.row]
-                if isStarredMessagePage {
-                    cell.setUserProfileInfo(message: message, isBlocked: false)
+                else {
+                    cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.chatViewLocationIncomingCell, for: indexPath) as? ChatViewParentMessageCell
+                    if !isStarredMessagePage && !(isStarredSearchEnabled ?? false) {
+                        cell.transform = CGAffineTransform(rotationAngle: -.pi)
+                    }
+                    cell.selectedForwardMessage = selectedMessages
+                    cell?.isStarredMessagePage = isStarredMessagePage
+                    cell?.showHideStarredMessageView()
+                    cell.quickForwardButton?.addTarget(self, action: #selector(quickForwardAction(sender:)), for: .touchUpInside)
+                    let message = isStarredMessagePage ? isStarredSearchEnabled == true ? starredSearchMessages?[indexPath.row] : starredMessageList[indexPath.row] : chatMessages[indexPath.section][indexPath.row]
+                    if isStarredMessagePage {
+                        cell.setUserProfileInfo(message: message, isBlocked: false)
+                    }
+                    
+                    cell = cell.getCellFor(message, at: indexPath, isShowForwardView: isShowForwardView, fromChat: true, isMessageSearch: messageSearchEnabled, searchText: messageSearchBar?.text ?? "", profileDetails: getProfileDetails)
+                    if !isStarredMessagePage {
+                        if getProfileDetails.profileChatType == .groupChat {
+                            if hideSenderNameToGroup(indexPath: indexPath) {
+                                cell.hideGroupMsgNameView()
+                                cell.baseViewTopConstraint.constant = 1
+                            } else {
+                                cell.groupMsgNameView?.isHidden = false
+                                cell.groupMsgSenderName?.textColor = ChatUtils.getColorForUser(userName: message?.senderUserName)
+                                cell.baseViewTopConstraint.constant = 3
+                                
+                            }
+                        } else {
+                            cell.hideGroupMsgNameView()
+                        }
+                    }
+                    cell.locationImageView?.addGestureRecognizer(gestureRecognizer)
+                    cell.contentView.accessibilityIdentifier = "\(indexPath.section)_\(indexPath.row)"
+                    configureGesture(view: cell?.contentView ?? UIView())
                 }
-
-                cell = cell.getCellFor(message, at: indexPath, isShowForwardView: isShowForwardView, isDeleteMessageSelected: isStarredMessageSelected ? true : isDeleteSelected, fromChat: true, isMessageSearch: isStarredMessagePage == true && isStarredSearchEnabled == true ? true : messageSearchEnabled, searchText: isStarredSearchEnabled == true ? searchBar?.text ?? "" : messageSearchBar?.text ?? "")!
-
-                //MARK: - Double tap gesture for VideoIncomingCel
-                if FlyDefaults.isTranlationEnabled {
-                    let  tapVideoCaption = UITapGestureRecognizer(target: self, action: #selector(self.translationLanguage(_:)))
-                    tapVideoCaption.numberOfTapsRequired = 2
-                    cell.captionView.isUserInteractionEnabled = true
-                    cell.captionView.addGestureRecognizer(tapVideoCaption)
+                
+                if isShareMediaSelected == true{
+                    cell.forwardButton?.isHidden = true
+                    cell.forwardView?.isHidden = true
                 }
-                cell.downloadButton.tag = (indexPath.section * 1000) + indexPath.row
-                cell.downloadButton.addTarget(self, action: #selector(videoDownload(sender:)), for: .touchUpInside)
-                cell.playButton.addTarget(self, action: #selector(playVideoGestureAction(sender:)), for: .touchUpInside)
-                cell.imageContainer?.tag = indexPath.row
-                cell.imageContainer?.isUserInteractionEnabled = (message?.messageType == .image) ? true : false
-                cell.imageGeasture.addTarget(self, action: #selector(imageGestureAction(_:)))
-                cell.progressButton.addTarget(self, action: #selector(cancelVideoDownload(sender:)), for: .touchUpInside)
+                cell.forwardButton?.tag = (indexPath.section * 1000) + indexPath.row
+                if let view = cell?.forwardView, let image = cell?.forwardImageView {
+                    image.tag = 10023
+                    view.tag = 10024
+                }
+                cell?.forwardButton?.addTarget(self, action: #selector(forwardAction(sender:)), for: .touchUpInside)
+                cell.delegate = self
+                cell?.refreshDelegate = self
+                cell.selectionStyle = .none
+                cell?.backgroundColor = .clear
+                cell?.contentView.backgroundColor = .clear
+                cell?.replyView?.addGestureRecognizer(textReplyTap)
+                return cell
+                
+            case .contact:
+                if(message?.isMessageSentByMe == true) {
+                    cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.chatViewContactOutgoingCell, for: indexPath) as? ChatViewParentMessageCell
+                    if !isStarredMessagePage && !(isStarredSearchEnabled ?? false) {
+                        cell.transform = CGAffineTransform(rotationAngle: -.pi)
+                    }
+                    cell.selectedForwardMessage = selectedMessages
+                    cell.isStarredMessagePage = isStarredMessagePage
+                    cell.showHideStarredMessageView()
+                    let message = isStarredMessagePage ? isStarredSearchEnabled == true ? starredSearchMessages?[indexPath.row] : starredMessageList[indexPath.row] : chatMessages[indexPath.section][indexPath.row]
+                    if isStarredMessagePage {
+                        cell.setUserProfileInfo(message: message, isBlocked: false)
+                    }
+                    
+                    cell.contentView.tag = (indexPath.section * 1000) + indexPath.row
+                    cell = cell.getCellFor(message, at: indexPath, isShowForwardView: isShowForwardView, fromChat: true, isMessageSearch: isStarredMessagePage ? isStarredSearchEnabled ?? false : messageSearchEnabled, searchText: isStarredMessagePage ? searchBar?.text ?? "" : messageSearchBar?.text ?? "", profileDetails: getProfileDetails)
+                    cell.contentView.accessibilityIdentifier = "\(indexPath.section)_\(indexPath.row)"
+                    configureGesture(view: cell?.contentView ?? UIView())
+                }
+                else {
+                    cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.chatViewContactIncomingCell, for: indexPath) as? ChatViewParentMessageCell
+                    if !isStarredMessagePage && !(isStarredSearchEnabled ?? false) {
+                        cell?.transform = CGAffineTransform(rotationAngle: -.pi)
+                    }
+                    cell.selectedForwardMessage = selectedMessages
+                    cell?.isStarredMessagePage = isStarredMessagePage
+                    cell?.showHideStarredMessageView()
+                    let message = isStarredMessagePage ? isStarredSearchEnabled == true ? starredSearchMessages?[indexPath.row] : starredMessageList[indexPath.row] : chatMessages[indexPath.section][indexPath.row]
+                    if isStarredMessagePage {
+                        cell.setUserProfileInfo(message: message, isBlocked: false)
+                    }
+                    cell = cell.getCellFor(message, at: indexPath, isShowForwardView: isShowForwardView, fromChat: true, isMessageSearch: isStarredMessagePage ? isStarredSearchEnabled ?? false : messageSearchEnabled, searchText: isStarredMessagePage ? searchBar?.text ?? "" : messageSearchBar?.text ?? "", profileDetails: getProfileDetails)!
+                    let gestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(onsaveContact(sender:)))
+                    cell.saveContactButton?.addGestureRecognizer(gestureRecognizer)
+                    cell.saveContactButton?.addGestureRecognizer(gestureRecognizer)
+                    if !isStarredMessagePage {
+                        if getProfileDetails.profileChatType == .groupChat {
+                            if hideSenderNameToGroup(indexPath: indexPath) {
+                                cell.hideGroupMsgNameView()
+                                cell.baseViewTopConstraint.constant = 1
+                            } else {
+                                cell.groupMsgNameView?.isHidden = false
+                                cell.groupMsgSenderName?.textColor = ChatUtils.getColorForUser(userName: message?.senderUserName)
+                                cell.baseViewTopConstraint.constant = 3
+                            }
+                        }
+                    } else {
+                        cell.hideGroupMsgNameView()
+                    }
+                    cell.contentView.accessibilityIdentifier = "\(indexPath.section)_\(indexPath.row)"
+                    configureGesture(view: cell?.contentView ?? UIView())
+                }
+                
+                if isShareMediaSelected == true{
+                    cell.forwardButton?.isHidden = true
+                    cell.forwardView?.isHidden = true
+                }
+                cell.forwardButton?.tag = (indexPath.section * 1000) + indexPath.row
+                if let view = cell?.forwardView, let image = cell?.forwardImageView {
+                    image.tag = 10023
+                    view.tag = 10024
+                }
+                cell?.forwardButton?.addTarget(self, action: #selector(forwardAction(sender:)), for: .touchUpInside)
                 cell.quickForwardButton?.addTarget(self, action: #selector(quickForwardAction(sender:)), for: .touchUpInside)
-
-                cell.forwardButton?.tag = (indexPath.section * 1000) + indexPath.row
-
-                cell.forwardButton?.addTarget(self, action: #selector(forwardAction(sender:)), for: .touchUpInside)
-                cell.delegate = self
-                cell.refreshDelegate = self
+                cell?.refreshDelegate = self
                 cell.selectionStyle = .none
-                if !isStarredMessagePage {
-                    if getProfileDetails.profileChatType == .groupChat {
-                        if hideSenderNameToGroup(indexPath: indexPath) {
-                            cell.senderNameView.isHidden = true
-                            cell.bubbleImageTopConstraint.constant = 1
-                        } else {
-                            cell.senderNameView.isHidden = false
-                            cell.senderGroupNameLabel.textColor = ChatUtils.getColorForUser(userName: message?.senderUserName)
-                            cell.bubbleImageTopConstraint.constant = 3
+                cell?.delegate = self
+                cell?.backgroundColor = .clear
+                cell?.contentView.backgroundColor = .clear
+                cell?.replyView?.addGestureRecognizer(textReplyTap)
+                return cell
+                
+            case .audio:
+                if(message?.isMessageSentByMe == true) {
+                    var cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.audioSender, for: indexPath) as? AudioSender
+                    cell?.selectedForwardMessage = selectedMessages
+                    cell?.isShowAudioLoadingIcon = isShowAudioLoadingIcon
+                    cell?.uploadingMediaObjects = uploadingMediaObjects
+                    cell?.isStarredMessagePage = isStarredMessagePage
+                    cell?.showHideStarredMessageView()
+                    let message = isStarredMessagePage ? isStarredSearchEnabled == true ? starredSearchMessages?[indexPath.row] : starredMessageList[indexPath.row] : chatMessages[indexPath.section][indexPath.row]
+                    if isStarredMessagePage {
+                        cell?.setUserProfileInfo(message: message, isBlocked: false)
+                    }
+                    cell = cell?.getCellFor(message, at: indexPath, isPlaying: currenAudioIndexPath == indexPath ? audioPlayer?.isPlaying ?? false : false, audioClosureCallBack: { [weak self] (sliderValue)  in
+                        self?.forwardAudio(sliderValue: sliderValue,indexPath:indexPath)
+                    }, isShowForwardView: isShowForwardView, isDeleteMessageSelected: isStarredMessageSelected ? true : isDeleteSelected, fromChat: true, isMessageSearch: messageSearchEnabled, searchText: messageSearchBar?.text ?? "")
+                    cell?.audioPlaySlider?.value = Float((indexPath == currenAudioIndexPath) ? (audioPlayer?.currentTime ?? 0.0) : 0.0)
+                    cell?.updateCancelButton?.tag = indexPath.row
+                    cell?.playButton?.tag = indexPath.row
+                    cell?.delegate = self
+                    cell?.refreshDelegate = self
+                    cell?.playButton?.addTarget(self, action: #selector(audioAction(sender:)), for: .touchUpInside)
+                    cell?.updateCancelButton?.addTarget(self, action: #selector(uploadCancelaudioAction(sender:)), for: .touchUpInside)
+                    cell?.forwardButton?.tag = (indexPath.section * 1000) + indexPath.row
+                    if let view = cell?.forwardView, let image = cell?.forwardImageView {
+                        image.tag = 10023
+                        view.tag = 10024
+                    }
+                    cell?.forwardButton?.addTarget(self, action: #selector(forwardAction(sender:)), for: .touchUpInside)
+                    cell?.fwdBtn?.addTarget(self, action: #selector(quickForwardAction(sender:)), for: .touchUpInside)
+                    if let audioUrl = currentAudioUrl, audioUrl == message?.mediaChatMessage?.mediaFileName {
+                        if let minuteSeconds = audioPlayer?.currentTime.minuteSecondMS {
+                            cell?.autioDuration?.text = minuteSeconds
+                            cell?.audioPlaySlider?.value = Float(audioPlayer?.currentTime ?? 0.0)
+                            currenAudioIndexPath = indexPath
                         }
                     }
+                    if let mediaFileName = message?.mediaChatMessage?.mediaFileName, let duration = ChatUtils.getAudiofileDuration(mediaFileName: mediaFileName){
+                        cell?.audioPlaySlider?.maximumValue = Float(duration)
+                    }
+                    cell?.audioPlaySlider?.addTarget(self, action: #selector(audioPlaySliderAction(sender:)), for: .valueChanged)
+                    if !isStarredMessagePage && !(isStarredSearchEnabled ?? false) {
+                        cell?.transform = CGAffineTransform(rotationAngle: -.pi)
+                    }
+                    cell?.selectionStyle = .none
+                    cell?.backgroundColor = .clear
+                    cell?.contentView.backgroundColor = .clear
+                    cell?.replyView?.addGestureRecognizer(textReplyTap)
+                    cell?.contentView.accessibilityIdentifier = "\(indexPath.section)_\(indexPath.row)"
+                    configureGesture(view: cell?.contentView ?? UIView())
+                    return cell ?? UITableViewCell()
                 } else {
-                    cell.senderNameView.isHidden = true
-                }
-                cell.replyView?.addGestureRecognizer(textReplyTap)
-                cell.contentView.backgroundColor = .clear
-                cell.contentView.accessibilityIdentifier = "\(indexPath.section)_\(indexPath.row)"
-                configureGesture(view: cell.contentView)
-                return cell
-            }
-            
-        case .document:
-            if(message?.isMessageSentByMe ==  true) {
-                var cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.senderDocumenCell,
-                                                         for: indexPath) as! SenderDocumentsTableViewCell
-                if !isStarredMessagePage && !(isStarredSearchEnabled ?? false) {
-                    cell.transform = CGAffineTransform(rotationAngle: -.pi)
-                }
-                cell.delegate = self
-                cell.refreshDelegate = self
-                cell.selectionStyle = .none
-                cell.contentView.backgroundColor = .clear
-                cell.sendMediaMessages = sendMediaMessages
-                cell.selectedForwardMessage = selectedMessages
-                cell.isStarredMessagePage = isStarredMessagePage
-                cell.showHideStarredMessageView()
-                let message = isStarredMessagePage ? isStarredSearchEnabled == true ? starredSearchMessages?[indexPath.row] : starredMessageList[indexPath.row] : chatMessages[indexPath.section][indexPath.row]
-                if isStarredMessagePage {
-                    cell.setUserProfileInfo(message: message, isBlocked: false)
-                }
-                cell.forwardButton?.tag = (indexPath.section * 1000) + indexPath.row
-                cell.uploadButton?.tag = (indexPath.section * 1000) + indexPath.row
-                cell.viewDocumentButton?.tag = (indexPath.section * 1000) + indexPath.row
-                cell = cell.getCellFor(message, at: indexPath, isShowForwardView: isShowForwardView,isDeletedMessageSelected: (isStarredMessageSelected ?? false) ? true : isDeleteSelected, fromChat: true, isMessageSearch: isStarredMessagePage == true && isStarredSearchEnabled == true ? true : messageSearchEnabled, searchText: isStarredSearchEnabled == true ? searchBar?.text ?? "" :   messageSearchBar?.text ?? "")!
-                cell.forwardButton?.addTarget(self, action: #selector(forwardAction(sender:)), for: .touchUpInside)
-                cell.uploadButton?.addTarget(self, action: #selector(uploadDownloadDocuments(sender: )), for: .touchUpInside)
-                cell.fwdButton?.addTarget(self, action: #selector(quickForwardAction(sender:)), for: .touchUpInside)
-                cell.viewDocumentButton?.addTarget(self, action: #selector(viewDocument(sender:)), for: .touchUpInside)
-                cell.replyView?.addGestureRecognizer(textReplyTap)
-                cell.contentView.accessibilityIdentifier = "\(indexPath.section)_\(indexPath.row)"
-                configureGesture(view: cell.contentView)
-                return cell
-            } else {
-                var cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.receiverDocumentCell,
-                                                         for: indexPath) as! ReceiverDocumentsTableViewCell
-                if !isStarredMessagePage && !(isStarredSearchEnabled ?? false) {
-                    cell.transform = CGAffineTransform(rotationAngle: -.pi)
-                }
-                cell.delegate = self
-                cell.refreshDelegate = self
-                cell.selectionStyle = .none
-                cell.contentView.backgroundColor = .clear
-                cell.sendMediaMessages = receivedMediaMessages
-                cell.selectedForwardMessage = selectedMessages
-                cell.isStarredMessagePage = isStarredMessagePage
-                cell.showHideStarredMessageView()
-                let message = isStarredMessagePage ? isStarredSearchEnabled == true ? starredSearchMessages?[indexPath.row] : starredMessageList[indexPath.row] : chatMessages[indexPath.section][indexPath.row]
-                if isStarredMessagePage {
-                    cell.setUserProfileInfo(message: message, isBlocked: false)
-                }
-                cell = cell.getCellFor(message, at: indexPath, isShowForwardView: isShowForwardView,isDeletedOrStarredSelected: isStarredMessageSelected ? true : isDeleteSelected, fromChat: true, isMessageSearch: isStarredMessagePage == true && isStarredSearchEnabled == true ? true : messageSearchEnabled, searchText: isStarredSearchEnabled == true ? searchBar?.text ?? "" : messageSearchBar?.text ?? "")!
-                cell.forwardButton?.tag = (indexPath.section * 1000) + indexPath.row
-                cell.downloadButton?.tag = (indexPath.section * 1000) + indexPath.row
-
-                cell.viewDocumentButton?.tag = (indexPath.section * 1000) + indexPath.row
-		
-                cell.viewDocumentButton?.tag = (indexPath.section * 1000) + indexPath.row
-                cell.forwardButton?.addTarget(self, action: #selector(forwardAction(sender:)), for: .touchUpInside)
-                cell.downloadButton?.addTarget(self, action: #selector(uploadDownloadDocuments(sender:)), for: .touchUpInside)
-                cell.fwdButton?.addTarget(self, action: #selector(quickForwardAction(sender:)), for: .touchUpInside)
-                cell.viewDocumentButton?.addTarget(self, action: #selector(viewDocument(sender:)), for: .touchUpInside)
-                if !isStarredMessagePage {
-                    if getProfileDetails.profileChatType == .groupChat {
-                        if hideSenderNameToGroup(indexPath: indexPath) {
-                            cell.groupSenderNameView?.isHidden = true
-                        } else {
-                            cell.groupSenderNameView?.isHidden = false
+                    var cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.audioReceiver, for: indexPath) as? AudioReceiver
+                    if !isStarredMessagePage && !(isStarredSearchEnabled ?? false) {
+                        cell?.transform = CGAffineTransform(rotationAngle: -.pi)
+                    }
+                    cell?.selectedForwardMessage = selectedMessages
+                    cell?.isStarredMessagePage = isStarredMessagePage
+                    cell?.showHideStarredMessageView()
+                    let message = isStarredMessagePage ? isStarredSearchEnabled == true ? starredSearchMessages?[indexPath.row] : starredMessageList[indexPath.row] : chatMessages[indexPath.section][indexPath.row]
+                    if isStarredMessagePage {
+                        cell?.setUserProfileInfo(message: message, isBlocked: false)
+                    }
+                    cell = cell?.getCellFor(message, at: indexPath, isPlaying: currenAudioIndexPath == indexPath ? audioPlayer?.isPlaying ?? false : false, audioClosureCallBack: { [weak self] (sliderValue)  in
+                        self?.forwardAudio(sliderValue: sliderValue, indexPath: indexPath)
+                    }, isShowForwardView: isShowForwardView, isDeletedMessageSelected: isStarredMessageSelected ? true : isDeleteSelected, fromChat: true, isMessageSearch: messageSearchEnabled, searchText: messageSearchBar?.text ?? "")!
+                    cell?.slider?.value = Float((indexPath == currenAudioIndexPath) ? (audioPlayer?.currentTime ?? 0.0) : 0.0)
+                    cell?.delegate = self
+                    cell?.refreshDelegate = self
+                    cell?.downloadButton?.addTarget(self, action:#selector(uploadCancelaudioAction(sender: )), for: .touchUpInside)
+                    
+                    cell?.playBtn?.addTarget(self, action: #selector(audioAction(sender:)), for: .touchUpInside)
+                    cell?.forwardButton?.tag = (indexPath.section * 1000) + indexPath.row
+                    if let view = cell?.forwardView, let image = cell?.forwardImageView {
+                        image.tag = 10023
+                        view.tag = 10024
+                    }
+                    cell?.forwardButton?.addTarget(self, action: #selector(forwardAction(sender:)), for: .touchUpInside)
+                    cell?.fwdBtn?.addTarget(self, action: #selector(quickForwardAction(sender:)), for: .touchUpInside)
+                    cell?.selectionStyle = .none
+                    hideSenderNameToGroup(indexPath: indexPath)
+                    if !isStarredMessagePage {
+                        if getProfileDetails.profileChatType == .groupChat {
+                            if hideSenderNameToGroup(indexPath: indexPath) {
+                                cell?.hideSenderGroupName()
+                                cell?.bubbleImageViewTopConstraint.constant = 1
+                            } else {
+                                cell?.senderNameContainer?.isHidden = false
+                                cell?.senderNameLabel?.textColor = ChatUtils.getColorForUser(userName: message?.senderUserName)
+                                cell?.bubbleImageViewTopConstraint.constant = 3
+                            }
+                        }
+                    } else {
+                        cell?.hideSenderGroupName()
+                    }
+                    if let audioUrl = currentAudioUrl, audioUrl == message?.mediaChatMessage?.mediaFileName {
+                        if let minuteSeconds = audioPlayer?.currentTime.minuteSecondMS {
+                            cell?.audioDuration?.text = minuteSeconds
+                            cell?.slider?.value = Float(audioPlayer?.currentTime ?? 0.0)
+                            currenAudioIndexPath = indexPath
                         }
                     }
-                } else {
-                    cell.groupSenderNameView?.isHidden = true
+                    if let mediaFileName = message?.mediaChatMessage?.mediaFileName, let duration = ChatUtils.getAudiofileDuration(mediaFileName: mediaFileName){
+                        cell?.slider?.maximumValue = Float(duration)
+                    }
+                    cell?.slider?.addTarget(self, action: #selector(audioPlaySliderAction(sender:)), for: .valueChanged)
+                    cell?.contentView.backgroundColor = .clear
+                    cell?.replyView?.addGestureRecognizer(textReplyTap)
+                    cell?.contentView.accessibilityIdentifier = "\(indexPath.section)_\(indexPath.row)"
+                    configureGesture(view: cell?.contentView ?? UIView())
+                    cell?.backgroundColor = .clear
+                    cell?.contentView.backgroundColor = .clear
+                    return cell ?? UITableViewCell()
                 }
-                cell.replyView?.addGestureRecognizer(textReplyTap)
-                cell.contentView.accessibilityIdentifier = "\(indexPath.section)_\(indexPath.row)"
-                configureGesture(view: cell.contentView)
+                
+            case .image, .video:
+                
+                let message = isStarredMessagePage ? isStarredSearchEnabled == true ? starredSearchMessages?[indexPath.row] : starredMessageList[indexPath.row] : chatMessages[indexPath.section][indexPath.row]
+                print("count nnnn \(message) inexpath \(indexPath.row)")
+                if indexPath.row == 0 {
+                    print("las row")
+                }
+                
+                if(message?.isMessageSentByMe == true) {
+                    var cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.videoOutgoingCell, for: indexPath) as! ChatViewVideoOutgoingCell
+                    cell.isFromBack = isFromBackground
+                    if !isStarredMessagePage && !(isStarredSearchEnabled ?? false) {
+                        cell.transform = CGAffineTransform(rotationAngle: -.pi)
+                    }
+                    cell.selectedForwardMessage = selectedMessages
+                    cell.sendMediaMessages = sendMediaMessages
+                    cell.isStarredMessagePage = isStarredMessagePage
+                    cell.showHideStarredMessageView()
+                    let message = isStarredMessagePage ? isStarredSearchEnabled == true ? starredSearchMessages?[indexPath.row] : starredMessageList[indexPath.row] : chatMessages[indexPath.section][indexPath.row]
+                    if isStarredMessagePage {
+                        cell.setUserProfileInfo(message: message, isBlocked: false)
+                    }
+                    cell.downloadButton?.tag = (indexPath.section * 1000) + indexPath.row
+                    cell.downloadButton?.addTarget(self, action: #selector(uploadedMediaDownload(sender:)), for: .touchUpInside)
+                    cell.imageContainer.tag = (indexPath.section * 1000) + indexPath.row
+                    cell.playButton.tag = (indexPath.section * 1000) + indexPath.row
+                    print("fileExists", FileManager.default.fileExists(atPath: message?.mediaChatMessage?.mediaLocalStoragePath ?? ""))
+                    cell = cell.getCellFor(message, at: indexPath, isShowForwardView: isShowForwardView, isDeleteMessageSelected: isStarredMessageSelected == true ? true : isDeleteSelected, fromChat: true, isMessageSearch: isStarredMessagePage == true && isStarredSearchEnabled == true ? true : messageSearchEnabled, searchText: isStarredMessagePage == true && isStarredSearchEnabled == true ? searchBar?.text ?? "" :  messageSearchBar?.text ?? "", profileDetails: getProfileDetails)!
+                    cell.playButton.addTarget(self, action: #selector(playVideoGestureAction(sender:)), for: .touchUpInside)
+                    cell.imageContainer?.tag = indexPath.row
+                    cell.imageContainer?.isUserInteractionEnabled = (message?.messageType == .image) ? true : false
+                    cell.imageGeasture.addTarget(self, action: #selector(imageGestureAction(_:)))
+                    cell.cancelUploadButton.addTarget(self, action: #selector(cancelVideoUpload(sender:)), for: .touchUpInside)
+                    cell.retryButton?.tag = (indexPath.section * 1000) + indexPath.row
+                    cell.downloadButton?.tag = (indexPath.section * 1000) + indexPath.row
+                    if message?.isCarbonMessage == true {
+                        cell.downloadButton?.addTarget(self, action: #selector(videoDownload(sender:)), for: .touchUpInside)
+                        cell.cancelUploadButton.addTarget(self, action: #selector(cancelVideoDownload(sender:)), for: .touchUpInside)
+                    } else {
+                        cell.cancelUploadButton.addTarget(self, action: #selector(cancelVideoUpload(sender:)), for: .touchUpInside)
+                        cell.retryButton?.addTarget(self, action: #selector(retryVideoUpload(sender:)), for: .touchUpInside)
+                    }
+                    
+                    
+                    cell.quickFwdBtn?.addTarget(self, action: #selector(quickForwardAction(sender:)), for: .touchUpInside)
+                    
+                    cell.forwardButton?.tag = (indexPath.section * 1000) + indexPath.row
+                    if let view = cell.forwardView, let image = cell.forwardImageView {
+                        image.tag = 10023
+                        view.tag = 10024
+                    }
+                    cell.forwardButton?.addTarget(self, action: #selector(forwardAction(sender:)), for: .touchUpInside)
+                    cell.delegate = self
+                    cell.refreshDelegate = self
+                    cell.selectionStyle = .none
+                    cell.backgroundColor = .clear
+                    cell.contentView.backgroundColor = .clear
+                    cell.replyView?.addGestureRecognizer(textReplyTap)
+                    cell.contentView.accessibilityIdentifier = "\(indexPath.section)_\(indexPath.row)"
+                    configureGesture(view: cell.contentView)
+                    return cell
+                }else {
+                    var cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.videoIncomingCell, for: indexPath) as! ChatViewVideoIncomingCell
+                    if !isStarredMessagePage && !(isStarredSearchEnabled ?? false) {
+                        cell.transform = CGAffineTransform(rotationAngle: -.pi)
+                    }
+                    cell.selectedForwardMessage = selectedMessages
+                    cell.isStarredMessagePage = isStarredMessagePage
+                    cell.showHideStarredMessageView()
+                    let message = isStarredMessagePage ? isStarredSearchEnabled == true ? starredSearchMessages?[indexPath.row] : starredMessageList[indexPath.row] : chatMessages[indexPath.section][indexPath.row]
+                    if isStarredMessagePage {
+                        cell.setUserProfileInfo(message: message, isBlocked: false)
+                    }
+                    
+                    cell = cell.getCellFor(message, at: indexPath, isShowForwardView: isShowForwardView, isDeleteMessageSelected: isStarredMessageSelected ? true : isDeleteSelected, fromChat: true, isMessageSearch: isStarredMessagePage == true && isStarredSearchEnabled == true ? true : messageSearchEnabled, searchText: isStarredSearchEnabled == true ? searchBar?.text ?? "" : messageSearchBar?.text ?? "", profileDetails: getProfileDetails)!
+                    
+                    //MARK: - Double tap gesture for VideoIncomingCel
+                    if FlyDefaults.isTranlationEnabled {
+                        let  tapVideoCaption = UITapGestureRecognizer(target: self, action: #selector(self.translationLanguage(_:)))
+                        tapVideoCaption.numberOfTapsRequired = 2
+                        cell.captionView.isUserInteractionEnabled = true
+                        cell.captionView.addGestureRecognizer(tapVideoCaption)
+                    }
+                    cell.downloadButton.tag = (indexPath.section * 1000) + indexPath.row
+                    cell.downloadButton.addTarget(self, action: #selector(videoDownload(sender:)), for: .touchUpInside)
+                    cell.playButton.addTarget(self, action: #selector(playVideoGestureAction(sender:)), for: .touchUpInside)
+                    cell.imageContainer?.tag = indexPath.row
+                    cell.imageContainer?.isUserInteractionEnabled = (message?.messageType == .image) ? true : false
+                    cell.imageGeasture.addTarget(self, action: #selector(imageGestureAction(_:)))
+                    cell.progressButton.addTarget(self, action: #selector(cancelVideoDownload(sender:)), for: .touchUpInside)
+                    cell.quickForwardButton?.addTarget(self, action: #selector(quickForwardAction(sender:)), for: .touchUpInside)
+                    
+                    cell.forwardButton?.tag = (indexPath.section * 1000) + indexPath.row
+                    if let view = cell.forwardView, let image = cell.forwardImageView {
+                        image.tag = 10023
+                        view.tag = 10024
+                    }
+                    cell.forwardButton?.addTarget(self, action: #selector(forwardAction(sender:)), for: .touchUpInside)
+                    cell.delegate = self
+                    cell.refreshDelegate = self
+                    cell.selectionStyle = .none
+                    if !isStarredMessagePage {
+                        if getProfileDetails.profileChatType == .groupChat {
+                            if hideSenderNameToGroup(indexPath: indexPath) {
+                                cell.senderNameView.isHidden = true
+                                cell.bubbleImageTopConstraint.constant = 1
+                            } else {
+                                cell.senderNameView.isHidden = false
+                                cell.senderGroupNameLabel.textColor = ChatUtils.getColorForUser(userName: message?.senderUserName)
+                                cell.bubbleImageTopConstraint.constant = 3
+                            }
+                        }
+                    } else {
+                        cell.senderNameView.isHidden = true
+                    }
+                    cell.replyView?.addGestureRecognizer(textReplyTap)
+                    cell.backgroundColor = .clear
+                    cell.contentView.backgroundColor = .clear
+                    cell.contentView.accessibilityIdentifier = "\(indexPath.section)_\(indexPath.row)"
+                    configureGesture(view: cell.contentView)
+                    return cell
+                }
+                
+            case .document:
+                if(message?.isMessageSentByMe ==  true) {
+                    var cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.senderDocumenCell,
+                                                             for: indexPath) as! SenderDocumentsTableViewCell
+                    if !isStarredMessagePage && !(isStarredSearchEnabled ?? false) {
+                        cell.transform = CGAffineTransform(rotationAngle: -.pi)
+                    }
+                    cell.delegate = self
+                    cell.refreshDelegate = self
+                    cell.selectionStyle = .none
+                    cell.contentView.backgroundColor = .clear
+                    cell.sendMediaMessages = sendMediaMessages
+                    cell.selectedForwardMessage = selectedMessages
+                    cell.isStarredMessagePage = isStarredMessagePage
+                    cell.showHideStarredMessageView()
+                    let message = isStarredMessagePage ? isStarredSearchEnabled == true ? starredSearchMessages?[indexPath.row] : starredMessageList[indexPath.row] : chatMessages[indexPath.section][indexPath.row]
+                    if isStarredMessagePage {
+                        cell.setUserProfileInfo(message: message, isBlocked: false)
+                    }
+                    cell.forwardButton?.tag = (indexPath.section * 1000) + indexPath.row
+                    cell.uploadButton?.tag = (indexPath.section * 1000) + indexPath.row
+                    cell.viewDocumentButton?.tag = (indexPath.section * 1000) + indexPath.row
+                    cell = cell.getCellFor(message, at: indexPath, isShowForwardView: isShowForwardView,isDeletedMessageSelected: (isStarredMessageSelected ?? false) ? true : isDeleteSelected, fromChat: true, isMessageSearch: isStarredMessagePage == true && isStarredSearchEnabled == true ? true : messageSearchEnabled, searchText: isStarredSearchEnabled == true ? searchBar?.text ?? "" :   messageSearchBar?.text ?? "")!
+                    if let view = cell.forwardView, let image = cell.forwardImageView {
+                        image.tag = 10023
+                        view.tag = 10024
+                    }
+                    cell.forwardButton?.addTarget(self, action: #selector(forwardAction(sender:)), for: .touchUpInside)
+                    cell.uploadButton?.addTarget(self, action: #selector(uploadDownloadDocuments(sender: )), for: .touchUpInside)
+                    cell.fwdButton?.addTarget(self, action: #selector(quickForwardAction(sender:)), for: .touchUpInside)
+                    cell.viewDocumentButton?.addTarget(self, action: #selector(viewDocument(sender:)), for: .touchUpInside)
+                    cell.replyView?.addGestureRecognizer(textReplyTap)
+                    cell.contentView.accessibilityIdentifier = "\(indexPath.section)_\(indexPath.row)"
+                    cell.backgroundColor = .clear
+                    cell.contentView.backgroundColor = .clear
+                    configureGesture(view: cell.contentView)
+                    return cell
+                } else {
+                    var cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.receiverDocumentCell,
+                                                             for: indexPath) as! ReceiverDocumentsTableViewCell
+                    if !isStarredMessagePage && !(isStarredSearchEnabled ?? false) {
+                        cell.transform = CGAffineTransform(rotationAngle: -.pi)
+                    }
+                    cell.delegate = self
+                    cell.refreshDelegate = self
+                    cell.selectionStyle = .none
+                    cell.contentView.backgroundColor = .clear
+                    cell.sendMediaMessages = receivedMediaMessages
+                    cell.selectedForwardMessage = selectedMessages
+                    cell.isStarredMessagePage = isStarredMessagePage
+                    cell.showHideStarredMessageView()
+                    let message = isStarredMessagePage ? isStarredSearchEnabled == true ? starredSearchMessages?[indexPath.row] : starredMessageList[indexPath.row] : chatMessages[indexPath.section][indexPath.row]
+                    if isStarredMessagePage {
+                        cell.setUserProfileInfo(message: message, isBlocked: false)
+                    }
+                    cell = cell.getCellFor(message, at: indexPath, isShowForwardView: isShowForwardView,isDeletedOrStarredSelected: isStarredMessageSelected ? true : isDeleteSelected, fromChat: true, isMessageSearch: isStarredMessagePage == true && isStarredSearchEnabled == true ? true : messageSearchEnabled, searchText: isStarredSearchEnabled == true ? searchBar?.text ?? "" : messageSearchBar?.text ?? "")!
+                    cell.forwardButton?.tag = (indexPath.section * 1000) + indexPath.row
+                    cell.downloadButton?.tag = (indexPath.section * 1000) + indexPath.row
+                    
+                    cell.viewDocumentButton?.tag = (indexPath.section * 1000) + indexPath.row
+                    if let view = cell.forwardView, let image = cell.forwardImageView {
+                        image.tag = 10023
+                        view.tag = 10024
+                    }
+                    cell.viewDocumentButton?.tag = (indexPath.section * 1000) + indexPath.row
+                    cell.forwardButton?.addTarget(self, action: #selector(forwardAction(sender:)), for: .touchUpInside)
+                    cell.downloadButton?.addTarget(self, action: #selector(uploadDownloadDocuments(sender:)), for: .touchUpInside)
+                    cell.fwdButton?.addTarget(self, action: #selector(quickForwardAction(sender:)), for: .touchUpInside)
+                    cell.viewDocumentButton?.addTarget(self, action: #selector(viewDocument(sender:)), for: .touchUpInside)
+                    if !isStarredMessagePage {
+                        if getProfileDetails.profileChatType == .groupChat {
+                            if hideSenderNameToGroup(indexPath: indexPath) {
+                                cell.groupSenderNameView?.isHidden = true
+                            } else {
+                                cell.groupSenderNameView?.isHidden = false
+                            }
+                        }
+                    } else {
+                        cell.groupSenderNameView?.isHidden = true
+                    }
+                    cell.replyView?.addGestureRecognizer(textReplyTap)
+                    cell.contentView.accessibilityIdentifier = "\(indexPath.section)_\(indexPath.row)"
+                    configureGesture(view: cell.contentView)
+                    cell.backgroundColor = .clear
+                    cell.contentView.backgroundColor = .clear
+                    return cell
+                }
+                
+            case .notification:
+                if isStarredMessagePage {
+                    return UITableViewCell()
+                }
+                let cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.notificationCell, for: indexPath) as! NotificationCell
+                cell.transform = CGAffineTransform(rotationAngle: -.pi)
+                var message = chatMessages[indexPath.section][indexPath.row].messageTextContent
+                if chatMessages[indexPath.section][indexPath.row].messageId == getUnreadMessageId() {
+                    cell.notificationLabel.text = message
+                    cell.backgroundColor = Color.color_D6D6D6
+                    cell.notificationLabel.textColor = Color.color_565656
+                    cell.notificationLabel.backgroundColor = .clear
+                    cell.background.backgroundColor = .clear
+                } else {
+                    cell.notificationLabel.text = message
+                    cell.backgroundColor = .clear
+                    cell.notificationLabel.textColor = Color.chatDateHeaderText
+                    cell.background.backgroundColor = Color.chatDateHeaderBackground
+                }
+                cell.selectionStyle = .none
+                cell.contentView.backgroundColor = .clear
                 return cell
+            @unknown default:
+                break
             }
-            
-        case .notification:
-            if isStarredMessagePage {
-                return UITableViewCell()
-            }
-            let cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.notificationCell, for: indexPath) as! NotificationCell
-            cell.transform = CGAffineTransform(rotationAngle: -.pi)
-            var message = chatMessages[indexPath.section][indexPath.row].messageTextContent
-            if chatMessages[indexPath.section][indexPath.row].messageId == getUnreadMessageId() {
-                cell.notificationLabel.text = message
-                cell.backgroundColor = Color.color_D6D6D6
-                cell.notificationLabel.textColor = Color.color_565656
-                cell.notificationLabel.backgroundColor = .clear
-                cell.background.backgroundColor = .clear
-            } else {
-                cell.notificationLabel.text = message
-                cell.backgroundColor = .clear
-                cell.notificationLabel.textColor = Color.chatDateHeaderText
-                cell.background.backgroundColor = Color.chatDateHeaderBackground
-            }
-            cell.selectionStyle = .none
-            cell.contentView.backgroundColor = .clear
-            return cell
-        @unknown default:
-            break
+            return UITableViewCell()
         }
-        return UITableViewCell()
     }
     
 
@@ -4179,6 +4482,25 @@ extension ChatViewParentController : UITableViewDataSource ,UITableViewDelegate,
         if isStarredMessagePage {
             stopAudioPlayer()
             openChat(index: indexPath.row)
+        }
+        if tableView == mentionTableView {
+            if let profileDetail = searchGroupMembers[indexPath.row].profileDetail, let Jid = searchGroupMembers[indexPath.row].profileDetail?.jid {
+                if let userId = try? FlyUtils.getIdFromJid(jid: Jid) {
+                    let selected = FlyUtils.getGroupUserName(profile: profileDetail)
+//                    for range in mentionRanges {
+//                        messageTextView.text = messageTextView.text.replacing("", range: range.1)
+//                    }
+                    if let lastRange = mentionRanges.last {
+                        messageTextView.text = messageTextView.text.replacing("", range: NSRange(location: mentionRange.location, length: ((lastRange.1.location+lastRange.1.length) - mentionRange.location)))
+                    } else {
+                        messageTextView.text = messageTextView.text.replacing("", range: NSRange(location: mentionRange.location, length: 1))
+                    }
+                    messageTextView.insert(to: selected, with: mentionRange ,userId: userId)
+                }
+            }
+            mentionBaseView.isHidden = true
+            resetGroupMention()
+            getGroupMember()
         }
     }
 
@@ -4246,13 +4568,13 @@ extension ChatViewParentController {
     }
     
     @objc func replyMessage(indexPath: IndexPath,isMessageDeleted: Bool,isKeyBoardEnabled: Bool,isSwipe: Bool) {
-        if isStarredMessagePage {
+        if isStarredMessagePage || getProfileDetails.isBlocked || getProfileDetails.isBlockedByAdmin {
             return
         }
         if messageSearchEnabled {
             hideMessageSearchView()
         }
-        if isShowForwardView == false {
+        if !isShowForwardView {
             let messageStatus =  chatMessages[indexPath.section][indexPath.row].messageStatus
             if  (messageStatus == .delivered || messageStatus == .received || messageStatus == .seen || messageStatus == .acknowledged) {
                 if (longPressCount == 0 && !indexPath.isEmpty) {
@@ -4265,7 +4587,7 @@ extension ChatViewParentController {
                     message.isMessageDeleted = isMessageDeleted
                     replyMessageObj = message
                     replyJid = getProfileDetails.jid
-                    messageText = messageTextView?.text ?? ""
+//                    messageText = messageTextView?.text ?? ""
                     replyView.isHidden = false
                     replyCloseButtonTapped = false
                     replyMessageId = message.messageId
@@ -4323,9 +4645,9 @@ extension ChatViewParentController : UIImagePickerControllerDelegate, EditImageD
         }
         media.forEach { item in
             if item.mediaType == .video {
-                self.sendVideoMessage(mediaData: item) { chatMessage in }
+                self.sendVideoMessage(mediaData: item, mentionedUsersIds: item.mentionedUsers) { chatMessage in }
             } else if item.mediaType == .image{
-                self.sendImageMessage(mediaData: item) { chatMessage in }
+                self.sendImageMessage(mediaData: item, mentionedUsersIds: item.mentionedUsers) { chatMessage in }
             }
             
         }
@@ -4524,39 +4846,67 @@ extension ChatViewParentController : MessageEventsDelegate {
     func onMediaStatusUpdated(message: ChatMessage) {
             print("onMediaStatusUpdated \(message.messageType) \(message.messageId)")
             if let indexPath = isStarredMessagePage ? isStarredSearchEnabled == true ? IndexPath(row: starredSearchMessages?.firstIndex(where: {$0.messageId == message.messageId}) ?? 0, section: 0)  : IndexPath(row: getStarredMessageList().firstIndex(where: {$0.messageId == message.messageId}) ?? 0, section: 0) : chatMessages.indexPath(where: {$0.messageId == message.messageId}) {
-                
-                    if isStarredMessagePage {
-                        if isStarredSearchEnabled == true {
-                            starredSearchMessages?[indexPath.row] = message
-                        } else {
-                            var messagList = getStarredMessageList()
-                            messagList[indexPath.row] = message
-                        }
-                    } else {
-                        chatMessages[indexPath.section][indexPath.row] = message
-                    }
-                
-                if message.isMessageSentByMe && message.isCarbonMessage == true {
-                    if message.messageType == .audio {
+                let isCarbon = message.isMessageSentByMe && message.isCarbonMessage
+                switch message.messageType {
+                case .audio:
+                    if isCarbon {
                         updateForCarbonAudio(message: message, index: indexPath)
-                    }
-
-                    else if message.messageType == .video || message.messageType == .image {
-                        updateCarbonVideoAndImage(message: message, index: indexPath)
-                    } else if message.messageType == .document {
-                        updateCarbonDocument(message: message, index: indexPath)
-                    }
-                } else {
-                    if message.messageType == .audio {
+                    } else {
                         updateForAudioStatus(message: message, index: indexPath)
                     }
-
-                    else if message.messageType == .video  || message.messageType == .image {
+                    break
+                case .video, .image:
+                    if isCarbon {
+                        updateCarbonVideoAndImage(message: message, index: indexPath)
+                    } else {
                         updateVideoAndImageStatus(message: message, index: indexPath)
-                    } else if message.messageType == .document {
+                    }
+                    break
+                case .document:
+                    if isCarbon {
+                        updateCarbonDocument(message: message, index: indexPath)
+                    } else {
                         updateDocumentStatus(message: message, index: indexPath)
                     }
+                    break
+                @unknown default:
+                    break
                 }
+//                    if isStarredMessagePage {
+//                        if isStarredSearchEnabled == true {
+//                            starredSearchMessages?[indexPath.row] = message
+//                        } else {
+//                            var messagList = getStarredMessageList()
+//                            messagList[indexPath.row] = message
+//                        }
+//                    } else {
+//                        chatMessages[indexPath.section][indexPath.row] = message
+//                        if let index = getAllMessages.firstIndex(where: { $0.messageId == message.messageId }) {
+//                            getAllMessages[index] = message
+//                        }
+//                    }
+//
+//                if message.isMessageSentByMe && message.isCarbonMessage == true {
+//                    if message.messageType == .audio {
+//                        updateForCarbonAudio(message: message, index: indexPath)
+//                    }
+//
+//                    else if message.messageType == .video || message.messageType == .image {
+//                        updateCarbonVideoAndImage(message: message, index: indexPath)
+//                    } else if message.messageType == .document {
+//                        updateCarbonDocument(message: message, index: indexPath)
+//                    }
+//                } else {
+//                    if message.messageType == .audio {
+//                        updateForAudioStatus(message: message, index: indexPath)
+//                    }
+//
+//                    else if message.messageType == .video  || message.messageType == .image {
+//                        updateVideoAndImageStatus(message: message, index: indexPath)
+//                    } else if message.messageType == .document {
+//                        updateDocumentStatus(message: message, index: indexPath)
+//                    }
+//                }
                 if isStarredMessagePage {
                     if isStarredSearchEnabled == true {
                         starredSearchMessages?[indexPath.row] = message
@@ -4566,14 +4916,19 @@ extension ChatViewParentController : MessageEventsDelegate {
                     }
                 } else {
                     chatMessages[indexPath.section][indexPath.row] = message
+                    if let index = getAllMessages.firstIndex(where: { $0.messageId == message.messageId }) {
+                        getAllMessages[index] = message
+                    }
                 }
                 executeOnMainThread {
-                    self.chatTableView.reloadRows(at: [indexPath], with: .none)
+                    if self.chatMessages.count > indexPath.row {
+                        self.chatTableView.reloadRows(at: [indexPath], with: .none)
+                    }
                 }
             }
         }
     
-    func onMediaStatusFailed(error: String, messageId: String) {
+    func onMediaStatusFailed(error: String, messageId: String, errorCode: Int) {
         var starredIndexPath: IndexPath? = nil
         starredIndexPath = isStarredSearchEnabled == true ? IndexPath(row: starredSearchMessages?.firstIndex(where: {$0.messageId == messageId}) ?? 0, section: 0) : IndexPath(row: getStarredMessageList().firstIndex(where: {$0.messageId == messageId}) ?? 0, section: 0)
         if let indexPath = isStarredMessagePage ? starredIndexPath : chatMessages.indexPath(where: {$0.messageId == messageId}){
@@ -4581,15 +4936,54 @@ extension ChatViewParentController : MessageEventsDelegate {
             guard let message = isStarredMessagePage ? isStarredSearchEnabled == true ? starredSearchMessages?[indexPath.row] : getStarredMessageList()[indexPath.row] : chatMessages[indexPath.section][indexPath.row] else {
                 return
             }
-            switch message.messageType {
+            if message.isMessageSentByMe {
+                if isStarredMessagePage {
+                    if isStarredSearchEnabled ?? false {
+                        let uploadStatus = starredSearchMessages?[indexPath.row].mediaChatMessage?.mediaUploadStatus
+                        starredSearchMessages?[indexPath.row].mediaChatMessage?.mediaUploadStatus = uploadStatus == .not_available ? .not_available : .failed
+                    } else {
+                        let uploadStatus = getStarredMessageList()[indexPath.row].mediaChatMessage?.mediaUploadStatus
+                        getStarredMessageList()[indexPath.row].mediaChatMessage?.mediaUploadStatus = uploadStatus == .not_available ? .not_available : .failed
+                    }
+                } else {
+                    let uploadStatus = chatMessages[indexPath.section][indexPath.row].mediaChatMessage?.mediaUploadStatus
+                    chatMessages[indexPath.section][indexPath.row].mediaChatMessage?.mediaUploadStatus = uploadStatus == .not_available ? .not_available : .failed
+                    if let index = getAllMessages.firstIndex(where: { $0.messageId == message.messageId }) {
+                        let uploadStatus = getAllMessages[index].mediaChatMessage?.mediaUploadStatus
+                        getAllMessages[index].mediaChatMessage?.mediaUploadStatus = uploadStatus == .not_available ? .not_available : .failed
+                    }
+                }
+            } else {
+                if isStarredMessagePage {
+                    if isStarredSearchEnabled ?? false {
+                        starredSearchMessages?[indexPath.row].mediaChatMessage?.mediaDownloadStatus = .failed
+                    } else {
+                        getStarredMessageList()[indexPath.row].mediaChatMessage?.mediaDownloadStatus = .failed
+                    }
+                } else {
+                    chatMessages[indexPath.section][indexPath.row].mediaChatMessage?.mediaDownloadStatus = .failed
+                    if let index = getAllMessages.firstIndex(where: { $0.messageId == message.messageId }) {
+                        getAllMessages[index].mediaChatMessage?.mediaDownloadStatus = .failed
+                    }
+                }
+            }
+            
+            guard let updatedMessage = isStarredMessagePage ? isStarredSearchEnabled == true ? starredSearchMessages?[indexPath.row] : getStarredMessageList()[indexPath.row] : chatMessages[indexPath.section][indexPath.row] else {
+                return
+            }
+            
+            switch updatedMessage.messageType {
             case .video, .image:
-                onVideoAndImageUploadFailed(message: message, indexPath: indexPath)
+                onVideoAndImageUploadFailed(message: updatedMessage, indexPath: indexPath)
             case .audio:
-                onAudioUploadFailed(message: message, indexPath: indexPath)
+                onAudioUploadFailed(message: updatedMessage, indexPath: indexPath)
             case .document:
-                onDocumentUploadFailed(message: message, indexPath: indexPath)
+                onDocumentUploadFailed(message: updatedMessage, indexPath: indexPath)
             default:
                 break
+            }
+            if errorCode == 204 {
+                AppAlert.shared.showToast(message: ErrorMessage.fileNoLongerExists)
             }
             self.chatTableView.reloadData()
         }
@@ -4723,9 +5117,7 @@ extension ChatViewParentController : MessageEventsDelegate {
     func updateForAudioStatus(message: ChatMessage, index: IndexPath) {
         if message.isMessageSentByMe {
             if let cell = chatTableView.cellForRow(at: index) as? AudioSender {
-                cell.uploadCancel?.image = UIImage(named: ImageConstant.ic_audioUploadCancel)
-                cell.playIcon?.isHidden = false
-                cell.uploadCancel?.isHidden = true
+                cell.updateMediaStatus(message: message, indexPath: index, isPlaying: self .currenAudioIndexPath == index ? self.audioPlayer?.isPlaying ?? false : false)
                 cell.showHideForwardView(message: message, isShowForwardView: isShowForwardView, isDeleteMessageSelected: isDeleteSelected)
                 if  (message.mediaChatMessage?.mediaUploadStatus == .not_uploaded || message.mediaChatMessage?.mediaUploadStatus == .failed || message.mediaChatMessage?.mediaUploadStatus == .uploading || message.messageStatus == .notAcknowledged || isShowForwardView == true) {
                     cell.fwdViw?.isHidden = true
@@ -4852,9 +5244,7 @@ extension ChatViewParentController : MessageEventsDelegate {
     func updateDocumentStatus(message: ChatMessage, index: IndexPath) {
         if message.isMessageSentByMe {
             if let cell = chatTableView.cellForRow(at: index) as? SenderDocumentsTableViewCell {
-                cell.uploadCancelImage?.image = UIImage(named: ImageConstant.ic_download_cancel)
-                cell.uploadCancelImage?.isHidden = true
-                cell.nicoProgressBar?.isHidden = true
+                cell.updateMediaStatus(message: message, indexPath: index)
                 if  (message.mediaChatMessage?.mediaUploadStatus == .not_uploaded || message.mediaChatMessage?.mediaUploadStatus == .failed || message.mediaChatMessage?.mediaUploadStatus == .uploading || message.messageStatus == .notAcknowledged || message.messageStatus == .sent || isShowForwardView == true) {
                     cell.fwdButton?.isHidden = true
                     cell.forwardButton?.isHidden = true
@@ -5005,7 +5395,7 @@ extension Array where Element : Collection, Element.Index == Int {
 
 //MARK - Send Messages
 extension ChatViewParentController {
-    func sendTextMessage(message: String,jid: String?) {
+    func sendTextMessage(message: String,jid: String?, mentionedUsersIds: [String]) {
         var lastSection = 0
         if  chatMessages.count == 0 {
             lastSection = ( chatTableView?.numberOfSections ?? 0)
@@ -5019,7 +5409,7 @@ extension ChatViewParentController {
             getReplyId =  replyMessageId
             isReplyViewOpen = false
         }
-        FlyMessenger.sendTextMessage(toJid: getProfileDetails.jid, message: message,replyMessageId: getReplyId){ [weak self] isSuccess,error,textMessage in
+        FlyMessenger.sendTextMessage(toJid: getProfileDetails.jid, message: message,replyMessageId: getReplyId, mentionedUsersIds: mentionedUsersIds){ [weak self] isSuccess,error,textMessage in
             if isSuccess {
                 print("loss SendText.........")
                 if self?.chatMessages.count == 0 {
@@ -5167,6 +5557,14 @@ extension ChatViewParentController: LocationDelegate {
 }
 
 extension ChatViewParentController : ConnectionEventDelegate {
+    func onConnectionFailed(error: FlyError) {
+        
+    }
+    
+    func onReconnecting() {
+        
+    }
+    
     func onConnected() {
         self.getLastSeen()
         markMessagessAsRead()
@@ -5176,9 +5574,6 @@ extension ChatViewParentController : ConnectionEventDelegate {
         print("ChatViewParentController ConnectionEventDelegate onDisconnected")
     }
     
-    func onConnectionNotAuthorized() {
-        print("ChatViewParentController ConnectionEventDelegate onConnectionNotAuthorized")
-    }
 }
 
 extension ChatViewParentController : ProfileEventsDelegate {
@@ -5264,6 +5659,7 @@ extension ChatViewParentController : ProfileEventsDelegate {
     func userUpdatedTheirProfile(for jid: String, profileDetails: ProfileDetails) {
         print("userUpdatedTheirProfile \(jid)")
         if !isStarredMessagePage {
+            fetchGroupMembers()
             let profile = ["jid": profileDetails.jid, "name": profileDetails.name, "image": profileDetails.image, "status": profileDetails.status]
             NotificationCenter.default.post(name: Notification.Name(FlyConstants.contactSyncState), object: nil, userInfo: profile as [AnyHashable : Any])
             if jid ==  getProfileDetails.jid {
@@ -5280,7 +5676,7 @@ extension ChatViewParentController : ProfileEventsDelegate {
     func userBlockedMe(jid: String) {
         if !isStarredMessagePage {
             getLastSeen()
-            setProfile()
+            setProfile(jid: jid)
         } else {
             chatTableView.reloadData()
         }
@@ -5289,7 +5685,7 @@ extension ChatViewParentController : ProfileEventsDelegate {
     func userUnBlockedMe(jid: String) {
         if !isStarredMessagePage {
             getLastSeen()
-            setProfile()
+            setProfile(jid: jid)
         } else {
             chatTableView.reloadData()
         }
@@ -5318,13 +5714,23 @@ extension ChatViewParentController : ProfileEventsDelegate {
             }
             if getProfileDetails.profileChatType == .groupChat{
                 getInitialMessages()
+                fetchGroupMembers()
                 if let index = groupMembers.firstIndex(where: { participant in
                     participant.memberJid == jid
                 }){
                     groupMembers.remove(at: index)
                     setGroupMemberInHeader()
                 }
+                mentionTableView.reloadData()
             }
+        }
+    }
+    
+    func fetchGroupMembers() {
+        if getProfileDetails.profileChatType == .groupChat{
+            getParticipants()
+            getGroupMember()
+            checkMemberOfGroup()
         }
     }
 }
@@ -5442,13 +5848,13 @@ extension ChatViewParentController {
 //MARK: Video
 extension ChatViewParentController {
     
-    func sendVideoMessage (mediaData : MediaData, completionHandler :  @escaping (ChatMessage) -> Void) {
+    func sendVideoMessage (mediaData : MediaData, mentionedUsersIds: [String], completionHandler :  @escaping (ChatMessage) -> Void) {
         print("#loss sendVideoMessage \(chatMessages.count)")
         selectedIndexs.removeAll()
         let tempReplyMessageId = replyMessageId
         view.endEditing(true)
         resetUnreadMessages()
-        FlyMessenger.sendVideoMessage(toJid: self.getProfileDetails.jid ?? "", mediaData: mediaData, replyMessageId: tempReplyMessageId){ [weak self] isSuccess,error,message in
+        FlyMessenger.sendVideoMessage(toJid: self.getProfileDetails.jid ?? "", mediaData: mediaData, replyMessageId: tempReplyMessageId, mentionedUsersIds: mentionedUsersIds){ [weak self] isSuccess,error,message in
             if let chatMessage = message {
                 self?.setLastMessage(messageId: chatMessage.messageId)
                 chatMessage.mediaChatMessage?.mediaUploadStatus = isSuccess == true ? .uploading : .not_uploaded
@@ -5531,6 +5937,7 @@ extension ChatViewParentController {
                 }
             }
             FlyMessenger.downloadMedia(messageId: chatMessage?.messageId ?? "") { isSuccess, error, chatMessage in
+                
             }
         }
     }
@@ -5569,7 +5976,7 @@ extension ChatViewParentController {
                 FlyMessenger.downloadMedia(messageId: chatMessage?.messageId ?? "") { [weak self] isSuccess, error, message in                    print("videoDownload \(success) \(error)")
                     if message?.messageType == .image {
                         if let cell = self?.chatTableView.cellForRow(at: indexPath) as? ChatViewVideoIncomingCell {
-                            cell.getCellFor(message, at: indexPath, isShowForwardView: self?.isShowForwardView, isDeleteMessageSelected: self?.isDeleteSelected)
+                            cell.getCellFor(message, at: indexPath, isShowForwardView: self?.isShowForwardView, isDeleteMessageSelected: self?.isDeleteSelected, profileDetails: self?.getProfileDetails ?? ProfileDetails(jid: FlyDefaults.myJid))
                         }
                     }
                 }
@@ -5636,10 +6043,10 @@ extension ChatViewParentController {
             if let indexPath = self?.chatMessages.indexPath(where: {$0.messageId == message?.messageId}) {
                 if let cell = self?.chatTableView.cellForRow(at: indexPath) as? ChatViewVideoOutgoingCell {
                     message?.mediaChatMessage?.mediaUploadStatus = .not_uploaded
-                    cell.progressView.isHidden = true
-                    cell.retryLabel.isHidden = false
-                    cell.retryButton?.isHidden = false
-                    cell.uploadView.isHidden = false
+//                    cell.progressView.isHidden = true
+//                    cell.retryLabel.isHidden = false
+//                    cell.retryButton?.isHidden = false
+//                    cell.uploadView.isHidden = false
                 }
                 
             }
@@ -5849,7 +6256,6 @@ extension ChatViewParentController {
             if message.isMessageSentByMe {
                 print("updateVideoStatus message.isMessageSentByMe")
                 if let cell = self?.chatTableView.cellForRow(at: index) as? ChatViewVideoOutgoingCell {
-                    message.mediaChatMessage?.mediaUploadStatus = .uploaded
                     
                     if message.messageType == .image {
                         executeOnMainThread {
@@ -5863,10 +6269,11 @@ extension ChatViewParentController {
                     }
 //                    cell.progressLoader?.transition(to: .indeterminate)
 //                    cell.progressLoader.isHidden = true
-                    cell.progressView.isHidden = true
-                    cell.retryButton?.isHidden = true
-                    cell.uploadView.isHidden = true
-                    cell.playButton.isHidden = message.messageType == .video ? false : true
+                    if message.isCarbonMessage {
+                        cell.mediaStatusForCorbon(message: message)
+                    } else {
+                        cell.mediaStatus(message: message)
+                    }
                     
                     if (message.mediaChatMessage?.mediaUploadStatus == .not_uploaded || message.mediaChatMessage?.mediaUploadStatus == .failed || message.mediaChatMessage?.mediaUploadStatus == .uploading || message.messageStatus == .notAcknowledged
                         || self?.isShowForwardView == true) {
@@ -5902,11 +6309,7 @@ extension ChatViewParentController {
                             cell.imageContainer.image = ImageConverter().base64ToImage(message.mediaChatMessage?.mediaThumbImage ?? "")
                         }
                     }
-//                    cell.progressLoader?.transition(to: .indeterminate)
-//                    cell.progressLoader?.isHidden = true
-                    cell.progressView.isHidden = true
-                    cell.downloadView.isHidden = true
-                    cell.downloadButton.isHidden = true
+                    cell.mediaStatus(message: message)
                     cell.showHideForwardView(message: message, isDeletedSelected: self?.isStarredMessageSelected == true ? true : self?.isDeleteSelected, isShowForwardView: self?.isShowForwardView)
                     cell.playButton.isHidden = message.messageType == .video ? false : true
                     if  message.mediaChatMessage?.mediaDownloadStatus == .not_downloaded || message.mediaChatMessage?.mediaDownloadStatus == .failed  || message.mediaChatMessage?.mediaDownloadStatus == .downloading || message.messageStatus == .notAcknowledged || self?.isShowForwardView == true || self?.isStarredMessagePage == true {
@@ -5927,34 +6330,38 @@ extension ChatViewParentController {
 
             if message.isMessageSentByMe {
                 if let cell = self?.chatTableView.cellForRow(at: indexPath) as? ChatViewVideoOutgoingCell {
-                    message.mediaChatMessage?.mediaUploadStatus = .failed
                     if let thumImage = message.mediaChatMessage?.mediaThumbImage {
                         ChatUtils.setThumbnail(imageContainer: cell.imageContainer, base64String: thumImage)
                     }
                     if message.isCarbonMessage {
-                        cell.progressLoader.isHidden = true
-                        cell.progressView.isHidden = true
-                        cell.playButton.isHidden = true
-                        
-                        cell.downloadLabel?.isHidden = false
-                        cell.downloadButton?.isHidden = false
-                        cell.downloadView?.isHidden = false
-                        cell.downloadImage?.isHidden = false
+                        cell.mediaStatusForCorbon(message: message)
                     } else {
-                        cell.progressLoader.isHidden = true
-                        cell.progressView.isHidden = true
-                        cell.playButton.isHidden = true
-                        
-                        cell.retryLabel.isHidden = false
-                        cell.retryButton?.isHidden = false
-                        cell.uploadView.isHidden = false
-                        cell.uploadImage.isHidden = false
+                        cell.mediaStatus(message: message)
                     }
+//                    if message.isCarbonMessage {
+//                        cell.progressLoader.isHidden = true
+//                        cell.progressView.isHidden = true
+//                        cell.playButton.isHidden = true
+//
+//                        cell.downloadLabel?.isHidden = false
+//                        cell.downloadButton?.isHidden = false
+//                        cell.downloadView?.isHidden = false
+//                        cell.downloadImage?.isHidden = false
+//                    } else {
+//                        cell.progressLoader.isHidden = true
+//                        cell.progressView.isHidden = true
+//                        cell.playButton.isHidden = true
+//
+//                        cell.retryLabel.isHidden = false
+//                        cell.retryButton?.isHidden = false
+//                        cell.uploadView.isHidden = false
+//                        cell.uploadImage.isHidden = false
+//                    }
                     self?.updateMediaMessageStatus(statusImage: cell.msgStatus, messageStatus: message.messageStatus)
+                    self?.chatTableView.reloadRows(at: [indexPath], with: .none)
                 }
             }else {
                 if let cell = self?.chatTableView.cellForRow(at: indexPath) as? ChatViewVideoIncomingCell {
-                    self?.chatMessages[indexPath.section][indexPath.row].mediaChatMessage?.mediaDownloadStatus = .failed
                     if let thumImage = message.mediaChatMessage?.mediaThumbImage {
                         ChatUtils.setThumbnail(imageContainer: cell.imageContainer, base64String: thumImage)
                     }
@@ -6055,7 +6462,6 @@ extension ChatViewParentController {
             } else {
                 print("updateDocumentProgress else \(progressPercentage)")
                 if let cell = self?.chatTableView.cellForRow(at: index) as? ReceiverDocumentsTableViewCell {
-                    self?.chatMessages[index.section][index.row].mediaChatMessage?.mediaDownloadStatus = .downloading
                     if message.mediaChatMessage?.mediaDownloadStatus == .downloaded || message.mediaChatMessage?.mediaProgressStatus == 100 {
                         cell.downloadButton?.isHidden = true
                         cell.downloadView?.isHidden = true
@@ -6080,20 +6486,15 @@ extension ChatViewParentController {
     func onAudioUploadFailed(message : ChatMessage, indexPath : IndexPath) {
         isShowAudioLoadingIcon = false
         executeOnMainThread { [weak self] in
-            self?.chatMessages[indexPath.section][indexPath.row].mediaChatMessage?.mediaUploadStatus = .failed
-            var tempMessage = message
-            tempMessage.mediaChatMessage?.mediaUploadStatus = .failed
-            if tempMessage.isMessageSentByMe {
+            if message.isMessageSentByMe {
                 if let cell = self?.chatTableView.cellForRow(at: indexPath) as? AudioSender {
-                    if tempMessage.isCarbonMessage {
-//                        self?.chatMessages[indexPath.section][indexPath.row].mediaChatMessage?.mediaDownloadStatus = .failed
-//                        cell.getCellFor(message, at: indexPath, isPlaying: false, audioClosureCallBack: { sliderValue in
-//                        },isShowForwardView: self?.isShowForwardView, isDeleteMessageSelected: self?.isDeleteSelected)
+                    if message.isCarbonMessage {
                         cell.stopDownload()
                     } else {
                         cell.stopUpload()
                     }
-                    self?.updateMediaMessageStatus(statusImage: cell.status ?? UIImageView(), messageStatus: tempMessage.messageStatus)
+                    cell.updateMediaStatus(message: message, indexPath: indexPath, isPlaying: self?.currenAudioIndexPath == indexPath ? self?.audioPlayer?.isPlaying ?? false : false)
+                    self?.updateMediaMessageStatus(statusImage: cell.status ?? UIImageView(), messageStatus: message.messageStatus)
                 }
             } else {
                 if let cell = self?.chatTableView.cellForRow(at: indexPath) as? AudioReceiver {
@@ -6105,18 +6506,16 @@ extension ChatViewParentController {
     
     func onDocumentUploadFailed(message: ChatMessage, indexPath: IndexPath) {
         executeOnMainThread { [weak self] in
-            self?.chatMessages[indexPath.section][indexPath.row].mediaChatMessage?.mediaUploadStatus = .failed
-            var tempMessage = message
-            tempMessage.mediaChatMessage?.mediaUploadStatus = .failed
-            if tempMessage.isMessageSentByMe {
+            if message.isMessageSentByMe {
                 if let cell = self?.chatTableView.cellForRow(at: indexPath) as? SenderDocumentsTableViewCell {
-                    if tempMessage.isCarbonMessage {
+                    if message.isCarbonMessage {
                         cell.stopDownload()
                     } else {
                         cell.stopUpload()
                     }
+                    cell.updateMediaStatus(message: message, indexPath: indexPath)
                     self?.updateMediaMessageStatus(statusImage: cell.messageStatusImage ?? UIImageView(),
-                                                   messageStatus: tempMessage.messageStatus)
+                                                   messageStatus: message.messageStatus)
                 }
             } else {
                 if let cell = self?.chatTableView.cellForRow(at: indexPath) as? ReceiverDocumentsTableViewCell {
@@ -6309,7 +6708,14 @@ extension ChatViewParentController {
                 print("ChatViewParentController Group isExist \(result.doesExist) \(result.message)")
                 chatTextViewXib?.cannotSendMessageView?.isHidden = result.doesExist ? true : false
                 disableForBlocking(disable: result.doesExist ? false : true)
-                GroupManager.shared.getGroupMemebersFromLocal(groupJid: getProfileDetails.jid)
+                groupMembers = GroupManager.shared.getGroupMemebersFromLocal(groupJid: getProfileDetails.jid).participantDetailArray.sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() })
+                if mentionSearch.isEmpty {
+                    searchGroupMembers = mentionArrayFilter().sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() })
+                } else {
+                    searchGroupMembers = mentionArrayFilter().filter{ $0.displayName.lowercased().contains(mentionSearch.lowercased())}.sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() })
+                }
+                mentionTableView.reloadData()
+
             }
         }
     }
@@ -6323,6 +6729,12 @@ extension ChatViewParentController {
         groupMembers = [GroupParticipantDetail]()
         groupMembers =  GroupManager.shared.getGroupMemebersFromLocal(groupJid: getProfileDetails.jid).participantDetailArray.filter({$0.memberJid != FlyDefaults.myJid})
         print("getGrouMember \(groupMembers.count)")
+        if mentionSearch.isEmpty {
+            searchGroupMembers = mentionArrayFilter().sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() })
+        } else {
+            searchGroupMembers = mentionArrayFilter().filter{ $0.displayName.lowercased().contains(mentionSearch.lowercased())}.sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() })
+        }
+        mentionTableView.reloadData()
         setGroupMemberInHeader()
     }
     
@@ -6336,11 +6748,14 @@ extension ChatViewParentController {
             let members = self?.groupMembers ?? [GroupParticipantDetail]()
             for (index, member) in members.enumerated() {
                 let profileDetail = member.profileDetail
-                let participantName = getUserName(jid : profileDetail?.jid ?? "" ,name: profileDetail?.name ?? "", nickName: profileDetail?.nickName ?? "", contactType: profileDetail?.contactType ?? .live)
-                if index != (members.count - 1) {
-                    memberString = memberString + (participantName) + ", "
-                } else {
-                    memberString = memberString + (participantName) + " "
+                let myProfile = self?.contactManager.getUserProfileDetails(for: FlyDefaults.myJid)
+                if myProfile?.jid != profileDetail?.jid {
+                    let participantName = getUserName(jid : profileDetail?.jid ?? "" ,name: profileDetail?.name ?? "", nickName: profileDetail?.nickName ?? "", contactType: profileDetail?.contactType ?? .live)
+                    if index != (members.count - 1) {
+                        memberString = memberString + (participantName) + ", "
+                    } else {
+                        memberString = memberString + (participantName) + " "
+                    }
                 }
             }
             self?.groupMemberLable.type = .continuous
@@ -6423,6 +6838,11 @@ extension ChatViewParentController : RefreshBubbleImageViewDelegate {
                     return
                 }
                 selectedMessages?.append(selectedForwardMessage)
+                if let cell = chatTableView.cellForRow(at: indexPath), let forwardImageView = cell.viewWithTag(10023) as? UIImageView, let forwardView = cell.viewWithTag(10024) {
+                    forwardImageView.image = UIImage(named: "forwardSelected")
+                    forwardImageView.isHidden = false
+                    forwardView.makeCircleView(borderColor: Color.forwardCircleBorderColor.cgColor, borderWidth: 0.0)
+                }
             }
         case false:
             selectedMessages?.enumerated().forEach { (index,item) in
@@ -6431,8 +6851,15 @@ extension ChatViewParentController : RefreshBubbleImageViewDelegate {
                     return
                 }
             }
+            if let cell = chatTableView.cellForRow(at: indexPath), let forwardImageView = cell.viewWithTag(10023) as? UIImageView, let forwardView = cell.viewWithTag(10024) {
+                forwardImageView.isHidden = true
+                forwardView.makeCircleView(borderColor: Color.forwardCircleBorderColor.cgColor, borderWidth: 1.5)
+            }
         }
-        chatTableView.reloadRows(at: [indexPath], with: .none)
+        executeOnMainThread { [self] in
+            chatTableView.beginUpdates()
+            chatTableView.endUpdates()
+        }
         let isStar = checkforStar(selectedMessages: selectedMessages ?? [])
         forwardButton?.setTitle(isStarredMessageSelected ? !isStar ? unStarTitle : isDeleteSelected ? deleteTitle : title : title, for: .normal)
         forwardButton?.isHidden = selectedMessages?.count ?? 0 > 0 ? false : true
@@ -6866,6 +7293,15 @@ extension ChatViewParentController {
                                     }
                                 }
                             }
+                        } else if message?.mediaChatMessage?.mediaUploadStatus == .not_available {
+                            FlyMessenger.downloadMedia(messageId: message?.messageId ?? "") { isSuccess, error, chatMessage in
+                                executeOnMainThread { [weak self] in
+                                    if let cell = self?.chatTableView.cellForRow(at: indexPath) as? AudioSender {
+                                        cell.getCellFor(message, at: indexPath, isPlaying: self?.currenAudioIndexPath == indexPath ? self?.audioPlayer?.isPlaying ?? false : false, audioClosureCallBack: { (_) in
+                                        }, isShowForwardView: self?.isShowForwardView, isDeleteMessageSelected: self?.isDeleteSelected)
+                                    }
+                                }
+                            }
                         } else {
                             if let _ = self?.chatTableView.cellForRow(at: indexPath) as? AudioSender {
                                 self?.chatTableView.reloadRows(at: [indexPath], with: .none)
@@ -7067,11 +7503,11 @@ extension ChatViewParentController: UIDocumentInteractionControllerDelegate {
                     }
                 } else if message?.mediaChatMessage?.mediaUploadStatus == .not_available {
                     FlyMessenger.downloadMedia(messageId: message?.messageId ?? "") { isSuccess, error, chatMessage in
-                        executeOnMainThread {
-                            if let cell = self.chatTableView.cellForRow(at: indexPath) as? SenderDocumentsTableViewCell {
-                                cell.getCellFor(chatMessage, at: indexPath, isShowForwardView: self.isShowForwardView,isDeletedMessageSelected: self.isDeleteSelected)
-                            }
-                        }
+//                        executeOnMainThread {
+//                            if let cell = self.chatTableView.cellForRow(at: indexPath) as? SenderDocumentsTableViewCell {
+//                                cell.getCellFor(chatMessage, at: indexPath, isShowForwardView: self.isShowForwardView,isDeletedMessageSelected: self.isDeleteSelected)
+//                            }
+//                        }
                     }
                 }
             }
@@ -7118,7 +7554,7 @@ extension ChatViewParentController: UIDocumentInteractionControllerDelegate {
                         }
                         FlyMessenger.downloadMedia(messageId: message?.messageId ?? "") { isSuccess, error, chatMessage in
                             executeOnMainThread {
-                                cell.getCellFor(message, at: indexPath, isShowForwardView: self?.isShowForwardView,isDeletedOrStarredSelected: self?.isDeleteSelected)
+                               // cell.getCellFor(chatMessage, at: indexPath, isShowForwardView: self?.isShowForwardView,isDeletedOrStarredSelected: self?.isDeleteSelected)
                             }
                         }
                     } else if message?.mediaChatMessage?.mediaDownloadStatus == .downloaded {
@@ -7318,6 +7754,10 @@ extension ChatViewParentController {
 extension ChatViewParentController : AdminBlockDelegate {
     func didBlockOrUnblockContact(userJid: String, isBlocked: Bool) {
         checkUserForBlocking(jid: userJid, isBlocked: isBlocked)
+        if getProfileDetails.profileChatType == .groupChat {
+            checkMemberOfGroup()
+            getGroupMember()
+        }
     }
     
     func didBlockOrUnblockSelf(userJid: String, isBlocked: Bool) {
@@ -7337,7 +7777,8 @@ extension ChatViewParentController {
         
         if availableFeatures.isBlockEnabled {
             //showConfirmationAlert
-            let alertViewController = UIAlertController.init(title: nil , message: (getBlocked() ) ? "Unblock \(getProfileDetails.nickName )?" : "Block \(self.getProfileDetails.nickName)?", preferredStyle: .alert)
+            let username = getUserName(jid : getProfileDetails.jid ,name: getProfileDetails.name, nickName: getProfileDetails.nickName, contactType: getProfileDetails.contactType)
+            let alertViewController = UIAlertController.init(title: nil , message: (getBlocked() ) ? "Unblock \(username)?" : "Block \(username)?", preferredStyle: .alert)
             
             let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { [weak self] (action) in
                 self?.dismiss(animated: true,completion: nil)
@@ -7555,7 +7996,7 @@ extension ChatViewParentController {
     
     func showUserIsBlocked() {
             chatTextViewXib?.blockedMessageLabel.attributedText = {
-                let attributedString = NSMutableAttributedString(string: "You have blocked \(getProfileDetails.nickName).",
+                let attributedString = NSMutableAttributedString(string: "You have blocked \(getUserName(jid : getProfileDetails.jid ,name: getProfileDetails.name, nickName: getProfileDetails.nickName, contactType: getProfileDetails.contactType)).",
                                                                  attributes: [NSAttributedString.Key.foregroundColor: Color.primaryTextColor2,
                                                                               NSAttributedString.Key.font: UIFont.systemFont(ofSize: 15)])
                 
@@ -7581,7 +8022,10 @@ extension ChatViewParentController {
                     executeOnMainThread { [weak self] in
                         self?.checkUserBlocked()
                         self?.setProfile()
-                        AppAlert.shared.showToast(message: "\(self?.getProfileDetails.nickName ?? "") has been Blocked")
+                        if let getProfileDetails = self?.getProfileDetails {
+                            let username = getUserName(jid : getProfileDetails.jid ,name: getProfileDetails.name, nickName: getProfileDetails.nickName, contactType: getProfileDetails.contactType)
+                            AppAlert.shared.showToast(message: "\(username) has been Blocked")
+                        }
                     }
                 }else {
                     let message = AppUtils.shared.getErrorMessage(description: error?.description ?? "")
@@ -7602,7 +8046,10 @@ extension ChatViewParentController {
                     executeOnMainThread { [weak self] in
                         self?.checkUserBlocked()
                         self?.setProfile()
-                        AppAlert.shared.showToast(message: "\(self?.getProfileDetails.nickName ?? "") has been Unblocked")
+                        if let getProfileDetails = self?.getProfileDetails {
+                            let username = getUserName(jid : getProfileDetails.jid ,name: getProfileDetails.name, nickName: getProfileDetails.nickName, contactType: getProfileDetails.contactType)
+                            AppAlert.shared.showToast(message: "\(username) has been Unblocked")
+                        }
                     }
                 } else {
                     let message = AppUtils.shared.getErrorMessage(description: error?.description ?? "")
@@ -7616,7 +8063,9 @@ extension ChatViewParentController {
     }
     
     func didTapReportInMessage(chatMessge : ChatMessage) {
-        reportFromMessage(chatMessage: chatMessge)
+        if let profileDetails = self.getProfileDetails {
+            self.reportFromMessage(chatMessage: chatMessge, profileDetail: profileDetails)
+        }
     }
 }
 
@@ -7730,6 +8179,8 @@ extension ChatViewParentController {
     
     
     @objc private func didTapAudioButton(sender : UIButton) {
+        resetGroupMention()
+        mentionBaseView.isHidden = true
         let didCallCome = didCallCome
         checkUserBusyStatusEnabled(self) { [weak self] status in
             if status {
@@ -8589,6 +9040,15 @@ extension ChatViewParentController: UISearchBarDelegate {
         }
     }
     
+    func scrollToTableViewBottom() {
+        if !isStarredMessagePage && !self.chatMessages.isEmpty {
+            DispatchQueue.main.async {
+                let indexPath = IndexPath(row: 0, section: 0)
+                self.chatTableView.scrollToRow(at: indexPath, at: .bottom, animated: true)
+            }
+        }
+    }
+
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         if isStarredMessagePage {
             refreshChatMessages()
@@ -8858,5 +9318,108 @@ extension ChatViewParentController {
             return chatMessages[indexPath.section][indexPath.row]
         }
         return nil
+    }
+    
+    @objc func handleTap(_ sender: UITapGestureRecognizer? = nil) {
+        view.endEditing(true)
+    }
+}
+
+extension ChatViewParentController {
+    func mentionshouldChangeTextIn(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) {
+        if text == " " && (text.count == 1) && isMention {
+            mentionRanges.append((text, NSRange(location: range.location, length: text.utf16.count)))
+            mentionSearch = mentionRanges.compactMap({$0.0}).joined(separator: "")
+            searchGroupMembers = mentionSearch.isEmpty ? mentionArrayFilter().sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() }) : mentionArraySearchFilter().sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() })
+            self.viewDidLayoutSubviews()
+            mentionTableView.reloadData()
+        } else {
+            if text.trim().utf16.isEmpty {
+                if isMention, text != "@" {
+                    mentionRanges = mentionRanges.filter({ $0.1 != range})
+                    mentionSearch = mentionRanges.compactMap({$0.0}).joined(separator: "")
+                    let textviewString: String = "\(textView.text.utf16)"
+                    if mentionSearch.isEmpty, textviewString.substringFromNSRange(range) == "@" {
+                        resetGroupMention()
+                        mentionBaseView.isHidden = true
+                        self.viewDidLayoutSubviews()
+                    } else {
+                        searchGroupMembers = mentionSearch.isEmpty ? mentionArrayFilter().sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() }) : mentionArraySearchFilter().sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() })
+                        updateGroupmention()
+                    }
+                } else {
+                    searchGroupMembers.removeAll()
+                    self.viewDidLayoutSubviews()
+                    mentionTableView.reloadData()
+                }
+            } else {
+                if text == "@" && !isMention {
+                    if range.location == 0 {
+                        mentionRange = range
+                        setGroupmention(range: range)
+                        mentionTableView.reloadData()
+                        self.viewDidLayoutSubviews()
+                    } else if textView.text.substringFromNSRange(NSRange(location: range.location-1, length: 1)) == " " {
+                        mentionRange = range
+                        setGroupmention(range: range)
+                        mentionTableView.reloadData()
+                        self.viewDidLayoutSubviews()
+                    }
+                } else if isMention && text != "@" {
+                    mentionRanges.append((text, NSRange(location: range.location, length: text.utf16.count)))
+                    mentionSearch = mentionRanges.compactMap({$0.0}).joined(separator: "")
+                    searchGroupMembers = mentionArraySearchFilter().sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() })
+                    updateGroupmention()
+                } else if text == "@" && isMention {
+                    if textView.text.substringFromNSRange(NSRange(location: range.location-1, length: 1)) == " " {
+                        mentionRange = range
+                        setGroupmention(range: range)
+                        mentionTableView.reloadData()
+                        self.viewDidLayoutSubviews()
+                    } else {
+                        searchGroupMembers.removeAll()
+                        self.viewDidLayoutSubviews()
+                        resetGroupMention()
+                    }
+                }
+            }
+        }
+        messageTextView.shouldChangeTextIn(textView, shouldChangeTextIn: range, replacementText: text)
+    }
+    
+    func updateGroupmention() {
+        mentionBaseView.isHidden = false
+        if searchGroupMembers.isEmpty {
+            self.viewDidLayoutSubviews()
+        } else {
+            mentionTableView.reloadData()
+            self.viewDidLayoutSubviews()
+        }
+    }
+    
+    func setGroupmention(range: NSRange) {
+        resetGroupMention()
+        searchGroupMembers = mentionArrayFilter().sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() })
+        mentionTableView.reloadData()
+        isMention = true
+        mentionRange = range
+        self.view.bringSubviewToFront(mentionBaseView)
+        self.viewDidLayoutSubviews()
+        mentionBaseView.isHidden = false
+    }
+    
+    func resetGroupMention() {
+        mentionSearch = ""
+        mentionRange = nil
+        mentionRanges.removeAll()
+        isMention = false
+    }
+    
+    func mentionArrayFilter() -> [GroupParticipantDetail] {
+        groupMembers.filter({ $0.memberJid != FlyDefaults.myJid && $0.profileDetail?.isBlockedByAdmin == false && $0.profileDetail?.contactType != .deleted })
+    }
+    
+    func mentionArraySearchFilter() -> [GroupParticipantDetail] {
+        groupMembers.filter({ $0.displayName.lowercased().contains(mentionSearch.lowercased()) && $0.memberJid != FlyDefaults.myJid && $0.profileDetail?.isBlockedByAdmin == false && $0.profileDetail?.contactType != .deleted })
     }
 }

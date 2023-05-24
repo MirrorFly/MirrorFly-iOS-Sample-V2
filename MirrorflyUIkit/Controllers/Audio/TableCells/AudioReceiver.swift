@@ -192,20 +192,24 @@ class AudioReceiver: BaseTableViewCell, AVAudioPlayerDelegate {
             senderNameContainer?.isHidden = true
         }
         
-    if  (message?.mediaChatMessage?.mediaDownloadStatus == .not_downloaded || message?.mediaChatMessage?.mediaDownloadStatus == .failed || message?.mediaChatMessage?.mediaDownloadStatus == .downloading || message?.messageStatus == .notAcknowledged || isShowForwardView == true || isStarredMessagePage == true) {
-            fwdViw?.isHidden = true
-            fwdBtn?.isHidden = true
-            isAllowSwipe = true
-        } else {
+        if message?.mediaChatMessage?.mediaDownloadStatus == .downloaded && !(isShowForwardView ?? false) {
             fwdViw?.isHidden = false
             fwdBtn?.isHidden = false
+            isAllowSwipe = true
+        } else {
+            fwdViw?.isHidden = true
+            fwdBtn?.isHidden = true
             isAllowSwipe = true
         }
         
         if message?.mediaChatMessage?.audioType == AudioType.recording {
             audioReceiverImage?.image = UIImage(named: ImageConstant.ic_audio_recorded)
+            audioReceiverImage?.backgroundColor = .clear
         } else {
-            audioReceiverImage?.image = UIImage(named: ImageConstant.ic_music)
+            audioReceiverImage?.contentMode = .center
+            audioReceiverImage?.image = UIImage(named: ImageConstant.ic_sender_audio)
+            audioReceiverImage?.backgroundColor = Color.color_97A5C7
+            audioReceiverImage?.layer.cornerRadius = (audioReceiverImage?.bounds.width ?? 0)/2
         }
         
         // Reply view elements and its data

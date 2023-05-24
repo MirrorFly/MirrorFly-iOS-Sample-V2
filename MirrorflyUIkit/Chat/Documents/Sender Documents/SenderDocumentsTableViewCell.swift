@@ -296,6 +296,61 @@ class SenderDocumentsTableViewCell: BaseTableViewCell {
         }
         
         /// Carbon Messages Handler
+        updateMediaStatus(message: message, indexPath: indexPath)
+        
+        let status = message?.messageStatus
+        if status == .acknowledged || status == .received || status == .delivered || status == .seen {
+            newProgressBar.removeFromSuperview()
+        }
+        
+        ChatUtils.setSenderBubbleBackground(imageView: bubbleImageView)
+        
+        switch message?.messageStatus {
+        case .notAcknowledged:
+            messageStatusImage?.image = UIImage(named: ImageConstant.ic_hour)
+            messageStatusImage?.accessibilityLabel = notAcknowledged.localized
+        case .sent:
+            messageStatusImage?.image = UIImage(named: ImageConstant.ic_hour)
+            messageStatusImage?.accessibilityLabel = sent.localized
+        case .acknowledged:
+            messageStatusImage?.image = UIImage(named: ImageConstant.ic_sent)
+            messageStatusImage?.accessibilityLabel = acknowledged.localized
+        case .delivered:
+            messageStatusImage?.image = UIImage(named: ImageConstant.ic_delivered)
+            messageStatusImage?.accessibilityLabel = delivered.localized
+        case .seen:
+            messageStatusImage?.image = UIImage(named: ImageConstant.ic_seen)
+            messageStatusImage?.accessibilityLabel = seen.localized
+        case .received:
+            messageStatusImage?.image = UIImage(named: ImageConstant.ic_delivered)
+            messageStatusImage?.accessibilityLabel = delivered.localized
+        default:
+            messageStatusImage?.image = UIImage(named: ImageConstant.ic_hour)
+            messageStatusImage?.accessibilityLabel = notAcknowledged.localized
+        }
+        
+        guard let timeStamp =  message?.messageSentTime else {
+            return self
+        }
+        
+        if let fileSize = message?.mediaChatMessage?.mediaFileSize{
+            documentSizeLabel?.text = "\(fileSize.byteSize)"
+        } else {
+            documentSizeLabel?.text = ""
+        }
+        if (isStarredMessagePage == true || isMessageSearch == true) {
+            ChatUtils.highlight(uilabel: documentNameLabel ?? UILabel(), message: message?.mediaChatMessage?.mediaFileName ?? "", searchText: searchText, isMessageSearch: isMessageSearch, isSystemBlue: isStarredMessagePage == true && isMessageSearch == true ? true : false)
+        } else {
+            documentNameLabel?.text = message?.mediaChatMessage?.mediaFileName
+        }
+        sentTimeLabel?.text = DateFormatterUtility.shared.currentMillisecondsToLocalTime(milliSec: timeStamp)
+        self.layoutIfNeeded()
+        self.layoutSubviews()
+        
+        return self
+    }
+    
+    func updateMediaStatus(message: ChatMessage?, indexPath: IndexPath?) {
         
         if message?.isCarbonMessage == false {
             if message?.mediaChatMessage?.mediaUploadStatus == .not_uploaded {
@@ -421,57 +476,6 @@ class SenderDocumentsTableViewCell: BaseTableViewCell {
                 newProgressBar.removeFromSuperview()
             }
         }
-        
-        let status = message?.messageStatus
-        if status == .acknowledged || status == .received || status == .delivered || status == .seen {
-            newProgressBar.removeFromSuperview()
-        }
-        
-        ChatUtils.setSenderBubbleBackground(imageView: bubbleImageView)
-        
-        switch message?.messageStatus {
-        case .notAcknowledged:
-            messageStatusImage?.image = UIImage(named: ImageConstant.ic_hour)
-            messageStatusImage?.accessibilityLabel = notAcknowledged.localized
-        case .sent:
-            messageStatusImage?.image = UIImage(named: ImageConstant.ic_hour)
-            messageStatusImage?.accessibilityLabel = sent.localized
-        case .acknowledged:
-            messageStatusImage?.image = UIImage(named: ImageConstant.ic_sent)
-            messageStatusImage?.accessibilityLabel = acknowledged.localized
-        case .delivered:
-            messageStatusImage?.image = UIImage(named: ImageConstant.ic_delivered)
-            messageStatusImage?.accessibilityLabel = delivered.localized
-        case .seen:
-            messageStatusImage?.image = UIImage(named: ImageConstant.ic_seen)
-            messageStatusImage?.accessibilityLabel = seen.localized
-        case .received:
-            messageStatusImage?.image = UIImage(named: ImageConstant.ic_delivered)
-            messageStatusImage?.accessibilityLabel = delivered.localized
-        default:
-            messageStatusImage?.image = UIImage(named: ImageConstant.ic_hour)
-            messageStatusImage?.accessibilityLabel = notAcknowledged.localized
-        }
-        
-        guard let timeStamp =  message?.messageSentTime else {
-            return self
-        }
-        
-        if let fileSize = message?.mediaChatMessage?.mediaFileSize{
-            documentSizeLabel?.text = "\(fileSize.byteSize)"
-        } else {
-            documentSizeLabel?.text = ""
-        }
-        if (isStarredMessagePage == true || isMessageSearch == true) {
-            ChatUtils.highlight(uilabel: documentNameLabel ?? UILabel(), message: message?.mediaChatMessage?.mediaFileName ?? "", searchText: searchText, isMessageSearch: isMessageSearch, isSystemBlue: isStarredMessagePage == true && isMessageSearch == true ? true : false)
-        } else {
-            documentNameLabel?.text = message?.mediaChatMessage?.mediaFileName
-        }
-        sentTimeLabel?.text = DateFormatterUtility.shared.currentMillisecondsToLocalTime(milliSec: timeStamp)
-        self.layoutIfNeeded()
-        self.layoutSubviews()
-        
-        return self
     }
     
     func showHideForwardView(message: ChatMessage?, isShowForwardView: Bool?,isDeletedMessageSelected: Bool?) {

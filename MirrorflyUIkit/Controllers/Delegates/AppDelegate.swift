@@ -20,20 +20,76 @@ import FirebaseRemoteConfig
 import AVFoundation
 import MirrorFlySDK
 
-let BASE_URL = "https://api-preprod-sandbox.mirrorfly.com/api/v1/"
-let LICENSE_KEY = "lu3Om85JYSghcsB6vgVoSgTlSQArL5"
-let XMPP_DOMAIN = "xmpp-preprod-sandbox.mirrorfly.com"
-let XMPP_PORT = 5222
-let SOCKETIO_SERVER_HOST = "https://signal-preprod-sandbox.mirrorfly.com"
-let JANUS_URL = "wss://janus.mirrorfly.com"
-let CONTAINER_ID = "group.com.mirrorfly.qa"
-let ENABLE_CONTACT_SYNC = false
-let IS_LIVE = false
-let WEB_LOGIN_URL = "https://webchat-preprod-sandbox.mirrorfly.com/"
-let IS_MOBILE_NUMBER_LOGIN = false
-let APP_NAME = "UiKitQa"
-let ICLOUD_CONTAINER_ID = "iCloud.com.mirrorfly.qa"
-
+//#if QA
+//    let BASE_URL = "https://api-qa19.mirrorfly.com/api/v1/"
+//    let LICENSE_KEY = "HNNQTJnERZF80L0lxmqC0EINq5su7X"
+//    let XMPP_DOMAIN = "fly-qa19.mirrorfly.com"
+//    let XMPP_PORT = 5226
+//    let SOCKETIO_SERVER_HOST = "https://signal-qa19.mirrorfly.com/"
+//    let JANUS_URL = "wss://janus.mirrorfly.com/"
+//    let CONTAINER_ID = "group.com.mirrorfly.qa"
+//    let ENABLE_CONTACT_SYNC = false
+//    let IS_LIVE = false
+//    let WEB_LOGIN_URL = "https://webreact-qa19.mirrorfly.com/"
+//    let IS_MOBILE_NUMBER_LOGIN = false
+//    let APP_NAME = "MirrorFlyQA"
+//    let ICLOUD_CONTAINER_ID = "iCloud.com.mirrorfly.qa"
+//#elseif DEV
+//    let BASE_URL = "https://api-dev19.mirrorfly.com/api/v1/"
+//    let LICENSE_KEY = "M2tdon7syA0MRH7ar1gR069fcCAgue"
+//    let XMPP_DOMAIN = "fly-dev19.mirrorfly.com"
+//    let XMPP_PORT = 5232
+//    let SOCKETIO_SERVER_HOST = "https://signal-dev19.mirrorfly.com/"
+//    let JANUS_URL = "wss://janus.mirrorfly.com"
+//    let CONTAINER_ID = "group.com.mirrorfly.qa"
+//    let ENABLE_CONTACT_SYNC = true
+//    let IS_LIVE = true
+//    let WEB_LOGIN_URL = "https://webreact-dev19.mirrorfly.com/"
+//    let IS_MOBILE_NUMBER_LOGIN = true
+//    let APP_NAME = "UiKit"
+//#elseif LIVE
+//    let BASE_URL = "https://api-beta.mirrorfly.com/api/v1/"
+//    let LICENSE_KEY = "lu3Om85JYSghcsB6vgVoSgTlSQArL5"
+//    let XMPP_DOMAIN = "xmpp-beta.mirrorfly.com"
+//    let XMPP_PORT = 5222
+//    let SOCKETIO_SERVER_HOST = "https://signal-beta.mirrorfly.com/"
+//    let JANUS_URL = "wss://janus.mirrorfly.com"
+//    let CONTAINER_ID = "group.com.mirror.fly"
+//    let ENABLE_CONTACT_SYNC = true
+//    let IS_LIVE = true
+//    let WEB_LOGIN_URL = "https://web.mirrorfly.com/"
+//    let IS_MOBILE_NUMBER_LOGIN = true
+//    let APP_NAME = "UiKit"
+//    let ICLOUD_CONTAINER_ID = "iCloud.com.mirror.fly"
+////#elseif UIKITQA
+    let BASE_URL = "https://api-uikit-qa.contus.us/api/v1/"
+    let LICENSE_KEY = "ckIjaccWBoMNvxdbql8LJ2dmKqT5bp"
+    let XMPP_DOMAIN = "xmpp-uikit-qa.contus.us"
+    let XMPP_PORT = 5249
+    let SOCKETIO_SERVER_HOST = "https://signal-uikit-qa.contus.us/"
+    let JANUS_URL = "wss://janus.mirrorfly.com"
+    let CONTAINER_ID = "group.com.mirrorfly.qa"
+    let ENABLE_CONTACT_SYNC = false
+    let IS_LIVE = false
+    let WEB_LOGIN_URL = "https://webchat-uikit-qa.contus.us/"
+    let IS_MOBILE_NUMBER_LOGIN = false
+    let APP_NAME = "UiKitQa"
+    let ICLOUD_CONTAINER_ID = "iCloud.com.mirrorfly.qa"
+//#else
+//    let BASE_URL = "https://api-uikit-dev.contus.us/api/v1/"
+//    let LICENSE_KEY = "2sdgNtr3sFBSM3bYRa7RKDPEiB38Xo"
+//    let XMPP_DOMAIN = "xmpp-uikit-dev.contus.us"
+//    let XMPP_PORT = 5248
+//    let SOCKETIO_SERVER_HOST = "https://signal-uikit-dev.contus.us/"
+//    let JANUS_URL = "wss://janus.mirrorfly.com"
+//    let CONTAINER_ID = "group.com.mirrorfly.qa"
+//    let ENABLE_CONTACT_SYNC = false
+//    let IS_LIVE = false
+//    let WEB_LOGIN_URL = "https://webchat-uikit-dev.contus.us/"
+//    let IS_MOBILE_NUMBER_LOGIN = false
+//    let APP_NAME = "UiKitDev"
+//    let ICLOUD_CONTAINER_ID = "iCloud.com.mirrorfly.qa"
+//#endif
 
 let isMigrationDone = "isMigrationDone"
 
@@ -92,7 +148,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
         GMSServices.provideAPIKey(googleApiKey)
         IQKeyboardManager.shared.shouldResignOnTouchOutside = true
         IQKeyboardManager.shared.disabledDistanceHandlingClasses.append(ChatViewParentController.self)
+        IQKeyboardManager.shared.disabledTouchResignedClasses.append(ChatViewParentController.self)
+        IQKeyboardManager.shared.disabledTouchResignedClasses.append(ImageEditController.self)
+        IQKeyboardManager.shared.disabledDistanceHandlingClasses.append(ImageEditController.self)
         NetworkReachability.shared.startMonitoring()
+        KeyboardStateListener.shared.start()
 
         if FlyDefaults.appLockenable || FlyDefaults.appFingerprintenable {
             FlyDefaults.showAppLock = true
@@ -189,7 +249,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
         }
 
         if Utility.getBoolFromPreference(key: isLoggedIn) && (FlyDefaults.isLoggedIn) {
-            ChatManager.connect()
+//            ChatManager.connect()
         }
         let current = UIApplication.shared.keyWindow?.getTopViewController()
         if (current is AuthenticationPINViewController || current is FingerPrintPINViewController) {
@@ -208,10 +268,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
         FlyDefaults.appBackgroundTime = Date()
         postNotificationdidEnterBackground = NotificationCenter.default
         postNotificationdidEnterBackground?.post(name: Notification.Name(didEnterBackground), object: nil)
-
-        if (FlyDefaults.isLoggedIn) {
-            ChatManager.disconnect()
-        }
     }
     
     func applicationWillTerminate(_ application: UIApplication) {
@@ -641,6 +697,10 @@ extension AppDelegate : LocalNotificationDelegate {
             if isCarbon {
                 message = "Duplicate message"
             }
+            
+            if !chatMessage.mentionedUsersIds.isEmpty {
+                message = ChatUtils.getMentionTextContent(message: message, isMessageSentByMe: chatMessage.isMessageSentByMe, mentionedUsers: chatMessage.mentionedUsersIds).string
+            }
 
             executeOnMainThread {
                 self.showCustomNotificationView(title: title , message: message, chatMessage: chatMessage)
@@ -758,6 +818,14 @@ extension AppDelegate {
         }
         
         @objc func handleTap(_ sender: UITapGestureRecognizer?) {
+            UIApplication.shared.keyWindow?.rootViewController?.dismiss(animated: true)
+            let current = UIApplication.shared.keyWindow?.getTopViewController()
+            if (current is ProfileViewController) {
+                return
+            }
+            if (current is CallViewController) {
+                (current as! CallViewController).showCallOverlay()
+            }
             
             //Redirect to chat page
             if let message = (sender?.view?.accessibilityElements as? [ChatMessage])?.first {

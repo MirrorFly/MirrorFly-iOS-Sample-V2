@@ -113,7 +113,7 @@ class ProgressBar: UIView {
                 self.outerView.layoutIfNeeded()
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: {
-                if !self.progressOn {
+                if !self.progressOn && self.current == .left {
                     self.current = .visible
                 }
             })
@@ -125,7 +125,7 @@ class ProgressBar: UIView {
                 self.outerView.layoutIfNeeded()
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: {
-                if !self.progressOn {
+                if !self.progressOn && self.current == .right {
                     self.current = .hidden
                 }
             })
@@ -137,7 +137,7 @@ class ProgressBar: UIView {
                 self.outerView.layoutIfNeeded()
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: {
-                if !self.progressOn {
+                if !self.progressOn && self.current == .hidden {
                     self.current = .left
                 }
             })
@@ -155,7 +155,7 @@ class ProgressBar: UIView {
                 self.outerView.layoutIfNeeded()
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: {
-                if !self.progressOn {
+                if !self.progressOn && self.current == .visible {
                     self.current = .right
                 }
             })

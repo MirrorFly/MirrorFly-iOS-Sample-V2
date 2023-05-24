@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21678"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -276,6 +276,9 @@
                                             </view>
                                             <imageView clipsSubviews="YES" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="4BR-hS-VDR">
                                                 <rect key="frame" x="0.0" y="0.0" width="218" height="216"/>
+                                                <accessibility key="accessibilityConfiguration" identifier="receivedLocationMessage">
+                                                    <bool key="isElement" value="YES"/>
+                                                </accessibility>
                                                 <constraints>
                                                     <constraint firstAttribute="width" relation="lessThanOrEqual" secondItem="4BR-hS-VDR" secondAttribute="height" multiplier="4:3" id="vTQ-C0-BkH"/>
                                                 </constraints>
@@ -283,7 +286,6 @@
                                                     <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
                                                         <integer key="value" value="2"/>
                                                     </userDefinedRuntimeAttribute>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="accessibilityIndentifier" value="receivedLocationMessage"/>
                                                 </userDefinedRuntimeAttributes>
                                             </imageView>
                                             <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="locationTimerBackground" translatesAutoresizingMaskIntoConstraints="NO" id="7FP-fR-K8L">
@@ -469,7 +471,7 @@
     <resources>
         <image name="Receiver" width="10" height="10"/>
         <image name="foward" width="24" height="24"/>
-        <image name="ic_favouriteStarGray" width="16" height="16"/>
+        <image name="ic_favouriteStarGray" width="100" height="100"/>
         <image name="ic_sent" width="8" height="8"/>
         <image name="locationTimerBackground" width="114" height="53"/>
         <image name="test-image.jpg" width="269" height="187"/>

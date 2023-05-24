@@ -10,10 +10,8 @@ import Foundation
 import AVFoundation
 import MirrorFlySDK
 import SDWebImage
-import Toaster
 import MobileCoreServices
 import Photos
-import Toaster
 import Tatsi
 import QCropper
 import Contacts

@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import Toaster
 import MirrorFlySDK
 
 class ContactUsController: UIViewController, UITextFieldDelegate, UITextViewDelegate {
@@ -54,16 +53,16 @@ class ContactUsController: UIViewController, UITextFieldDelegate, UITextViewDele
         let title = titleTextField.text ?? ""
         let description = descriptionTextView.text ?? ""
         if title.isEmpty || description.isEmpty{
-            Toast.init(text: "Enter valid title and description").show()
+            AppAlert.shared.showToast(message: "Enter valid title and description")
             return
         }
         ContactManager.shared.sendContactUsInfo(title: title, description: description) { isSuccess, error, data in
             if isSuccess{
-                Toast.init(text: "Thank you for contacting us!").show()
+                AppAlert.shared.showToast(message: "Thank you for contacting us!")
                 self.navigationController?.popViewController(animated: true)
             }else{
                 let message = data["message"] as? String ?? ""
-                Toast.init(text: message).show()
+                AppAlert.shared.showToast(message: message)
             }
         }
     }

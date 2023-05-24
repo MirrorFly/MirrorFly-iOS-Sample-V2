@@ -140,6 +140,22 @@ public class iCloudmanager {
         }
     }
     
+    public func deleteiCloudBackupFile() {
+        guard let containerURL = FileManager.default.url(forUbiquityContainerIdentifier: ICLOUD_CONTAINER_ID) else {
+            return
+        }
+        let backupCloudFileURL = containerURL.appendingPathComponent("Documents").appendingPathComponent("Backup_\(FlyDefaults.myXmppUsername).txt")
+        if FileManager.default.fileExists(atPath: backupCloudFileURL.path) {
+            do {
+                try FileManager.default.removeItem(at: backupCloudFileURL)
+            } catch {
+                
+            }
+        } else {
+            
+        }
+    }
+    
     // Download backup file from iCloud to local document directory
 
     public func downloadBackupFile() {
@@ -158,6 +174,7 @@ public class iCloudmanager {
                         self?.checkLastBackupDetails()
                     } else {
                         try FileManager.default.startDownloadingUbiquitousItem(at: containerURL)
+                        self?.checkLastBackupDetails()
                     }
                 } catch let error as NSError {
                     print("Failed to download iCloud file : \(error)")

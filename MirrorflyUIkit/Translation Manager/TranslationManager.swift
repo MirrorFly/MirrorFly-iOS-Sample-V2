@@ -36,7 +36,7 @@ class TranslationManager: UIViewController {
         let baseUrl = Constants.BaseUrl
         let parameters = [
             "target": "en",
-            "key": "AIzaSyCdwzAZR6tx8KB-2dMn0KzSI1V0LpsYdH0"]
+            "key": ""]
         
         AF.request(baseUrl,
                    method: .get,

@@ -603,24 +603,24 @@
                                                         <rect key="frame" x="25" y="5" width="279.33333333333331" height="104.33333333333333"/>
                                                         <subviews>
                                                             <view contentMode="scaleToFill" horizontalHuggingPriority="2" verticalHuggingPriority="2" horizontalCompressionResistancePriority="2" verticalCompressionResistancePriority="2" translatesAutoresizingMaskIntoConstraints="NO" id="sgU-XY-PA5">
-                                                                <rect key="frame" x="139.66666666666669" y="0.0" width="0.0" height="27.333333333333332"/>
+                                                                <rect key="frame" x="139.66666666666669" y="0.0" width="0.0" height="27"/>
                                                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                                             </view>
                                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="252" text="Delete" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rLm-MM-EBc">
-                                                                <rect key="frame" x="115.33333333333333" y="31.333333333333371" width="48.666666666666671" height="20"/>
+                                                                <rect key="frame" x="114.66666666666669" y="31" width="50" height="20.333333333333329"/>
                                                                 <fontDescription key="fontDescription" name="SFUIDisplay-Semibold" family="SF UI Display" pointSize="17"/>
                                                                 <nil key="textColor"/>
                                                                 <nil key="highlightedColor"/>
                                                             </label>
                                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Do you want to delete selected chats?" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="8CJ-FA-uPr" userLabel="hgood kd">
-                                                                <rect key="frame" x="11" y="55.333333333333364" width="257.33333333333331" height="17.666666666666664"/>
+                                                                <rect key="frame" x="16.666666666666686" y="55.333333333333371" width="246" height="18"/>
                                                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                                 <fontDescription key="fontDescription" name="SFUIDisplay-Regular" family="SF UI Display" pointSize="15"/>
                                                                 <nil key="textColor"/>
                                                                 <nil key="highlightedColor"/>
                                                             </label>
                                                             <view contentMode="scaleToFill" horizontalHuggingPriority="2" verticalHuggingPriority="2" horizontalCompressionResistancePriority="2" verticalCompressionResistancePriority="2" translatesAutoresizingMaskIntoConstraints="NO" id="ffj-7v-xsz">
-                                                                <rect key="frame" x="139.66666666666669" y="77" width="0.0" height="27.333333333333329"/>
+                                                                <rect key="frame" x="139.66666666666669" y="77.333333333333371" width="0.0" height="27"/>
                                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                             </view>
                                                         </subviews>
@@ -1688,17 +1688,17 @@
                                                                                 <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="chatSeen" translatesAutoresizingMaskIntoConstraints="NO" id="If4-OJ-9WW">
                                                                                     <rect key="frame" x="0.0" y="5" width="7" height="3"/>
                                                                                     <constraints>
-                                                                                        <constraint firstAttribute="width" constant="7" id="ZI1-7Z-8Ds"/>
+                                                                                        <constraint firstAttribute="width" constant="10" id="ZI1-7Z-8Ds"/>
                                                                                     </constraints>
                                                                                 </imageView>
                                                                             </subviews>
                                                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                                             <constraints>
                                                                                 <constraint firstItem="If4-OJ-9WW" firstAttribute="leading" secondItem="AhB-qe-pkx" secondAttribute="leading" id="1Sj-r3-HUX"/>
-                                                                                <constraint firstAttribute="bottom" secondItem="If4-OJ-9WW" secondAttribute="bottom" constant="5" id="Gwf-b3-VgW"/>
+                                                                                <constraint firstAttribute="bottom" secondItem="If4-OJ-9WW" secondAttribute="bottom" constant="2" id="Gwf-b3-VgW"/>
                                                                                 <constraint firstItem="If4-OJ-9WW" firstAttribute="centerY" secondItem="AhB-qe-pkx" secondAttribute="centerY" id="V5j-oD-byZ"/>
-                                                                                <constraint firstItem="If4-OJ-9WW" firstAttribute="top" secondItem="AhB-qe-pkx" secondAttribute="top" constant="5" id="fTz-Hs-9Mu"/>
-                                                                                <constraint firstAttribute="trailing" secondItem="If4-OJ-9WW" secondAttribute="trailing" constant="5" id="ri2-et-wyz"/>
+                                                                                <constraint firstItem="If4-OJ-9WW" firstAttribute="top" secondItem="AhB-qe-pkx" secondAttribute="top" constant="2" id="fTz-Hs-9Mu"/>
+                                                                                <constraint firstAttribute="trailing" secondItem="If4-OJ-9WW" secondAttribute="trailing" constant="2" id="ri2-et-wyz"/>
                                                                             </constraints>
                                                                         </view>
                                                                         <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ZCC-nl-Dxf">
@@ -2900,7 +2900,7 @@
                                             <constraint firstItem="oO7-3w-iiG" firstAttribute="top" secondItem="VJo-OT-WKM" secondAttribute="top" id="yiV-Jv-dtm"/>
                                         </constraints>
                                     </view>
-                                    <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" adjustsFontForContentSizeCategory="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8AT-YA-SqF">
+                                    <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" adjustsFontForContentSizeCategory="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8AT-YA-SqF" customClass="MentionTextView" customModule="UiKitQa">
                                         <rect key="frame" x="60" y="0.0" width="294" height="45"/>
                                         <color key="backgroundColor" name="captionBackgorund"/>
                                         <accessibility key="accessibilityConfiguration" hint="Add a caption..."/>
@@ -2915,6 +2915,7 @@
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
                                     <constraint firstItem="Esm-6R-nal" firstAttribute="leading" secondItem="8AT-YA-SqF" secondAttribute="trailing" id="NuG-KD-Amh"/>
+                                    <constraint firstAttribute="bottom" secondItem="Esm-6R-nal" secondAttribute="bottom" id="QK2-gs-DRf"/>
                                     <constraint firstItem="8AT-YA-SqF" firstAttribute="leading" secondItem="VJo-OT-WKM" secondAttribute="trailing" id="QWq-AA-UGo"/>
                                     <constraint firstItem="VJo-OT-WKM" firstAttribute="centerY" secondItem="8AT-YA-SqF" secondAttribute="centerY" id="RiD-2I-avg"/>
                                     <constraint firstAttribute="bottom" secondItem="8AT-YA-SqF" secondAttribute="bottom" id="RwQ-jk-pZY"/>
@@ -2922,6 +2923,7 @@
                                     <constraint firstItem="VJo-OT-WKM" firstAttribute="top" secondItem="qu6-sn-Gms" secondAttribute="top" id="SzH-bX-Oyz"/>
                                     <constraint firstItem="Esm-6R-nal" firstAttribute="top" secondItem="qu6-sn-Gms" secondAttribute="top" id="YCZ-eG-DDl"/>
                                     <constraint firstAttribute="trailing" secondItem="Esm-6R-nal" secondAttribute="trailing" id="YsX-hH-vZP"/>
+                                    <constraint firstAttribute="bottom" secondItem="VJo-OT-WKM" secondAttribute="bottom" id="ekD-de-loG"/>
                                     <constraint firstItem="Esm-6R-nal" firstAttribute="centerY" secondItem="VJo-OT-WKM" secondAttribute="centerY" id="tg0-tc-kpd"/>
                                 </constraints>
                             </view>
@@ -3057,6 +3059,7 @@
                         <outlet property="addmore" destination="VJo-OT-WKM" id="QKF-XE-jHq"/>
                         <outlet property="botomCollection" destination="aVf-M3-aSf" id="d2h-RJ-iUc"/>
                         <outlet property="bottomCollectionCons" destination="7ye-gB-arb" id="nSG-lH-gSQ"/>
+                        <outlet property="captionBaseBottom" destination="RwQ-jk-pZY" id="lxh-NO-8S4"/>
                         <outlet property="captionBottomCons" destination="ICM-Ee-qUG" id="R5d-my-3RM"/>
                         <outlet property="captionHeightCons" destination="fFi-65-4a9" id="OyO-RA-cvl"/>
                         <outlet property="captionTxt" destination="8AT-YA-SqF" id="weh-tx-mcs"/>
@@ -5152,6 +5155,13 @@
                                     <outlet property="delegate" destination="LGe-HW-FjE" id="2PB-dS-db9"/>
                                 </connections>
                             </tableView>
+                            <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="No Blocked Contacts found" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ALX-mX-mU6">
+                                <rect key="frame" x="110.00000000000001" y="358.33333333333331" width="194.33333333333337" height="19.333333333333314"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <fontDescription key="fontDescription" name="SFUIDisplay-Medium" family="SF UI Display" pointSize="16"/>
+                                <color key="textColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="MkS-4z-zKO"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -5160,10 +5170,12 @@
                             <constraint firstItem="aHM-go-wZ4" firstAttribute="top" secondItem="yWh-Yv-phy" secondAttribute="top" id="5pJ-4k-hRh"/>
                             <constraint firstItem="aHM-go-wZ4" firstAttribute="leading" secondItem="MkS-4z-zKO" secondAttribute="leading" id="8j7-A7-UVX"/>
                             <constraint firstItem="Ufd-p2-9U2" firstAttribute="top" secondItem="aHM-go-wZ4" secondAttribute="bottom" id="EZz-rq-xxO"/>
+                            <constraint firstItem="ALX-mX-mU6" firstAttribute="centerY" secondItem="yWh-Yv-phy" secondAttribute="centerY" id="FcO-c8-ocb"/>
                             <constraint firstItem="Ufd-p2-9U2" firstAttribute="trailing" secondItem="MkS-4z-zKO" secondAttribute="trailing" id="NEZ-pw-6hR"/>
                             <constraint firstItem="aHM-go-wZ4" firstAttribute="trailing" secondItem="MkS-4z-zKO" secondAttribute="trailing" id="Qm4-qi-ghm"/>
                             <constraint firstItem="rDQ-JE-Cb8" firstAttribute="top" secondItem="MkS-4z-zKO" secondAttribute="top" id="dVA-eb-8fG"/>
                             <constraint firstItem="MkS-4z-zKO" firstAttribute="bottom" secondItem="Ufd-p2-9U2" secondAttribute="bottom" id="ewE-sd-9Wy"/>
+                            <constraint firstItem="ALX-mX-mU6" firstAttribute="centerX" secondItem="yWh-Yv-phy" secondAttribute="centerX" id="spe-o1-E7U"/>
                         </constraints>
                     </view>
                     <tabBarItem key="tabBarItem" title="Settings" image="setting" selectedImage="setting" id="Keu-nD-G4l">
@@ -5171,6 +5183,7 @@
                     </tabBarItem>
                     <connections>
                         <outlet property="blockedContactsTableView" destination="Ufd-p2-9U2" id="Alb-sb-Qyd"/>
+                        <outlet property="noContactsLabel" destination="ALX-mX-mU6" id="2gU-GI-gk5"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="2WZ-l9-F7l" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>

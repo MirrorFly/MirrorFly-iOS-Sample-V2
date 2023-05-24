@@ -13,12 +13,48 @@ import Social
 import CoreServices
 import Contacts
 
-let BASE_URL =  "https://api-preprod-sandbox.mirrorfly.com/api/v1/"
-let CONTAINER_ID = "group.com.mirrorfly.qa"
-let LICENSE_KEY = "lu3Om85JYSghcsB6vgVoSgTlSQArL5"
-let IS_LIVE = false
-let ENABLE_CONTACT_SYNC = false
-let APP_NAME = "UiKit"
+//#if QA
+//    let BASE_URL = "https://api-qa19.mirrorfly.com/api/v1/"
+//    let LICENSE_KEY = "HNNQTJnERZF80L0lxmqC0EINq5su7X"
+//    let CONTAINER_ID = "group.com.mirrorfly.qa"
+//    let IS_LIVE = false
+//    let APP_NAME = "MirrorFlyQa"
+//#elseif DEV
+//    let BASE_URL = "https://api-dev19.mirrorfly.com/api/v1/"
+//    let LICENSE_KEY = "M2tdon7syA0MRH7ar1gR069fcCAgue"
+//    let CONTAINER_ID = "group.com.mirrorfly.qa"
+//    let IS_LIVE = true
+//    let APP_NAME = "MirrorFlyDev"
+//#elseif LIVE
+//    let BASE_URL =  "https://api-beta.mirrorfly.com/api/v1/"
+//    let CONTAINER_ID = "group.com.mirror.flyZ
+//    let APP_NAME = "MirrorFly"
+//#elseif UIKITQA
+    let BASE_URL =  "https://api-uikit-qa.contus.us/api/v1/"
+    let CONTAINER_ID = "group.com.mirrorfly.qa"
+    let LICENSE_KEY = "ckIjaccWBoMNvxdbql8LJ2dmKqT5bp"
+    let IS_LIVE = false
+    let APP_NAME = "UiKitQa"
+    let ENABLE_CONTACT_SYNC = false
+////#else
+//    let BASE_URL =  "https://api-uikit-qa.contus.us/api/v1/"
+//    let CONTAINER_ID = "group.com.mirrorfly.qa"
+//    let LICENSE_KEY = "ckIjaccWBoMNvxdbql8LJ2dmKqT5bp"
+//    let IS_LIVE = false
+//    let APP_NAME = "UiKitQa"
+//#else
+//    let BASE_URL = "https://api-uikit-dev.contus.us/api/v1/"
+//    let CONTAINER_ID = "group.com.mirrorfly.qa"
+//    let LICENSE_KEY = "2sdgNtr3sFBSM3bYRa7RKDPEiB38Xo"
+//    let IS_LIVE = false
+//    let APP_NAME = "UiKitDev"
+//#endif
+//let BASE_URL = "https://api-beta.mirrorfly.com/api/v1/"
+//let LICENSE_KEY = "lu3Om85JYSghcsB6vgVoSgTlSQArL5"
+//let CONTAINER_ID = "group.com.mirror.fly"
+//let XMPP_PORT = 5222
+//let IS_LIVE = true
+//let APP_NAME = "UiKit"
 
 protocol ShareKitDelegate {
     func removeData()

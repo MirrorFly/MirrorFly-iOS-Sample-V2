@@ -669,7 +669,7 @@ extension ContactViewController: UISearchBarDelegate {
             let searchString = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
             if !searchString.isEmpty || self.searchTerm != searchString{
                 resetParams()
-                searchSubject.onNext(searchString.lowercased())
+                searchSubject.onNext("\(searchString.lowercased().utf16)")
             }
         }
     }

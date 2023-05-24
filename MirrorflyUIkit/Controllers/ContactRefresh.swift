@@ -10,6 +10,15 @@ import MirrorFlySDK
 
 class ContactRefresh: NSObject, ConnectionEventDelegate {
     
+    func onConnectionFailed(error: FlyError) {
+        
+    }
+    
+    func onReconnecting() {
+        
+    }
+    
+    
     public func setDelegate() {
         ChatManager.shared.connectionDelegate = self
         }
@@ -26,7 +35,4 @@ class ContactRefresh: NSObject, ConnectionEventDelegate {
         
     }
     
-    func onConnectionNotAuthorized() {
-        
-    }
 }

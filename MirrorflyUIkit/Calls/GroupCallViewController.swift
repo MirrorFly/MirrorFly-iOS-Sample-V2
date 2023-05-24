@@ -20,7 +20,11 @@ class GroupCallViewController: UIViewController {
     @IBOutlet weak var groupCallNameLbl: UILabel!
     @IBOutlet weak var callDurationLbl: UILabel!
     @IBOutlet weak var callTimeLbl: UILabel!
-    @IBOutlet weak var groupDetailTblView: UITableView!
+    @IBOutlet weak var groupDetailTblView: UITableView! {
+        didSet {
+            groupDetailTblView.separatorStyle = .none
+        }
+    }
     @IBOutlet weak var callStateImg: UIImageView!
     @IBOutlet weak var callInitiateBtn: UIButton!
     @IBOutlet weak var imgOne: UIImageView!
@@ -270,7 +274,7 @@ extension GroupCallViewController : UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 90
+        return 70
     }
     
 }

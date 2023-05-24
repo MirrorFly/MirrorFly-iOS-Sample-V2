@@ -156,7 +156,7 @@ class ChatViewVideoIncomingCell: BaseTableViewCell {
     }
     
 
-    func getCellFor(_ message: ChatMessage?, at indexPath: IndexPath?,isShowForwardView: Bool?,isDeleteMessageSelected: Bool?, fromChat: Bool = false, isMessageSearch: Bool = false, searchText: String = "") -> ChatViewVideoIncomingCell? {
+    func getCellFor(_ message: ChatMessage?, at indexPath: IndexPath?,isShowForwardView: Bool?,isDeleteMessageSelected: Bool?, fromChat: Bool = false, isMessageSearch: Bool = false, searchText: String = "", profileDetails: ProfileDetails) -> ChatViewVideoIncomingCell? {
 
         currentIndexPath = nil
         currentIndexPath = indexPath
@@ -184,16 +184,16 @@ class ChatViewVideoIncomingCell: BaseTableViewCell {
             forwardView?.makeCircleView(borderColor: Color.forwardCircleBorderColor.cgColor, borderWidth: 1.5)
         }
         
-        if  (message?.mediaChatMessage?.mediaDownloadStatus == .not_downloaded || message?.mediaChatMessage?.mediaDownloadStatus == .failed ||  message?.mediaChatMessage?.mediaDownloadStatus == .downloading || message?.messageStatus == .notAcknowledged || isShowForwardView == true || isStarredMessagePage == true) {
-            quickForwardView?.isHidden = true
-            quickForwardButton?.isHidden = true
-            isAllowSwipe = true
-        } else {
+        if message?.mediaChatMessage?.mediaDownloadStatus == .downloaded && !(isShowForwardView ?? false) {
             quickForwardView?.isHidden = false
             quickForwardButton?.isHidden = false
             isAllowSwipe = true
+        } else {
+            quickForwardView?.isHidden = true
+            quickForwardButton?.isHidden = true
+            isAllowSwipe = false
         }
-        
+
         // Reply view elements and its data
        if(message!.isReplyMessage) {
             replyView?.isHidden = false
@@ -216,7 +216,23 @@ class ChatViewVideoIncomingCell: BaseTableViewCell {
                            let image =  converter.base64ToImage(thumImage)
                            mediaImageView?.image = image
                            mediaImageView?.isHidden = false
-                           replyTextLabel?.text = (!(replyMessage?.mediaChatMessage?.mediaCaptionText.isEmpty ?? false)) ? replyMessage?.mediaChatMessage?.mediaCaptionText : "Photo"
+                           let message = replyMessage?.mediaChatMessage?.mediaCaptionText
+                           let mentionedUsersIds = replyMessage?.mentionedUsersIds ?? []
+                           let isMessageSentByMe = replyMessage?.isMessageSentByMe ?? false
+                           if message?.isEmpty ?? false {
+                               replyTextLabel?.text = replyMessage?.mediaChatMessage?.messageType.rawValue.capitalized
+                           } else {
+                               if !mentionedUsersIds.isEmpty {
+                                   if profileDetails.profileChatType == .groupChat {
+                                       replyTextLabel?.attributedText = ChatUtils.getMentionTextContent(message: message ?? "", uiLabel: replyTextLabel, isMessageSentByMe: isMessageSentByMe, mentionedUsers: mentionedUsersIds)
+                                   } else {
+                                       replyTextLabel?.text = ChatUtils.convertMentionUser(message: message ?? "", mentionedUsersIds: mentionedUsersIds).replacingOccurrences(of: "`", with: "")
+                                   }
+                               } else {
+                                   replyTextLabel?.text = !(replyMessage?.mediaChatMessage?.mediaCaptionText.isEmpty ?? false) ? replyMessage?.mediaChatMessage?.mediaCaptionText : replyMessage?.mediaChatMessage?.messageType.rawValue.capitalized
+                               }
+                           }
+                          // replyTextLabel?.text = (!(replyMessage?.mediaChatMessage?.mediaCaptionText.isEmpty ?? false)) ? replyMessage?.mediaChatMessage?.mediaCaptionText : "Photo"
                        }
                        replyWithoutMediaCOns?.isActive = false
                        replyWithMediaCons?.isActive = true
@@ -233,7 +249,23 @@ class ChatViewVideoIncomingCell: BaseTableViewCell {
                            let image =  converter.base64ToImage(thumImage)
                            mediaImageView?.image = image
                            mediaImageView?.isHidden = false
-                           replyTextLabel?.text = (!(replyMessage?.mediaChatMessage?.mediaCaptionText.isEmpty ?? false)) ? replyMessage?.mediaChatMessage?.mediaCaptionText : replyMessage?.mediaChatMessage?.messageType.rawValue.capitalized
+                           let message = replyMessage?.mediaChatMessage?.mediaCaptionText
+                           let mentionedUsersIds = replyMessage?.mentionedUsersIds ?? []
+                           let isMessageSentByMe = replyMessage?.isMessageSentByMe ?? false
+                           if message?.isEmpty ?? false {
+                               replyTextLabel?.text = replyMessage?.mediaChatMessage?.messageType.rawValue.capitalized
+                           } else {
+                               if !mentionedUsersIds.isEmpty {
+                                   if profileDetails.profileChatType == .groupChat {
+                                       replyTextLabel?.attributedText = ChatUtils.getMentionTextContent(message: message ?? "", uiLabel: replyTextLabel, isMessageSentByMe: isMessageSentByMe, mentionedUsers: mentionedUsersIds)
+                                   } else {
+                                       replyTextLabel?.text = ChatUtils.convertMentionUser(message: message ?? "", mentionedUsersIds: mentionedUsersIds).replacingOccurrences(of: "`", with: "")
+                                   }
+                               } else {
+                                   replyTextLabel?.text = !(replyMessage?.mediaChatMessage?.mediaCaptionText.isEmpty ?? false) ? replyMessage?.mediaChatMessage?.mediaCaptionText : replyMessage?.mediaChatMessage?.messageType.rawValue.capitalized
+                               }
+                           }
+                           //replyTextLabel?.text = (!(replyMessage?.mediaChatMessage?.mediaCaptionText.isEmpty ?? false)) ? replyMessage?.mediaChatMessage?.mediaCaptionText : replyMessage?.mediaChatMessage?.messageType.rawValue.capitalized
                        }
                        replyWithoutMediaCOns?.isActive = false
                        replyWithMediaCons?.isActive = true
@@ -315,7 +347,18 @@ class ChatViewVideoIncomingCell: BaseTableViewCell {
         }
         
         if let captionTxt = message?.mediaChatMessage?.mediaCaptionText, captionTxt != "" {
-            ChatUtils.highlight(uilabel: caption, message: captionTxt, searchText: searchText, isMessageSearch: isMessageSearch, isSystemBlue: isStarredMessagePage == true && isMessageSearch ? true : false)
+            //ChatUtils.highlight(uilabel: caption, message: captionTxt, searchText: searchText, isMessageSearch: isMessageSearch, isSystemBlue: isStarredMessagePage == true && isMessageSearch ? true : false)
+            let mentionedUsersIds = message?.mentionedUsersIds ?? []
+            let isMessageSentByMe = message?.isMessageSentByMe ?? false
+            if !mentionedUsersIds.isEmpty {
+                if profileDetails.profileChatType == .groupChat {
+                    caption.attributedText = ChatUtils.getMentionTextContent(message: captionTxt, uiLabel: caption, isMessageSentByMe: isMessageSentByMe, mentionedUsers: mentionedUsersIds, searchedText: searchText)
+                } else {
+                    caption.text = ChatUtils.convertMentionUser(message: captionTxt, mentionedUsersIds: mentionedUsersIds).replacingOccurrences(of: "`", with: "")
+                }
+            } else {
+                caption.text = captionTxt
+            }
             timeOverlay.isHidden = true
             reecivedTime.isHidden = true
             captionTime?.isHidden = false
@@ -476,4 +519,20 @@ class ChatViewVideoIncomingCell: BaseTableViewCell {
         }
         //delete media
     }
+}
+extension UILabel {
+
+    func highlight(searchedText: String?, color: UIColor = Color.color_3276E2 ?? UIColor.systemBlue) {
+        guard let txtLabel = self.text?.lowercased(), let searchedText = searchedText?.lowercased() else {
+            return
+        }
+
+        let attributeTxt = NSMutableAttributedString(string: txtLabel)
+        let range: NSRange = attributeTxt.mutableString.range(of: searchedText, options: .caseInsensitive)
+
+        attributeTxt.addAttribute(NSAttributedString.Key.backgroundColor, value: color, range: range)
+
+        self.attributedText = attributeTxt
+    }
+
 }

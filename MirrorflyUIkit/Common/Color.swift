@@ -84,6 +84,9 @@ enum Color {
     static let backupOptionGreenColor = UIColor.init(hex: "30C076")
     static let restoreShadowColor = UIColor.init(hex: "000029")
     static let color_7B7B7B = UIColor.init(hex: "7B7B7B")
+    static let mentionBackgroundColor = UIColor(named: "mention_background")
+    static let mentionColor = UIColor(named: "Mention_color")
+    static let highlightColor = UIColor.init(hex: "FFF4BC")
 }
 
 extension UIColor {

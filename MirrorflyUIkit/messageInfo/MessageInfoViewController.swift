@@ -30,6 +30,7 @@ class MessageInfoViewController: BaseViewController {
     var audioCell : AudioSender? = nil
     var isAudioPaused = false
     var updater : CADisplayLink! = nil
+    var profileDetails: ProfileDetails!
     
     var messageDelegate : MessageDelegate? = nil
     
@@ -157,7 +158,8 @@ extension MessageInfoViewController : UITableViewDelegate, UITableViewDataSource
                 switch(message.messageType) {
                 case .text:
                     cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.chatViewTextOutgoingCell, for: indexPath) as? ChatViewParentMessageCell
-                    cell = cell?.getCellFor(message, at: indexPath, isShowForwardView: false)
+                    cell.starredMessageView?.isHidden = true
+                    cell = cell?.getCellFor(message, at: indexPath, isShowForwardView: false, profileDetails: profileDetails)
                     cell.selectionStyle = .none
                     cell?.contentView.backgroundColor = .clear
                     cell.isAllowSwipe = false
@@ -165,7 +167,8 @@ extension MessageInfoViewController : UITableViewDelegate, UITableViewDataSource
                     
                 case.location:
                     cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.chatViewLocationOutgoingCell, for: indexPath) as? ChatViewParentMessageCell
-                    cell = cell.getCellFor(message, at: indexPath, isShowForwardView: false)
+                    cell.starredMessageView?.isHidden = true
+                    cell = cell.getCellFor(message, at: indexPath, isShowForwardView: false, profileDetails: profileDetails)
                     cell.locationOutgoingView?.isUserInteractionEnabled = true
                     cell.selectionStyle = .none
                     cell?.contentView.backgroundColor = .clear
@@ -175,7 +178,8 @@ extension MessageInfoViewController : UITableViewDelegate, UITableViewDataSource
                     
                 case .contact:
                     cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.chatViewContactOutgoingCell, for: indexPath) as? ChatViewParentMessageCell
-                    cell = cell.getCellFor(message, at: indexPath, isShowForwardView: false)
+                    cell.starredMessageView?.isHidden = true
+                    cell = cell.getCellFor(message, at: indexPath, isShowForwardView: false, profileDetails: profileDetails)
                     cell.selectionStyle = .none
                     cell?.contentView.backgroundColor = .clear
                     cell.isAllowSwipe = false
@@ -184,6 +188,7 @@ extension MessageInfoViewController : UITableViewDelegate, UITableViewDataSource
                     
                 case .audio:
                     var cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.audioSender, for: indexPath) as? AudioSender
+                    cell?.starredMessageView?.isHidden = true
                     cell = cell?.getCellFor(message, at: indexPath, isPlaying: false, audioClosureCallBack: { [weak self] (sliderValue)  in
                         
                     }, isShowForwardView: false, isDeleteMessageSelected: false)
@@ -198,7 +203,8 @@ extension MessageInfoViewController : UITableViewDelegate, UITableViewDataSource
                     
                 case .image, .video:
                     var cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.videoOutgoingCell, for: indexPath) as! ChatViewVideoOutgoingCell
-                    cell = cell.getCellFor(message, at: indexPath, isShowForwardView: false, isDeleteMessageSelected: false)!
+                    cell = cell.getCellFor(message, at: indexPath, isShowForwardView: false, isDeleteMessageSelected: false, profileDetails: profileDetails)!
+                    cell.starredMessageView?.isHidden = true
                     cell.playButton.addTarget(self, action: #selector(playVideo), for: .touchUpInside)
                     cell.selectionStyle = .none
                     cell.contentView.backgroundColor = .clear
@@ -211,6 +217,7 @@ extension MessageInfoViewController : UITableViewDelegate, UITableViewDataSource
                 case .document:
                     var cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.senderDocumenCell,
                                                              for: indexPath) as! SenderDocumentsTableViewCell
+                    cell.starredMessageView?.isHidden = true
                     cell = cell.getCellFor(message, at: indexPath, isShowForwardView: false,isDeletedMessageSelected: false)!
                     cell.viewDocumentButton?.addTarget(self, action: #selector(viewDocument), for: .touchUpInside)
                     cell.selectionStyle = .none
@@ -565,7 +572,7 @@ extension MessageInfoViewController : MessageEventsDelegate {
         
     }
     
-    func onMediaStatusFailed(error: String, messageId: String) {
+    func onMediaStatusFailed(error: String, messageId: String, errorCode: Int) {
         
     }
     

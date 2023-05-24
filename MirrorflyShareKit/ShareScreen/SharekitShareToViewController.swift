@@ -7,7 +7,6 @@
 
 import UIKit
 import RxSwift
-import Toaster
 import Photos
 import PhotosUI
 import MobileCoreServices
@@ -382,7 +381,7 @@ class SharekitShareToViewController: ShareKitBaseViewController {
                 self.removeLoader()
                 self.shareKitViewModel.locationList.forEach { location in
                     self.selectedProfiles.forEach { profile in
-                        FlyMessenger.sendTextMessage(toJid: profile.jid, message: location) { _, _, _ in
+                        FlyMessenger.sendTextMessage(toJid: profile.jid, message: location, mentionedUsersIds: []) { _, _, _ in
                         }
                     }
                 }
@@ -391,7 +390,7 @@ class SharekitShareToViewController: ShareKitBaseViewController {
                 self.removeLoader()
                 self.shareKitViewModel.textList.forEach { text in
                     self.selectedProfiles.forEach { profile in
-                        FlyMessenger.sendTextMessage(toJid: profile.jid, message: text) { _, _, _ in
+                        FlyMessenger.sendTextMessage(toJid: profile.jid, message: text, mentionedUsersIds: []) { _, _, _ in
                         }
                     }
                 }
@@ -678,11 +677,22 @@ extension SharekitShareToViewController : UITableViewDelegate, UITableViewDataSo
                 cell.statusUILabel?.isHidden = false
                 cell.removeButton?.isHidden = true
                 cell.removeIcon?.isHidden = true
-                if recentChatDetails.lastMessageType == .text || recentChatDetails.lastMessageType == .notification {
-                    cell.statusUILabel?.text = recentChatDetails.lastMessageContent
-                } else  {
-                    cell.receiverMessageTypeView?.isHidden = false
-                    cell.statusUILabel?.text = recentChatDetails.lastMessageContent + (recentChatDetails.lastMessageType?.rawValue ?? "")
+                let chatMessage = recentChatDetails.lastMessageContent.trim()
+                if recentChatDetails.isMentionedUser, chatMessage.isNotEmpty {
+                    let message = ShareKitUtility.shared.getMentionTextContent(message: recentChatDetails.lastMessageContent, isMessageSentByMe: recentChatDetails.isLastMessageSentByMe, mentionedUsers: recentChatDetails.mentionedUsersIds)
+                    if recentChatDetails.lastMessageType == .text || recentChatDetails.lastMessageType == .notification {
+                        cell.statusUILabel?.text = message.string
+                    } else {
+                        cell.receiverMessageTypeView?.isHidden = false
+                        cell.statusUILabel?.text = message.string + (recentChatDetails.lastMessageType?.rawValue ?? "")
+                    }
+                } else {
+                    if recentChatDetails.lastMessageType == .text || recentChatDetails.lastMessageType == .notification {
+                        cell.statusUILabel?.text = recentChatDetails.lastMessageContent
+                    } else  {
+                        cell.receiverMessageTypeView?.isHidden = false
+                        cell.statusUILabel?.text = recentChatDetails.lastMessageContent + (recentChatDetails.lastMessageType?.rawValue ?? "")
+                    }
                 }
                 showHideEmptyMessage(totalCount: isSearchEnabled == true ? getRecentChat.filter({$0.profileType == .groupChat}).count : getAllRecentChat.filter({$0.profileType == .groupChat}).count)
             case 3:
@@ -698,11 +708,23 @@ extension SharekitShareToViewController : UITableViewDelegate, UITableViewDataSo
                 let color = randomColors[abs(hashcode) % randomColors.count]
                 cell.setRecentChatDetails(recentChat: recentChatDetails, color: color ?? .gray)
                 cell.showLastMessageContentInfo()
-                if recentChatDetails.lastMessageType == .text || recentChatDetails.lastMessageType == .notification {
-                    cell.statusUILabel?.text = recentChatDetails.lastMessageContent
-                } else  {
-                    cell.receiverMessageTypeView?.isHidden = false
-                    cell.statusUILabel?.text = recentChatDetails.lastMessageContent + (recentChatDetails.lastMessageType?.rawValue ?? "")
+                cell.receiverMessageTypeView?.isHidden = true
+                let chatMessage = recentChatDetails.lastMessageContent.trim()
+                if recentChatDetails.isMentionedUser, chatMessage.isNotEmpty {
+                    let message = ShareKitUtility.shared.getMentionTextContent(message: recentChatDetails.lastMessageContent, isMessageSentByMe: recentChatDetails.isLastMessageSentByMe, mentionedUsers: recentChatDetails.mentionedUsersIds)
+                    if recentChatDetails.lastMessageType == .text || recentChatDetails.lastMessageType == .notification {
+                        cell.statusUILabel?.text = message.string
+                    } else {
+                        cell.receiverMessageTypeView?.isHidden = false
+                        cell.statusUILabel?.text = message.string + (recentChatDetails.lastMessageType?.rawValue ?? "")
+                    }
+                } else {
+                    if recentChatDetails.lastMessageType == .text || recentChatDetails.lastMessageType == .notification {
+                        cell.statusUILabel?.text = recentChatDetails.lastMessageContent
+                    } else  {
+                        cell.receiverMessageTypeView?.isHidden = false
+                        cell.statusUILabel?.text = recentChatDetails.lastMessageContent + (recentChatDetails.lastMessageType?.rawValue ?? "")
+                    }
                 }
                 cell.statusUILabel?.isHidden = false
                 cell.removeButton?.isHidden = true
@@ -1416,7 +1438,7 @@ extension SharekitShareToViewController : MessageEventsDelegate {
 
     }
     
-    func onMediaStatusFailed(error: String, messageId: String) {
+    func onMediaStatusFailed(error: String, messageId: String, errorCode: Int) {
         var canExit = false
         messageIDs.removeAll { id in
             if id == messageId {
@@ -1856,7 +1878,7 @@ extension SharekitShareToViewController: ShareEditImageDelegate {
                 if media.mediaType == .video {
                     let profiles = selectedProfiles.compactMap({ $0.jid })
                     for profile in profiles {
-                        FlyMessenger.sendVideoMessage(toJid: profile, mediaData: media) { isSuccess, _, message in
+                        FlyMessenger.sendVideoMessage(toJid: profile, mediaData: media, mentionedUsersIds: []) { isSuccess, _, message in
                             if let chatMessage = message {
                                 self.messageIDs.append(chatMessage.messageId)
                                 self.shareMediaCount+=1
@@ -1870,7 +1892,7 @@ extension SharekitShareToViewController: ShareEditImageDelegate {
                 } else if media.mediaType == .image {
                     let profiles = selectedProfiles.compactMap({ $0.jid })
                     for profile in profiles {
-                        FlyMessenger.sendImageMessage(toJid: profile, mediaData: media) { isSuccess, _, message in
+                        FlyMessenger.sendImageMessage(toJid: profile, mediaData: media, mentionedUsersIds: []) { isSuccess, _, message in
                             if let chatMessage = message {
                                 self.messageIDs.append(chatMessage.messageId)
                                 self.shareMediaCount+=1
@@ -1914,6 +1936,15 @@ class SpinnerViewController: UIViewController {
 }
 
 extension SharekitShareToViewController: ConnectionEventDelegate {
+    
+    func onConnectionFailed(error: FlyError) {
+        
+    }
+    
+    func onReconnecting() {
+        
+    }
+    
     func onConnected() {
         isXmppConnected = true
     }
@@ -1921,10 +1952,5 @@ extension SharekitShareToViewController: ConnectionEventDelegate {
     func onDisconnected() {
         isXmppConnected = false
     }
-
-    func onConnectionNotAuthorized() {
-
-    }
-
 
 }

@@ -149,7 +149,7 @@ class ChatViewVideoOutgoingCell: BaseTableViewCell {
         }
     }
     
-    func getCellFor(_ message: ChatMessage?, at indexPath: IndexPath?,isShowForwardView: Bool?,isDeleteMessageSelected: Bool?, fromChat: Bool = false, isMessageSearch: Bool = false, searchText: String = "") -> ChatViewVideoOutgoingCell? {
+    func getCellFor(_ message: ChatMessage?, at indexPath: IndexPath?,isShowForwardView: Bool?,isDeleteMessageSelected: Bool?, fromChat: Bool = false, isMessageSearch: Bool = false, searchText: String = "", profileDetails: ProfileDetails) -> ChatViewVideoOutgoingCell? {
 
         currentIndexPath = nil
         currentIndexPath = indexPath
@@ -176,14 +176,14 @@ class ChatViewVideoOutgoingCell: BaseTableViewCell {
             forwardView?.makeCircleView(borderColor: Color.forwardCircleBorderColor.cgColor, borderWidth: 1.5)
         }
         
-        if  (message?.mediaChatMessage?.mediaUploadStatus == .not_uploaded || message?.mediaChatMessage?.mediaUploadStatus == .failed || message?.mediaChatMessage?.mediaUploadStatus == .uploading || message?.messageStatus == .notAcknowledged || isShowForwardView == true || isStarredMessagePage == true) {
-            quickfwdView?.isHidden = true
-            quickFwdBtn?.isHidden = true
-            isAllowSwipe = false
-        } else {
+        if ((message?.isCarbonMessage ?? false) ? message?.mediaChatMessage?.mediaDownloadStatus == .downloaded : message?.mediaChatMessage?.mediaUploadStatus == .uploaded) && !(isShowForwardView ?? false) {
             quickfwdView?.isHidden = false
             quickFwdBtn?.isHidden = false
             isAllowSwipe = true
+        } else {
+            quickfwdView?.isHidden = true
+            quickFwdBtn?.isHidden = true
+            isAllowSwipe = false
         }
         
         // Reply view elements and its data
@@ -212,7 +212,19 @@ class ChatViewVideoOutgoingCell: BaseTableViewCell {
                            let converter = ImageConverter()
                            let image =  converter.base64ToImage(thumImage)
                            mediaMessageImageView?.image = image
-                           replyTextLabel?.text = !(replyMessage?.mediaChatMessage?.mediaCaptionText.isEmpty ?? false) ? replyMessage?.mediaChatMessage?.mediaCaptionText : "Photo"
+                           let message = replyMessage?.mediaChatMessage?.mediaCaptionText
+                           let mentionedUsersIds = replyMessage?.mentionedUsersIds ?? []
+                           let isMessageSentByMe = replyMessage?.isMessageSentByMe ?? false
+                           if message?.isEmpty ?? false {
+                               replyTextLabel?.text = "Photo"
+                           } else {
+                               if !mentionedUsersIds.isEmpty {
+                                   replyTextLabel?.attributedText = ChatUtils.getMentionTextContent(message: message ?? "", uiLabel: replyTextLabel, isMessageSentByMe: isMessageSentByMe, mentionedUsers: mentionedUsersIds)
+                               } else {
+                                   replyTextLabel?.text = !(replyMessage?.mediaChatMessage?.mediaCaptionText.isEmpty ?? false) ? replyMessage?.mediaChatMessage?.mediaCaptionText : "Photo"
+                               }
+                           }
+                           //replyTextLabel?.text = !(replyMessage?.mediaChatMessage?.mediaCaptionText.isEmpty ?? false) ? replyMessage?.mediaChatMessage?.mediaCaptionText : "Photo"
                        }
                        messageTypeIconView?.isHidden = false
                        mediaMessageImageView?.isHidden = false
@@ -237,7 +249,19 @@ class ChatViewVideoOutgoingCell: BaseTableViewCell {
                            mediaMessageImageView?.image = image
                            mediaMessageImageView?.isHidden = false
                            mediaLocationMapView?.isHidden = true
-                           replyTextLabel?.text = !(replyMessage?.mediaChatMessage?.mediaCaptionText.isEmpty ?? false) ? replyMessage?.mediaChatMessage?.mediaCaptionText : replyMessage?.mediaChatMessage?.messageType.rawValue.capitalized
+                           let message = replyMessage?.mediaChatMessage?.mediaCaptionText
+                           let mentionedUsersIds = replyMessage?.mentionedUsersIds ?? []
+                           let isMessageSentByMe = replyMessage?.isMessageSentByMe ?? false
+                           if message?.isEmpty ?? false {
+                               replyTextLabel?.text = replyMessage?.mediaChatMessage?.messageType.rawValue.capitalized
+                           } else {
+                               if !mentionedUsersIds.isEmpty {
+                                   replyTextLabel?.attributedText = ChatUtils.getMentionTextContent(message: message ?? "", uiLabel: replyTextLabel, isMessageSentByMe: isMessageSentByMe, mentionedUsers: mentionedUsersIds)
+                               } else {
+                                   replyTextLabel?.text = !(replyMessage?.mediaChatMessage?.mediaCaptionText.isEmpty ?? false) ? replyMessage?.mediaChatMessage?.mediaCaptionText : replyMessage?.mediaChatMessage?.messageType.rawValue.capitalized
+                               }
+                           }
+                           //replyTextLabel?.text = !(replyMessage?.mediaChatMessage?.mediaCaptionText.isEmpty ?? false) ? replyMessage?.mediaChatMessage?.mediaCaptionText : replyMessage?.mediaChatMessage?.messageType.rawValue.capitalized
                        }
                        replyWithoutMediaCons?.isActive = false
                        replyWithMediaCOns?.isActive = true
@@ -320,7 +344,19 @@ class ChatViewVideoOutgoingCell: BaseTableViewCell {
         }else {
             let captionTxt = message?.mediaChatMessage?.mediaCaptionText ?? ""
             captionHolder.isHidden = false
-            ChatUtils.highlight(uilabel: captionLabel, message: captionTxt, searchText: searchText, isMessageSearch: isMessageSearch, isSystemBlue: isStarredMessagePage == true && isMessageSearch ? true : false)
+            let mentionedUsersIds = message?.mentionedUsersIds ?? []
+            let isMessageSentByMe = message?.isMessageSentByMe ?? false
+            captionHolder.isHidden = false
+            if !mentionedUsersIds.isEmpty {
+                if profileDetails.profileChatType == .groupChat {
+                    captionLabel.attributedText = ChatUtils.getMentionTextContent(message: captionTxt, uiLabel: captionLabel, isMessageSentByMe: isMessageSentByMe, mentionedUsers: mentionedUsersIds, searchedText: searchText)
+                } else {
+                    captionLabel.text = ChatUtils.convertMentionUser(message: captionTxt, mentionedUsersIds: mentionedUsersIds).replacingOccurrences(of: "`", with: "")
+                }
+            } else {
+                captionLabel.text = captionTxt
+            }
+            //ChatUtils.highlight(uilabel: captionLabel, message: captionTxt, searchText: searchText, isMessageSearch: isMessageSearch, isSystemBlue: isStarredMessagePage == true && isMessageSearch ? true : false)
             captionHolder.roundCorners(corners: [.bottomLeft], radius: 5.0)
             cellView.roundCorners(corners: [.topLeft, .topRight], radius: 5.0)
             sentTime.isHidden = true
@@ -402,6 +438,7 @@ class ChatViewVideoOutgoingCell: BaseTableViewCell {
     }
     
     func mediaStatus(message: ChatMessage?) {
+        print("onMediaStatusSucced===>1\(message?.mediaChatMessage?.mediaUploadStatus), messageid \(message?.messageId)")
         downloadView?.isHidden = true
         downloadButton?.isHidden = true
         downloadLabel?.isHidden = true

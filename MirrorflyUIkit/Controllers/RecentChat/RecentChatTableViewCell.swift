@@ -45,6 +45,7 @@ class RecentChatTableViewCell: UITableViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         profileImageView?.image = nil
+        userMessageLabel?.attributedText = NSMutableAttributedString(string: "", attributes: [:])
     }
     
     override func setSelected(_ selected: Bool, animated: Bool) {
@@ -115,22 +116,45 @@ class RecentChatTableViewCell: UITableViewCell {
         }
     }
     
-    func setLastContentTextColor(searchText: String,recentChat: RecentChat, caption : String = "") {
-        if let range = recentChat.lastMessageContent.capitalized.range(of: searchText.trim().capitalized, options: [.caseInsensitive, .diacriticInsensitive]) {
-            let convertedRange = NSRange(range, in: recentChat.lastMessageContent.capitalized)
-            let attributedString = NSMutableAttributedString(string: recentChat.lastMessageContent.capitalized)
+    func setLastContentTextColor(searchText: String,recentChat: RecentChat, caption : String = "", searchMessage: ChatMessage? = nil) {
+        var recentMessage = recentChat.lastMessageContent.trim()
+        var captionText = caption
+        if !recentChat.mentionedUsersIds.isEmpty && searchText.isNotEmpty {
+            recentMessage = ChatUtils.convertNormalMentionUser(message: recentMessage, mentionedUsersIds: recentChat.mentionedUsersIds)
+        } else if let searchMessage = searchMessage, !searchMessage.mentionedUsersIds.isEmpty {
+            recentMessage = ChatUtils.convertNormalMentionUser(message: recentMessage, mentionedUsersIds: searchMessage.mentionedUsersIds)
+        }
+        
+        if let getsearchMessage = searchMessage, !getsearchMessage.mentionedUsersIds.isEmpty {
+            captionText = ChatUtils.convertNormalMentionUser(message: caption, mentionedUsersIds: getsearchMessage.mentionedUsersIds)
+        } else if let searchMessage = searchMessage, !searchMessage.mentionedUsersIds.isEmpty {
+            captionText = ChatUtils.convertNormalMentionUser(message: caption, mentionedUsersIds: searchMessage.mentionedUsersIds)
+        }
+        
+        if let range = recentMessage.capitalized.range(of: searchText.trim().capitalized, options: [.caseInsensitive, .diacriticInsensitive]) {
+            let convertedRange = NSRange(range, in: recentMessage.capitalized)
+            let attributedString = NSMutableAttributedString(string: recentMessage.capitalized)
             attributedString.setAttributes([NSAttributedString.Key.foregroundColor: UIColor.systemBlue], range: convertedRange)
             userMessageLabel?.attributedText = attributedString
-        } else if caption.isNotEmpty {
-            if let range = caption.capitalized.range(of: searchText.trim().capitalized, options: [.caseInsensitive, .diacriticInsensitive]) {
-                let convertedRange = NSRange(range, in: caption.capitalized)
-                let attributedString = NSMutableAttributedString(string: caption.capitalized)
+        } else if captionText.isNotEmpty {
+            print("captionText===>", captionText)
+            if let range = captionText.capitalized.range(of: searchText.trim().capitalized, options: [.caseInsensitive, .diacriticInsensitive]) {
+                let convertedRange = NSRange(range, in: captionText.capitalized)
+                let attributedString = NSMutableAttributedString(string: captionText.capitalized)
                 attributedString.setAttributes([NSAttributedString.Key.foregroundColor: UIColor.systemBlue], range: convertedRange)
                 userMessageLabel?.attributedText = attributedString
             }
         } else {
-            userMessageLabel?.text = recentChat.lastMessageContent
             userMessageLabel?.textColor = Color.userStatusTextColor
+            if recentChat.isMentionedUser, recentMessage.isNotEmpty {
+                if recentChat.profileType == .groupChat {
+                    userMessageLabel?.attributedText = ChatUtils.getMentionTextContent(message: recentMessage, uiLabel: userMessageLabel, isMessageSentByMe: recentChat.isLastMessageSentByMe, mentionedUsers: recentChat.mentionedUsersIds)
+                } else {
+                    userMessageLabel?.text = ChatUtils.convertMentionUser(message: recentMessage, mentionedUsersIds: recentChat.mentionedUsersIds).replacingOccurrences(of: "`", with: "")
+                }
+            } else {
+                userMessageLabel?.text = recentChat.lastMessageContent
+            }
         }
     }
 
@@ -284,7 +308,19 @@ class RecentChatTableViewCell: UITableViewCell {
             }
             break
         case .video, .image,.audio,.contact,.location:
-            userMessageLabel?.text = (chatMessage?.mediaChatMessage?.mediaCaptionText.trim().isNotEmpty ?? false) ? chatMessage?.mediaChatMessage?.mediaCaptionText : recentChatMessage.lastMessageType?.rawValue.capitalized
+            let mentionedUsersIds = chatMessage?.mentionedUsersIds ?? []
+            if !mentionedUsersIds.isEmpty, chatMessage?.mediaChatMessage?.mediaCaptionText.trim().isNotEmpty ?? false {
+                let message = chatMessage?.mediaChatMessage?.mediaCaptionText.trim() ?? ""
+                let isMessageSentByMe = chatMessage?.isMessageSentByMe ?? false
+                if recentChatMessage.profileType == .groupChat {
+                    userMessageLabel?.attributedText = ChatUtils.getMentionTextContent(message: message, uiLabel: userMessageLabel, isMessageSentByMe: isMessageSentByMe, mentionedUsers: mentionedUsersIds)
+                } else {
+                    userMessageLabel?.text = ChatUtils.convertMentionUser(message: message, mentionedUsersIds: mentionedUsersIds).replacingOccurrences(of: "`", with: "")
+                }
+            } else {
+                userMessageLabel?.text = (chatMessage?.mediaChatMessage?.mediaCaptionText.trim().isNotEmpty ?? false) ? chatMessage?.mediaChatMessage?.mediaCaptionText : recentChatMessage.lastMessageType?.rawValue.capitalized
+            }
+           // userMessageLabel?.text = (chatMessage?.mediaChatMessage?.mediaCaptionText.trim().isNotEmpty ?? false) ? chatMessage?.mediaChatMessage?.mediaCaptionText : recentChatMessage.lastMessageType?.rawValue.capitalized
         case .document:
             userMessageLabel?.text = "Document"
         default:

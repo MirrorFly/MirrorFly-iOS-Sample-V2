@@ -25,16 +25,6 @@ class GroupCallCell: UICollectionViewCell {
         super.awakeFromNib()
     }
     
-    override func prepareForReuse() {
-        executeOnMainThread {
-            for view in self.videoBaseView.subviews {
-                view.removeFromSuperview()
-                self.videoBaseView.willRemoveSubview(view)
-            }
-        }
-        super.prepareForReuse()
-    }
-    
     override func layoutSubviews() {
         super.layoutSubviews()
         executeOnMainThread {

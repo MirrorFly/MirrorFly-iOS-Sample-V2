@@ -295,6 +295,18 @@ class CallLogViewController: UIViewController {
 // MARK: Table View Methods
 extension CallLogViewController : UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        //callLogArray = CallLogManager.getAllCallLogs()
+        print("calllog array issss" , callLogArray)
+//        if CallLogArray.count == 0{
+//            let noDataLabel: UILabel  = UILabel(frame: CGRect(x: 0, y: 0, width: tableView.bounds.size.width, height: tableView.bounds.size.height))
+//            noDataLabel.text          = "No call log history found \n Any new calls will appear here "
+//            noDataLabel.textColor     = UIColor.black
+//            noDataLabel.numberOfLines = 0
+//            noDataLabel.textAlignment = .center
+//            noDataLabel.lineBreakMode = .byWordWrapping
+//            tableView.backgroundView  = noDataLabel
+//            tableView.separatorStyle  = .none
+//        }
         return callLogArray.count
     }
     
@@ -739,7 +751,21 @@ extension CallLogViewController : UITableViewDataSource, UITableViewDelegate {
         }
         if getSelectedLogs().isEmpty {
             if seletedCallLog.callMode == .ONE_TO_ONE && (seletedCallLog.groupId?.isEmpty ?? true){
-                
+                let vc = UIStoryboard.init(name: Storyboards.chat, bundle: Bundle.main).instantiateViewController(withIdentifier: Identifiers.chatViewParentController) as? ChatViewParentController
+                var jidString = String()
+                if seletedCallLog.fromUserId == FlyDefaults.myJid {
+                    jidString = seletedCallLog.toUserId
+                } else {
+                    jidString = seletedCallLog.fromUserId
+                }
+                let profileDetails = ContactManager.shared.getUserProfileDetails(for: jidString)
+                vc?.getProfileDetails = profileDetails
+                let color = getColor(userName: ChatManager.getRechtChat(jid: jidString)?.profileName ?? "")
+                vc?.contactColor = color
+
+                vc?.isStarredMessagePage = false
+                navigationController?.modalPresentationStyle = .overFullScreen
+                navigationController?.pushViewController(vc!, animated: true)
             }else{
                 let storyboard = UIStoryboard(name: "Call", bundle: nil)
                 groupCallViewController = storyboard.instantiateViewController(withIdentifier: "GroupCallViewController") as? GroupCallViewController
@@ -829,7 +855,6 @@ extension CallLogViewController {
             } else {
                 let calllogIds = self.getSelectedLogs().compactMap({ $0.callLogId })
                 ChatManager.deleteCallLog(isClearAll: false, callLogIds: calllogIds) { isSuccess, error, data in
-                    self.noCallLogView.isHidden = !self.callLogArray.isEmpty
                     self.updateButtons()
                     self.callLogTableView.reloadData()
                 }
@@ -1218,8 +1243,13 @@ extension CallLogViewController : CallLogDelegate {
     
     func deleteCallLogs(callLogId : String) {
         if let index = callLogArray.firstIndex(where: {$0.callLogId == callLogId}), !callLogArray.isEmpty {
-            self.callLogArray.remove(at: index)
-            self.allCallLogArray.remove(at: index)
+            executeOnMainThread {
+                self.callLogArray.remove(at: index)
+                self.allCallLogArray.remove(at: index)
+                self.callLogTableView.reloadData()
+                self.updateButtons()
+                self.noCallLogView.isHidden = !self.callLogArray.isEmpty
+            }
         }
     }
     
@@ -1232,9 +1262,15 @@ extension CallLogViewController : CallLogDelegate {
 extension CallLogViewController: refreshCallLogDelegate {
 
     func refreshCallLog() {
-        executeOnMainThread {
+        executeOnMainThread { [weak self] in
+            guard let self else {return}
             self.callLogArray.removeAll()
             self.callLogArray = CallLogManager.getAllCallLogs()
+            self.allCallLogArray.forEach { log in
+                if let index = self.callLogArray.firstIndex(where: {$0.callLogId == log.callLogId}) {
+                    self.callLogArray[index] = log
+                }
+            }
             self.allCallLogArray = self.callLogArray
             self.callLogTableView.reloadData()
             self.noCallLogView.isHidden = !self.callLogArray.isEmpty

@@ -569,7 +569,7 @@ extension ViewAllMediaController : MessageEventsDelegate {
         
     }
     
-    func onMediaStatusFailed(error: String, messageId: String) {
+    func onMediaStatusFailed(error: String, messageId: String, errorCode: Int) {
         
     }
     

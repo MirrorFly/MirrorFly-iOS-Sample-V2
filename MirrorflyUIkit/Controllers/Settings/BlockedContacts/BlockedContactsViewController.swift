@@ -17,6 +17,7 @@ class BlockedContactsViewController: UIViewController {
         }
     }
 
+    @IBOutlet weak var noContactsLabel: UILabel!
     var blockedList = [ProfileDetails]()
 
     override func viewDidLoad() {
@@ -77,6 +78,7 @@ class BlockedContactsViewController: UIViewController {
 
 extension BlockedContactsViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        noContactsLabel.isHidden = blockedList.count != 0
         return blockedList.count
     }
 

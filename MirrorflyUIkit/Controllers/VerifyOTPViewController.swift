@@ -5,6 +5,7 @@ import Foundation
 import UIKit
 import FirebaseAuth
 import MirrorFlySDK
+import IQKeyboardManagerSwift
 
 
 class VerifyOTPViewController: UIViewController
@@ -45,6 +46,7 @@ class VerifyOTPViewController: UIViewController
         super.viewDidDisappear(true)
         chatManager.connectionDelegate = nil
         NotificationCenter.default.removeObserver(self)
+        IQKeyboardManager.shared.enable = true
     }
     
     // MARK:- Functions
@@ -62,6 +64,7 @@ class VerifyOTPViewController: UIViewController
         changeNumber.titleLabel?.font = UIFont.font14px_appRegular()
         resendOtp.titleLabel?.font = UIFont.font14px_appRegular()
         verifyotp.titleLabel?.font = UIFont.font16px_appSemibold()
+        IQKeyboardManager.shared.enable = false
     }
     func configureDefaults() {
         let notificationCenter = NotificationCenter.default
@@ -495,6 +498,15 @@ extension VerifyOTPViewController: UITextFieldDelegate, CustomTextFieldDelegate 
 }
 
 extension VerifyOTPViewController : ConnectionEventDelegate {
+    
+    func onConnectionFailed(error: FlyError) {
+        stopLoading()
+    }
+    
+    func onReconnecting() {
+        
+    }
+    
     func onConnected() {
         if isAuthorizedSuccess == true {
 //            self.performSegue(withIdentifier: Identifiers.otpNextToProfile, sender: nil)
@@ -516,7 +528,4 @@ extension VerifyOTPViewController : ConnectionEventDelegate {
         print("Xmmpp DisConnected")
     }
     
-    func onConnectionNotAuthorized() {
-        stopLoading()
-    }
 }

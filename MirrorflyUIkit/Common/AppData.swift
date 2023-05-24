@@ -8,11 +8,20 @@
 import Foundation
 
 //Access : AppConstant.baseUrl
-let googleApiKey = "AIzaSyDnjPEs86MRsnFfW1sVPKvMWjqQRnSa7Ts"
-let googleApiKey_Translation = "AIzaSyCdwzAZR6tx8KB-2dMn0KzSI1V0LpsYdH0"
+let googleApiKey = getkey().0
+let googleApiKey_Translation = getkey().1
 
 struct AppConstant {
     //App Detail
     static let appName = "MirrorFly"
 }
 
+func getkey() -> (String, String) {
+    var keys:(String, String)!
+    if let path = Bundle.main.path(forResource: "MirrorflyUIkit-info", ofType: "plist"){
+        if let dict = NSDictionary(contentsOfFile: path) as? Dictionary<String, AnyObject> {
+            keys = (dict["googleApiKey"] as! String,dict["googleApiKey_Translation"] as! String)
+        }
+    }
+    return keys
+}
