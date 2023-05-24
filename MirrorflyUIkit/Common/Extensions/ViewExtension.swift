@@ -69,6 +69,29 @@ extension UIView {
         NSLayoutConstraint(item: self, attribute: .top, relatedBy: .equal, toItem: container, attribute: .top, multiplier: 1.0, constant: 0).isActive = true
         NSLayoutConstraint(item: self, attribute: .bottom, relatedBy: .equal, toItem: container, attribute: .bottom, multiplier: 1.0, constant: 0).isActive = true
     }
+    
+    enum ViewSide {
+        case Top, Bottom, Left, Right
+    }
+    
+    func addBorder(toSide side: ViewSide, withColor color: UIColor, andThickness thickness: CGFloat) {
+        
+        let border = CALayer()
+        border.backgroundColor = color.cgColor
+        
+        switch side {
+        case .Top:
+            border.frame = CGRect(x: 0, y: 0, width: frame.size.width, height: thickness)
+        case .Bottom:
+            border.frame = CGRect(x: 0, y: frame.size.height - thickness, width: frame.size.width, height: thickness)
+        case .Left:
+            border.frame = CGRect(x: 0, y: 0, width: thickness, height: frame.size.height)
+        case .Right:
+            border.frame = CGRect(x: frame.size.width - thickness, y: 0, width: thickness, height: frame.size.height)
+        }
+        
+        layer.addSublayer(border)
+    }
    
 }
 

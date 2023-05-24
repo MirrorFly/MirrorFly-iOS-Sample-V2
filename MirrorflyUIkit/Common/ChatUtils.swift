@@ -61,6 +61,75 @@ class ChatUtils {
         }
         return NSMutableAttributedString()
     }
+    
+    static func convertMentionUser(message: String, mentionedUsersIds: [String]) -> String {
+        var replyMessage = message.trim()
+
+        for user in mentionedUsersIds {
+            let JID = user + "@" + FlyDefaults.xmppDomain
+            let myJID = try? FlyUtils.getMyJid()
+            if let profileDetail = ContactManager.shared.getUserProfileDetails(for: JID) {
+                let userName = "@`\(FlyUtils.getGroupUserName(profile: profileDetail)) `"
+                let mentionRange = (replyMessage as NSString).range(of: "@[?]")
+                replyMessage = replyMessage.replacing(userName, range: mentionRange)
+            }
+        }
+        return replyMessage
+    }
+    
+    static func convertNormalMentionUser(message: String, mentionedUsersIds: [String]) -> String {
+        var replyMessage = message.trim()
+
+        for user in mentionedUsersIds {
+            let JID = user + "@" + FlyDefaults.xmppDomain
+            let myJID = try? FlyUtils.getMyJid()
+            if let profileDetail = ContactManager.shared.getUserProfileDetails(for: JID) {
+                let userName = "@\(FlyUtils.getGroupUserName(profile: profileDetail))"
+                let mentionRange = (replyMessage as NSString).range(of: "@[?]")
+                replyMessage = replyMessage.replacing(userName, range: mentionRange)
+            }
+        }
+        return replyMessage
+    }
+    
+    static func getMentionTextContent(message: String, uiLabel: UILabel? = nil, isMessageSentByMe: Bool, mentionedUsers: [String], searchedText: String? = "") -> NSMutableAttributedString {
+        var attributedString = NSMutableAttributedString(string: message)
+        for user in mentionedUsers {
+            let JID = user + "@" + FlyDefaults.xmppDomain
+            let myJID = try? FlyUtils.getMyJid()
+            if let profileDetail = ContactManager.shared.getUserProfileDetails(for: JID) {
+                let userName = "@`\(FlyUtils.getGroupUserName(profile: profileDetail))` "
+                let messageString: String = attributedString.string
+                let mentionRange = (messageString as NSString).range(of: "@[?]")
+                if mentionRange.location < attributedString.string.utf16.count {
+                    attributedString.replaceCharacters(in: mentionRange, with: userName)
+                }
+                let mentionRange2 = ((attributedString.string) as NSString).range(of: userName)
+                if mentionRange2.location < attributedString.string.utf16.count {
+                    attributedString.addAttributes(uiLabel != nil ? (uiLabel?.font)! : .systemFont(ofSize: 15), color: Color.muteSwitchColor, range: mentionRange2)
+                    if !isMessageSentByMe , JID == myJID {
+                        attributedString.addBGAttributes(uiLabel != nil ? (uiLabel?.font)! : .systemFont(ofSize: 15), color: Color.mentionBackgroundColor!, range: mentionRange2)
+                        let paragraphStyle = NSMutableParagraphStyle()
+                        paragraphStyle.lineSpacing = 4
+                        attributedString.addAttribute(
+                            .paragraphStyle,
+                            value: paragraphStyle,
+                            range: NSRange(location: 0, length: attributedString.length
+                                          ))
+                    } else {
+//                        attributedString.addAttributes(uiLabel != nil ? (uiLabel?.font)! : .systemFont(ofSize: 15), color: Color.mentionColor!, range: NSRange(location: mentionRange2.location, length: 1))
+                        attributedString.addAttribute(NSAttributedString.Key.backgroundColor, value: UIColor.clear, range: mentionRange2)
+                    }
+                }
+            }
+            attributedString = attributedString.stringWithString(stringToReplace: "`", replacedWithString: "")
+        }
+        let attributeTxt = NSMutableAttributedString(string: attributedString.string)
+        let range: NSRange = attributeTxt.mutableString.range(of: searchedText ?? "", options: .caseInsensitive)
+        
+        attributedString.addAttribute(NSAttributedString.Key.backgroundColor, value: Color.highlightColor , range: range)
+        return attributedString
+    }
 
     static func getAttributedMessage(message: String, searchText: String, isMessageSearch: Bool,isSystemBlue: Bool) -> NSMutableAttributedString {
         if isMessageSearch {
@@ -82,7 +151,7 @@ class ChatUtils {
                 let regex = try NSRegularExpression(pattern:  NSRegularExpression.escapedPattern(for: searchText.trim().lowercased()).folding(options: .regularExpression, locale: .current), options: .caseInsensitive)
                 let range = NSRange(location: 0, length: message.utf16.count)
                 for match in regex.matches(in: message.folding(options: .regularExpression, locale: .current), options: .withTransparentBounds, range: range) {
-                    attributedString.addAttribute(NSAttributedString.Key.backgroundColor, value: Color.color_3276E2 ?? .blue, range: match.range)
+                    attributedString.addAttribute(NSAttributedString.Key.backgroundColor, value: Color.highlightColor , range: match.range)
                 }
                 uilabel.attributedText = attributedString
             } catch {

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21225" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21207"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -439,10 +439,10 @@
                                         <rect key="frame" x="0.0" y="0.0" width="454" height="163"/>
                                         <subviews>
                                             <view contentMode="scaleToFill" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="BVG-lV-riH">
-                                                <rect key="frame" x="0.0" y="0.0" width="454" height="96"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="454" height="93"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" ambiguous="YES" text="Caption...." textAlignment="natural" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="w0F-w3-AHu">
-                                                        <rect key="frame" x="12" y="6" width="434" height="96"/>
+                                                        <rect key="frame" x="12" y="6" width="382" height="96"/>
                                                         <fontDescription key="fontDescription" name="SFUIDisplay-Regular" family="SF UI Display" pointSize="14"/>
                                                         <color key="textColor" name="imageCaption"/>
                                                         <nil key="highlightedColor"/>
@@ -454,13 +454,13 @@
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <constraints>
                                                     <constraint firstItem="w0F-w3-AHu" firstAttribute="top" secondItem="BVG-lV-riH" secondAttribute="top" constant="6" id="UQQ-2J-B9X"/>
-                                                    <constraint firstAttribute="trailing" secondItem="w0F-w3-AHu" secondAttribute="trailing" constant="8" id="b4v-yL-yoq"/>
+                                                    <constraint firstAttribute="trailing" secondItem="w0F-w3-AHu" secondAttribute="trailing" constant="60" id="b4v-yL-yoq"/>
                                                     <constraint firstAttribute="height" secondItem="w0F-w3-AHu" secondAttribute="height" id="ga9-Rb-fJ7"/>
                                                     <constraint firstItem="w0F-w3-AHu" firstAttribute="leading" secondItem="BVG-lV-riH" secondAttribute="leading" constant="12" id="oeT-Se-k3c"/>
                                                 </constraints>
                                             </view>
                                             <view contentMode="scaleToFill" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="AsZ-My-Svg" userLabel="Translated View">
-                                                <rect key="frame" x="0.0" y="106" width="452" height="47"/>
+                                                <rect key="frame" x="0.0" y="103" width="452" height="50"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="" textAlignment="natural" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="54c-7t-V64" userLabel="Translate Label">
                                                         <rect key="frame" x="12" y="0.0" width="440" height="50"/>

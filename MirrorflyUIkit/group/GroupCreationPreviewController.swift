@@ -266,11 +266,11 @@ extension GroupCreationPreviewController : ProfileEventsDelegate {
     }
     
     func userBlockedMe(jid: String) {
-        
+        participantTableView.reloadData()
     }
     
     func userUnBlockedMe(jid: String) {
-        
+        participantTableView.reloadData()
     }
     
     func hideUserLastSeen() {

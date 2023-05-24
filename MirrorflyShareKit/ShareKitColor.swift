@@ -39,4 +39,7 @@ enum ShareKitColor {
     static let color18 = UIColor(named: "color18")
     static let color19 = UIColor(named: "color19")
     static let color20 = UIColor(named: "color20")
+    static let muteSwitchColor = UIColor.init(hex: "3276E2")
+    static let mentionBackgroundColor = UIColor(named: "mention_background")
+    static let mentionColor = UIColor(named: "Mention_color")
 }

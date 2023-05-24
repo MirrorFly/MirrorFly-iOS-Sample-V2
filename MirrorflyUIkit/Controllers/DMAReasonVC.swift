@@ -53,6 +53,7 @@ class DMAReasonVC: UIViewController {
                 if CallManager.isOngoingCall(){
                     CallManager.disconnectCall()
                 }
+                iCloudmanager().deleteiCloudBackupFile()
                 ContactManager.shared.deleteMyAccountRequest(reason: reason, feedback: feedBack) { isSuccess, error, data in
                     let message = data["message"] as? String ?? ""
                     if isSuccess{

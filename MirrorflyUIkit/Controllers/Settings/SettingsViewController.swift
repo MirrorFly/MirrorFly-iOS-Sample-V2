@@ -116,6 +116,7 @@ extension SettingsViewController : UITableViewDelegate, UITableViewDataSource {
         case "Starred Messages":
             if let vc = UIStoryboard(name: "Chat", bundle: nil).instantiateViewController(withIdentifier: "ChatViewParentController") as? ChatViewParentController {
                 vc.isStarredMessagePage = true
+                vc.getProfileDetails = ChatManager.profileDetaisFor(jid: FlyDefaults.myJid)
                 self.navigationController?.pushViewController(vc, animated: true)
             }
             break

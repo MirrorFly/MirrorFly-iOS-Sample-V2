@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21225" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21207"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -278,10 +278,10 @@
                                         <rect key="frame" x="0.0" y="0.0" width="530" height="57"/>
                                         <subviews>
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ltF-uG-YPk">
-                                                <rect key="frame" x="10" y="10" width="28" height="37"/>
+                                                <rect key="frame" x="10" y="13.5" width="30" height="30"/>
                                                 <subviews>
                                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_audioSender" translatesAutoresizingMaskIntoConstraints="NO" id="tmV-MK-SHo">
-                                                        <rect key="frame" x="0.0" y="0.0" width="28" height="37"/>
+                                                        <rect key="frame" x="0.0" y="0.0" width="30" height="30"/>
                                                     </imageView>
                                                 </subviews>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -289,12 +289,14 @@
                                                     <constraint firstAttribute="bottom" secondItem="tmV-MK-SHo" secondAttribute="bottom" id="27w-h9-Ad1"/>
                                                     <constraint firstItem="tmV-MK-SHo" firstAttribute="leading" secondItem="ltF-uG-YPk" secondAttribute="leading" id="840-mh-fIQ"/>
                                                     <constraint firstAttribute="trailing" secondItem="tmV-MK-SHo" secondAttribute="trailing" id="AVW-gp-QSD"/>
-                                                    <constraint firstAttribute="width" constant="28" id="Au9-j7-vwP"/>
-                                                    <constraint firstItem="tmV-MK-SHo" firstAttribute="top" secondItem="ltF-uG-YPk" secondAttribute="top" id="Zhe-mj-5wJ"/>
+                                                    <constraint firstAttribute="width" constant="30" id="Au9-j7-vwP"/>
+                                                    <constraint firstItem="tmV-MK-SHo" firstAttribute="width" secondItem="ltF-uG-YPk" secondAttribute="width" id="LIT-cT-LMJ"/>
+                                                    <constraint firstItem="tmV-MK-SHo" firstAttribute="height" secondItem="ltF-uG-YPk" secondAttribute="height" id="m6s-6S-BP9"/>
+                                                    <constraint firstAttribute="height" constant="30" id="mpp-X9-cy2"/>
                                                 </constraints>
                                             </view>
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BWN-dR-yX2">
-                                                <rect key="frame" x="43" y="10" width="32" height="37"/>
+                                                <rect key="frame" x="45" y="10" width="32" height="37"/>
                                                 <subviews>
                                                     <imageView hidden="YES" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_audioUploadCancel" translatesAutoresizingMaskIntoConstraints="NO" id="DjW-mm-eWZ">
                                                         <rect key="frame" x="6" y="7" width="20" height="23"/>
@@ -316,7 +318,7 @@
                                                             <constraint firstAttribute="height" constant="5" id="WaE-xb-Tla"/>
                                                         </constraints>
                                                         <userDefinedRuntimeAttributes>
-                                                            <userDefinedRuntimeAttribute type="color" keyPath="borderColor">
+                                                            <userDefinedRuntimeAttribute type="color" keyPath="layer.borderColor">
                                                                 <color key="value" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                             </userDefinedRuntimeAttribute>
                                                         </userDefinedRuntimeAttributes>
@@ -336,10 +338,10 @@
                                                 </constraints>
                                             </view>
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="yrg-cK-lYY">
-                                                <rect key="frame" x="85" y="23.5" width="437" height="10"/>
+                                                <rect key="frame" x="87" y="23.5" width="435" height="10"/>
                                                 <subviews>
                                                     <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="mha-LY-byC">
-                                                        <rect key="frame" x="-2" y="-15" width="441" height="41"/>
+                                                        <rect key="frame" x="-2" y="-15" width="439" height="41"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="40" id="h9N-OM-Phq"/>
                                                         </constraints>
@@ -355,7 +357,7 @@
                                                 </constraints>
                                             </view>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="00:00" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Xdx-4S-4GG">
-                                                <rect key="frame" x="85" y="38.5" width="31.5" height="15.5"/>
+                                                <rect key="frame" x="87" y="38.5" width="31.5" height="15.5"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="11"/>
                                                 <color key="textColor" red="0.47058823529999999" green="0.47058823529999999" blue="0.47058823529999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <nil key="highlightedColor"/>
@@ -367,17 +369,17 @@
                                         </accessibility>
                                         <constraints>
                                             <constraint firstItem="yrg-cK-lYY" firstAttribute="leading" secondItem="Xdx-4S-4GG" secondAttribute="leading" id="5oX-K8-qbz"/>
-                                            <constraint firstAttribute="bottom" secondItem="ltF-uG-YPk" secondAttribute="bottom" constant="10" id="L9m-fW-n8X"/>
                                             <constraint firstItem="yrg-cK-lYY" firstAttribute="leading" secondItem="BWN-dR-yX2" secondAttribute="trailing" constant="10" id="NZS-Rd-o4T"/>
                                             <constraint firstItem="Xdx-4S-4GG" firstAttribute="leading" secondItem="ltF-uG-YPk" secondAttribute="trailing" constant="47" id="VMM-7a-W8z"/>
                                             <constraint firstItem="ltF-uG-YPk" firstAttribute="leading" secondItem="iWU-hE-09f" secondAttribute="leading" constant="10" id="Yx8-h2-sIv"/>
+                                            <constraint firstItem="ltF-uG-YPk" firstAttribute="centerY" secondItem="BWN-dR-yX2" secondAttribute="centerY" id="a39-6A-Eq4"/>
                                             <constraint firstItem="BWN-dR-yX2" firstAttribute="leading" secondItem="ltF-uG-YPk" secondAttribute="trailing" constant="5" id="dzQ-1a-dGD"/>
                                             <constraint firstItem="Xdx-4S-4GG" firstAttribute="top" secondItem="yrg-cK-lYY" secondAttribute="bottom" constant="5" id="iUr-7h-OO3"/>
-                                            <constraint firstItem="ltF-uG-YPk" firstAttribute="top" secondItem="iWU-hE-09f" secondAttribute="top" constant="10" id="jlS-eO-V8W"/>
                                             <constraint firstItem="BWN-dR-yX2" firstAttribute="top" secondItem="iWU-hE-09f" secondAttribute="top" constant="10" id="oGH-3c-E6g"/>
                                             <constraint firstAttribute="trailing" secondItem="yrg-cK-lYY" secondAttribute="trailing" constant="8" id="qqb-cR-xlE"/>
                                             <constraint firstItem="yrg-cK-lYY" firstAttribute="centerY" secondItem="iWU-hE-09f" secondAttribute="centerY" id="rL2-c7-hD6"/>
                                             <constraint firstAttribute="bottom" secondItem="Xdx-4S-4GG" secondAttribute="bottom" constant="3" id="ytj-uB-07A"/>
+                                            <constraint firstItem="BWN-dR-yX2" firstAttribute="centerY" secondItem="yrg-cK-lYY" secondAttribute="centerY" id="zeQ-dB-vf8"/>
                                             <constraint firstAttribute="bottom" secondItem="BWN-dR-yX2" secondAttribute="bottom" constant="10" id="zqC-6g-URK"/>
                                         </constraints>
                                         <userDefinedRuntimeAttributes>
@@ -436,7 +438,7 @@
                         </state>
                     </button>
                     <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="7f0-SW-8Zd">
-                        <rect key="frame" x="182" y="72" width="20" height="23"/>
+                        <rect key="frame" x="184" y="72" width="20" height="23"/>
                         <color key="tintColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                         <state key="normal">
@@ -444,7 +446,7 @@
                         </state>
                     </button>
                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="tDa-KR-uNA">
-                        <rect key="frame" x="176" y="65" width="32" height="37"/>
+                        <rect key="frame" x="178" y="65" width="32" height="37"/>
                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                         <state key="normal">

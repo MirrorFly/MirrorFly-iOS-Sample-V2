@@ -7,7 +7,6 @@
 
 import Foundation
 import UIKit
-import Toaster
 
 class AppAlert: NSObject {
 
@@ -21,13 +20,11 @@ class AppAlert: NSObject {
 
     //Simple Alert view
     func showToast(message : String){
-         let toast = Toast(text: message)
-         toast.show()
+        UIApplication.shared.windows.last?.makeToast(message: message, duration: 2, position: .bottom)
     }
     
     func showToastWithDuration(message : String, duration: Double){
-        let toast = Toast(text: message, duration: duration)
-         toast.show()
+        UIApplication.shared.windows.last?.makeToast(message: message, duration: duration, position: .bottom)
     }
     func showAlert(view: UIViewController, buttonTitle: String) {
 

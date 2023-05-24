@@ -8,7 +8,6 @@
 import UIKit
 import MirrorFlySDK
 import RxSwift
-import Toaster
 
 protocol SendSelectecUserDelegate {
     func sendSelectedUsers(selectedUsers: [Profile],completion: @escaping (() -> Void))
@@ -464,11 +463,28 @@ extension ForwardViewController : UITableViewDelegate, UITableViewDataSource {
                 cell.statusUILabel?.isHidden = false
                 cell.removeButton?.isHidden = true
                 cell.removeIcon?.isHidden = true
-                if recentChatDetails.lastMessageType == .text || recentChatDetails.lastMessageType == .notification {
-                    cell.statusUILabel?.text = recentChatDetails.lastMessageContent
-                } else  {
-                    cell.receiverMessageTypeView?.isHidden = false
-                    cell.statusUILabel?.text = recentChatDetails.lastMessageContent + (recentChatDetails.lastMessageType?.rawValue ?? "")
+                cell.receiverMessageTypeView?.isHidden = true
+                let chatMessage = recentChatDetails.lastMessageContent.trim()
+                if recentChatDetails.isMentionedUser, chatMessage.isNotEmpty {
+                    var message = emptyString()
+                    if recentChatDetails.profileType == .groupChat {
+                        message = ChatUtils.getMentionTextContent(message: recentChatDetails.lastMessageContent, isMessageSentByMe: recentChatDetails.isLastMessageSentByMe, mentionedUsers: recentChatDetails.mentionedUsersIds).string
+                    } else {
+                        message = ChatUtils.convertMentionUser(message: recentChatDetails.lastMessageContent, mentionedUsersIds: recentChatDetails.mentionedUsersIds).replacingOccurrences(of: "`", with: "")
+                    }
+                    if recentChatDetails.lastMessageType == .text || recentChatDetails.lastMessageType == .notification {
+                        cell.statusUILabel?.text = message
+                    } else {
+                        cell.receiverMessageTypeView?.isHidden = false
+                        cell.statusUILabel?.text = message + (recentChatDetails.lastMessageType?.rawValue ?? "")
+                    }
+                } else {
+                    if recentChatDetails.lastMessageType == .text || recentChatDetails.lastMessageType == .notification {
+                        cell.statusUILabel?.text = recentChatDetails.lastMessageContent
+                    } else  {
+                        cell.receiverMessageTypeView?.isHidden = false
+                        cell.statusUILabel?.text = recentChatDetails.lastMessageContent + (recentChatDetails.lastMessageType?.rawValue ?? "")
+                    }
                 }
                 showHideEmptyMessage(totalCount: isSearchEnabled == true ? getRecentChat.filter({$0.profileType == .groupChat}).count : getAllRecentChat.filter({$0.profileType == .groupChat}).count)
             case 3:
@@ -484,11 +500,27 @@ extension ForwardViewController : UITableViewDelegate, UITableViewDataSource {
                 let color = randomColors[abs(hashcode) % randomColors.count]
                 cell.setRecentChatDetails(recentChat: recentChatDetails, color: color ?? .gray)
                 cell.showLastMessageContentInfo()
-                if recentChatDetails.lastMessageType == .text || recentChatDetails.lastMessageType == .notification {
-                    cell.statusUILabel?.text = recentChatDetails.lastMessageContent
-                } else  {
-                    cell.receiverMessageTypeView?.isHidden = false
-                    cell.statusUILabel?.text = recentChatDetails.lastMessageContent + (recentChatDetails.lastMessageType?.rawValue ?? "")
+                let chatMessage = recentChatDetails.lastMessageContent.trim()
+                if recentChatDetails.isMentionedUser, chatMessage.isNotEmpty {
+                    var message = emptyString()
+                    if recentChatDetails.profileType == .groupChat {
+                        message = ChatUtils.getMentionTextContent(message: recentChatDetails.lastMessageContent, isMessageSentByMe: recentChatDetails.isLastMessageSentByMe, mentionedUsers: recentChatDetails.mentionedUsersIds).string
+                    } else {
+                        message = ChatUtils.convertMentionUser(message: recentChatDetails.lastMessageContent, mentionedUsersIds: recentChatDetails.mentionedUsersIds).replacingOccurrences(of: "`", with: "")
+                    }
+                    if recentChatDetails.lastMessageType == .text || recentChatDetails.lastMessageType == .notification {
+                        cell.statusUILabel?.text = message
+                    } else {
+                        cell.receiverMessageTypeView?.isHidden = false
+                        cell.statusUILabel?.text = message + (recentChatDetails.lastMessageType?.rawValue ?? "")
+                    }
+                } else {
+                    if recentChatDetails.lastMessageType == .text || recentChatDetails.lastMessageType == .notification {
+                        cell.statusUILabel?.text = recentChatDetails.lastMessageContent
+                    } else  {
+                        cell.receiverMessageTypeView?.isHidden = false
+                        cell.statusUILabel?.text = recentChatDetails.lastMessageContent + (recentChatDetails.lastMessageType?.rawValue ?? "")
+                    }
                 }
                 cell.statusUILabel?.isHidden = false
                 cell.removeButton?.isHidden = true
@@ -1169,7 +1201,7 @@ extension ForwardViewController : MessageEventsDelegate {
         
     }
     
-    func onMediaStatusFailed(error: String, messageId: String) {
+    func onMediaStatusFailed(error: String, messageId: String, errorCode: Int) {
         
     }
     

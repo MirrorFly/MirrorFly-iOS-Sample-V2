@@ -182,15 +182,14 @@ class ReceiverDocumentsTableViewCell: BaseTableViewCell {
         }
         
             if isDeletedOrStarredSelected == false {
-                
-                if (message?.mediaChatMessage?.mediaDownloadStatus == .not_downloaded || message?.mediaChatMessage?.mediaDownloadStatus == .failed || message?.mediaChatMessage?.mediaDownloadStatus == .downloading || message?.messageStatus == .notAcknowledged || message?.messageStatus == .sent || isShowForwardView == false) {
-                    forwardView?.isHidden = true
-                    forwardButton?.isHidden = true
-                    isAllowSwipe = false
-                } else {
+                if message?.mediaChatMessage?.mediaDownloadStatus == .downloaded && !(isShowForwardView ?? false) {
                     forwardView?.isHidden = false
                     forwardButton?.isHidden = false
                     isAllowSwipe = true
+                } else {
+                    forwardView?.isHidden = true
+                    forwardButton?.isHidden = true
+                    isAllowSwipe = false
                 }
             }
         

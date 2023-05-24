@@ -92,9 +92,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             navigateToBlockedScreen()
             return
         }
-        if Utility.getBoolFromPreference(key: isLoggedIn) && (FlyDefaults.isLoggedIn) {
-            ChatManager.connect()
-        }
         let current = UIApplication.shared.keyWindow?.getTopViewController()
         if (current is AuthenticationPINViewController || current is FingerPrintPINViewController) {
             if let vc = current as? FingerPrintPINViewController {
@@ -147,9 +144,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         FlyDefaults.appBackgroundTime = Date()
         postNotificationdidEnterBackground = NotificationCenter.default
         postNotificationdidEnterBackground?.post(name: Notification.Name(didEnterBackground), object: nil)
-        if Utility.getBoolFromPreference(key: isLoggedIn){
-            ChatManager.disconnect()
-        }
+
         // Called as the scene transitions from the foreground to the background.
         // Use this method to save data, release shared resources, and store enough scene-specific state information
         // to restore the scene back to its current state.

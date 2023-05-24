@@ -227,7 +227,7 @@
                         <view clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="13R-zW-VKB">
                             <rect key="frame" x="39" y="5" width="401" height="40"/>
                             <subviews>
-                                <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" usesAttributedText="YES" translatesAutoresizingMaskIntoConstraints="NO" id="i2H-ML-Rga" customClass="KMPlaceholderTextView" customModule="KMPlaceholderTextView">
+                                <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" usesAttributedText="YES" translatesAutoresizingMaskIntoConstraints="NO" id="i2H-ML-Rga" customClass="MentionTextView" customModule="UiKitQa">
                                     <rect key="frame" x="5" y="4" width="361" height="40"/>
                                     <constraints>
                                         <constraint firstAttribute="height" constant="40" id="HTh-zm-4sv"/>

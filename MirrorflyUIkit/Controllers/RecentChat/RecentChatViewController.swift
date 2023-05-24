@@ -1088,7 +1088,7 @@ extension RecentChatViewController : UITableViewDataSource ,UITableViewDelegate 
                             let chatMessage = getMessages(messageId: recentChat.lastMessageId)
                             let getGroupSenderName = ChatUtils.getGroupSenderName(messsage: chatMessage)
                             cell.setRecentChatMessage(recentChatMessage: recentChat, color: color, chatMessage: chatMessage, senderName: getGroupSenderName, fromArchive: showArchivedChat, forSearch: true)
-                            cell.setLastContentTextColor(searchText: searchBar?.text ?? "", recentChat: recentChat, caption: chatMessage.mediaChatMessage?.mediaCaptionText ?? "")
+                            cell.setLastContentTextColor(searchText: searchBar?.text ?? "", recentChat: recentChat, caption: chatMessage.mediaChatMessage?.mediaCaptionText ?? "", searchMessage: chatMessage)
                             cell.profileImageButton?.isHidden = true
                             cell.setChatTimeTextColor(lastMessageTime: recentChat.lastMessageTime, unreadCount: recentChat.unreadMessageCount)
                             cell.countLabel?.isHidden = true
@@ -1118,7 +1118,7 @@ extension RecentChatViewController : UITableViewDataSource ,UITableViewDelegate 
                 }
             }  else if indexPath.section == 2 {
                 if searchedMessages.count >= indexPath.row {
-                    openContactChat(index: indexPath)
+                    openContactChat(index: indexPath, searchMessageId: searchedMessages[indexPath.row].messageId)
                 }
             } else {
                 if indexPath.row < getRecentChat.count {
@@ -1328,7 +1328,7 @@ extension RecentChatViewController : UITableViewDataSource ,UITableViewDelegate 
             vc?.navigationController?.modalPresentationStyle = .overFullScreen
             self.navigationController?.pushViewController(vc!, animated: true)
     }
-    func openContactChat(index: IndexPath) {
+    func openContactChat(index: IndexPath, searchMessageId: String = "") {
         let vc = UIStoryboard.init(name: Storyboards.chat, bundle: Bundle.main).instantiateViewController(withIdentifier: Identifiers.chatViewParentController) as? ChatViewParentController
         switch index.section {
         case 0:
@@ -1401,6 +1401,7 @@ extension RecentChatViewController : UITableViewDataSource ,UITableViewDelegate 
             break
         }
         vc?.isStarredMessagePage = false
+        vc?.searchMessageId = searchMessageId
         navigationController?.modalPresentationStyle = .overFullScreen
         navigationController?.pushViewController(vc!, animated: true)
     }
@@ -1825,6 +1826,14 @@ extension RecentChatViewController {
 }
 
 extension RecentChatViewController : ConnectionEventDelegate {
+    func onConnectionFailed(error: FlyError) {
+    
+    }
+    
+    func onReconnecting() {
+    
+    }
+    
     func onConnected() {
         if !Utility.getBoolFromPreference(key: "oneTimeSync") {
             ContactSyncManager.shared.syncContacts(){ isSuccess,_,_ in
@@ -1838,7 +1847,6 @@ extension RecentChatViewController : ConnectionEventDelegate {
     
     func onDisconnected() {}
     
-    func onConnectionNotAuthorized() {}
 }
 
 // MessageEventDelegate
@@ -1857,7 +1865,7 @@ extension RecentChatViewController : MessageEventsDelegate {
         
     }
     
-    func onMediaStatusFailed(error: String, messageId: String) {
+    func onMediaStatusFailed(error: String, messageId: String, errorCode: Int) {
         
     }
     

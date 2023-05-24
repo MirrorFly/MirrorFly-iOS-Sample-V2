@@ -55,6 +55,7 @@ enum ImageConstant{
     static let ic_camera = "camera"
     
     static let ic_music = "music"
+    static let ic_sender_audio = "audio_icon"
     static let ic_video_play = "videoPlay"
     
     //RecentChaticons

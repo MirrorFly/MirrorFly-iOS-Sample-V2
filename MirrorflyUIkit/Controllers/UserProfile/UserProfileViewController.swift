@@ -11,7 +11,6 @@ import MirrorFlySDK
 import Foundation
 import MobileCoreServices
 import Photos
-import Toaster
 import Tatsi
 import QCropper
 import SDWebImage
@@ -842,6 +841,10 @@ extension UserProfileViewController : ProfileEventsDelegate {
 }
 
 extension UserProfileViewController: ConnectionEventDelegate {
+    func onConnectionFailed(error: FlyError) {
+        
+    }
+    
     func onConnected() {
         getProfile()
     }
@@ -849,8 +852,7 @@ extension UserProfileViewController: ConnectionEventDelegate {
     func onDisconnected() {
 
     }
+    
+    func onReconnecting(){}
 
-    func onConnectionNotAuthorized() {
-
-    }
 }

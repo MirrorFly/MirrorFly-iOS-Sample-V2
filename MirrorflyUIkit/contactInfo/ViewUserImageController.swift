@@ -32,7 +32,7 @@ class ViewUserImageController: ViewController {
         let placeholder = ChatUtils.getPlaceholder(name: profileDetails?.name ?? "", userColor: ChatUtils.getColorForUser(userName: name), userImage: userImage ?? UIImageView())
         let imageUrl = profileDetails?.image  ?? ""
         userImage?.loadFlyImage(imageURL: imageUrl, name: name, chatType: profileDetails?.profileChatType ?? .singleChat, jid: profileDetails?.jid ?? "")
-        
+        userImage?.backgroundColor = .white
         titleLabel?.text = name
     }
     

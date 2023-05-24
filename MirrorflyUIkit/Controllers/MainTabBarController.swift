@@ -168,6 +168,15 @@ class MainTabBarController: UITabBarController{
 }
 
 extension MainTabBarController : ConnectionEventDelegate {
+    
+    func onConnectionFailed(error: FlyError) {
+        
+    }
+    
+    func onReconnecting() {
+        
+    }
+    
     func onConnected() {
         if FlyDefaults.isFriendsListSyncPending {
             ContactManager.shared.getRegisteredUsers(fromServer: true){isSuccess,_,_ in
@@ -178,10 +187,6 @@ extension MainTabBarController : ConnectionEventDelegate {
     }
     
     func onDisconnected() {
-        
-    }
-    
-    func onConnectionNotAuthorized() {
         
     }
 }

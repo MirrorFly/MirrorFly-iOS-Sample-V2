@@ -216,7 +216,7 @@ open class ContextMenu: NSObject {
         }
 
         let rect = viewTargeted.convert(mainViewRect.origin, to: nil)
-
+        targetedImageView.contentMode = .scaleAspectFit
         targetedImageView.image = viewTargeted.image()
         targetedImageView.frame = CGRect(x: rect.x,
                                          y: rect.y,
@@ -293,7 +293,7 @@ open class ContextMenu: NSObject {
         }
         self.updateTargetedImageViewPosition(animated: animated, position: position, view)
         self.onViewAppear?(self.viewTargeted)
-
+        self.customView.bringSubviewToFront(menuView)
         self.delegate?.contextMenuDidAppear(self)
     }
 
@@ -605,7 +605,7 @@ open class ContextMenu: NSObject {
 
         weakSelf.targetedImageView.frame = CGRect(
             x: weakSelf.tvX,
-            y: weakSelf.tvY,
+            y: weakSelf.tvH >= weakSelf.mainViewRect.height ? 30 : weakSelf.tvY,
             width: weakSelf.tvW,
             height: weakSelf.tvH
         )

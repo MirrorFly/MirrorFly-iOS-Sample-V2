@@ -90,7 +90,7 @@ class AudioSender: BaseTableViewCell, AVAudioPlayerDelegate {
         audioPlaySlider?.setThumbImage( thumbImage, for: UIControl.State.normal)
         audioPlaySlider?.minimumValue = 0
         audioPlaySlider?.maximumValue = 100
-        audioSenderIcon?.image = UIImage(named: ImageConstant.ic_music)
+        audioSenderIcon?.image = UIImage(named: ImageConstant.ic_sender_audio)
         newProgressBar = ProgressBar(frame: CGRect(x: 0, y: 0, width: nicoProgressBar.frame.width, height: nicoProgressBar.frame.height))
         newProgressBar.primaryColor = .white
         newProgressBar.bgColor = .clear
@@ -174,32 +174,25 @@ class AudioSender: BaseTableViewCell, AVAudioPlayerDelegate {
             forwardImageView?.isHidden = true
             forwardView?.makeCircleView(borderColor: Color.forwardCircleBorderColor.cgColor, borderWidth: 1.5)
         }
-        if message?.isCarbonMessage == true {
-            if  (message?.mediaChatMessage?.mediaDownloadStatus == .not_downloaded || message?.mediaChatMessage?.mediaDownloadStatus == .failed || message?.mediaChatMessage?.mediaDownloadStatus == .downloading || message?.messageStatus == .notAcknowledged || isShowForwardView == true || isStarredMessagePage == true) {
-                fwdViw?.isHidden = true
-                fwdBtn?.isHidden = true
-                isAllowSwipe = false
-            } else {
-                fwdViw?.isHidden = false
-                fwdBtn?.isHidden = false
-                isAllowSwipe = true
-            }
+        
+        if ((message?.isCarbonMessage ?? false) ? message?.mediaChatMessage?.mediaDownloadStatus == .downloaded : message?.mediaChatMessage?.mediaUploadStatus == .uploaded) && !(isShowForwardView ?? false) {
+            fwdViw?.isHidden = false
+            fwdBtn?.isHidden = false
+            isAllowSwipe = true
         } else {
-            if  (message?.mediaChatMessage?.mediaUploadStatus == .not_uploaded || message?.mediaChatMessage?.mediaUploadStatus == .failed || message?.mediaChatMessage?.mediaUploadStatus == .uploading || message?.messageStatus == .notAcknowledged || isShowForwardView == true || isStarredMessagePage == true) {
-                fwdViw?.isHidden = true
-                fwdBtn?.isHidden = true
-                isAllowSwipe = false
-            } else {
-                fwdViw?.isHidden = false
-                fwdBtn?.isHidden = false
-                isAllowSwipe = true
-            }
+            fwdViw?.isHidden = true
+            fwdBtn?.isHidden = true
+            isAllowSwipe = false
         }
         
         if message?.mediaChatMessage?.audioType == AudioType.recording {
             audioSenderIcon?.image = UIImage(named: ImageConstant.ic_audio_recorded)
+            audioSenderIcon?.backgroundColor = .clear
         } else {
-            audioSenderIcon?.image = UIImage(named: ImageConstant.ic_music)
+            audioSenderIcon?.contentMode = .center
+            audioSenderIcon?.image = UIImage(named: ImageConstant.ic_sender_audio)
+            audioSenderIcon?.backgroundColor = Color.color_97A5C7
+            audioSenderIcon?.layer.cornerRadius = (audioSenderIcon?.bounds.width ?? 0)/2
         }
         
         // Reply view elements and its data
@@ -316,6 +309,50 @@ class AudioSender: BaseTableViewCell, AVAudioPlayerDelegate {
         }
         
         ChatUtils.setSenderBubbleBackground(imageView: bubbleImageView)
+        updateMediaStatus(message: message, indexPath: indexPath, isPlaying: isPlaying)
+        switch message?.messageStatus {
+        case .notAcknowledged:
+            status?.image = UIImage(named: ImageConstant.ic_hour)
+            status?.accessibilityLabel = notAcknowledged.localized
+            break
+        case .sent:
+            status?.image = UIImage(named: ImageConstant.ic_hour)
+            status?.accessibilityLabel = sent.localized
+            break
+        case .acknowledged:
+            status?.image = UIImage(named: ImageConstant.ic_sent)
+            status?.accessibilityLabel = acknowledged.localized
+            break
+        case .delivered:
+            status?.image = UIImage(named: ImageConstant.ic_delivered)
+            status?.accessibilityLabel = delivered.localized
+            break
+        case .seen:
+            status?.image = UIImage(named: ImageConstant.ic_seen)
+            status?.accessibilityLabel = seen.localized
+            break
+        case .received:
+            status?.image = UIImage(named: ImageConstant.ic_delivered)
+            status?.accessibilityLabel = delivered.localized
+            break
+        default:
+            status?.image = UIImage(named: ImageConstant.ic_hour)
+            status?.accessibilityLabel = notAcknowledged.localized
+            break
+        }
+        guard let timeStamp =  message?.messageSentTime else {
+            return self
+        }
+        self.sentTime?.text = DateFormatterUtility.shared.currentMillisecondsToLocalTime(milliSec: timeStamp)
+        return self
+    }
+    
+    func stopDisplayLink() {
+        updater?.invalidate()
+        updater = nil
+     }
+    
+    func updateMediaStatus(message: ChatMessage?, indexPath: IndexPath?, isPlaying: Bool) {
         if message?.isCarbonMessage == false {
             if message?.mediaChatMessage?.mediaUploadStatus == .not_uploaded {
                 uploadCancel?.isHidden = false
@@ -411,48 +448,7 @@ class AudioSender: BaseTableViewCell, AVAudioPlayerDelegate {
                 audioPlaySlider?.isUserInteractionEnabled = false
             }
         }
-        switch message?.messageStatus {
-        case .notAcknowledged:
-            status?.image = UIImage(named: ImageConstant.ic_hour)
-            status?.accessibilityLabel = notAcknowledged.localized
-            break
-        case .sent:
-            status?.image = UIImage(named: ImageConstant.ic_hour)
-            status?.accessibilityLabel = sent.localized
-            break
-        case .acknowledged:
-            status?.image = UIImage(named: ImageConstant.ic_sent)
-            status?.accessibilityLabel = acknowledged.localized
-            break
-        case .delivered:
-            status?.image = UIImage(named: ImageConstant.ic_delivered)
-            status?.accessibilityLabel = delivered.localized
-            break
-        case .seen:
-            status?.image = UIImage(named: ImageConstant.ic_seen)
-            status?.accessibilityLabel = seen.localized
-            break
-        case .received:
-            status?.image = UIImage(named: ImageConstant.ic_delivered)
-            status?.accessibilityLabel = delivered.localized
-            break
-        default:
-            status?.image = UIImage(named: ImageConstant.ic_hour)
-            status?.accessibilityLabel = notAcknowledged.localized
-            break
-        }
-        guard let timeStamp =  message?.messageSentTime else {
-            return self
-        }
-        self.sentTime?.text = DateFormatterUtility.shared.currentMillisecondsToLocalTime(milliSec: timeStamp)
-        return self
     }
-    
-    func stopDisplayLink() {
-        updater?.invalidate()
-        updater = nil
-     }
-    
     
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
         playIcon?.image = UIImage(named: ImageConstant.ic_play)

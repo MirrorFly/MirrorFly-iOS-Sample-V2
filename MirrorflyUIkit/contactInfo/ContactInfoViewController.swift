@@ -69,17 +69,20 @@ class ContactInfoViewController: ViewController {
     }
     
     private func getLastSeen() {
-        contactInfoViewModel.getLastSeen(jid: contactJid) { [weak self] lastSeen in
-            if lastSeen == "error" {
-                let indexPath = IndexPath(row: 0, section: 0)
-                if let cell = self?.contactInfoTableView?.cellForRow(at: indexPath) as? ContactImageCell {
-                    cell.onlineStatus?.text = emptyString()
-                    cell.onlineStatus?.isHidden = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(1000), execute: { [weak self] in
+            guard let self else {return}
+            self.contactInfoViewModel.getLastSeen(jid: self.contactJid) { lastSeen in
+                if lastSeen == "error" {
+                    let indexPath = IndexPath(row: 0, section: 0)
+                    if let cell = self.contactInfoTableView?.cellForRow(at: indexPath) as? ContactImageCell {
+                        cell.onlineStatus?.text = emptyString()
+                        cell.onlineStatus?.isHidden = true
+                    }
+                } else {
+                    self.setLastSeen(lastSeen: lastSeen)
                 }
-            } else {
-                self?.setLastSeen(lastSeen: lastSeen)
             }
-        }
+        })
     }
     
     private func setLastSeen(lastSeen : String) {
@@ -493,6 +496,14 @@ extension ContactInfoViewController {
 }
 
 extension ContactInfoViewController: ConnectionEventDelegate {
+    func onConnectionFailed(error: FlyError) {
+        
+    }
+    
+    func onReconnecting() {
+        
+    }
+    
     func onConnected() {
         getLastSeen()
     }
@@ -501,9 +512,6 @@ extension ContactInfoViewController: ConnectionEventDelegate {
         setLastSeen(lastSeen: waitingForNetwork)
     }
     
-    func onConnectionNotAuthorized() {
-        
-    }
 }
 
 extension ContactInfoViewController : AvailableFeaturesDelegate {

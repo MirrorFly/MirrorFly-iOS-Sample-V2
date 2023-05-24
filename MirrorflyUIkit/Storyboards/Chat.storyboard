@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="a6v-qf-Ud1">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="a6v-qf-Ud1">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21678"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -437,12 +437,30 @@
                                     <constraint firstItem="D5z-sL-2EN" firstAttribute="centerX" secondItem="sAz-2n-OhK" secondAttribute="centerX" id="fOH-Nc-wRF"/>
                                 </constraints>
                             </view>
+                            <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BX6-b4-TQW">
+                                <rect key="frame" x="0.0" y="618" width="393" height="200"/>
+                                <subviews>
+                                    <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="c5o-qz-r0o">
+                                        <rect key="frame" x="0.0" y="0.0" width="393" height="200"/>
+                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                    </tableView>
+                                </subviews>
+                                <color key="backgroundColor" name="progress_green"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="200" id="2gV-y7-A28"/>
+                                    <constraint firstAttribute="bottom" secondItem="c5o-qz-r0o" secondAttribute="bottom" id="7KV-5b-tg6"/>
+                                    <constraint firstAttribute="trailing" secondItem="c5o-qz-r0o" secondAttribute="trailing" id="YiY-5h-eiP"/>
+                                    <constraint firstItem="c5o-qz-r0o" firstAttribute="leading" secondItem="BX6-b4-TQW" secondAttribute="leading" id="dvZ-65-l46"/>
+                                    <constraint firstItem="c5o-qz-r0o" firstAttribute="top" secondItem="BX6-b4-TQW" secondAttribute="top" id="kyM-RZ-Pg5"/>
+                                </constraints>
+                            </view>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="t8I-hg-Oof"/>
                         <color key="backgroundColor" red="0.94901960780000005" green="0.94901960780000005" blue="0.94901960780000005" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <gestureRecognizers/>
                         <constraints>
                             <constraint firstItem="uyg-cc-Sqb" firstAttribute="leading" secondItem="o1q-Mw-BVQ" secondAttribute="leading" id="0p6-yS-65r"/>
+                            <constraint firstItem="BX6-b4-TQW" firstAttribute="leading" secondItem="t8I-hg-Oof" secondAttribute="leading" id="1gF-xm-Kei"/>
                             <constraint firstItem="o1q-Mw-BVQ" firstAttribute="top" secondItem="tYR-ZY-lng" secondAttribute="top" id="3cL-OP-KMe"/>
                             <constraint firstItem="tYR-ZY-lng" firstAttribute="leading" secondItem="t8I-hg-Oof" secondAttribute="leading" id="4DT-IL-3Or"/>
                             <constraint firstItem="ooK-05-PDO" firstAttribute="leading" secondItem="t8I-hg-Oof" secondAttribute="leading" id="55C-Kl-WUY"/>
@@ -453,6 +471,7 @@
                             <constraint firstItem="t8I-hg-Oof" firstAttribute="trailing" secondItem="tYR-ZY-lng" secondAttribute="trailing" id="AR9-Bf-PVE"/>
                             <constraint firstItem="t8I-hg-Oof" firstAttribute="trailing" secondItem="wG0-oh-ucO" secondAttribute="trailing" constant="10" id="AZn-hE-eAS"/>
                             <constraint firstItem="t8I-hg-Oof" firstAttribute="trailing" secondItem="1Rn-uK-goY" secondAttribute="trailing" id="Ata-J2-ehn"/>
+                            <constraint firstItem="t8I-hg-Oof" firstAttribute="trailing" secondItem="BX6-b4-TQW" secondAttribute="trailing" id="EHE-la-3JO"/>
                             <constraint firstItem="uyg-cc-Sqb" firstAttribute="trailing" secondItem="o1q-Mw-BVQ" secondAttribute="trailing" id="Jhf-7N-8FB"/>
                             <constraint firstItem="t8I-hg-Oof" firstAttribute="trailing" secondItem="GL1-9R-WMd" secondAttribute="trailing" id="LI8-y9-WHm"/>
                             <constraint firstItem="HdH-nz-NUv" firstAttribute="top" secondItem="tYR-ZY-lng" secondAttribute="top" id="MH7-AR-xlX"/>
@@ -475,6 +494,7 @@
                             <constraint firstItem="ooK-05-PDO" firstAttribute="top" secondItem="uyg-cc-Sqb" secondAttribute="bottom" id="pHz-MJ-qOY"/>
                             <constraint firstItem="t8I-hg-Oof" firstAttribute="trailing" secondItem="RJu-Nd-zCH" secondAttribute="trailing" id="ula-wJ-flq"/>
                             <constraint firstItem="sAz-2n-OhK" firstAttribute="centerX" secondItem="t8I-hg-Oof" secondAttribute="centerX" id="vhx-AQ-vji"/>
+                            <constraint firstItem="BX6-b4-TQW" firstAttribute="bottom" secondItem="ooK-05-PDO" secondAttribute="bottom" id="wmV-Xc-c6I"/>
                             <constraint firstAttribute="bottomMargin" secondItem="3Rb-gg-IiS" secondAttribute="bottom" constant="100" id="z5k-nY-Bjq"/>
                         </constraints>
                     </view>
@@ -492,6 +512,10 @@
                         <outlet property="headerView" destination="tYR-ZY-lng" id="1bI-bs-eWy"/>
                         <outlet property="lastSeenLabel" destination="1qq-YJ-Avs" id="yTa-pb-7wV"/>
                         <outlet property="longPressCountLabel" destination="OAA-V3-Wea" id="4rv-fx-1HZ"/>
+                        <outlet property="mentionBaseView" destination="BX6-b4-TQW" id="4Px-JI-W80"/>
+                        <outlet property="mentionBottom" destination="wmV-Xc-c6I" id="Ibe-GZ-GkC"/>
+                        <outlet property="mentionHeight" destination="2gV-y7-A28" id="99p-GX-vuk"/>
+                        <outlet property="mentionTableView" destination="c5o-qz-r0o" id="ZHw-Eg-6Au"/>
                         <outlet property="menuButton" destination="Grz-AT-BAL" id="PzN-Nn-qrn"/>
                         <outlet property="messageSearchBar" destination="HdH-nz-NUv" id="VlH-Z7-yJV"/>
                         <outlet property="messageSearchDown" destination="DIf-J7-mzg" id="K0X-Qe-I5t"/>
@@ -530,7 +554,7 @@
                     </connections>
                 </searchDisplayController>
             </objects>
-            <point key="canvasLocation" x="134.78260869565219" y="-206.25"/>
+            <point key="canvasLocation" x="133.58778625954199" y="-206.33802816901411"/>
         </scene>
         <!--Update Group Info View Controller-->
         <scene sceneID="Y79-ds-fqK">
@@ -1050,11 +1074,11 @@
             <objects>
                 <viewController id="Pto-9t-rvq" customClass="ChatContactViewController" customModule="Mirrorfly" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="cU1-ry-Y4x">
-                        <rect key="frame" x="0.0" y="0.0" width="393" height="783"/>
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="842"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="pXI-Lh-PO1">
-                                <rect key="frame" x="0.0" y="59" width="393" height="724"/>
+                                <rect key="frame" x="0.0" y="0.0" width="393" height="842"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" distribution="fillProportionally" translatesAutoresizingMaskIntoConstraints="NO" id="Okn-2y-Fhl">
                                         <rect key="frame" x="0.0" y="0.0" width="393" height="50"/>
@@ -1135,7 +1159,7 @@
                                         </constraints>
                                     </stackView>
                                     <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" indicatorStyle="white" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="40" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="Ry3-Py-Z1i">
-                                        <rect key="frame" x="0.0" y="130" width="393" height="594"/>
+                                        <rect key="frame" x="0.0" y="130" width="393" height="712"/>
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <color key="sectionIndexBackgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <color key="sectionIndexTrackingBackgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -1703,6 +1727,9 @@
         </namedColor>
         <namedColor name="group_info_name_back_color">
             <color red="0.94901960784313721" green="0.94901960784313721" blue="0.94901960784313721" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="progress_green">
+            <color red="0.18823529411764706" green="0.75294117647058822" blue="0.46274509803921571" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

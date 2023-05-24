@@ -156,7 +156,7 @@ class ChatViewParentMessageCell: BaseTableViewCell {
         }
     }
     
-    func getCellFor(_ message: ChatMessage?, at indexPath: IndexPath?,isShowForwardView: Bool?, fromChat: Bool = false, isMessageSearch: Bool = false, searchText: String = "") -> ChatViewParentMessageCell? {
+    func getCellFor(_ message: ChatMessage?, at indexPath: IndexPath?,isShowForwardView: Bool?, fromChat: Bool = false, isMessageSearch: Bool = false, searchText: String = "", profileDetails: ProfileDetails) -> ChatViewParentMessageCell? {
         currentIndexPath = nil
         currentIndexPath = indexPath
         replyViewHeightCons?.isActive = true
@@ -231,7 +231,12 @@ class ChatViewParentMessageCell: BaseTableViewCell {
            } else {
             let getReplymessage =  replyMessage?.messageTextContent
            replyViewHeightCons?.isActive = (getReplymessage?.count ?? 0 > 20) ? false : true
-               replyTextLabel?.attributedText = ChatUtils.getAttributedMessage(message: getReplymessage ?? "", searchText: searchText, isMessageSearch: isMessageSearch,isSystemBlue: false)
+               if let getReplyMessage =  replyMessage, profileDetails.profileChatType == .groupChat, !getReplyMessage.mentionedUsersIds.isEmpty {
+                   replyTextLabel?.attributedText = ChatUtils.getMentionTextContent(message: getReplyMessage.messageTextContent, isMessageSentByMe: getReplyMessage.isMessageSentByMe, mentionedUsers: getReplyMessage.mentionedUsersIds, searchedText: searchText)
+               } else {
+                   replyTextLabel?.attributedText = ChatUtils.getAttributedMessage(message: getReplymessage ?? "", searchText: searchText, isMessageSearch: isMessageSearch,isSystemBlue: false)
+               }
+           //replyTextLabel?.text = ChatUtils.getMentionTextContent(message: getReplymessage ?? "", uiLabel: replyTextLabel, isMessageSentByMe: replyMessage?.isMessageSentByMe ?? false, mentionedUsers: replyMessage?.mentionedUsersIds ?? []).string
            if replyMessage?.mediaChatMessage != nil {
                mediaImageViewWidthCons?.constant = 50
                replyMessageIconWidthCons?.constant = 12
@@ -251,7 +256,17 @@ class ChatViewParentMessageCell: BaseTableViewCell {
                                mediaImageView?.image = image
                                mediaImageView?.isHidden = false
                                messageIconView?.isHidden = false
-                               replyTextLabel?.text = !(replyMessage?.mediaChatMessage?.mediaCaptionText.isEmpty ?? false) ? replyMessage?.mediaChatMessage?.mediaCaptionText : "Photo"
+                               //replyTextLabel?.text = !(replyMessage?.mediaChatMessage?.mediaCaptionText.isEmpty ?? false) ? replyMessage?.mediaChatMessage?.mediaCaptionText : "Photo"
+                               let message = replyMessage?.mediaChatMessage?.mediaCaptionText
+                               if message?.isEmpty ?? false {
+                                   replyTextLabel?.text = replyMessage?.mediaChatMessage?.messageType.rawValue.capitalized
+                               } else {
+                                   if profileDetails.profileChatType == .groupChat {
+                                       replyTextLabel?.text = ChatUtils.getMentionTextContent(message: message ?? "", uiLabel: replyTextLabel, isMessageSentByMe: replyMessage?.isMessageSentByMe ?? false, mentionedUsers: replyMessage?.mentionedUsersIds ?? []).string
+                                   } else {
+                                       replyTextLabel?.text = ChatUtils.convertMentionUser(message: message ?? "", mentionedUsersIds: replyMessage?.mentionedUsersIds ?? []).replacingOccurrences(of: "`", with: "")
+                                   }
+                               }
                            }else {
                                if let thumImage = replyMessage?.mediaChatMessage?.mediaThumbImage {
                                    let converter = ImageConverter()
@@ -259,7 +274,17 @@ class ChatViewParentMessageCell: BaseTableViewCell {
                                    mediaImageView?.image = image
                                    mediaImageView?.isHidden = false
                                    messageIconView?.isHidden = false
-                                   replyTextLabel?.text = !(replyMessage?.mediaChatMessage?.mediaCaptionText.isEmpty ?? false) ? replyMessage?.mediaChatMessage?.mediaCaptionText : "Photo"
+                                  // replyTextLabel?.text = !(replyMessage?.mediaChatMessage?.mediaCaptionText.isEmpty ?? false) ? replyMessage?.mediaChatMessage?.mediaCaptionText : "Photo"
+                                   let message = replyMessage?.mediaChatMessage?.mediaCaptionText
+                                   if message?.isEmpty ?? false {
+                                       replyTextLabel?.text = replyMessage?.mediaChatMessage?.messageType.rawValue.capitalized
+                                   } else {
+                                       if profileDetails.profileChatType == .groupChat {
+                                           replyTextLabel?.text = ChatUtils.getMentionTextContent(message: message ?? "", uiLabel: replyTextLabel, isMessageSentByMe: replyMessage?.isMessageSentByMe ?? false, mentionedUsers: replyMessage?.mentionedUsersIds ?? []).string
+                                       } else {
+                                           replyTextLabel?.text = ChatUtils.convertMentionUser(message: message ?? "", mentionedUsersIds: replyMessage?.mentionedUsersIds ?? []).replacingOccurrences(of: "`", with: "").replacingOccurrences(of: "`", with: "")
+                                       }
+                                   }
                                }
                            }
                        }
@@ -270,7 +295,17 @@ class ChatViewParentMessageCell: BaseTableViewCell {
                            mediaImageView?.image = image
                            mediaImageView?.isHidden = false
                            messageIconView?.isHidden = false
-                           replyTextLabel?.text = !(replyMessage?.mediaChatMessage?.mediaCaptionText.isEmpty ?? false) ? replyMessage?.mediaChatMessage?.mediaCaptionText : "Photo"
+                           //replyTextLabel?.text = !(replyMessage?.mediaChatMessage?.mediaCaptionText.isEmpty ?? false) ? replyMessage?.mediaChatMessage?.mediaCaptionText : "Photo"
+                           let message = replyMessage?.mediaChatMessage?.mediaCaptionText
+                           if message?.isEmpty ?? false {
+                               replyTextLabel?.text = replyMessage?.mediaChatMessage?.messageType.rawValue.capitalized
+                           } else {
+                               if profileDetails.profileChatType == .groupChat {
+                                   replyTextLabel?.text = ChatUtils.getMentionTextContent(message: message ?? "", uiLabel: replyTextLabel, isMessageSentByMe: replyMessage?.isMessageSentByMe ?? false, mentionedUsers: replyMessage?.mentionedUsersIds ?? []).string
+                               } else {
+                                   replyTextLabel?.text = ChatUtils.convertMentionUser(message: message ?? "", mentionedUsersIds: replyMessage?.mentionedUsersIds ?? []).replacingOccurrences(of: "`", with: "").replacingOccurrences(of: "`", with: "")
+                               }
+                           }
                        }
                    }
                    replyVIewWithMediaCons?.isActive = true
@@ -280,7 +315,17 @@ class ChatViewParentMessageCell: BaseTableViewCell {
                    messageIconView?.isHidden = false
                    ChatUtils.setIconForAudio(imageView: messageTypeIcon, chatMessage: nil, replyParentMessage: message?.replyParentChatMessage)
                    let duration = Int(replyMessage?.mediaChatMessage?.mediaDuration ?? 0)
-                   replyTextLabel?.text = !(replyMessage?.mediaChatMessage?.mediaCaptionText.isEmpty ?? false) ? replyMessage?.mediaChatMessage?.mediaCaptionText : replyMessage?.mediaChatMessage?.messageType.rawValue.capitalized.appending(" (\(duration.msToSeconds.minuteSecondMS))")
+                   let message = replyMessage?.mediaChatMessage?.mediaCaptionText
+                   if message?.isEmpty ?? false {
+                       replyTextLabel?.text = replyMessage?.mediaChatMessage?.messageType.rawValue.capitalized.appending(" (\(duration.msToSeconds.minuteSecondMS))")
+                   } else {
+                       if profileDetails.profileChatType == .groupChat {
+                           replyTextLabel?.text = ChatUtils.getMentionTextContent(message: message ?? "", uiLabel: replyTextLabel, isMessageSentByMe: replyMessage?.isMessageSentByMe ?? false, mentionedUsers: replyMessage?.mentionedUsersIds ?? []).string
+                       } else {
+                           replyTextLabel?.text = ChatUtils.convertMentionUser(message: message ?? "", mentionedUsersIds: replyMessage?.mentionedUsersIds ?? []).replacingOccurrences(of: "`", with: "")
+                       }
+                   }
+//                   replyTextLabel?.text = !(replyMessage?.mediaChatMessage?.mediaCaptionText.isEmpty ?? false) ? replyMessage?.mediaChatMessage?.mediaCaptionText : replyMessage?.mediaChatMessage?.messageType.rawValue.capitalized.appending(" (\(duration.msToSeconds.minuteSecondMS))")
                    replyVIewWithMediaCons?.isActive = false
                    replyViewWithoutMediaCons?.isActive = true
                case .video:
@@ -291,7 +336,17 @@ class ChatViewParentMessageCell: BaseTableViewCell {
                        mediaImageView?.image = image
                        mediaImageView?.isHidden = false
                        messageIconView?.isHidden = false
-                       replyTextLabel?.text = !(replyMessage?.mediaChatMessage?.mediaCaptionText.isEmpty ?? false) ? replyMessage?.mediaChatMessage?.mediaCaptionText : replyMessage?.mediaChatMessage?.messageType.rawValue.capitalized
+                      // replyTextLabel?.text = !(replyMessage?.mediaChatMessage?.mediaCaptionText.isEmpty ?? false) ? replyMessage?.mediaChatMessage?.mediaCaptionText : replyMessage?.mediaChatMessage?.messageType.rawValue.capitalized
+                       let message = replyMessage?.mediaChatMessage?.mediaCaptionText
+                       if message?.isEmpty ?? false {
+                           replyTextLabel?.text = replyMessage?.mediaChatMessage?.messageType.rawValue.capitalized
+                       } else {
+                           if profileDetails.profileChatType == .groupChat {
+                               replyTextLabel?.text = ChatUtils.getMentionTextContent(message: message ?? "", uiLabel: replyTextLabel, isMessageSentByMe: replyMessage?.isMessageSentByMe ?? false, mentionedUsers: replyMessage?.mentionedUsersIds ?? []).string
+                           } else {
+                               replyTextLabel?.text = ChatUtils.convertMentionUser(message: message ?? "", mentionedUsersIds: replyMessage?.mentionedUsersIds ?? []).replacingOccurrences(of: "`", with: "")
+                           }
+                       }
                    }
                    replyVIewWithMediaCons?.isActive = true
                    replyViewWithoutMediaCons?.isActive = false
@@ -451,8 +506,7 @@ class ChatViewParentMessageCell: BaseTableViewCell {
         switch  message?.messageType {
         case .text:
             if let label = messageLabel {
-
-                messageLabel?.attributedText = processTextMessage(message: message?.messageTextContent ?? "", uiLabel: label, fromChat: fromChat, isMessageSearch: isMessageSearch, searchText: searchText, isSentByMe: message?.isMessageSentByMe ?? false)
+                messageLabel?.attributedText = processTextMessage(message: message?.messageTextContent ?? "", uiLabel: label, fromChat: fromChat, isMessageSearch: isMessageSearch, searchText: searchText, isMessageSentByMe: message?.isMessageSentByMe ?? false, mentionedUsers: message?.mentionedUsersIds ?? [], profileDetails: profileDetails)
                 print("message label width = \(messageLabel?.frame.size.width)")
 
             }
@@ -494,8 +548,8 @@ class ChatViewParentMessageCell: BaseTableViewCell {
         if (message!.isMessageTranslated && FlyDefaults.isTranlationEnabled) {
             guard let chatMessage = message,let messageLabeltemp = messageLabel, let translatedTextLabeltemp = translatedTextLabel else {return self }
 
-            messageLabel?.attributedText = processTextMessage(message: chatMessage.messageTextContent , uiLabel: messageLabeltemp, fromChat: fromChat, isMessageSearch: isMessageSearch, searchText: searchText, isSentByMe: message?.isMessageSentByMe ?? false)
-            translatedTextLabel?.attributedText = processTextMessage(message: chatMessage.translatedMessageTextContent , uiLabel: translatedTextLabeltemp, fromChat: fromChat, isMessageSearch: isMessageSearch, searchText: searchText, isSentByMe: message?.isMessageSentByMe ?? false)
+            messageLabel?.attributedText = processTextMessage(message: chatMessage.messageTextContent , uiLabel: messageLabeltemp, fromChat: fromChat, isMessageSearch: isMessageSearch, searchText: searchText, isMessageSentByMe: message?.isMessageSentByMe ?? false, mentionedUsers: message?.mentionedUsersIds ?? [], profileDetails: profileDetails)
+            translatedTextLabel?.attributedText = processTextMessage(message: chatMessage.translatedMessageTextContent , uiLabel: translatedTextLabeltemp, fromChat: fromChat, isMessageSearch: isMessageSearch, searchText: searchText, isMessageSentByMe: message?.isMessageSentByMe ?? false, mentionedUsers: message?.mentionedUsersIds ?? [], profileDetails: profileDetails)
 
         }
         return self
@@ -531,7 +585,7 @@ class ChatViewParentMessageCell: BaseTableViewCell {
     }
     
 
-    func processTextMessage(message : String, uiLabel : UILabel, fromChat: Bool = false, isMessageSearch: Bool = false, searchText: String = "", isSentByMe: Bool) -> NSMutableAttributedString? {
+    func processTextMessage(message : String, uiLabel : UILabel, fromChat: Bool = false, isMessageSearch: Bool = false, searchText: String = "", isMessageSentByMe: Bool, mentionedUsers: [String], profileDetails: ProfileDetails) -> NSMutableAttributedString? {
 
         var attributedString : NSMutableAttributedString?
         if !message.isEmpty {
@@ -571,6 +625,13 @@ class ChatViewParentMessageCell: BaseTableViewCell {
                     }
                 }
                  print("processTextMessage After else \(tempText)")
+            }
+            if !mentionedUsers.isEmpty {
+                if profileDetails.profileChatType == .groupChat {
+                    attributedString = ChatUtils.getMentionTextContent(message: message, uiLabel: uiLabel, isMessageSentByMe: isMessageSentByMe, mentionedUsers: mentionedUsers, searchedText: searchText)
+                } else {
+                    attributedString = NSMutableAttributedString(string: ChatUtils.convertMentionUser(message: message, mentionedUsersIds: mentionedUsers).replacingOccurrences(of: "`", with: ""))
+                }
             }
         } else {
             attributedString = NSMutableAttributedString(string: message)

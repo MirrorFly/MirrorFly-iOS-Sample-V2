@@ -10,10 +10,8 @@ import WebRTC
 import Alamofire
 import PulsingHalo
 import AVKit
-import Toaster
 import RxSwift
 import MirrorFlySDK
-
 
 enum CallMode : String{
     case Incoming
@@ -90,6 +88,8 @@ class CallViewController: UIViewController ,AVPictureInPictureControllerDelegate
     var returnToCall = UIImageView()
     
     var isOnCall = false
+
+    var overlayShown = false
     
     var safeAreaHeight : CGFloat = 0.0
     var safeAraeWidth : CGFloat = 0.0
@@ -111,7 +111,7 @@ class CallViewController: UIViewController ,AVPictureInPictureControllerDelegate
     var remoteImage = emptyString()
     var callHoldLabel = UILabel()
     var isFromInvite = false
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         print("#lifecycle viewDidLoad")
@@ -194,7 +194,7 @@ class CallViewController: UIViewController ,AVPictureInPictureControllerDelegate
     
     func showOneToOneVideoCallUI() {
         print("#call showOneToOneVideoCallUI")
-
+        
         outgoingCallView?.localUserVideoView.isHidden = false
         outgoingCallView?.remoteUserVideoView.isHidden = false
         collectionView?.isHidden = CallManager.isOneToOneCall()
@@ -243,9 +243,11 @@ class CallViewController: UIViewController ,AVPictureInPictureControllerDelegate
         }
         let tap = UITapGestureRecognizer(target: self, action: #selector(smallVideoTileTapped(_:)))
         outgoingCallView?.localUserVideoView?.addGestureRecognizer(tap)
+        
     }
     
     @objc func draggedView(_ sender:UIPanGestureRecognizer){
+        
         guard let localView = outgoingCallView?.localUserVideoView! else { return }
         let translation = sender.translation(in: view)
         
@@ -313,7 +315,14 @@ class CallViewController: UIViewController ,AVPictureInPictureControllerDelegate
     }
     
     func showCallOverlay() {
-        
+
+        overlayShown = true
+        if let controller = self.presentingViewController {
+            if let cont = controller as? UINavigationController, let vc = cont.topViewController {
+                ContactManager.shared.profileDelegate = vc as? ProfileEventsDelegate
+            }
+        }
+
         callViewOverlay = UIView(frame: CGRect(x: UIScreen.main.bounds.size.width - 150, y: 100, width: 150, height: 150))
         callViewOverlay.backgroundColor = UIColor.clear
         callViewOverlay.layer.cornerRadius = callViewOverlay.frame.size.height / 2
@@ -359,6 +368,9 @@ class CallViewController: UIViewController ,AVPictureInPictureControllerDelegate
     }
     
     @objc func callViewTapGestureAction(_ tapGesture: UITapGestureRecognizer?) {
+
+        overlayShown = false
+        ContactManager.shared.profileDelegate = self
         callViewOverlay.removeFromSuperview()
         let window = UIApplication.shared.windows.filter {$0.isKeyWindow}.first
         if let rootVC = window?.rootViewController {
@@ -456,9 +468,9 @@ class CallViewController: UIViewController ,AVPictureInPictureControllerDelegate
             self.collectionView?.delegate = self
             self.collectionView?.dataSource = self
         }
-
+        
         if isAddParticipant == false {
-
+           
             collectionView?.backgroundColor = bgcolor
             getContactNames()
             if isOnCall{
@@ -521,7 +533,9 @@ class CallViewController: UIViewController ,AVPictureInPictureControllerDelegate
     override func viewWillDisappear(_ animated: Bool) {
         print("#lifecycle viewWillDisappear")
         super.viewWillDisappear(animated)
-        ContactManager.shared.profileDelegate = nil
+        if overlayShown == false {
+            ContactManager.shared.profileDelegate = nil
+        }
     }
     
     override func viewDidDisappear(_ animated: Bool) {
@@ -693,14 +707,14 @@ class CallViewController: UIViewController ,AVPictureInPictureControllerDelegate
     
     @objc func SingleTapGesturTapped(_ sender: UITapGestureRecognizer) {
         // if members.count == 2 {
-
+        
         print(self.outgoingCallView?.localUserVideoView.frame.origin.y)
-
+        
         if isTapped == false{
             isTapped = true
             let bottom = CGAffineTransform(translationX: 0, y: 200)
             let top = CGAffineTransform(translationX: 0, y: -400)
-
+            
             UIView.animate(withDuration: 0.4, delay: 0.0, options: [], animations: {
                 if !CallManager.isOneToOneCall() || CallManager.getCallType() == .Video{
                     self.outgoingCallView?.AttendingBottomView.transform = bottom
@@ -742,7 +756,7 @@ class CallViewController: UIViewController ,AVPictureInPictureControllerDelegate
                 self.outgoingCallView?.OutgoingRingingStatusLabel.transform = bottom
             }, completion: nil)
         }
-
+        
         if self.outgoingCallView?.localUserVideoView.frame.origin.y == 480.0 ||  self.outgoingCallView?.localUserVideoView.frame.origin.y == 280.0 || self.outgoingCallView?.localUserVideoView.frame.origin.y == 320.0{
             if isTapped == true{
                 let bottom = CGAffineTransform(translationX: 0, y: 160)
@@ -757,9 +771,9 @@ class CallViewController: UIViewController ,AVPictureInPictureControllerDelegate
                     self.callHoldLabel.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
                 }, completion: nil)
             }
-
+            
             print(self.outgoingCallView?.localUserVideoView.frame.origin.y)
-
+            
         }
         
     }
@@ -985,7 +999,6 @@ extension CallViewController {
         if self.isCallConversionRequestedByMe && self.isCallConversionRequestedByRemote{
             CallManager.setCallType(callType: .Video)
             CallManager.acceptVideoCallSwitchRequest()
-            CallManager.muteVideo(false)
             switchAudioToVideoCall()
             isCallConversionRequestedByMe = false
             isCallConversionRequestedByRemote = false
@@ -1101,7 +1114,7 @@ extension CallViewController : UICollectionViewDelegate , UICollectionViewDataSo
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-
+        
         let groupCell = self.collectionView?.dequeueReusableCell(withReuseIdentifier: GroupCallCell.identifier, for: indexPath) as! GroupCallCell
         let member = members[indexPath.row]
         let isLastRow = (indexPath.row == members.count - 1)
@@ -1150,9 +1163,14 @@ extension CallViewController : UICollectionViewDelegate , UICollectionViewDataSo
             groupCell.statusLable.textColor = UIColor(hexString: "#FFFFFF")
             groupCell.profileName.font = AppFont.Regular.size(14)
         }
-        Utility.IntialLetter(name: member.name, imageView: groupCell.videoBaseView, colorCode: member.color,frameSize: 128,fontSize: 64)
-        Utility.download(token: member.image, profileImage: groupCell.videoBaseView, uniqueId: member.jid,name: member.name,colorCode: member.color,frameSize: 128,fontSize: 64,notify: true, completion: { [weak self] in
-        })
+        if member.isVideoMuted || member.videoTrack == nil || CallManager.getCallType() == .Audio {
+            Utility.IntialLetter(name: member.name, imageView: groupCell.videoBaseView, colorCode: member.color,frameSize: 128,fontSize: 64)
+            Utility.download(token: member.image, profileImage: groupCell.videoBaseView, uniqueId: member.jid,name: member.name,colorCode: member.color,frameSize: 128,fontSize: 64,notify: true, completion: {
+            })
+        } else {
+            groupCell.videoBaseView.addSubview(member.videoTrackView)
+        }
+        
         return groupCell
     }
     
@@ -1372,12 +1390,16 @@ extension CallViewController : CallManagerDelegate {
             addMyInfoToMembersArray(videoTrack: videoTrack)
             self.members.last?.videoTrack = videoTrack
             executeOnMainThread {
-                self.addlocalTrackToView(videoTrack: videoTrack)
+                autoreleasepool {
+                    self.addlocalTrackToView(videoTrack: videoTrack)
+                }
             }
         } else {
             if !CallManager.isCallConnected() {
                 executeOnMainThread {
-                    self.addlocalTrackToView(videoTrack: videoTrack)
+                    autoreleasepool {
+                        self.addlocalTrackToView(videoTrack: videoTrack)
+                    }
                 }
             }
             addMyInfoToMembersArray(videoTrack: videoTrack)
@@ -1401,7 +1423,7 @@ extension CallViewController : CallManagerDelegate {
             }
         }
     }
-
+    
     func addRemoteTrackToView() {
         if let remoteView = self.outgoingCallView?.remoteUserVideoView, let jid = members.first?.jid, let videoTrack = CallManager.getRemoteVideoTrack(jid: jid) {
             self.remoteRenderer.removeFromSuperview()
@@ -1420,7 +1442,7 @@ extension CallViewController : CallManagerDelegate {
             self.showConnectedVideoCallOneToOneUI()
         }
     }
-
+    
     func addMyInfoToMembersArray(videoTrack: RTCVideoTrack) {
         let callMember = CallMember()
         callMember.name = FlyDefaults.myName
@@ -1545,7 +1567,7 @@ extension CallViewController : CallManagerDelegate {
     func onCallStatusUpdated(callStatus: CALLSTATUS, userId: String) {
         print("STEP #call onCallStatusUpdated \(callStatus.rawValue) userJid : \(userId) memersCount : \(members.count)")
         CallViewController.refreshDelegate?.refreshCallLog()
-
+        
         DispatchQueue.main.async { [weak self] in
             
             if userId == FlyDefaults.myJid && (callStatus != .RECONNECTING && callStatus != .RECONNECTED) {
@@ -1609,7 +1631,9 @@ extension CallViewController : CallManagerDelegate {
                     self?.outgoingCallView?.timerTop.constant = 0
                     self?.outgoingCallView?.imageHeight.constant = 0
                 }
+                AudioManager.shared().stopPlayingTone()
             case .CONNECTED:
+                self?.callHoldLabel.removeFromSuperview()
                 self?.setHoldText(isShow: false)
                 print("#callStatus onCallStatus ==== \(userId) Connected")
                 if ((self?.audioPlayer) != nil) {
@@ -1688,19 +1712,17 @@ extension CallViewController : CallManagerDelegate {
             case .ON_HOLD:
                 self?.isOnCall = true
                 let userId = userId.isEmpty ? FlyDefaults.myJid : userId
-                var indexValue : Int? = nil
                 if let index =  self?.findIndexOfUser(jid: userId) {
-                    print("#callStatus onCallStatus ====  .ON_HOLD for \(userId) at \(index)  \(CallManager.isOneToOneCall())  \(self?.members.count)")
-                    indexValue = index
+                    print("#callStatus onCallStatus ====  .ON_HOLD for \(userId) at \(index)  \(CallManager.isOneToOneCall())  \(String(describing: self?.members.count ?? 0))")
                     self?.members[index].callStatus = .onHold
                 }
+                self?.setHoldText(isShow: true)
                 _ = self?.updateCallStatus(jid: userId, status: .onHold)
                 if CallManager.isOneToOneCall() && (self?.members.count == 2) {
                     self?.outgoingCallView?.OutgoingRingingStatusLabel.text = CallStatus.onHold.rawValue
                 }else{
                     self?.outgoingCallView?.OutgoingRingingStatusLabel.text =  CallStatus.connected.rawValue
                 }
-                self?.setHoldText(isShow: true)
                 FlyLogWriter.sharedInstance.writeText("#call UI .ON_HOLD => \(userId) \(self?.members.count)")
             case .ON_RESUME:
                 self?.isOnCall = true
@@ -1713,6 +1735,7 @@ extension CallViewController : CallManagerDelegate {
                     indexValue = index
                     self?.members[index].callStatus = .connected
                 }
+                _ = self?.updateCallStatus(jid: userId, status: .connected)
                 if CallManager.isOneToOneCall() && (self?.members.count == 2) {
                     self?.outgoingCallView?.OutgoingRingingStatusLabel.text =  CallStatus.connected.rawValue
                     self?.myCallStatus = .connected
@@ -1725,6 +1748,8 @@ extension CallViewController : CallManagerDelegate {
                         self?.reloadCollectionViewForIndex(index: indexValue)
                     }
                 }
+                self?.outgoingCallView?.OutgoingRingingStatusLabel.isHidden = true
+                self?.callHoldLabel.removeFromSuperview()
                 self?.setHoldText(isShow: false)
                 FlyLogWriter.sharedInstance.writeText("#call UI .ON_RESUME => \(userId) \(self?.members.count) videoMute => \(CallManager.getMuteStatus(jid: userId, isAudioStatus: false))")
             case .USER_JOINED:
@@ -1836,9 +1861,8 @@ extension CallViewController : CallManagerDelegate {
                 FlyLogWriter.sharedInstance.writeText("#call UI onCallAction  CallAction.ACTION_REMOTE_VIDEO_ADDED  \(userId) at index \(index)")
             }
         } else if callAction == CallAction.ACTION_REMOTE_BUSY {
-            let toast = Toast.init(text: "User is Busy")
-            toast.show()
-            
+            AppAlert.shared.showToast(message: "User is Busy")
+
             if CallManager.getAllCallUsersList().count == 1{
                 self.dismissWithDelay(callStatus: "User Busy")
             } else {
@@ -1885,6 +1909,7 @@ extension CallViewController : CallManagerDelegate {
             isLocalViewSwitched = false
             CallManager.setCallType(callType: .Audio)
             resetConversionTimer()
+            CallManager.muteVideo(true)
             updateOneToOneAudioCallUI()
             removeRemoteOneToOneLocalTracks()
             AudioManager.shared().routeToAvailableDevice(preferredDevice: currentOutputDevice)
@@ -1903,8 +1928,8 @@ extension CallViewController : CallManagerDelegate {
 //              let toast = Toast.init(text: "User" + contact.name + "Engaged")
 //              toast.show()
 //            }
-            let toast = Toast.init(text: "Call Engaged")
-            toast.show()
+
+            AppAlert.shared.showToast(message: "Call Engaged")
 
             if CallManager.isOneToOneCall() && isOnCall && (CallManager.getCallConnectedUsersList()?.count ?? 0) == 0 {
                 dismissWithDelay(callStatus: "Call Engaged")
@@ -1938,6 +1963,7 @@ extension CallViewController : CallManagerDelegate {
             if CallManager.isOneToOneCall() {
                 members.first?.isVideoMuted = true
                 setMuteStatusText()
+                removeRemoteOneToOneLocalTracks()
             } else {
                 updateMuteStatus(jid: userId, isMute: true, isAudio: false)
             }
@@ -1946,6 +1972,7 @@ extension CallViewController : CallManagerDelegate {
                 outgoingCallView?.contentView.backgroundColor = .clear
                 members.first?.isVideoMuted = false
                 setMuteStatusText()
+                addRemoteTrackToView()
             } else {
                 updateMuteStatus(jid: userId, isMute: false, isAudio: false)
             }
@@ -1962,7 +1989,6 @@ extension CallViewController : CallManagerDelegate {
         CallManager.setCallType(callType: .Video)
         switchLoaclandRemoteViews()
         showOneToOneVideoCallUI()
-        isVideoMuted = false
         setVideoBtnIcon()
         resetConversionTimer()
     }
@@ -2005,7 +2031,9 @@ extension CallViewController {
     func removeAllMembers() {
         //clearAllTrackViews()
         members.removeAll()
-        collectionView?.reloadData()
+        executeOnMainThread {
+            self.collectionView?.reloadData()
+        }
     }
     
     func updateMuteStatus(jid : String, isMute : Bool, isAudio : Bool) {
@@ -2039,10 +2067,12 @@ extension CallViewController {
             if let groupCell = self.collectionView?.cellForItem(at: IndexPath(item: index, section: 0)) as? GroupCallCell {
                 if (isLastRow  && member.callStatus == .reconnecting) || (!isLastRow && member.callStatus != .connected) || member.callStatus == .onHold || (isLastRow && CallManager.isCallOnHold()){
                     groupCell.foreGroundView.isHidden = false
+                    groupCell.foreGroundView.alpha = 1
                     groupCell.callActionsView.isHidden = true
                     groupCell.statusLable.text = member.callStatus.rawValue.capitalized
                 }else{
                     groupCell.foreGroundView.isHidden = true
+                    groupCell.foreGroundView.alpha = 0.5
                     groupCell.callActionsView.isHidden = false
                     groupCell.statusLable.textColor = UIColor(hexString: "#FFFFFF")
                     groupCell.profileName.font = AppFont.Regular.size(14)
@@ -2185,16 +2215,12 @@ extension CallViewController {
             }
         }
     }
-
+    
     func insertUsersToCollectionView(userIndex: Int, userJid: String) {
-        if collectionView?.numberOfItems(inSection: 0) == 0 {
-            collectionView?.reloadData()
-        }else {
-            collectionView?.insertItems(at:  [IndexPath(item: userIndex, section: 0)])
+        executeOnMainThread {
+            self.collectionView?.reloadData()
         }
         outgoingCallView?.audioMuteStackView.isHidden = true
-        collectionView.reloadItems(at: [IndexPath(item: userIndex, section: 0)])
-        //addGroupTracks(jid: FlyDefaults.myJid)
     }
     
 
@@ -2403,38 +2429,47 @@ extension CallViewController {
 }
 
 extension CallViewController : ConnectionEventDelegate{
+    
+    func onConnectionFailed(error: FlyError) {
+        if error.description.contains(FlyConstants.ErrorMessage.authorization_error) {
+            CallManager.disconnectCall()
+            dismiss()
+            FlyDefaults.myMobileNumber = ""
+            FlyDefaults.myXmppUsername = ""
+            FlyDefaults.myXmppPassword = ""
+            FlyDefaults.myXmppResource = ""
+            FlyDefaults.xmppDomain = ""
+            FlyDefaults.xmppPort = 0
+            FlyDefaults.isLoggedIn = false
+            let window = UIApplication.shared.windows.filter {$0.isKeyWindow}.first
+            let controller : OTPViewController
+            if #available(iOS 13.0, *) {
+                controller = UIStoryboard(name: "Login", bundle: nil).instantiateViewController(identifier: "OTPViewController")
+            } else {
+                // Fallback on earlier versions
+                controller = UIStoryboard(name: "Login", bundle: nil).instantiateViewController(withIdentifier: "OTPViewController") as! OTPViewController
+            }
+            if let navigationController = window?.rootViewController  as? UINavigationController {
+                navigationController.popToRootViewController(animated: false)
+                navigationController.pushViewController(controller, animated: false)
+            }
+        }
+    }
+
+    
     func onConnected() {
     }
+    
     func onDisconnected() {
     }
-    func onConnectionNotAuthorized() {
-        CallManager.disconnectCall()
-        dismiss()
-        FlyDefaults.myMobileNumber = ""
-        FlyDefaults.myXmppUsername = ""
-        FlyDefaults.myXmppPassword = ""
-        FlyDefaults.myXmppResource = ""
-        FlyDefaults.xmppDomain = ""
-        FlyDefaults.xmppPort = 0
-        FlyDefaults.isLoggedIn = false
-        let window = UIApplication.shared.windows.filter {$0.isKeyWindow}.first
-        let controller : OTPViewController
-        if #available(iOS 13.0, *) {
-            controller = UIStoryboard(name: "Login", bundle: nil).instantiateViewController(identifier: "OTPViewController")
-        } else {
-            // Fallback on earlier versions
-            controller = UIStoryboard(name: "Login", bundle: nil).instantiateViewController(withIdentifier: "OTPViewController") as! OTPViewController
-        }
-        if let navigationController = window?.rootViewController  as? UINavigationController {
-            navigationController.popToRootViewController(animated: false)
-            navigationController.pushViewController(controller, animated: false)
-        }
-    }
     
+    func onReconnecting(){}
+
     @objc func copyLink(sender:UIButton){
         if let callLink = CallManager.getCallLink(){
             UIPasteboard.general.string = callLink
-            Toast.init(text: "CallLink \(callLink) copied").show()
+            AppAlert.shared.showToast(message: "CallLink \(callLink) copied")
+
         }
     }
 }
@@ -2457,6 +2492,9 @@ extension CallViewController : AudioManagerDelegate {
         case .bluetooth:
             currentOutputDevice = .bluetooth
             outgoingCallView?.speakerButton.setImage(UIImage(named: "bluetooth_headset" ), for: .normal)
+        @unknown default:
+            currentOutputDevice = .receiver
+            outgoingCallView?.speakerButton.setImage(UIImage(named: "IconSpeakerOff" ), for: .normal)
         }
     }
     
@@ -2651,26 +2689,24 @@ extension CallViewController {
         }
     }
     func setHoldText(isShow: Bool) {outgoingCallView
-        if CallManager.getCallStatus(userId: members.last?.jid ?? "") == .ON_HOLD {
-            if let localView = outgoingCallView?.localUserVideoView {
-                if isShow {
-                    if !localView.subviews.contains(callHoldLabel) {
-                        callHoldLabel = UILabel(frame: CGRect(x: 0, y: 0, width: localView.bounds.width, height: localView.bounds.height))
-                        self.callHoldLabel.isHidden = false
-                        callHoldLabel.textAlignment = .center
-                        callHoldLabel.transform = CGAffineTransform(scaleX: -1.0, y: 1.0)
-                        callHoldLabel.font = .systemFont(ofSize: 14)
-                        callHoldLabel.textColor = .white
-                        callHoldLabel.text = "Call on hold"
-                        localView.addSubview(callHoldLabel)
-                    } else {
-                        self.callHoldLabel.isHidden = false
-                    }
+        if let localView = outgoingCallView?.localUserVideoView {
+            if isShow {
+                if !localView.subviews.contains(callHoldLabel) {
+                    callHoldLabel = UILabel(frame: CGRect(x: 0, y: 0, width: localView.bounds.width, height: localView.bounds.height))
+                    self.callHoldLabel.isHidden = false
+                    callHoldLabel.textAlignment = .center
+                    callHoldLabel.transform = CGAffineTransform(scaleX: -1.0, y: 1.0)
+                    callHoldLabel.font = .systemFont(ofSize: 14)
+                    callHoldLabel.textColor = .white
+                    callHoldLabel.text = "Call on hold"
+                    localView.addSubview(callHoldLabel)
                 } else {
-                    self.callHoldLabel.isHidden = true
-                    localView.willRemoveSubview(callHoldLabel)
-                    callHoldLabel.removeFromSuperview()
+                    self.callHoldLabel.isHidden = false
                 }
+            } else {
+                self.callHoldLabel.isHidden = true
+                localView.willRemoveSubview(callHoldLabel)
+                callHoldLabel.removeFromSuperview()
             }
         }
     }

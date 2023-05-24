@@ -147,23 +147,23 @@ extension String{
     }
     
     func index(from: Int) -> Index {
-        return self.index(startIndex, offsetBy: from)
+        return self.utf16.index(startIndex, offsetBy: from)
     }
     
     func substring(from: Int) -> String {
         let fromIndex = index(from: from)
-        return String(self[fromIndex...])
+        return String(self.utf16[fromIndex...]) ?? ""
     }
     
     func substring(to: Int) -> String {
         let toIndex = index(from: to)
-        return String(self[..<toIndex])
+        return String(self.utf16[..<toIndex]) ?? ""
     }
     
     func substring(with r: Range<Int>) -> String {
         let startIndex = index(from: r.lowerBound)
         let endIndex = index(from: r.upperBound)
-        return String(self[startIndex..<endIndex])
+        return String(self.utf16[startIndex..<endIndex]) ?? ""
     }
     
     public func getAcronyms(separator: String = "") -> String

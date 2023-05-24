@@ -22,7 +22,7 @@ class ImageEditController: UIViewController {
     @IBOutlet weak var addMoreButton: UIButton?
     @IBOutlet weak var deleteViw: UIView!
     @IBOutlet weak var addmore: UIView!
-    @IBOutlet weak var captionTxt: UITextView?
+    @IBOutlet weak var captionTxt: MentionTextView!
     @IBOutlet weak var botomCollection: UICollectionView!
     @IBOutlet weak var topCollection: UICollectionView!
     @IBOutlet weak var captionHeightCons: NSLayoutConstraint?
@@ -33,6 +33,8 @@ class ImageEditController: UIViewController {
     @IBOutlet weak var captionViewTopCons: NSLayoutConstraint?
     @IBOutlet weak var bottomCollectionCons: NSLayoutConstraint?
     
+    @IBOutlet weak var captionBaseBottom: NSLayoutConstraint!
+    
     var growingTextViewHandler:GrowingTextViewHandler?
     public var tempImageAray = [ImageData]()
     public var imageAray = [ImageData]()
@@ -40,17 +42,34 @@ class ImageEditController: UIViewController {
     public var selectedAssets = [PHAsset]()
     public var currentSelectedAssets = [PHAsset]()
     public var currentDeSelectedAssets = [PHAsset]()
-    var imageEditIndex = Int()
+    var imageEditIndex = Int() {
+        didSet {
+            print("imageEditIndex", imageEditIndex)
+            captionTxt.resetMentionTextView()
+        }
+    }
     var botmImageIndex = Int()
     weak var delegate: EditImageDelegate? = nil
     var profileName = ""
     var captionText: String?
+    var textMentioned = [String]()
     public var iscamera = false
     var mediaProcessed = [String]()
     var id : String = emptyString()
     var isKeyboardDisabled: Bool? = false
     
     let backgroundQueue = DispatchQueue.init(label: "mediaQueue")
+    var mentionView: UIView!
+    var mentionTableView: UITableView!
+    var groupMembers = [GroupParticipantDetail]()
+    var searchGroupMembers = [GroupParticipantDetail]()
+    var getProfileDetails: ProfileDetails!
+    var isMention = false 
+    var mentionSearch = ""
+    var mentionRange: NSRange!
+    var mentionRanges: [(String, NSRange)] = []
+    var mentionUsersList: [String] = []
+    var mentionBaseHeight: NSLayoutConstraint!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -64,6 +83,7 @@ class ImageEditController: UIViewController {
         backgroundQueue.async { [weak self] in
             _ = self?.getAssetsImageInfo(assets: self!.selectedAssets)
         }
+        searchGroupMembers = groupMembers.filter({$0.profileDetail?.isBlockedByAdmin == false || $0.memberJid != FlyDefaults.myJid}).sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() })
         setupUI()
     }
     
@@ -113,6 +133,8 @@ class ImageEditController: UIViewController {
         super.viewWillAppear(true)
         NotificationCenter.default.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.willResignActiveNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(appMovedToForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(notification:)), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)
         self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
     }
     
@@ -121,6 +143,54 @@ class ImageEditController: UIViewController {
         navigationController?.navigationBar.isHidden = false
         NotificationCenter.default.removeObserver(self, name:UIApplication.willResignActiveNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name:UIApplication.willEnterForegroundNotification, object: nil)
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        GroupManager.shared.groupDelegate = self
+        ContactManager.shared.profileDelegate = self
+        ChatManager.shared.adminBlockDelegate = self
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        textMentioned.removeAll()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        if isMention {
+            if searchGroupMembers.isEmpty {
+                mentionBaseHeight.constant = 0
+                mentionTableView.frame = .zero
+            } else {
+                let groupHeight = CGFloat(searchGroupMembers.count * 70)
+                let groupCustomHeight = CGFloat(topCollection.bounds.height/1.8)
+                print("groupHeight \(groupHeight) groupCustomHeight \(groupCustomHeight)")
+                mentionBaseHeight.constant = groupHeight > groupCustomHeight ? groupCustomHeight : groupHeight
+                mentionTableView.frame = CGRect(x: 0, y: 0, width: mentionView.bounds.size.width, height: mentionView.bounds.size.height)
+            }
+        }
+    }
+    
+    @objc func keyboardWillShow(notification: NSNotification) {
+        if let value = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
+            let newHeight: CGFloat
+            if #available(iOS 11.0, *) {
+                newHeight = value.height - view.safeAreaInsets.bottom - 50
+            } else {
+                newHeight = value.height
+            }
+            self.captionViewTopCons?.isActive = false
+            self.captionBottomCons?.constant = newHeight
+
+        }
+    }
+    
+    @objc func keyboardWillHide(notification: NSNotification) {
+        self.captionBottomCons?.constant = 10
+        self.captionViewTopCons?.isActive = true
+
     }
     
     func setupUI() {
@@ -135,7 +205,15 @@ class ImageEditController: UIViewController {
         captionTxt?.delegate = self
         captionTxt?.font = UIFont.font12px_appRegular()
         captionTxt?.textContainerInset = UIEdgeInsets(top: 15, left: 10, bottom: 15, right: 10)
-        captionTxt?.text = (captionText?.isNotEmpty ?? false) ? captionText : addCaption
+//        if textMentioned.isEmpty {
+//            captionTxt?.text = (captionText?.isNotEmpty ?? false) ? captionText : addCaption
+//        } else {
+//            var dataArray = [String]()
+//            let message = ChatUtils.convertMentionUser(message: captionText ?? "", mentionedUsersIds: textMentioned)
+//            dataArray.append(message)
+//            dataArray.append(textMentioned.joined(separator: ","))
+//            self.captionTxt?.convertAndInsert(to: dataArray, with: NSRange(location: 0, length: 0))
+//        }
         captionTxt?.textColor = Color.captionTxt
         captionTxt?.layer.cornerRadius = 20
         captionTxt?.clipsToBounds = true
@@ -160,6 +238,36 @@ class ImageEditController: UIViewController {
         botomCollection!.collectionViewLayout = layout2
         topCollection?.reloadData()
         botomCollection.reloadData()
+        addMentionView()
+    }
+    
+    func addMentionView() {
+        mentionView = UIView()
+        mentionView.isHidden = true
+        mentionView.backgroundColor = .white
+        mentionView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(mentionView)
+        
+        if let textView = captionTxt {
+            mentionView.bottomAnchor.constraint(equalTo: textView.topAnchor, constant: -5).isActive = true
+        }
+        mentionView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0).isActive = true
+        mentionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0).isActive = true
+        mentionBaseHeight = mentionView.heightAnchor.constraint(equalToConstant: 200)
+        mentionBaseHeight.isActive = true
+        self.mentionView.layoutIfNeeded()
+        self.view.layoutIfNeeded()
+        
+        mentionTableView = UITableView(frame: .zero)
+        mentionTableView.translatesAutoresizingMaskIntoConstraints = false
+        mentionTableView.frame = CGRect(x: 0, y: 0, width: mentionView.bounds.size.width, height: mentionView.bounds.size.height)
+        mentionTableView.register(UINib(nibName: "MentionTableViewCell",
+                                        bundle: .main), forCellReuseIdentifier: "MentionTableViewCell")
+        mentionTableView.delegate = self
+        mentionTableView.dataSource = self
+        mentionTableView.estimatedRowHeight = UITableView.automaticDimension
+        mentionView.addSubview(mentionTableView)
+
     }
     
     private func showHideDeleteView() {
@@ -179,19 +287,28 @@ class ImageEditController: UIViewController {
     @objc func appMovedToForeground() {
         if isKeyboardDisabled == false {
             captionTxt?.becomeFirstResponder()
+            mentionView.isHidden = !isMention
+            mentionSearch = mentionRanges.compactMap({$0.0}).joined(separator: "")
+            if mentionSearch.isNotEmpty {
+                let sortedMembers = groupMembers.filter({$0.profileDetail?.isBlockedByAdmin == false || $0.memberJid != FlyDefaults.myJid}).sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() })
+                let getGroupMembers = sortedMembers.filter{ $0.displayName.lowercased().contains(mentionSearch.lowercased())}
+                searchGroupMembers = getGroupMembers
+                mentionTableView.reloadData()
+            }
         }
     }
     
     @IBAction func addMoreImages(_ sender: Any) {
         isKeyboardDisabled = true
+        view.endEditing(true)
         addMoreImages()
     }
     
     @IBAction func sendAction(_ sender: Any) {
         view.endEditing(true)
+        mentionView.isHidden = true
         if let captionText = captionTxt {
-            captionTxt?.resignFirstResponder()
-            textViewDidEndEditing(captionText)
+            view.endEditing(true)
         }
         DispatchQueue.main.async { [weak self] in
             self?.startLoading( withText: "Compressing 1 of \((self?.imageAray.count ?? 0)!)")
@@ -222,6 +339,7 @@ class ImageEditController: UIViewController {
                                 media.duration = duration
                                 media.base64Thumbnail = self?.imageAray[index].base64Image ?? emptyString()
                                 media.caption = self?.imageAray[index].caption ?? emptyString()
+                                media.mentionedUsers = self?.imageAray[index].mentionedUsers ?? []
                                 self?.mediaData.append(media)
                                 self?.backToConversationScreen()
                             }
@@ -240,6 +358,7 @@ class ImageEditController: UIViewController {
                         media.fileKey = fileKey
                         media.base64Thumbnail = self?.imageAray[index].base64Image ?? emptyString()
                         media.caption = self?.imageAray[index].caption ?? emptyString()
+                        media.mentionedUsers = self?.imageAray[index].mentionedUsers ?? []
                         self?.mediaData.append(media)
                     }
                     
@@ -576,54 +695,87 @@ extension ImageEditController: UICollectionViewDelegate, UICollectionViewDataSou
     }
     
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        var visibleRect = CGRect()
-        visibleRect.origin = topCollection.contentOffset
-        visibleRect.size = topCollection.bounds.size
-        let visiblePoint = CGPoint(x: visibleRect.midX, y: visibleRect.midY)
-        captionTxt?.endEditing(true)
-        setCaption()
-        guard let indexPath = topCollection.indexPathForItem(at: visiblePoint) else { return }
-        self.imageEditIndex = indexPath.row
-        botmImageIndex = indexPath.row
-        botomCollection.reloadData()
-        setCaption()
+        if !isMention {
+            captionText = ""
+            var visibleRect = CGRect()
+            visibleRect.origin = topCollection.contentOffset
+            visibleRect.size = topCollection.bounds.size
+            let visiblePoint = CGPoint(x: visibleRect.midX, y: visibleRect.midY)
+            captionTxt?.endEditing(true)
+            guard let indexPath = topCollection.indexPathForItem(at: visiblePoint) else { return }
+            self.imageEditIndex = indexPath.row
+            botmImageIndex = indexPath.row
+            botomCollection.reloadData()
+            setCaption()
+            searchGroupMembers = mentionArrayFilter().sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() })
+        }
     }
     
     func setCaption() {
         if imageEditIndex < imageAray.count && !(imageAray.isEmpty) {
             let imgDetail = imageAray[imageEditIndex]
             if let caption = imgDetail.caption, caption != "" {
-                captionTxt?.text = imgDetail.caption
-                captionTxt?.textColor = Color.captionTxt
+                if imgDetail.mentionedUsers.isEmpty {
+                    executeOnMainThread {
+                        self.captionTxt?.text = imgDetail.caption
+                    }
+                } else {
+                    executeOnMainThread {
+                        self.captionTxt?.text = ""
+                        self.captionTxt?.textColor = Color.captionTxt
+                        var dataArray = [String]()
+                        let message = ChatUtils.convertMentionUser(message: caption, mentionedUsersIds: imgDetail.mentionedUsers)
+                        dataArray.append(message)
+                        dataArray.append(imgDetail.mentionedUsers.joined(separator: ","))
+                        self.captionTxt?.convertAndInsert(to: dataArray, with: NSRange(location: 0, length: 0))
+                    }
+//                    captionTxt?.attributedText = ChatUtils.getMentionTextContent(message: caption, isMessageSentByMe: true, mentionedUsers: imgDetail.mentionedUsers)
+                }
                 setCaptionHeightCons()
             } else{
-                captionTxt?.text = (captionText?.isNotEmpty ?? false && imageEditIndex == 0) ? captionText : addCaption
-                captionTxt?.textColor = Color.captionTxt
-                setCaptionHeightCons()
+                executeOnMainThread {
+                    self.captionTxt?.textColor = Color.captionTxt
+                    if self.textMentioned.isEmpty {
+                        self.captionTxt?.text = (self.captionText?.isNotEmpty ?? false) ? self.captionText : addCaption
+                        self.imageAray[self.imageEditIndex].caption = (self.captionText?.isNotEmpty ?? false) ? self.captionText : ""
+                    } else {
+                        var dataArray = [String]()
+                        let message = ChatUtils.convertMentionUser(message: self.captionText ?? "", mentionedUsersIds: self.textMentioned)
+                        dataArray.append(message)
+                        dataArray.append(self.textMentioned.joined(separator: ","))
+                        self.captionTxt?.convertAndInsert(to: dataArray, with: NSRange(location: 0, length: 0))
+                        self.imageAray[self.imageEditIndex].caption = self.captionTxt.mentionText
+                        self.imageAray[self.imageEditIndex].mentionedUsers = self.textMentioned
+                        self.textMentioned.removeAll()
+                    }
+                    self.setCaptionHeightCons()
+                }
             }
         }
     }
     
     private func setCaptionHeightCons() {
-        let sizeToFitIn = CGSize(width: captionTxt?.bounds.size.width ?? 0.0, height: CGFloat(MAXFLOAT))
-        let newSize = captionTxt?.sizeThatFits(sizeToFitIn)
-        captionHeightCons?.constant = newSize?.height ?? 0.0
+        executeOnMainThread {
+            let sizeToFitIn = CGSize(width: self.captionTxt?.bounds.size.width ?? 0.0, height: CGFloat(MAXFLOAT))
+            let newSize = self.captionTxt?.sizeThatFits(sizeToFitIn)
+            self.captionHeightCons?.constant = newSize?.height ?? 0.0
+        }
     }
     
     private func addKeyboardConstraints() {
-        keyboardTopCons?.isActive = true
-        captionBottomCons?.isActive = false
-        TopViewCons?.isActive = false
-        captionViewTopCons?.isActive = false
-        bottomCollectionCons?.isActive = true
+        //keyboardTopCons?.isActive = true
+        //captionBottomCons?.isActive = false
+        //TopViewCons?.isActive = false
+        //captionViewTopCons?.isActive = false
+        //bottomCollectionCons?.isActive = true
     }
     
     private func removeKeyboardConstraints() {
-        keyboardTopCons?.isActive = false
-        captionBottomCons?.isActive = true
-        TopViewCons?.isActive = true
-        captionViewTopCons?.isActive = true
-        bottomCollectionCons?.isActive = false
+        //keyboardTopCons?.isActive = false
+        //captionBottomCons?.isActive = true
+        //TopViewCons?.isActive = true
+        //captionViewTopCons?.isActive = true
+        //bottomCollectionCons?.isActive = false
     }
 }
 
@@ -641,9 +793,33 @@ extension ImageEditController : UITextViewDelegate {
         if captionTxt?.text.contains(addCaption) == true {
             textView.text = captionTxt?.text.replacingOccurrences(of: addCaption, with: "")
         }
+        if getProfileDetails.profileChatType == .groupChat && textView.text.last == "@" {
+            mentionView.isHidden = false
+            viewDidLayoutSubviews()
+        }
+    }
+    
+    func textViewDidChangeSelection(_ textView: UITextView) {
+        if textView.text.utf16.count > textView.selectedRange.location && isMention {
+            textView.selectedRange = NSRange(location: (mentionRange.location+mentionRanges.count+1), length: 0)
+        }
     }
     
     func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+
+        if text.trim().utf16.count > 1 && !isMention {
+            return clipboardCopyAction(textView, shouldChangeTextIn: range, replacementText: text)
+        } else if text.trim().count > 1 && isMention{
+            mentionView.isHidden = true
+            resetGroupMention()
+            mentionTableView.reloadData()
+            self.viewDidLayoutSubviews()
+            return clipboardCopyAction(textView, shouldChangeTextIn: range, replacementText: text)
+        }
+        if getProfileDetails.profileChatType == .groupChat {
+            mentionshouldChangeTextIn(textView, shouldChangeTextIn: range, replacementText: text)
+        }
+
         if imageEditIndex == 0 {
             captionText = nil
         }
@@ -661,6 +837,62 @@ extension ImageEditController : UITextViewDelegate {
         let numberOfChars = newText.count
         return numberOfChars <= 1024
     }
+    
+    func clipboardCopyAction(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+        if let clipBoardStrings = UIPasteboard.general.strings, !clipBoardStrings.isEmpty, getProfileDetails.profileChatType == .groupChat {
+            if "\(clipBoardStrings.joined(separator: " ").utf16)" != "\(text.trim().utf16)" {
+                if getProfileDetails.profileChatType == .groupChat {
+                    self.captionTxt.shouldChangeTextIn(textView, shouldChangeTextIn: range, replacementText: text)
+                }
+                return true
+            } else {
+                if clipBoardStrings.count == 2 {
+                    captionTxt.convertAndInsert(to: clipBoardStrings, with: range)
+                    UIPasteboard.general.strings = []
+                    DispatchQueue.main.asyncAfter(deadline: .now()+0.5, execute: {
+                        let endPosition = self.captionTxt.endOfDocument
+                        self.captionTxt.selectedTextRange = self.captionTxt.textRange(from: endPosition, to: endPosition)
+                    })
+                    return false
+                } else {
+                    if getProfileDetails.profileChatType == .groupChat {
+                        self.captionTxt.shouldChangeTextIn(textView, shouldChangeTextIn: range, replacementText: text)
+                    }
+                    return true
+                }
+            }
+        } else if let clipBoardStrings = UIPasteboard.general.strings, !clipBoardStrings.isEmpty, getProfileDetails.profileChatType == .singleChat {
+            if "\(clipBoardStrings.joined(separator: " ").utf16)" != "\(text.trim().utf16)" {
+                if getProfileDetails.profileChatType == .groupChat {
+                    self.captionTxt.shouldChangeTextIn(textView, shouldChangeTextIn: range, replacementText: text)
+                }
+                return true
+            } else {
+                return true
+            }
+        }
+        if getProfileDetails.profileChatType == .groupChat {
+            self.captionTxt.shouldChangeTextIn(textView, shouldChangeTextIn: range, replacementText: text)
+        }
+        return true
+    }
+    
+    func setGroupmention(range: NSRange) {
+        resetGroupMention()
+        searchGroupMembers = groupMembers.sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() }).filter({$0.memberJid != FlyDefaults.myJid || $0.profileDetail?.isBlockedByAdmin == false})
+        mentionTableView.reloadData()
+        isMention = true
+        mentionRange = range
+        self.view.bringSubviewToFront(mentionView)
+        self.viewDidLayoutSubviews()
+        mentionView.isHidden = false
+    }
+    
+    func resetGroupMention() {
+        mentionSearch = ""
+        mentionRange = nil
+        isMention = false
+    }
     @objc func getHintsFromTextField(textView: UITextView) {
         textView.selectedRange = NSRange(location: textView.text.count, length: 1)
     }
@@ -675,20 +907,45 @@ extension ImageEditController : UITextViewDelegate {
                 captionTxt?.isScrollEnabled = true
             }
         }
+        if getProfileDetails.profileChatType == .groupChat && !isMention {
+            captionTxt?.textDidChange(textView, isCaption: true)
+            setMentionedUsers()
+        }
     }
     
     func textViewDidEndEditing(_ textView: UITextView) {
         removeKeyboardConstraints()
+        captionTxt?.textViewEnd()
         if textView == captionTxt {
             if textView.text.isEmpty {
                 captionTxt?.text = (captionText?.isNotEmpty ?? false) ? captionText : addCaption
             }else {
                 var imgDetail = imageAray[imageEditIndex]
-                imgDetail.caption = textView.text == addCaption ? "" : textView.text.trim()
+                if getProfileDetails.profileChatType == .groupChat {
+                   // setMentionedUsers()
+                } else {
+                    imgDetail.caption = textView.text == addCaption ? "" : textView.text.trim()
+                    imageAray[imageEditIndex] = imgDetail
+                }
                // textView.textColor = textView.text == addCaption ? UIColor.clear : Color.captionTxt
-                imageAray[imageEditIndex] = imgDetail
             }
         }
+    }
+    
+    func setMentionedUsers() {
+        var imgDetail = imageAray[imageEditIndex]
+        imgDetail.caption = captionTxt?.text == addCaption ? "" : captionTxt?.mentionText?.trim()
+        imgDetail.mentionedUsers = captionTxt?.mentionedUsers ?? []
+        imgDetail.mentionedRange = captionTxt?.selectedRange ?? NSRange(location: 0, length: 0)
+        imageAray[imageEditIndex] = imgDetail
+    }
+    
+    func resetMention() {
+        isMention = false
+        mentionSearch = ""
+        mentionRange = nil
+        mentionRanges.removeAll()
+        getGroupMember()
     }
 }
 
@@ -769,6 +1026,7 @@ extension ImageEditController {
                 }
             }
             checkForSlowMotionVideo()
+            self.setCaption()
             DispatchQueue.main.async { [weak self] in
                 print("#media : ImageEditController reload collectionviews")
                 self?.stopLoading()
@@ -779,5 +1037,308 @@ extension ImageEditController {
         
     }
 }
+extension ImageEditController: UITableViewDelegate, UITableViewDataSource {
+    
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return 1
+    }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return searchGroupMembers.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        if let cell = tableView.dequeueReusableCell(withIdentifier: "MentionTableViewCell", for: indexPath) as? MentionTableViewCell {
+            if let profileDetail = searchGroupMembers[indexPath.row].profileDetail {
+                let placeholder = UIImage(named: "ic_profile_placeholder") ?? UIImage()
+                if profileDetail.contactType == .deleted || profileDetail.isBlockedMe || profileDetail.isBlockedByAdmin {
+                    cell.userImageView.image = placeholder
+                } else {
+                    let imageUrl = searchGroupMembers[indexPath.row].profileDetail?.image ?? ""
+                    cell.userImageView.sd_setImage(with: ChatUtils.getUserImaeUrl(imageUrl: imageUrl),
+                                                   placeholderImage: placeholder)
+                }
+            }
+            cell.userNameLabel.text = searchGroupMembers[indexPath.row].displayName
+            cell.selectionStyle = .none
+            return cell
+        } else {
+            return UITableViewCell()
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 70
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if let selected = searchGroupMembers[indexPath.row].profileDetail?.name, let Jid = searchGroupMembers[indexPath.row].profileDetail?.jid {
+            if let userId = try? FlyUtils.getIdFromJid(jid: Jid) {
+                if let lastRange = mentionRanges.last {
+                    captionTxt?.text = captionTxt?.text.replacing("", range: NSRange(location: mentionRange.location, length: ((lastRange.1.location+lastRange.1.length) - mentionRange.location)))
+                } else {
+                    captionTxt?.text = captionTxt?.text.replacing("", range: NSRange(location: mentionRange.location, length: 1))
+                }
+                captionTxt?.insert(to: selected, userId: userId, isCaption: true)
+                mentionView.isHidden = true
+                resetMention()
+                setMentionedUsers()
+            }
+        }
+    }
+    
+}
 
+extension ImageEditController: GroupEventsDelegate {
+    func didAddNewMemeberToGroup(groupJid: String, newMemberJid: String, addedByMemberJid: String) {
+        getGroupMember()
+    }
+    
+    func didRemoveMemberFromGroup(groupJid: String, removedMemberJid: String, removedByMemberJid: String) {
+        getGroupMember()
+    }
+    
+    func didFetchGroupProfile(groupJid: String) {
+        
+    }
+    
+    func didUpdateGroupProfile(groupJid: String) {
+        
+    }
+    
+    func didMakeMemberAsAdmin(groupJid: String, newAdminMemberJid: String, madeByMemberJid: String) {
+        
+    }
+    
+    func didRemoveMemberFromAdmin(groupJid: String, removedAdminMemberJid: String, removedByMemberJid: String) {
+        
+    }
+    
+    func didDeleteGroupLocally(groupJid: String) {
+        
+    }
+    
+    func didLeftFromGroup(groupJid: String, leftUserJid: String) {
+        
+    }
+    
+    func didCreateGroup(groupJid: String) {
+        
+    }
+    
+    func didFetchGroups(groups: [MirrorFlySDK.ProfileDetails]) {
+        
+    }
+    
+    func didFetchGroupMembers(groupJid: String) {
+        getGroupMember()
+    }
+    
+    func didReceiveGroupNotificationMessage(message: MirrorFlySDK.ChatMessage) {
+        
+    }
+    
+    
+}
 
+extension ImageEditController: ProfileEventsDelegate {
+    func userCameOnline(for jid: String) {
+        
+    }
+    
+    func userWentOffline(for jid: String) {
+        
+    }
+    
+    func userProfileFetched(for jid: String, profileDetails: MirrorFlySDK.ProfileDetails?) {
+        
+    }
+    
+    func myProfileUpdated() {
+        
+    }
+    
+    func usersProfilesFetched() {
+        
+    }
+    
+    func blockedThisUser(jid: String) {
+        
+    }
+    
+    func unblockedThisUser(jid: String) {
+        
+    }
+    
+    func usersIBlockedListFetched(jidList: [String]) {
+        
+    }
+    
+    func usersBlockedMeListFetched(jidList: [String]) {
+        
+    }
+    
+    func userUpdatedTheirProfile(for jid: String, profileDetails: MirrorFlySDK.ProfileDetails) {
+        
+    }
+    
+    func userBlockedMe(jid: String) {
+        if let member = searchGroupMembers.filter({$0.memberJid == jid}).first {
+            if let profile = ChatManager.profileDetaisFor(jid: jid) {
+                member.profileDetail = profile
+                mentionTableView.reloadData()
+            }
+        }
+    }
+    
+    func userUnBlockedMe(jid: String) {
+        if let member = searchGroupMembers.filter({$0.memberJid == jid}).first {
+            if let profile = ChatManager.profileDetaisFor(jid: jid) {
+                member.profileDetail = profile
+                mentionTableView.reloadData()
+            }
+        }
+    }
+    
+    func hideUserLastSeen() {
+        
+    }
+    
+    func getUserLastSeen() {
+        
+    }
+    
+    func userDeletedTheirProfile(for jid: String, profileDetails: MirrorFlySDK.ProfileDetails) {
+        getGroupMember()
+    }
+    
+    
+}
+
+extension ImageEditController: AdminBlockDelegate {
+    func didBlockOrUnblockContact(userJid: String, isBlocked: Bool) {
+        getGroupMember()
+    }
+    
+    func didBlockOrUnblockSelf(userJid: String, isBlocked: Bool) {
+        
+    }
+    
+    func didBlockOrUnblockGroup(groupJid: String, isBlocked: Bool) {
+        
+    }
+    
+}
+
+extension ImageEditController {
+    func getGroupMember() {
+        if getProfileDetails.profileChatType == .groupChat {
+            groupMembers = [GroupParticipantDetail]()
+            groupMembers =  GroupManager.shared.getGroupMemebersFromLocal(groupJid: getProfileDetails.jid).participantDetailArray.filter({$0.memberJid != FlyDefaults.myJid})
+            print("getGrouMember \(groupMembers.count)")
+            searchGroupMembers = mentionArrayFilter().sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() })
+            mentionTableView.reloadData()
+//            let sortedMembers = groupMembers.filter({$0.memberJid != FlyDefaults.myJid || $0.profileDetail?.isBlockedByAdmin == false}).sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() })
+//            let getGroupMembers = mentionSearch.isEmpty ? sortedMembers : sortedMembers.filter{ $0.displayName.lowercased().contains(mentionSearch.lowercased())}.sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() })
+//            if searchGroupMembers != getGroupMembers {
+//                searchGroupMembers = getGroupMembers
+//                mentionTableView.reloadData()
+//            }
+        }
+    }
+    
+    func mentionshouldChangeTextIn(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) {
+        if text == " " && (text.count == 1) && isMention {
+            mentionRanges.append((text, NSRange(location: range.location, length: text.utf16.count)))
+            mentionSearch = mentionRanges.compactMap({$0.0}).joined(separator: "")
+            searchGroupMembers = mentionSearch.isEmpty ? mentionArrayFilter().sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() }) : mentionArraySearchFilter().sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() })
+            self.viewDidLayoutSubviews()
+            mentionTableView.reloadData()
+        } else if text.trim().utf16.isEmpty {
+            if isMention, text != "@" {
+                mentionRanges = mentionRanges.filter({ $0.1 != range})
+                mentionSearch = mentionRanges.compactMap({$0.0}).joined(separator: "")
+                let textviewString: String = "\(textView.text.trim().utf16)"
+                if mentionSearch.isEmpty, textviewString.substringFromNSRange(range) == "@" {
+                    resetGroupMention()
+                    mentionView.isHidden = true
+                    self.viewDidLayoutSubviews()
+                } else {
+                    searchGroupMembers = mentionSearch.isEmpty ? mentionArrayFilter().sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() }) : mentionArraySearchFilter().sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() })
+                    updateGroupmention()
+                }
+            } else {
+                searchGroupMembers.removeAll()
+                self.viewDidLayoutSubviews()
+                mentionTableView.reloadData()
+            }
+        } else {
+            if text == "@" && !isMention {
+                if range.location == 0 {
+                    mentionRange = range
+                    setGroupmention(range: range)
+                    mentionTableView.reloadData()
+                    self.viewDidLayoutSubviews()
+                } else if textView.text.substringFromNSRange(NSRange(location: range.location-1, length: 1)) == " " {
+                    mentionRange = range
+                    setGroupmention(range: range)
+                    mentionTableView.reloadData()
+                    self.viewDidLayoutSubviews()
+                }
+            } else if isMention && text != "@" {
+                mentionRanges.append((text, NSRange(location: range.location, length: text.utf16.count)))
+                mentionSearch = mentionRanges.compactMap({$0.0}).joined(separator: "")
+                searchGroupMembers = mentionArraySearchFilter().sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() })
+                updateGroupmention()
+            } else if text == "@" && isMention {
+                if textView.text.substringFromNSRange(NSRange(location: range.location-1, length: 1)) == " " {
+                    mentionRange = range
+                    setGroupmention(range: range)
+                    mentionTableView.reloadData()
+                    self.viewDidLayoutSubviews()
+                } else {
+                    searchGroupMembers.removeAll()
+                    self.viewDidLayoutSubviews()
+                    resetGroupMention()
+                }
+            }
+        }
+        captionTxt.shouldChangeTextIn(textView, shouldChangeTextIn: range, replacementText: text)
+    }
+    
+    func updateGroupmention() {
+        if searchGroupMembers.isEmpty {
+            self.viewDidLayoutSubviews()
+        } else {
+            mentionTableView.reloadData()
+            self.viewDidLayoutSubviews()
+        }
+    }
+    
+//    func setGroupmention(range: NSRange) {
+//        resetGroupMention()
+//        searchGroupMembers = mentionArrayFilter().sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() })
+//        mentionTableView.reloadData()
+//        isMention = true
+//        mentionRange = range
+//        self.view.bringSubviewToFront(mentionBaseView)
+//        self.viewDidLayoutSubviews()
+//        mentionBaseView.isHidden = false
+//    }
+//    
+//    func resetGroupMention() {
+//        mentionSearch = ""
+//        mentionRange = nil
+//        mentionRanges.removeAll()
+//        isMention = false
+//    }
+    
+    func mentionArrayFilter() -> [GroupParticipantDetail] {
+        groupMembers.filter({ $0.memberJid != FlyDefaults.myJid && $0.profileDetail?.isBlockedByAdmin == false })
+    }
+    
+    func mentionArraySearchFilter() -> [GroupParticipantDetail] {
+        groupMembers.filter({ $0.displayName.lowercased().contains(mentionSearch.lowercased()) && $0.memberJid != FlyDefaults.myJid && $0.profileDetail?.isBlockedByAdmin == false })
+    }
+    
+}

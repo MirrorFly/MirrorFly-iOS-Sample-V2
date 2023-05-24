@@ -78,6 +78,5 @@ class VerifyOTPViewModel : NSObject
             FlyDefaults.isLoggedIn = true
             RootViewController.sharedInstance.initCallSDK()
             VOIPManager.sharedInstance.updateDeviceToken()
-            ChatManager.connect()
     }
 }
