@@ -20,67 +20,19 @@ import RxSwift
 import Contacts
 
 
-//#if QA
-//    let BASE_URL = "https://api-qa19.mirrorfly.com/api/v1/"
-//    let LICENSE_KEY = "lu3Om85JYSghcsB6vgVoSgTlSQArL5"
-//    let XMPP_DOMAIN = "fly-qa19.mirrorfly.com"
-//    let XMPP_PORT = 5226
-//    let SOCKETIO_SERVER_HOST = "https://signal-qa19.mirrorfly.com/"
-//    let JANUS_URL = "wss://janus.mirrorfly.com/"
-//    let CONTAINER_ID = "group.com.mirrorfly.qa"
-//    let ENABLE_CONTACT_SYNC = true
-//    let IS_LIVE = true
-//    let WEB_LOGIN_URL = "https://webreact-qa19.mirrorfly.com/"
-//    let IS_MOBILE_NUMBER_LOGIN = true
-//#elseif DEV
-//    let BASE_URL = "https://api-dev19.mirrorfly.com/api/v1/"
-//    let LICENSE_KEY = "lu3Om85JYSghcsB6vgVoSgTlSQArL5"
-//    let XMPP_DOMAIN = "fly-dev19.mirrorfly.com"
-//    let XMPP_PORT = 5232
-//    let SOCKETIO_SERVER_HOST = "https://signal-dev19.mirrorfly.com/"
-//    let JANUS_URL = "wss://janus.mirrorfly.com"
-//    let CONTAINER_ID = "group.com.mirrorfly.qa"
-//    let ENABLE_CONTACT_SYNC = true
-//    let IS_LIVE = true
-//    let WEB_LOGIN_URL = "https://webreact-dev19.mirrorfly.com/"
-//    let IS_MOBILE_NUMBER_LOGIN = true
-//#elseif LIVE
-//    let BASE_URL = "https://api-beta.mirrorfly.com/api/v1/"
-//    let LICENSE_KEY = "lu3Om85JYSghcsB6vgVoSgTlSQArL5"
-//    let XMPP_DOMAIN = "xmpp-beta.mirrorfly.com"
-//    let XMPP_PORT = 5222
-//    let SOCKETIO_SERVER_HOST = "https://signal-beta.mirrorfly.com/"
-//    let JANUS_URL = "wss://janus.mirrorfly.com"
-//    let CONTAINER_ID = "group.com.mirror.fly"
-//    let ENABLE_CONTACT_SYNC = true
-//    let IS_LIVE = true
-//    let WEB_LOGIN_URL = "https://web.mirrorfly.com/"
-//    let IS_MOBILE_NUMBER_LOGIN = true
-//#elseif UIKITQA
-//    let BASE_URL = "https://api-uikit-qa.contus.us/api/v1/"
-//    let LICENSE_KEY = "lu3Om85JYSghcsB6vgVoSgTlSQArL5"
-//    let XMPP_DOMAIN = "xmpp-uikit-qa.contus.us"
-//    let XMPP_PORT = 5249
-//    let SOCKETIO_SERVER_HOST = "https://signal-uikit-qa.contus.us/"
-//    let JANUS_URL = "wss://janus.mirrorfly.com"
-//    let CONTAINER_ID = "group.com.mirrorfly.qa"
-//    let ENABLE_CONTACT_SYNC = false
-//    let IS_LIVE = false
-//    let WEB_LOGIN_URL = "https://webchat-uikit-qa.contus.us/"
-//    let IS_MOBILE_NUMBER_LOGIN = false
-//#else
-    let BASE_URL = "https://api-uikit-dev.contus.us/api/v1/"
-    let LICENSE_KEY = "5RYyc9b32qTIkPMGe6JuIXY2fLFq9A"
-    let XMPP_DOMAIN = "xmpp-uikit-dev.contus.us"
-    let XMPP_PORT = 5248
-    let SOCKETIO_SERVER_HOST = "https://signal-uikit-dev.contus.us/"
-    let JANUS_URL = "wss://janus.mirrorfly.com"
-    let CONTAINER_ID = "group.com.mirrorfly.qa"
-    let ENABLE_CONTACT_SYNC = false
-    let IS_LIVE = false
-    let WEB_LOGIN_URL = "https://webchat-uikit-dev.contus.us/"
-    let IS_MOBILE_NUMBER_LOGIN = false
-//#endif
+let BASE_URL = "https://api-preprod-sandbox.mirrorfly.com/api/v1/"
+let LICENSE_KEY = "XXXXXXXXXXXXXXXX"
+let XMPP_DOMAIN = "xmpp-preprod-sandbox.mirrorfly.com"
+let XMPP_PORT = 5222
+let SOCKETIO_SERVER_HOST = "https://signal-preprod-sandbox.mirrorfly.com"
+let JANUS_URL = "wss://janus.mirrorfly.com"
+let CONTAINER_ID = "group.com.mirrorfly.qa"
+let ENABLE_CONTACT_SYNC = false
+let IS_LIVE = false
+let WEB_LOGIN_URL = "https://webchat-preprod-sandbox.mirrorfly.com/"
+let IS_MOBILE_NUMBER_LOGIN = false
+let APP_NAME = "UiKitQa"
+let ICLOUD_CONTAINER_ID = "iCloud.com.mirrorfly.qa"
 
 let isMigrationDone = "isMigrationDone"
 
