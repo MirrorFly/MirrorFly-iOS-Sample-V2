@@ -14,6 +14,7 @@ import CoreServices
 import Contacts
 
 let BASE_URL =  "https://api-preprod-sandbox.mirrorfly.com/api/v1/"
+let ENABLE_CONTACT_SYNC = false
 let CONTAINER_ID = "group.com.mirrorfly.qa"
 let LICENSE_KEY = "XXXXXXXXXXXX"
 let IS_LIVE = false
