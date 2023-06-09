@@ -21,6 +21,16 @@ class GroupCallCell: UICollectionViewCell {
     @IBOutlet weak var videoBaseView: UIImageView!
     @IBOutlet weak var videoMuteImage: UIImageView!
     
+    override func prepareForReuse() {
+        executeOnMainThread {
+            for view in self.videoBaseView.subviews {
+                view.removeFromSuperview()
+                self.videoBaseView.willRemoveSubview(view)
+            }
+        }
+        super.prepareForReuse()
+    }
+    
     override class func awakeFromNib() {
         super.awakeFromNib()
     }

@@ -20,9 +20,8 @@ import FirebaseRemoteConfig
 import AVFoundation
 import MirrorFlySDK
 
-
 let BASE_URL = "https://api-preprod-sandbox.mirrorfly.com/api/v1/"
-let LICENSE_KEY = "XXXXXXXXXXXXXXXX"
+let LICENSE_KEY = "xxxx"
 let XMPP_DOMAIN = "xmpp-preprod-sandbox.mirrorfly.com"
 let XMPP_PORT = 5222
 let SOCKETIO_SERVER_HOST = "https://signal-preprod-sandbox.mirrorfly.com"
@@ -34,6 +33,7 @@ let WEB_LOGIN_URL = "https://webchat-preprod-sandbox.mirrorfly.com/"
 let IS_MOBILE_NUMBER_LOGIN = false
 let APP_NAME = "UiKitQa"
 let ICLOUD_CONTAINER_ID = "iCloud.com.mirrorfly.qa"
+
 
 let isMigrationDone = "isMigrationDone"
 
@@ -78,6 +78,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
             .buildAndInitialize()
         
         ChatManager.enableContactSync(isEnable: ENABLE_CONTACT_SYNC)
+//        ChatManager.enableChatHistory(isEnable: ENABLE_CHAT_HISTORY)
         ChatManager.setSignalServer(signalServerUrl: SOCKETIO_SERVER_HOST)
         ChatManager.setMaximumPinningForRecentChat(maxPinChat: 4)
         ChatManager.deleteMediaFromDevice(delete: true)
@@ -158,8 +159,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
         ChatManager.hideNotificationContent(hide: false)
         FlyUtils.setAppName(appName: APP_NAME)
         VOIPManager.sharedInstance.updateDeviceToken()
-        let licenceKeyForEncryption = String(LICENSE_KEY.prefix(16))
-        FlyDefaults.profileIV = licenceKeyForEncryption
         networkMonitor()
         return true
     }
@@ -293,7 +292,7 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
         }
         print("#token appDelegate \(token)")
         print("#token application DT => \(token)")
-        VOIPManager.sharedInstance.saveAPNSToken(token: token)
+        VOIPManager.sharedInstance.savePushToken(token: token)
         Utility.saveInPreference(key: googleToken, value: token)
         VOIPManager.sharedInstance.updateDeviceToken()
     }

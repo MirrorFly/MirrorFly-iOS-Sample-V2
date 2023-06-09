@@ -128,7 +128,7 @@ class ReceiverDocumentsTableViewCell: BaseTableViewCell {
     }
     
     func setImage(imageURL: String, name: String, color: UIColor, chatType : ChatType,jid: String) {
-        if !getisBlockedMe(jid: jid) {
+        if !getisBlockedMe(jid: jid) || !(IS_LIVE && ENABLE_CONTACT_SYNC && ContactManager.shared.getUserProfileDetails(for: jid)?.isItSavedContact == false) {
             senderProfileImageView?.loadFlyImage(imageURL: imageURL, name: name, chatType: chatType, jid: jid)
         } else {
             senderProfileImageView?.image = UIImage(named: ImageConstant.ic_profile_placeholder)!

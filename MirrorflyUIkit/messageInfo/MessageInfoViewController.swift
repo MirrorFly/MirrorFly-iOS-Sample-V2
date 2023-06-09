@@ -365,8 +365,12 @@ extension MessageInfoViewController {
     private func hanldeGroupUserCell(cell : DeliveredCell, messageReceipt : MessageReceipt) {
         if let profileDetail = messageReceipt.profileDetails {
             let userName = getUserName(jid: profileDetail.jid, name: profileDetail.name, nickName: profileDetail.nickName, contactType: profileDetail.contactType)
-            cell.userNameLabel.text = userName
-            cell.userImage.loadFlyImage(imageURL:profileDetail.image, name: userName, jid: profileDetail.jid)
+            if profileDetail.mobileNumber == "" {
+                cell.userNameLabel.text = ""
+            } else {
+                cell.userNameLabel.text = userName
+                cell.userImage.loadFlyImage(imageURL:profileDetail.image, name: userName, jid: profileDetail.jid)
+            }
         } else {
             cell.userNameLabel.text = ""
         }

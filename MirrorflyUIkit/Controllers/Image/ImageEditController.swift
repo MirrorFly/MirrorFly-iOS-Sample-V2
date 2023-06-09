@@ -1051,7 +1051,7 @@ extension ImageEditController: UITableViewDelegate, UITableViewDataSource {
         if let cell = tableView.dequeueReusableCell(withIdentifier: "MentionTableViewCell", for: indexPath) as? MentionTableViewCell {
             if let profileDetail = searchGroupMembers[indexPath.row].profileDetail {
                 let placeholder = UIImage(named: "ic_profile_placeholder") ?? UIImage()
-                if profileDetail.contactType == .deleted || profileDetail.isBlockedMe || profileDetail.isBlockedByAdmin {
+                if profileDetail.contactType == .deleted || profileDetail.isBlockedMe || profileDetail.isBlockedByAdmin || (IS_LIVE && ENABLE_CONTACT_SYNC && profileDetail.isItSavedContact == false){
                     cell.userImageView.image = placeholder
                 } else {
                     let imageUrl = searchGroupMembers[indexPath.row].profileDetail?.image ?? ""

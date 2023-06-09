@@ -12,9 +12,10 @@ import MirrorFlySDK
 
 let BASE_URL =  "https://api-preprod-sandbox.mirrorfly.com/api/v1/"
 let CONTAINER_ID = "group.com.mirrorfly.qa"
-let LICENSE_KEY = "XXXXXXXXXXXXX"
+let LICENSE_KEY = "xxxx"
 let IS_LIVE = false
 let APP_NAME = "UiKit"
+let ENABLE_CONTACT_SYNC = false
 
 class NotificationService: UNNotificationServiceExtension {
     

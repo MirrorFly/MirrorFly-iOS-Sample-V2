@@ -29,7 +29,7 @@ extension RootViewController : CallManagerDelegate {
     }
 
     func onRemoteVideoTrackAdded(userId: String, track: RTCVideoTrack) {
-        
+        callViewController?.onRemoteVideoTrackAdded(userId: userId, track: track)
     }
     
     
@@ -182,6 +182,7 @@ extension RootViewController {
                 .setCallViewController(viewController: callViewController!)
                 .buildAndInitialize()
         }
+        CallManager.setMyInfo(name: FlyDefaults.myName, imageUrl: FlyDefaults.myImageUrl)
         if let callViewController = callViewController {
             CallManager.setCallViewController(callViewController)
         }

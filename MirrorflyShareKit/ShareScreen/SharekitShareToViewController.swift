@@ -302,6 +302,7 @@ class SharekitShareToViewController: ShareKitBaseViewController {
                         var profilesList = self.selectedProfiles
                         if !profilesList.isEmpty {
                             let profile = profilesList.first!
+                            let documentParams = FileMessageParams(fileUrl: file.fileURL, fileName: file.fileName)
                             FlyMessenger.sendDocumentMessage(toJid: profile.jid, mediaData: file) { isSuccess, _, message in
                                 if isSuccess {
                                     profilesList.removeFirst()
@@ -324,6 +325,7 @@ class SharekitShareToViewController: ShareKitBaseViewController {
                         var profilesList = self.selectedProfiles
                         if !profilesList.isEmpty {
                             let profile = profilesList.first!
+                            let audioParams = FileMessageParams(fileUrl: file.fileURL, fileName: file.fileName,fileSize: file.fileSize, duration: file.duration, fileKey: file.fileKey)
                             FlyMessenger.sendAudioMessage(toJid: profile.jid, mediaData: file, isRecorded: false) { isSuccess, _, message in
                                 if isSuccess {
                                     profilesList.removeFirst()
@@ -381,6 +383,7 @@ class SharekitShareToViewController: ShareKitBaseViewController {
                 self.removeLoader()
                 self.shareKitViewModel.locationList.forEach { location in
                     self.selectedProfiles.forEach { profile in
+                        let messageParams = TextMessage(toId: profile.jid, messageText : location)
                         FlyMessenger.sendTextMessage(toJid: profile.jid, message: location, mentionedUsersIds: []) { _, _, _ in
                         }
                     }
@@ -390,6 +393,7 @@ class SharekitShareToViewController: ShareKitBaseViewController {
                 self.removeLoader()
                 self.shareKitViewModel.textList.forEach { text in
                     self.selectedProfiles.forEach { profile in
+                        let messageParams = TextMessage(toId: profile.jid, messageText : text)
                         FlyMessenger.sendTextMessage(toJid: profile.jid, message: text, mentionedUsersIds: []) { _, _, _ in
                         }
                     }
@@ -1878,6 +1882,7 @@ extension SharekitShareToViewController: ShareEditImageDelegate {
                 if media.mediaType == .video {
                     let profiles = selectedProfiles.compactMap({ $0.jid })
                     for profile in profiles {
+                        let mediaParams = FileMessageParams(fileUrl: media.fileURL, fileName: media.fileName, caption: media.caption,fileSize: media.fileSize, duration: media.duration, thumbImage: media.base64Thumbnail, fileKey: media.fileKey)
                         FlyMessenger.sendVideoMessage(toJid: profile, mediaData: media, mentionedUsersIds: []) { isSuccess, _, message in
                             if let chatMessage = message {
                                 self.messageIDs.append(chatMessage.messageId)
@@ -1892,6 +1897,7 @@ extension SharekitShareToViewController: ShareEditImageDelegate {
                 } else if media.mediaType == .image {
                     let profiles = selectedProfiles.compactMap({ $0.jid })
                     for profile in profiles {
+                        let mediaParams = FileMessageParams(fileUrl: media.fileURL, fileName: media.fileName, caption: media.caption,fileSize: media.fileSize, duration: media.duration, thumbImage: media.base64Thumbnail, fileKey: media.fileKey)
                         FlyMessenger.sendImageMessage(toJid: profile, mediaData: media, mentionedUsersIds: []) { isSuccess, _, message in
                             if let chatMessage = message {
                                 self.messageIDs.append(chatMessage.messageId)

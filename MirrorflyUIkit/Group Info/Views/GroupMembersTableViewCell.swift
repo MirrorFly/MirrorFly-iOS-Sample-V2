@@ -40,9 +40,7 @@ class GroupMembersTableViewCell: UITableViewCell {
         let userName = getUserName(jid : groupInfo.profileDetail?.jid ?? "", name: groupInfo.profileDetail?.name ?? "",
                                    nickName: groupInfo.profileDetail?.nickName ?? "",
                                    contactType: groupInfo.profileDetail?.contactType ?? .unknown)
-        nameLabel.text = userName
-        statusLabel.text = groupInfo.profileDetail?.status
-        setUsersImage(userName: userName, groupInfo: groupInfo)
+        
         
         if groupInfo.memberJid == FlyDefaults.myJid {
             nameLabel.text = "You"
@@ -51,24 +49,36 @@ class GroupMembersTableViewCell: UITableViewCell {
         }
         
         let profileDetails = groupInfoViewModel.checkContactType(participantJid: groupInfo.memberJid)
-        self.profileDetails = profileDetails
-        
-        if self.profileDetails?.contactType == .unknown {
-            nickNameLabel.text = ("\("~")\(groupInfo.profileDetail?.name ?? "")")
-        }
-        
-        if groupInfo.isAdminMember == true {
-            adminLabel.text = "Admin"
-        } else {
-            adminLabel.text = ""
-        }
-        
-        let blockedMe = profileDetails?.isBlockedMe ?? false
-        
-        if profileDetails?.contactType == .deleted || blockedMe {
+        if profileDetails?.mobileNumber == "" {
+            nameLabel.text = "Deleted User"
+            nickNameLabel.text = ""
             userImageView?.image = UIImage(named: "ic_profile_placeholder") ?? UIImage()
-            statusLabel.text = ""
+        } else {
+            nameLabel.text = userName
+            statusLabel.text = groupInfo.profileDetail?.status
+            setUsersImage(userName: userName, groupInfo: groupInfo)
+            
+            self.profileDetails = profileDetails
+            
+            if self.profileDetails?.contactType == .unknown {
+                nickNameLabel.text = ("\("~")\(groupInfo.profileDetail?.name ?? "")")
+            }
+            
+            if groupInfo.isAdminMember == true {
+                adminLabel.text = "Admin"
+            } else {
+                adminLabel.text = ""
+            }
+            
+            let blockedMe = profileDetails?.isBlockedMe ?? false
+            let isBlockedMyAdmin = profileDetails?.isBlockedByAdmin ?? false
+            
+            if profileDetails?.contactType == .deleted || blockedMe || isBlockedMyAdmin || (IS_LIVE && ENABLE_CONTACT_SYNC && profileDetails?.isItSavedContact == false && groupInfo.memberJid != FlyDefaults.myJid){
+                userImageView?.image = UIImage(named: "ic_profile_placeholder") ?? UIImage()
+                statusLabel.text = ""
+            }
         }
+        
     }
     
     func setUsersImage(userName: String, groupInfo: GroupParticipantDetail) {

@@ -111,7 +111,7 @@ class RecentChatTableViewCell: UITableViewCell {
             attributedString.setAttributes([NSAttributedString.Key.foregroundColor: UIColor.systemBlue], range: convertedRange)
             userNameLabel?.attributedText = attributedString
         } else {
-            userNameLabel?.text = name.capitalized.isEmpty ? name.capitalized : name.capitalized
+            userNameLabel?.text = name
             userNameLabel?.textColor = Color.userNameTextColor
         }
     }
@@ -221,13 +221,14 @@ class RecentChatTableViewCell: UITableViewCell {
                                            chatType: recentChatMessage.profileType, jid: recentChatMessage.jid, isBlockedByAdmin: recentChatMessage.isBlockedByAdmin, validateBlock: false)
         }
         
-        if recentChatMessage.isBlockedMe || getisBlockedMe(jid: recentChatMessage.jid) || recentChatMessage.isBlockedByAdmin {
+        if recentChatMessage.isBlockedMe || getisBlockedMe(jid: recentChatMessage.jid) || recentChatMessage.isBlockedByAdmin || (IS_LIVE && ENABLE_CONTACT_SYNC && recentChatMessage.isItSavedContact == false){
             profileImageView?.backgroundColor =  Color.groupIconBackgroundGray
             let placeHolder = recentChatMessage.isGroup ? UIImage(named: "ic_groupPlaceHolder") :  UIImage(named: "ic_profile_placeholder")
             profileImageView?.sd_setImage(with: nil, placeholderImage: placeHolder ?? UIImage())
         }
         
-        let messageTime = chatMessage?.messageChatType == .singleChat ? recentChatMessage.lastMessageTime : DateFormatterUtility.shared.getGroupMilliSeconds(milliSeconds: recentChatMessage.lastMessageTime)
+        let messageTime = recentChatMessage.lastMessageTime
+        //chatMessage?.messageChatType == .singleChat ? recentChatMessage.lastMessageTime : DateFormatterUtility.shared.getGroupMilliSeconds(milliSeconds: recentChatMessage.lastMessageTime)
       
         chatTimeLabel?.text = recentChatMessage.lastMessageId == "" ? "" : String().fetchMessageDate(for: messageTime)
         countLabel?.text = recentChatMessage.unreadMessageCount > 99 ? "99+" : String(recentChatMessage.unreadMessageCount)
@@ -264,41 +265,45 @@ class RecentChatTableViewCell: UITableViewCell {
             default:
                 receiverMessageTypeView?.isHidden = true
             }
-    
-        switch recentChatMessage.isLastMessageSentByMe {
-        case true:
-            // show hide sent and received msg status
-            switch recentChatMessage.lastMessageStatus {
-            case .notAcknowledged:
-                statusImage?.image = UIImage(named: ImageConstant.ic_hour)
-                break
-            case .sent:
-                switch recentChatMessage.lastMessageType {
-                case .video, .audio, .image,.text,.contact, .document:
+        if recentChatMessage.lastMessageType != .notification {
+            switch recentChatMessage.isLastMessageSentByMe {
+            case true:
+                // show hide sent and received msg status
+                switch recentChatMessage.lastMessageStatus {
+                case .notAcknowledged:
                     statusImage?.image = UIImage(named: ImageConstant.ic_hour)
-                default:
+                    break
+                case .sent:
+                    switch recentChatMessage.lastMessageType {
+                    case .video, .audio, .image,.text,.contact, .document:
+                        statusImage?.image = UIImage(named: ImageConstant.ic_hour)
+                    default:
+                        statusImage?.image = UIImage(named: ImageConstant.ic_sent)
+                    }
+                    break
+                case .acknowledged:
                     statusImage?.image = UIImage(named: ImageConstant.ic_sent)
+                    break
+                case .delivered:
+                    statusImage?.image = UIImage(named: ImageConstant.ic_delivered)
+                    break
+                case .seen:
+                    statusImage?.image = UIImage(named: ImageConstant.ic_seen)
+                    break
+                case .received:
+                    statusImage?.image = UIImage(named: ImageConstant.ic_delivered)
+                    break
+                default:
+                    statusImage?.image = UIImage(named: ImageConstant.ic_hour)
+                    break
                 }
-                break
-            case .acknowledged:
-                statusImage?.image = UIImage(named: ImageConstant.ic_sent)
-                break
-            case .delivered:
-                statusImage?.image = UIImage(named: ImageConstant.ic_delivered)
-                break
-            case .seen:
-                statusImage?.image = UIImage(named: ImageConstant.ic_seen)
-                break
-            case .received:
-                statusImage?.image = UIImage(named: ImageConstant.ic_delivered)
-                break
-            default:
-                statusImage?.image = UIImage(named: ImageConstant.ic_hour)
-                break
+                case false:
+                statusImage?.isHidden = true
             }
-            case false:
-            statusImage?.isHidden = true
+        } else {
+            statusView?.isHidden = true
         }
+        
         
         // show send messageType
         switch recentChatMessage.lastMessageType {

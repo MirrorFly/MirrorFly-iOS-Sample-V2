@@ -307,8 +307,9 @@ extension UIImageView {
             case .groupChat:
                 placeholder = UIImage(named: "smallGroupPlaceHolder")
             default:
-                if uniqueId == FlyDefaults.myJid || contactType == .deleted || getIsBlockedByMe(jid: jid) || isBlockedByAdmin {
+                if uniqueId == FlyDefaults.myJid || contactType == .deleted || getIsBlockedByMe(jid: jid) || isBlockedByAdmin || (IS_LIVE && ENABLE_CONTACT_SYNC && ContactManager.shared.getUserProfileDetails(for: jid)?.isItSavedContact == false) {
                     placeholder = UIImage(named: "ic_profile_placeholder")
+                    url = URL(string: "")
                 } else {
                     let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
                     let ipimage = IPImage(text: trimmedName, radius: Double(self.frame.size.height), font: UIFont.font32px_appBold(),
@@ -322,8 +323,9 @@ extension UIImageView {
             case .groupChat:
                 placeholder = UIImage(named: "smallGroupPlaceHolder")
             default:
-                if uniqueId == FlyDefaults.myJid || getIsBlockedByMe(jid: jid) || isBlockedByAdmin {
+                if uniqueId == FlyDefaults.myJid || getIsBlockedByMe(jid: jid) || isBlockedByAdmin || (IS_LIVE && ENABLE_CONTACT_SYNC && ContactManager.shared.getUserProfileDetails(for: jid)?.isItSavedContact == false) {
                     placeholder = UIImage(named: "ic_profile_placeholder")
+                    url = URL(string: "")
                 } else {
                     let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
                     let ipimage = IPImage(text: trimmedName, radius: Double(self.frame.size.height), font: UIFont.font32px_appBold(),

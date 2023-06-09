@@ -1190,7 +1190,7 @@ extension GroupInfoViewController: TatsiPickerViewControllerDelegate {
 
 extension GroupInfoViewController : AdminBlockDelegate {
     func didBlockOrUnblockContact(userJid: String, isBlocked: Bool) {
-        
+        getGroupMembers()
     }
     
     func didBlockOrUnblockSelf(userJid: String, isBlocked: Bool) {

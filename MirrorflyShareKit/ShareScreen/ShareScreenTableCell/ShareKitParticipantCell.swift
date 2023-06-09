@@ -56,7 +56,7 @@ class ShareKitParticipantCell: UITableViewCell {
     }
     
     func setImage(imageURL: String, name: String, color: UIColor, chatType : ChatType,jid: String) {
-        if !getisBlockedMe(jid: jid) {
+        if !getisBlockedMe(jid: jid) || !(IS_LIVE && ENABLE_CONTACT_SYNC && ContactManager.shared.getUserProfileDetails(for: jid)?.isItSavedContact == false) {
             contactImageView?.loadFlyImage(imageURL: imageURL, name: name, chatType: chatType, jid: jid)
         } else {
             contactImageView?.image = UIImage(named: ImageConstant.ic_profile_placeholder)!
@@ -95,7 +95,7 @@ class ShareKitParticipantCell: UITableViewCell {
         var placeHolder = UIImage()
         if recentChat.profileType == .groupChat {
             placeHolder = UIImage(named: ImageConstant.ic_group_small_placeholder)!
-        }else if recentChat.isDeletedUser || getisBlockedMe(jid: recentChat.jid) {
+        }else if recentChat.isDeletedUser || getisBlockedMe(jid: recentChat.jid) || (IS_LIVE && ENABLE_CONTACT_SYNC && recentChat.isItSavedContact == false){
             placeHolder = UIImage(named: ImageConstant.ic_profile_placeholder)!
             url = nil
             statusUILabel?.text = ""
@@ -129,7 +129,7 @@ class ShareKitParticipantCell: UITableViewCell {
         var placeHolder = UIImage()
         if profile.profileChatType == .groupChat {
             placeHolder = UIImage(named: ImageConstant.ic_group_small_placeholder)!
-        }else if profile.contactType == .deleted || getisBlockedMe(jid: profile.jid) {
+        }else if profile.contactType == .deleted || getisBlockedMe(jid: profile.jid) || (IS_LIVE && ENABLE_CONTACT_SYNC && profile.isItSavedContact == false){
             placeHolder = UIImage(named: ImageConstant.ic_profile_placeholder)!
             url = nil
             statusUILabel?.text = ""
@@ -148,7 +148,7 @@ class ShareKitParticipantCell: UITableViewCell {
             statusUILabel?.text = recentChat.lastMessageContent
         }
        
-        if !recentChat.isDeletedUser{
+        if !recentChat.isDeletedUser || !(IS_LIVE && ENABLE_CONTACT_SYNC && recentChat.isItSavedContact == false) {
             checkBoxImageView?.image = recentChat.isSelected ?  UIImage(named: ImageConstant.ic_checked) : UIImage(named: ImageConstant.ic_check_box)
             let image = recentChat.profileThumbImage == "" ? recentChat.profileImage : recentChat.profileThumbImage
             setImage(imageURL: image, name: FlyUtils.getUserName(jid: recentChat.jid, name: recentChat.profileName, nickName: recentChat.nickName, contactType: recentChat.isItSavedContact ? .live : .unknown), color: color , recentChat: recentChat)
@@ -157,7 +157,7 @@ class ShareKitParticipantCell: UITableViewCell {
             contactImageView?.sd_setImage(with: nil, placeholderImage: UIImage(named: ImageConstant.ic_profile_placeholder)!)
             checkBoxImageView?.isHidden = true
         }
-        if getisBlockedMe(jid: recentChat.jid) {
+        if getisBlockedMe(jid: recentChat.jid) || (IS_LIVE && ENABLE_CONTACT_SYNC && recentChat.isItSavedContact == false) {
             contactImageView?.sd_setImage(with: nil, placeholderImage: UIImage(named: ImageConstant.ic_profile_placeholder)!)
         }
         removeButton?.isHidden = true

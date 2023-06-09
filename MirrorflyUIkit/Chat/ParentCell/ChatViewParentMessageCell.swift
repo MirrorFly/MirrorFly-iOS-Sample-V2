@@ -16,6 +16,11 @@ protocol RefreshBubbleImageViewDelegate {
     func refreshBubbleImageView(indexPath: IndexPath,isSelected: Bool,title: String?)
 }
 
+protocol LinkDelegate {
+    func pushToJoinCallView(callLink: String)
+    func showAlreadyInCallAlert(callLink: String)
+}
+
 class ChatViewParentMessageCell: BaseTableViewCell {
     
     //Outgoing And Incoming cell -  Basic view and its elements
@@ -90,11 +95,17 @@ class ChatViewParentMessageCell: BaseTableViewCell {
     @IBOutlet weak var quickForwardButton: UIButton?
     @IBOutlet weak var quickForwardView: UIView?
     
+    
+    @IBOutlet weak var linkView: UIView?
+    @IBOutlet weak var receiverLinkView: UIView?
+    
     var refreshDelegate: RefreshBubbleImageViewDelegate? = nil
     var selectedForwardMessage: [SelectedMessages]? = []
     var isDeleteSelected: Bool = false
     var isStarredMessagePage: Bool = false
     var searchText: String?
+    
+    var linkDelegate: LinkDelegate? = nil
        
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -147,7 +158,7 @@ class ChatViewParentMessageCell: BaseTableViewCell {
     }
     
     func setImage(imageURL: String, name: String, color: UIColor, chatType : ChatType,jid: String) {
-        if !getisBlockedMe(jid: jid) {
+        if !getisBlockedMe(jid: jid) || !(IS_LIVE && ENABLE_CONTACT_SYNC && ContactManager.shared.getUserProfileDetails(for: jid)?.isItSavedContact == false) {
             senderProfileImage?.loadFlyImage(imageURL: imageURL, name: name, chatType: chatType, jid: jid)
         } else if chatType == .groupChat {
             senderProfileImage?.image = UIImage(named: ImageConstant.ic_group_small_placeholder)!
@@ -163,6 +174,9 @@ class ChatViewParentMessageCell: BaseTableViewCell {
         replyTextLabel?.text = ""
         replyUserLabel?.text = ""
         translatedTextLabel?.text = ""
+        
+        linkView?.isHidden = true
+        receiverLinkView?.isHidden = true
 
         // Forward view elements and its data
         bubbleImageLeadingCons?.constant = (isShowForwardView == true) ? 10 : 0
@@ -230,7 +244,7 @@ class ChatViewParentMessageCell: BaseTableViewCell {
                replyViewWithoutMediaCons?.isActive = true
            } else {
             let getReplymessage =  replyMessage?.messageTextContent
-           replyViewHeightCons?.isActive = (getReplymessage?.count ?? 0 > 20) ? false : true
+//           replyViewHeightCons?.isActive = (getReplymessage?.count ?? 0 > 20) ? false : true
                if let getReplyMessage =  replyMessage, profileDetails.profileChatType == .groupChat, !getReplyMessage.mentionedUsersIds.isEmpty {
                    replyTextLabel?.attributedText = ChatUtils.getMentionTextContent(message: getReplyMessage.messageTextContent, isMessageSentByMe: getReplyMessage.isMessageSentByMe, mentionedUsers: getReplyMessage.mentionedUsersIds, searchedText: searchText)
                } else {
@@ -574,7 +588,25 @@ class ChatViewParentMessageCell: BaseTableViewCell {
                         let textRange = (tempName as NSString).range(of: text)
                         if(sender.didTapAttributedTextInLabel(label: textUILabel, inRange: textRange)) {
                             print("didTapTextLabel isURL \(text)")
-                            AppUtils.shared.openURLInBrowser(urlString: text)
+                            if text.contains(WEB_LOGIN_URL) {
+                                
+                                let callID = self.getCallLinkID(callLink: text)
+                                
+                                if callID.components(separatedBy: "-").count == 3 {
+                                    
+                                    if !CallManager.isOngoingCall() {
+                                        
+                                        linkDelegate?.pushToJoinCallView(callLink: text)
+                                    }else {
+                                        linkDelegate?.showAlreadyInCallAlert(callLink: text)
+                                    }
+                                }else {
+                                    AppUtils.shared.openURLInBrowser(urlString: text)
+                                }
+                                
+                            }else {
+                                AppUtils.shared.openURLInBrowser(urlString: text)
+                            }
                             break
                         }
                     }
@@ -611,6 +643,20 @@ class ChatViewParentMessageCell: BaseTableViewCell {
                      let urlRange = (message as NSString).range(of: text )
                      attributedString?.addAttribute(NSAttributedString.Key.underlineStyle,value: NSUnderlineStyle.single.rawValue, range: urlRange)
                      uiLabel.addGestureRecognizer(gestureRecognizer)
+                     
+                     if text.contains(WEB_LOGIN_URL) {
+                         
+                         let callID = self.getCallLinkID(callLink: text)
+                         
+                         if callID.components(separatedBy: "-").count == 3 {
+                             
+                             if(isMessageSentByMe) {
+                                 linkView?.isHidden = false
+                             }else {
+                                 receiverLinkView?.isHidden = false
+                             }
+                         }
+                     }
                  }
 
                 if fromChat && isMessageSearch {
@@ -638,6 +684,11 @@ class ChatViewParentMessageCell: BaseTableViewCell {
         }
         return attributedString
         
+    }
+    
+    func getCallLinkID(callLink: String) -> String {
+        
+        return callLink.components(separatedBy: "/").last ?? ""
     }
 }
 

@@ -53,11 +53,11 @@ class DateFormatterUtility: NSObject {
     }
     
     func convertMillisecondsToLocalDate(milliSeconds: Double)  -> Date {
-        let date = Date(timeIntervalSince1970: TimeInterval(milliSeconds/1000000))
+        let date = Date(timeIntervalSince1970:  milliSeconds/1000000)
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "MM/dd/yyyy HH:mm:ss"
         let strDate = dateFormatter.string(from: date)
-        dateFormatter.timeZone = TimeZone.current
+//        dateFormatter.timeZone = TimeZone.current
         dateFormatter.calendar = Calendar.current
         guard let str = dateFormatter.date(from: strDate) else {
             return Date()
@@ -67,11 +67,14 @@ class DateFormatterUtility: NSObject {
     
     func convertMillisecondsToLocalTime(milliSeconds: Double)  -> String {
         let date = Date(timeIntervalSince1970: milliSeconds/1000000)
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "MM-dd-yyyy hh:mm:ss a"
-        dateFormatter.locale = NSLocale.current
-        dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
+        return utcToLocal(date: date)
+    }
     
+    func utcToLocal(date: Date) -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "H:mm:ss"
+        dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
+        dateFormatter.timeZone = TimeZone.current
         let formatter : String = DateFormatter.dateFormat(fromTemplate: "j", options:0, locale:NSLocale.current)!
         if formatter.contains("a") {
             //phone is set to 12 hours format
@@ -80,10 +83,7 @@ class DateFormatterUtility: NSObject {
             //phone is set to 24 hours format
             dateFormatter.dateFormat = "HH:mm"
         }
-        dateFormatter.locale = Locale(identifier: "en_US")
-        dateFormatter.timeZone = TimeZone.current
-        let formattedDate = dateFormatter.string(from: date)
-        return formattedDate.lowercased()
+        return dateFormatter.string(from: date)
     }
     
     func convertToMilliseconds(milliSeconds: Double)  -> String {

@@ -18,8 +18,7 @@
 		3DF9C99A28E6A7FA00154BBE /* DeleteForEveryOneReceiverCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3DF9C99828E6A7FA00154BBE /* DeleteForEveryOneReceiverCell.xib */; };
 		3DF9C9A628E6E69300154BBE /* DeleteMessageForEveryOneAlertController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DF9C9A528E6E69300154BBE /* DeleteMessageForEveryOneAlertController.swift */; };
 		3DF9C9A928E6E6A300154BBE /* DeleteMessageForEveryOneAlertController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3DF9C9A828E6E6A300154BBE /* DeleteMessageForEveryOneAlertController.xib */; };
-		683D6D7E6BBB8DABF2083302 /* Pods_UikitQaShareKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 94F26C21F465F83BF8AC9B54 /* Pods_UikitQaShareKit.framework */; };
-		8500F0222BEB0C959F93F2E2 /* Pods_UiKitQa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 42E51127FE5ABBDEDFF9E05B /* Pods_UiKitQa.framework */; };
+		96F58A63E7A3C25C02D56FB7 /* Pods_UikitQaShareKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 36931E12F2FA5873C2534D40 /* Pods_UikitQaShareKit.framework */; };
 		CE005CA729C9D431009BE471 /* AuthenticationExtenison.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE46746A29C9799400169A96 /* AuthenticationExtenison.swift */; };
 		CE0140B0298943F7002CE0F8 /* AppLockDescriptionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE0140AE298943F6002CE0F8 /* AppLockDescriptionCell.swift */; };
 		CE0140B2298943F7002CE0F8 /* AppLockDescriptionCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = CE0140AF298943F7002CE0F8 /* AppLockDescriptionCell.xib */; };
@@ -40,6 +39,7 @@
 		CE0EE39927D8CAAE00C4823D /* GroupInfoViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE0EE39827D8CAAE00C4823D /* GroupInfoViewModel.swift */; };
 		CE1391FB29C86BC400F31957 /* ProgressBar.xib in Resources */ = {isa = PBXBuildFile; fileRef = CE1391F929C86BC400F31957 /* ProgressBar.xib */; };
 		CE1391FD29C86BC400F31957 /* ProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE1391FA29C86BC400F31957 /* ProgressBar.swift */; };
+		CE1446232A1755D40037E353 /* JoinCallViaLinkViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE1446222A1755D40037E353 /* JoinCallViaLinkViewController.swift */; };
 		CE167AC929200E8000C9CBA0 /* PINenteredCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE167AC729200E8000C9CBA0 /* PINenteredCollectionViewCell.swift */; };
 		CE167ACA29200E8000C9CBA0 /* PINenteredCollectionViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = CE167AC829200E8000C9CBA0 /* PINenteredCollectionViewCell.xib */; };
 		CE20699229B5D3A100271838 /* QuickSharePopupViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CE20699029B5CD2900271838 /* QuickSharePopupViewController.xib */; };
@@ -49,6 +49,7 @@
 		CE2A391429227C1C005F7AF0 /* AppLockTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE2A391329227C1C005F7AF0 /* AppLockTableViewCell.swift */; };
 		CE2FA0542812B38E004C0A85 /* ContactUsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE2FA0532812B38E004C0A85 /* ContactUsController.swift */; };
 		CE31D80C274365BD0052FFFF /* ChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE31D80B274365BD0052FFFF /* ChatViewModel.swift */; };
+		CE3521082A1B51F200E24933 /* CallEndedViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE3521072A1B51F200E24933 /* CallEndedViewController.swift */; };
 		CE39193A2967F74A0004268E /* 1-second-of-silence.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = CE3919392967F7490004268E /* 1-second-of-silence.mp3 */; };
 		CE40C5C426DDC0B5001F829F /* CountryPickerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE40C5B826DDC0B4001F829F /* CountryPickerViewController.swift */; };
 		CE40C5C526DDC0B5001F829F /* ContactViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE40C5B926DDC0B4001F829F /* ContactViewController.swift */; };
@@ -410,7 +411,8 @@
 		CEFB2D9429A4DFCE00FF6649 /* ShareComposeVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = CEFB2D9029A4DF4200FF6649 /* ShareComposeVC.xib */; };
 		CEFD043026CD25B90017287F /* countries.json in Resources */ = {isa = PBXBuildFile; fileRef = CEFD042F26CD25B90017287F /* countries.json */; };
 		CEFD043226CD3D4B0017287F /* CountryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEFD043126CD3D4B0017287F /* CountryModel.swift */; };
-		FB83D5FA0F028551F4E97B0B /* Pods_UiKitQaNotificationExtention.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 02BCAC85B902AA4FF37E43CC /* Pods_UiKitQaNotificationExtention.framework */; };
+		F5398310CC0101650D5C158B /* Pods_UiKitQaNotificationExtention.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63D64B5D54109632BB4E5DEC /* Pods_UiKitQaNotificationExtention.framework */; };
+		FABB456B97B64B08B0E9186D /* Pods_UiKitQa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B7AB9F8D70FA64283CAFD705 /* Pods_UiKitQa.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -456,7 +458,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		02BCAC85B902AA4FF37E43CC /* Pods_UiKitQaNotificationExtention.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_UiKitQaNotificationExtention.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		127536284DFECBDF1D0DC759 /* Pods-UiKitQa.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UiKitQa.debug.xcconfig"; path = "Target Support Files/Pods-UiKitQa/Pods-UiKitQa.debug.xcconfig"; sourceTree = "<group>"; };
+		36931E12F2FA5873C2534D40 /* Pods_UikitQaShareKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_UikitQaShareKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3D12788E27A7AC6D00A34436 /* UserProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfileViewController.swift; sourceTree = "<group>"; };
 		3D3C47DA28E5315D001F2520 /* DeleteForEveryOneViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteForEveryOneViewCell.swift; sourceTree = "<group>"; };
 		3D3C47DB28E5315D001F2520 /* DeleteForEveryOneViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = DeleteForEveryOneViewCell.xib; sourceTree = "<group>"; };
@@ -467,11 +470,13 @@
 		3DF9C99828E6A7FA00154BBE /* DeleteForEveryOneReceiverCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = DeleteForEveryOneReceiverCell.xib; sourceTree = "<group>"; };
 		3DF9C9A528E6E69300154BBE /* DeleteMessageForEveryOneAlertController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteMessageForEveryOneAlertController.swift; sourceTree = "<group>"; };
 		3DF9C9A828E6E6A300154BBE /* DeleteMessageForEveryOneAlertController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = DeleteMessageForEveryOneAlertController.xib; sourceTree = "<group>"; };
-		42E51127FE5ABBDEDFF9E05B /* Pods_UiKitQa.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_UiKitQa.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		572B590239A2A1E0FD07ABE1 /* Pods-UiKitQa.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UiKitQa.debug.xcconfig"; path = "Target Support Files/Pods-UiKitQa/Pods-UiKitQa.debug.xcconfig"; sourceTree = "<group>"; };
-		7370F3BC54CDDDE34509EAFC /* Pods-UikitQaShareKit.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UikitQaShareKit.release.xcconfig"; path = "Target Support Files/Pods-UikitQaShareKit/Pods-UikitQaShareKit.release.xcconfig"; sourceTree = "<group>"; };
-		94F26C21F465F83BF8AC9B54 /* Pods_UikitQaShareKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_UikitQaShareKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		CD6E1D8EE75DA8E7B2FEF007 /* Pods-UikitQaShareKit.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UikitQaShareKit.debug.xcconfig"; path = "Target Support Files/Pods-UikitQaShareKit/Pods-UikitQaShareKit.debug.xcconfig"; sourceTree = "<group>"; };
+		4B574C6B0A15ECC6F4B9A03B /* Pods-UiKitQa.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UiKitQa.release.xcconfig"; path = "Target Support Files/Pods-UiKitQa/Pods-UiKitQa.release.xcconfig"; sourceTree = "<group>"; };
+		63D64B5D54109632BB4E5DEC /* Pods_UiKitQaNotificationExtention.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_UiKitQaNotificationExtention.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		71BE1E51670C76564D54D315 /* Pods-UikitQaShareKit.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UikitQaShareKit.release.xcconfig"; path = "Target Support Files/Pods-UikitQaShareKit/Pods-UikitQaShareKit.release.xcconfig"; sourceTree = "<group>"; };
+		B7AB9F8D70FA64283CAFD705 /* Pods_UiKitQa.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_UiKitQa.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C6B53A9B8858848106303F37 /* Pods-UiKitQaNotificationExtention.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UiKitQaNotificationExtention.release.xcconfig"; path = "Target Support Files/Pods-UiKitQaNotificationExtention/Pods-UiKitQaNotificationExtention.release.xcconfig"; sourceTree = "<group>"; };
+		CABBC7DAE14A97A1DA2BBCF6 /* Pods-UikitQaShareKit.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UikitQaShareKit.debug.xcconfig"; path = "Target Support Files/Pods-UikitQaShareKit/Pods-UikitQaShareKit.debug.xcconfig"; sourceTree = "<group>"; };
+		CC7A6C397E7F8C56EB1A30BE /* Pods-UiKitQaNotificationExtention.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UiKitQaNotificationExtention.debug.xcconfig"; path = "Target Support Files/Pods-UiKitQaNotificationExtention/Pods-UiKitQaNotificationExtention.debug.xcconfig"; sourceTree = "<group>"; };
 		CE0140AE298943F6002CE0F8 /* AppLockDescriptionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLockDescriptionCell.swift; sourceTree = "<group>"; };
 		CE0140AF298943F7002CE0F8 /* AppLockDescriptionCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = AppLockDescriptionCell.xib; sourceTree = "<group>"; };
 		CE0755B3290067E1008F6C37 /* NotificationWebViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationWebViewController.swift; sourceTree = "<group>"; };
@@ -491,6 +496,7 @@
 		CE0EE39827D8CAAE00C4823D /* GroupInfoViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupInfoViewModel.swift; sourceTree = "<group>"; };
 		CE1391F929C86BC400F31957 /* ProgressBar.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ProgressBar.xib; sourceTree = "<group>"; };
 		CE1391FA29C86BC400F31957 /* ProgressBar.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressBar.swift; sourceTree = "<group>"; };
+		CE1446222A1755D40037E353 /* JoinCallViaLinkViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoinCallViaLinkViewController.swift; sourceTree = "<group>"; };
 		CE167AC729200E8000C9CBA0 /* PINenteredCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PINenteredCollectionViewCell.swift; sourceTree = "<group>"; };
 		CE167AC829200E8000C9CBA0 /* PINenteredCollectionViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = PINenteredCollectionViewCell.xib; sourceTree = "<group>"; };
 		CE20699029B5CD2900271838 /* QuickSharePopupViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = QuickSharePopupViewController.xib; sourceTree = "<group>"; };
@@ -500,6 +506,7 @@
 		CE2A391329227C1C005F7AF0 /* AppLockTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppLockTableViewCell.swift; sourceTree = "<group>"; };
 		CE2FA0532812B38E004C0A85 /* ContactUsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactUsController.swift; sourceTree = "<group>"; };
 		CE31D80B274365BD0052FFFF /* ChatViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModel.swift; sourceTree = "<group>"; };
+		CE3521072A1B51F200E24933 /* CallEndedViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallEndedViewController.swift; sourceTree = "<group>"; };
 		CE3919392967F7490004268E /* 1-second-of-silence.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "1-second-of-silence.mp3"; sourceTree = "<group>"; };
 		CE40C5B826DDC0B4001F829F /* CountryPickerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CountryPickerViewController.swift; sourceTree = "<group>"; };
 		CE40C5B926DDC0B4001F829F /* ContactViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactViewController.swift; sourceTree = "<group>"; };
@@ -797,6 +804,7 @@
 		CEB66AC429ADDE630084559C /* ShareKitParticipantCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ShareKitParticipantCell.xib; sourceTree = "<group>"; };
 		CEB66AC929AE2DC90084559C /* ShareKitShareViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareKitShareViewModel.swift; sourceTree = "<group>"; };
 		CEBE3BD82959CF1F004E7C49 /* FooterSectionCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FooterSectionCell.xib; sourceTree = "<group>"; };
+		CEC08B7227E23B9F005E48C5 /* MirrorflyNotificationExtention-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "MirrorflyNotificationExtention-Info.plist"; path = "/Users/user/Desktop/UiKit/MirrorflyNotificationExtention-Info.plist"; sourceTree = "<absolute>"; };
 		CEC08B7427E243D9005E48C5 /* MirrorflyNotificationextention.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = MirrorflyNotificationextention.entitlements; sourceTree = "<group>"; };
 		CEC08B7E27E24F41005E48C5 /* GoogleService-Qa-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Qa-Info.plist"; sourceTree = "<group>"; };
 		CEC2D48827A5AAA700AB107A /* ContactInfoViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactInfoViewModel.swift; sourceTree = "<group>"; };
@@ -873,9 +881,6 @@
 		CEFB2D9029A4DF4200FF6649 /* ShareComposeVC.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ShareComposeVC.xib; sourceTree = "<group>"; };
 		CEFD042F26CD25B90017287F /* countries.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = countries.json; sourceTree = "<group>"; };
 		CEFD043126CD3D4B0017287F /* CountryModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountryModel.swift; sourceTree = "<group>"; };
-		E8EB752F16E71289DCCE4C0E /* Pods-UiKitQaNotificationExtention.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UiKitQaNotificationExtention.release.xcconfig"; path = "Target Support Files/Pods-UiKitQaNotificationExtention/Pods-UiKitQaNotificationExtention.release.xcconfig"; sourceTree = "<group>"; };
-		F979BBD1C0071EDDA5F0717B /* Pods-UiKitQa.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UiKitQa.release.xcconfig"; path = "Target Support Files/Pods-UiKitQa/Pods-UiKitQa.release.xcconfig"; sourceTree = "<group>"; };
-		FC7797DB71E7BCA7F67DAF1B /* Pods-UiKitQaNotificationExtention.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UiKitQaNotificationExtention.debug.xcconfig"; path = "Target Support Files/Pods-UiKitQaNotificationExtention/Pods-UiKitQaNotificationExtention.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -883,7 +888,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8500F0222BEB0C959F93F2E2 /* Pods_UiKitQa.framework in Frameworks */,
+				FABB456B97B64B08B0E9186D /* Pods_UiKitQa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -891,7 +896,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				683D6D7E6BBB8DABF2083302 /* Pods_UikitQaShareKit.framework in Frameworks */,
+				96F58A63E7A3C25C02D56FB7 /* Pods_UikitQaShareKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -899,7 +904,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FB83D5FA0F028551F4E97B0B /* Pods_UiKitQaNotificationExtention.framework in Frameworks */,
+				F5398310CC0101650D5C158B /* Pods_UiKitQaNotificationExtention.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -961,22 +966,22 @@
 		6B19A949DEFF3996B7AA7823 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				572B590239A2A1E0FD07ABE1 /* Pods-UiKitQa.debug.xcconfig */,
-				F979BBD1C0071EDDA5F0717B /* Pods-UiKitQa.release.xcconfig */,
-				FC7797DB71E7BCA7F67DAF1B /* Pods-UiKitQaNotificationExtention.debug.xcconfig */,
-				E8EB752F16E71289DCCE4C0E /* Pods-UiKitQaNotificationExtention.release.xcconfig */,
-				CD6E1D8EE75DA8E7B2FEF007 /* Pods-UikitQaShareKit.debug.xcconfig */,
-				7370F3BC54CDDDE34509EAFC /* Pods-UikitQaShareKit.release.xcconfig */,
+				127536284DFECBDF1D0DC759 /* Pods-UiKitQa.debug.xcconfig */,
+				4B574C6B0A15ECC6F4B9A03B /* Pods-UiKitQa.release.xcconfig */,
+				CC7A6C397E7F8C56EB1A30BE /* Pods-UiKitQaNotificationExtention.debug.xcconfig */,
+				C6B53A9B8858848106303F37 /* Pods-UiKitQaNotificationExtention.release.xcconfig */,
+				CABBC7DAE14A97A1DA2BBCF6 /* Pods-UikitQaShareKit.debug.xcconfig */,
+				71BE1E51670C76564D54D315 /* Pods-UikitQaShareKit.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
 		};
-		8A8E48640657768F894B2995 /* Frameworks */ = {
+		7B1BE3E4D673597A9D4C4E6A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				42E51127FE5ABBDEDFF9E05B /* Pods_UiKitQa.framework */,
-				02BCAC85B902AA4FF37E43CC /* Pods_UiKitQaNotificationExtention.framework */,
-				94F26C21F465F83BF8AC9B54 /* Pods_UikitQaShareKit.framework */,
+				B7AB9F8D70FA64283CAFD705 /* Pods_UiKitQa.framework */,
+				63D64B5D54109632BB4E5DEC /* Pods_UiKitQaNotificationExtention.framework */,
+				36931E12F2FA5873C2534D40 /* Pods_UikitQaShareKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -1878,7 +1883,7 @@
 				CEA2F92626569C590013F5E8 /* Products */,
 				6B19A949DEFF3996B7AA7823 /* Pods */,
 				CE31D802274365020052FFFF /* Recovered References */,
-				8A8E48640657768F894B2995 /* Frameworks */,
+				7B1BE3E4D673597A9D4C4E6A /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -2502,6 +2507,8 @@
 				CEF4371B27390C60008D0F39 /* CallLogViewController.swift */,
 				CEF4372427391D6C008D0F39 /* CallViewController.swift */,
 				CEF4372627391D78008D0F39 /* GroupCallViewController.swift */,
+				CE1446222A1755D40037E353 /* JoinCallViaLinkViewController.swift */,
+				CE3521072A1B51F200E24933 /* CallEndedViewController.swift */,
 			);
 			path = Calls;
 			sourceTree = "<group>";
@@ -2521,6 +2528,7 @@
 				CEC08B7427E243D9005E48C5 /* MirrorflyNotificationextention.entitlements */,
 				CEF43750273BCAB2008D0F39 /* NotificationExtentionQa.entitlements */,
 				CEF43746273BCA77008D0F39 /* NotificationService.swift */,
+				CEC08B7227E23B9F005E48C5 /* MirrorflyNotificationExtention-Info.plist */,
 				CEF43748273BCA77008D0F39 /* Info.plist */,
 			);
 			path = NotificationExtention;
@@ -2573,7 +2581,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = CEA2F93926569C5C0013F5E8 /* Build configuration list for PBXNativeTarget "UiKitQa" */;
 			buildPhases = (
-				208912E43B7188E76E9A0CCE /* [CP] Check Pods Manifest.lock */,
+				E5F36AC8FE18D63BBC275BF2 /* [CP] Check Pods Manifest.lock */,
 				CEA2F92126569C590013F5E8 /* Sources */,
 				CEA2F92226569C590013F5E8 /* Frameworks */,
 				CEA2F92326569C590013F5E8 /* Resources */,
@@ -2581,8 +2589,8 @@
 				CED4FB5C277DE60D008FAF15 /* ShellScript */,
 				CEC08B8327E25037005E48C5 /* Google Plist */,
 				CEF9F50229E52E5700492772 /* Embed Frameworks */,
-				682E453CE716D933BE526F8E /* [CP] Embed Pods Frameworks */,
-				7C9C91F7B282610930B0FB1E /* [CP] Copy Pods Resources */,
+				ECE2229DA61D9D654C58FD48 /* [CP] Embed Pods Frameworks */,
+				604160648E63FA9250B080AD /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -2599,11 +2607,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = CEE7C5BA299F651E002F22FA /* Build configuration list for PBXNativeTarget "UikitQaShareKit" */;
 			buildPhases = (
-				3E2D2BE45A6C774C6691B753 /* [CP] Check Pods Manifest.lock */,
+				ACFABEF767E6CDA929AE2E79 /* [CP] Check Pods Manifest.lock */,
 				CEE7C5AB299F651D002F22FA /* Sources */,
 				CEE7C5AC299F651D002F22FA /* Frameworks */,
 				CEE7C5AD299F651D002F22FA /* Resources */,
-				7A4E471AEB8D8F50215841C6 /* [CP] Copy Pods Resources */,
+				98200A4B58A1B01A7BA846C8 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -2618,7 +2626,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = CEF4374F273BCA77008D0F39 /* Build configuration list for PBXNativeTarget "UiKitQaNotificationExtention" */;
 			buildPhases = (
-				90A47C6B531275AE13C98434 /* [CP] Check Pods Manifest.lock */,
+				181BFA9EC59E46AB299BBEF2 /* [CP] Check Pods Manifest.lock */,
 				CEF43740273BCA76008D0F39 /* Sources */,
 				CEF43741273BCA76008D0F39 /* Frameworks */,
 				CEF43742273BCA76008D0F39 /* Resources */,
@@ -2833,7 +2841,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		208912E43B7188E76E9A0CCE /* [CP] Check Pods Manifest.lock */ = {
+		181BFA9EC59E46AB299BBEF2 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -2848,70 +2856,14 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-UiKitQa-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-UiKitQaNotificationExtention-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		3E2D2BE45A6C774C6691B753 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-UikitQaShareKit-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		682E453CE716D933BE526F8E /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-UiKitQa/Pods-UiKitQa-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-UiKitQa/Pods-UiKitQa-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-UiKitQa/Pods-UiKitQa-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		7A4E471AEB8D8F50215841C6 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-UikitQaShareKit/Pods-UikitQaShareKit-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-UikitQaShareKit/Pods-UikitQaShareKit-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-UikitQaShareKit/Pods-UikitQaShareKit-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		7C9C91F7B282610930B0FB1E /* [CP] Copy Pods Resources */ = {
+		604160648E63FA9250B080AD /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -2928,7 +2880,24 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-UiKitQa/Pods-UiKitQa-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		90A47C6B531275AE13C98434 /* [CP] Check Pods Manifest.lock */ = {
+		98200A4B58A1B01A7BA846C8 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-UikitQaShareKit/Pods-UikitQaShareKit-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-UikitQaShareKit/Pods-UikitQaShareKit-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-UikitQaShareKit/Pods-UikitQaShareKit-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		ACFABEF767E6CDA929AE2E79 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -2943,7 +2912,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-UiKitQaNotificationExtention-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-UikitQaShareKit-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -2986,6 +2955,45 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/FirebaseCrashlytics/run\"\n";
+		};
+		E5F36AC8FE18D63BBC275BF2 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-UiKitQa-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		ECE2229DA61D9D654C58FD48 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-UiKitQa/Pods-UiKitQa-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-UiKitQa/Pods-UiKitQa-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-UiKitQa/Pods-UiKitQa-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -3046,6 +3054,7 @@
 				CE9FA02626F067D20082EFA5 /* RecentChatTableViewCell.swift in Sources */,
 				CE62CD9C275E85E100E77310 /* BaseTableViewCell.swift in Sources */,
 				CE2A390B29227862005F7AF0 /* AppLockPasswordViewController.swift in Sources */,
+				CE3521082A1B51F200E24933 /* CallEndedViewController.swift in Sources */,
 				CEA22DBA26F4A5D2002034C0 /* ContactDetails.swift in Sources */,
 				CE40C5C426DDC0B5001F829F /* CountryPickerViewController.swift in Sources */,
 				CEA4FEDD26DF73E1004A1268 /* ChatTextView.swift in Sources */,
@@ -3205,6 +3214,7 @@
 				CEECC55829CD870700466FBF /* CustomNotificationView.swift in Sources */,
 				CEABA5F527704731004CF761 /* ChatUtils.swift in Sources */,
 				CEA4FFB126DFBA9F004A1268 /* ProfileViewModel.swift in Sources */,
+				CE1446232A1755D40037E353 /* JoinCallViaLinkViewController.swift in Sources */,
 				CEA4FEE126DF73F3004A1268 /* ChatViewParentMessageCell.swift in Sources */,
 				CEF8A4D02959CD5100D669B6 /* ViewAllMediaController.swift in Sources */,
 				CEA2F92B26569C590013F5E8 /* SceneDelegate.swift in Sources */,
@@ -3456,7 +3466,7 @@
 		};
 		CEA2F93A26569C5C0013F5E8 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 572B590239A2A1E0FD07ABE1 /* Pods-UiKitQa.debug.xcconfig */;
+			baseConfigurationReference = 127536284DFECBDF1D0DC759 /* Pods-UiKitQa.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ARCHS = "$(ARCHS_STANDARD)";
@@ -3467,7 +3477,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 376;
+				CURRENT_PROJECT_VERSION = 378;
 				DEVELOPMENT_TEAM = G44VFA67ZG;
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = G44VFA67ZG;
 				ENABLE_BITCODE = NO;
@@ -3509,7 +3519,7 @@
 		};
 		CEA2F93B26569C5C0013F5E8 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F979BBD1C0071EDDA5F0717B /* Pods-UiKitQa.release.xcconfig */;
+			baseConfigurationReference = 4B574C6B0A15ECC6F4B9A03B /* Pods-UiKitQa.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ARCHS = "$(ARCHS_STANDARD)";
@@ -3520,7 +3530,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 376;
+				CURRENT_PROJECT_VERSION = 378;
 				DEVELOPMENT_TEAM = G44VFA67ZG;
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = G44VFA67ZG;
 				ENABLE_BITCODE = NO;
@@ -3560,7 +3570,7 @@
 		};
 		CEE7C5BB299F651E002F22FA /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CD6E1D8EE75DA8E7B2FEF007 /* Pods-UikitQaShareKit.debug.xcconfig */;
+			baseConfigurationReference = CABBC7DAE14A97A1DA2BBCF6 /* Pods-UikitQaShareKit.debug.xcconfig */;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -3568,7 +3578,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 376;
+				CURRENT_PROJECT_VERSION = 378;
 				DEVELOPMENT_TEAM = G44VFA67ZG;
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = G44VFA67ZG;
 				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
@@ -3597,7 +3607,7 @@
 		};
 		CEE7C5BC299F651E002F22FA /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 7370F3BC54CDDDE34509EAFC /* Pods-UikitQaShareKit.release.xcconfig */;
+			baseConfigurationReference = 71BE1E51670C76564D54D315 /* Pods-UikitQaShareKit.release.xcconfig */;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -3605,7 +3615,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 376;
+				CURRENT_PROJECT_VERSION = 378;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = G44VFA67ZG;
 				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
@@ -3634,7 +3644,7 @@
 		};
 		CEF4374D273BCA77008D0F39 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = FC7797DB71E7BCA7F67DAF1B /* Pods-UiKitQaNotificationExtention.debug.xcconfig */;
+			baseConfigurationReference = CC7A6C397E7F8C56EB1A30BE /* Pods-UiKitQaNotificationExtention.debug.xcconfig */;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
@@ -3642,7 +3652,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 376;
+				CURRENT_PROJECT_VERSION = 378;
 				DEVELOPMENT_TEAM = G44VFA67ZG;
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = G44VFA67ZG;
 				ENABLE_BITCODE = NO;
@@ -3682,14 +3692,14 @@
 		};
 		CEF4374E273BCA77008D0F39 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = E8EB752F16E71289DCCE4C0E /* Pods-UiKitQaNotificationExtention.release.xcconfig */;
+			baseConfigurationReference = C6B53A9B8858848106303F37 /* Pods-UiKitQaNotificationExtention.release.xcconfig */;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_ENTITLEMENTS = notificationextention/NotificationExtentionQa.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Distribution: CONTUS SUPPORT INTERACTIVE PRIVATE LIMITED";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 376;
+				CURRENT_PROJECT_VERSION = 378;
 				DEVELOPMENT_TEAM = G44VFA67ZG;
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = G44VFA67ZG;
 				ENABLE_BITCODE = NO;

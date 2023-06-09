@@ -212,7 +212,7 @@ extension ContactInfoViewController : UITableViewDelegate, UITableViewDataSource
             
             let isBlockedByAdmin = profileDetails?.isBlockedByAdmin ?? false
             
-            if profileDetails?.contactType == .deleted || isBlockedByAdmin || getisBlockedMe() {
+            if profileDetails?.contactType == .deleted || isBlockedByAdmin || getisBlockedMe() || (IS_LIVE && ENABLE_CONTACT_SYNC && profileDetails?.isItSavedContact == false) {
                 cell.userImage?.image = UIImage(named: "ic_profile_placeholder") ?? UIImage()
                 cell.userImage?.contentMode = .center
                 cell.userImage?.backgroundColor = UIColor.darkGray

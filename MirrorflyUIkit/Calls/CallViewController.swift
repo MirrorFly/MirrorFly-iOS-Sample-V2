@@ -111,12 +111,14 @@ class CallViewController: UIViewController ,AVPictureInPictureControllerDelegate
     var remoteImage = emptyString()
     var callHoldLabel = UILabel()
     var isFromInvite = false
+    var isVideoPermissionEnabled: Bool = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
         print("#lifecycle viewDidLoad")
         
         checkForUserBlockingByAdmin()
+        checkCameraPermission(sourceType: .camera)
         
         isTapped = false
         outgoingCallView?.addParticipantBtn.isHidden = true
@@ -315,7 +317,9 @@ class CallViewController: UIViewController ,AVPictureInPictureControllerDelegate
     }
     
     func showCallOverlay() {
-
+        
+        CallViewController.sharedInstance = self
+        
         overlayShown = true
         if let controller = self.presentingViewController {
             if let cont = controller as? UINavigationController, let vc = cont.topViewController {
@@ -601,22 +605,28 @@ class CallViewController: UIViewController ,AVPictureInPictureControllerDelegate
     @objc func videoButtonTapped(sender:UIButton) {
         print("isVideoMuted \(isVideoMuted)")
         
-        if CallManager.isCallOnHold(){
-            return
-        }
-        
-        if CallManager.isOneToOneCall() && CallManager.getCallType() == .Audio {
-            callConversionPopup()
-        } else {
-            print("#mute videoButtonTapped else")
-            isVideoMuted.toggle()
-            if !CallManager.isOneToOneCall(){
-                if members.last?.videoTrack == nil{
-                    print("#mute videoButtonTapped if if isVideoMuted: false")
-                    CallManager.enableVideo()
-                }
+        if isVideoPermissionEnabled {
+            
+            if CallManager.isCallOnHold(){
+                return
             }
-            delegate?.onVideoMute(status: isVideoMuted)
+            
+            if CallManager.isOneToOneCall() && CallManager.getCallType() == .Audio {
+                callConversionPopup()
+            } else {
+                print("#mute videoButtonTapped else")
+                isVideoMuted.toggle()
+                if !CallManager.isOneToOneCall(){
+                    if members.last?.videoTrack == nil{
+                        print("#mute videoButtonTapped if if isVideoMuted: false")
+                        CallManager.enableVideo()
+                    }
+                }
+                delegate?.onVideoMute(status: isVideoMuted)
+            }
+        } else {
+            
+            AppPermissions.shared.presentSettingsForPermission(permission: .camera, instance: self as Any)
         }
     }
     
@@ -1163,13 +1173,71 @@ extension CallViewController : UICollectionViewDelegate , UICollectionViewDataSo
             groupCell.statusLable.textColor = UIColor(hexString: "#FFFFFF")
             groupCell.profileName.font = AppFont.Regular.size(14)
         }
-        if member.isVideoMuted || member.videoTrack == nil || CallManager.getCallType() == .Audio {
-            Utility.IntialLetter(name: member.name, imageView: groupCell.videoBaseView, colorCode: member.color,frameSize: 128,fontSize: 64)
-            Utility.download(token: member.image, profileImage: groupCell.videoBaseView, uniqueId: member.jid,name: member.name,colorCode: member.color,frameSize: 128,fontSize: 64,notify: true, completion: {
-            })
-        } else {
-            groupCell.videoBaseView.addSubview(member.videoTrackView)
+        
+        if member.isVideoMuted || CallManager.getCallType() == .Audio {
+            
+            if let profileDetail = ContactManager.shared.getUserProfileDetails(for: member.jid) {
+                
+                print(profileDetail)
+                
+                let profileImageStr = profileDetail.thumbImage.isEmpty ? profileDetail.image : profileDetail.thumbImage
+                
+                groupCell.videoBaseView.loadFlyImage(imageURL: profileImageStr, name: getUserName(jid : profileDetail.jid ,name: profileDetail.name, nickName: profileDetail.nickName, contactType: profileDetail.contactType), chatType: profileDetail.profileChatType,contactType: profileDetail.contactType, jid: profileDetail.jid, isBlockedByAdmin: ContactManager.shared.getUserProfileDetails(for: profileDetail.jid)?.isBlockedByAdmin ?? false)
+                
+                if !profileImageStr.isEmpty {
+                    groupCell.videoBaseView.contentMode = .scaleAspectFill
+                }else{
+                    Utility.IntialLetter(name: member.name, imageView: groupCell.videoBaseView, colorCode: member.color,frameSize: 128,fontSize: 64)
+                }
+            }else {
+                
+                let (userName, profileImg) = CallManager.getUserNameAndImage(userId: member.jid)
+                Utility.IntialLetter(name: member.name, imageView: groupCell.videoBaseView, colorCode: member.color,frameSize: 128,fontSize: 64)
+                Utility.download(token: profileImg, profileImage: groupCell.videoBaseView, uniqueId: member.jid,name: userName,colorCode: member.color,frameSize: 128,fontSize: 64,notify: true, completion: {
+                })
+                
+                try? ContactManager.shared.getUserProfile(for:  member.jid, fetchFromServer: true) { isSuccess, error, data in
+                    if isSuccess{
+                        print("#profile is fetched")
+                    }
+                }
+                
+            }
+        }else {
+           // groupCell.videoBaseView.addSubview(member.videoTrackView)
+            
+            if member.videoTrack == nil {
+                
+                if let profileDetail = ContactManager.shared.getUserProfileDetails(for: member.jid) {
+                    
+                    print(profileDetail)
+                    
+                    let profileImageStr = profileDetail.thumbImage.isEmpty ? profileDetail.image : profileDetail.thumbImage
+                    
+                    groupCell.videoBaseView.loadFlyImage(imageURL: profileImageStr, name: getUserName(jid : profileDetail.jid ,name: profileDetail.name, nickName: profileDetail.nickName, contactType: profileDetail.contactType), chatType: profileDetail.profileChatType,contactType: profileDetail.contactType, jid: profileDetail.jid, isBlockedByAdmin: ContactManager.shared.getUserProfileDetails(for: profileDetail.jid)?.isBlockedByAdmin ?? false)
+                    
+                    if !profileImageStr.isEmpty {
+                        groupCell.videoBaseView.contentMode = .scaleAspectFill
+                    }else{
+                        Utility.IntialLetter(name: member.name, imageView: groupCell.videoBaseView, colorCode: member.color,frameSize: 128,fontSize: 64)
+                    }
+                }else {
+                    
+                    let (userName, profileImg) = CallManager.getUserNameAndImage(userId: member.jid)
+                    Utility.IntialLetter(name: member.name, imageView: groupCell.videoBaseView, colorCode: member.color,frameSize: 128,fontSize: 64)
+                    Utility.download(token: profileImg, profileImage: groupCell.videoBaseView, uniqueId: member.jid,name: userName,colorCode: member.color,frameSize: 128,fontSize: 64,notify: true, completion: {
+                    })
+                    
+                    try? ContactManager.shared.getUserProfile(for:  member.jid, fetchFromServer: true) { isSuccess, error, data in
+                        if isSuccess{
+                            print("#profile is fetched")
+                        }
+                    }
+                    
+                }
+            }
         }
+         
         
         return groupCell
     }
@@ -1375,8 +1443,16 @@ extension CallViewController : CallManagerDelegate {
                 if let index = self.findIndexOfUser(jid: userId) {
                     self.members[index].videoTrack = track
                     self.members[index].isVideoTrackAdded = true
-                    self.addGroupTracks(jid: FlyDefaults.myJid)
-                    self.addGroupTracks(jid: userId)
+//                    self.addGroupTracks(jid: FlyDefaults.myJid)
+//                    self.addGroupTracks(jid: userId)
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() +  2) { [weak self] in
+                        if let members = self?.members {
+                            for member in members {
+                                self?.addGroupTracks(jid: member.jid)
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -1833,6 +1909,10 @@ extension CallViewController : CallManagerDelegate {
         controller.groupJid = self.groupId
         controller.refreshDelegate = self
         isFromInvite = true
+        if let callLink = CallManager.getCallLink(){
+            controller.callLink = callLink
+        }
+       
         self.navigationController?.pushViewController(controller, animated: true)
     }
     
@@ -2103,6 +2183,19 @@ extension CallViewController {
                         }
                     }
                     members[index].isVideoMuted = isMute
+                }else {
+                    if isMute {
+                        member.videoTrackView.removeFromSuperview()
+                        groupCell.videoBaseView.willRemoveSubview(member.videoTrackView)
+                        if userid == FlyDefaults.myJid {
+                            groupCell.videoBaseView.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
+                        }
+                    } else {
+                        addGroupTracks(jid: userid)
+                        if userid == FlyDefaults.myJid {
+                            groupCell.videoBaseView.transform = CGAffineTransform(scaleX: -1.0, y: 1.0)
+                        }
+                    }
                 }
             }
         }
@@ -2794,5 +2887,32 @@ extension CallViewController : RefreshProfileInfo {
                 onCallStatusUpdated(callStatus: .DISCONNECTED, userId: jid)
             }
         }
+    }
+}
+
+extension CallViewController {
+    
+    func checkCameraPermission(sourceType: UIImagePickerController.SourceType) {
+        AppPermissions.shared.checkCameraPermissionAccess(permissionCallBack: { [weak self] authorizationStatus in
+            switch authorizationStatus {
+            case .denied:
+                self?.isVideoPermissionEnabled = false
+               // AppPermissions.shared.presentSettingsForPermission(permission: .camera, instance: self as Any)
+                break
+            case .restricted:
+                self?.isVideoPermissionEnabled = false
+                break
+            case .authorized:
+                self?.isVideoPermissionEnabled = true
+                break
+            case .notDetermined:
+                break
+            @unknown default:
+                print("Permission failed")
+                self?.isVideoPermissionEnabled = false
+               
+            }
+        })
+        
     }
 }

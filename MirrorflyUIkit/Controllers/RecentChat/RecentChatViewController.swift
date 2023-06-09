@@ -74,7 +74,10 @@ class RecentChatViewController: UIViewController, UIGestureRecognizerDelegate {
             chatTagsCollectionView.isHidden = self.getChatTags.isEmpty ? true : showArchivedChat
         }
     }
-    
+    var chatTotalPages = 1
+    var chatPageSize = 40
+    var chatTotalChat = 0
+    var chatNextPage = 2
     var totalPages = 2
     var totalUsers = 0
     var nextPage = 1
@@ -93,7 +96,6 @@ class RecentChatViewController: UIViewController, UIGestureRecognizerDelegate {
     var isRecentLoadingDone = false
     var isRecentLoadingInProgress = false
     let backgroundQueue = DispatchQueue(label: "recent")
-    
     var availableFeatures = ChatManager.getAvailableFeatures()
     var getChatTags: [ChatTagsModel] = []
     var selectedChatTag: ChatTagsModel! {
@@ -240,6 +242,29 @@ class RecentChatViewController: UIViewController, UIGestureRecognizerDelegate {
         let longPressGesture:UILongPressGestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector( handleCellLongPress))
         longPressGesture.delegate = self
         recentChatTableView?.addGestureRecognizer(longPressGesture)
+    }
+    
+    func getRecent(page: Int, size: Int) {
+        isRecentLoadingInProgress = true
+        executeOnMainThread {
+            if page == 1 {
+                self.startLoading(withText: "")
+            }
+        }
+        recentChatViewModel?.getRecentChatFromAPI(page: page, size: size, completionHandler: { [weak self] isSuccess, error, data in
+            executeOnMainThread {
+                self?.stopLoading()
+            }
+            if let list = data["chatList"] as? NSArray {
+                if list.count == size {
+                    self?.chatNextPage += 1
+                }
+            }
+            self?.chatTotalPages = data["totalPages"] as? Int ?? 1
+            self?.chatTotalChat = data["totalRecords"] as? Int ?? 1
+            self?.getRecentChatList(fromAPI: true)
+            self?.isRecentLoadingInProgress = false
+        })
     }
 
     @objc func contactSyncCompleted(notification: Notification){
@@ -1431,12 +1456,12 @@ extension RecentChatViewController {
         }
     }
     
-    func getRecentChatList() {
+    func getRecentChatList(fromAPI: Bool = false) {
         
         if selectedChatTag?.tagId == FlyDefaults.myJid || selectedChatTag == nil {
             
             recentChatListBuilder?.changeLimit(limit:  getAllRecentChat.isEmpty ? 80 : ((getAllRecentChat.count < 40 ? 40 : getAllRecentChat.count)))
-            recentChatListBuilder?.loadRecentChatList(completionHandler: {  [weak self] isSuccess, error, data in
+            recentChatListBuilder?.loadRecentChatList(fromAPI, completionHandler: {  [weak self] isSuccess, error, data in
                 var result = data
                 if  let weakSelf = self, let recentChatList = result.getData() as? [RecentChat], isSuccess{
                     weakSelf.isRecentLoadingDone = false
@@ -1485,30 +1510,12 @@ extension RecentChatViewController {
             if showArchivedChat && getArchiveChat.count == 0 {
                 hideArchiveHeader()
             }
-            //executeOnMainThread {
+            executeOnMainThread {
+                if (self.getRecentChat.count + self.getArchiveChat.count) == self.chatTotalChat && fromAPI {
+                    self.isRecentLoadingDone = true
+                }
                 self.recentChatTableView?.reloadData()
-            //}
-            
-            //        recentChatViewModel?.getRecentChatList(isBackground: true, completionHandler: { [weak self] recentChatList in
-            //            if let weakSelf = self {
-            //                if weakSelf.isSearchEnabled == false {
-            //                    weakSelf.clearChatList()
-            //                    weakSelf.getRecentChat = recentChatList ?? []
-            //                    weakSelf.getAllRecentChat = recentChatList ?? []
-            //                    weakSelf.selectionRecentChatList.enumerated().forEach { (index,selectedRecentChat) in
-            //                        weakSelf.getRecentChat.filter({$0.jid == selectedRecentChat.jid}).first?.isSelected = selectedRecentChat.isSelected
-            //                    }
-            //                  //weakSelf.getMessageForSearch()
-            //                }
-            //                DispatchQueue.main.async { [weak self] in
-            //                    if self?.isSearchEnabled == false {
-            //                        self?.recentChatTableView?.reloadData()
-            //                        self?.showHideEmptyMessage()
-            //                    }
-            //                    self?.getOverallUnreadCount()
-            //                }
-            //            }
-            //        })
+            }
         } else {
             self.selectedChatTag = getChatTags.first(where: {$0.tagId == self.selectedChatTag.tagId})
             if self.selectedChatTag != nil {
@@ -1697,7 +1704,7 @@ extension RecentChatViewController {
                 userImage?.sd_setImage(with: url, placeholderImage: placeHolder)
             }
             
-            if profile.isDeletedUser || getisBlockedMe(jid: profile.jid) || profile.isBlockedByAdmin {
+            if profile.isDeletedUser || getisBlockedMe(jid: profile.jid) || profile.isBlockedByAdmin || (IS_LIVE && ENABLE_CONTACT_SYNC && profile.isItSavedContact == false){
                 userImage?.backgroundColor =  Color.groupIconBackgroundGray
                 let placeHolder = profile.isGroup ? UIImage(named: "ic_groupPlaceHolder") :  UIImage(named: "ic_profile_placeholder")
                 userImage?.sd_setImage(with: nil, placeholderImage: placeHolder ?? UIImage())
@@ -1947,7 +1954,7 @@ extension RecentChatViewController : ProfileEventsDelegate {
 
 
             let section = showArchivedChat ? 0 : getArchiveChat.count > 0 ? FlyDefaults.isArchivedChatEnabled ? 1 : 0 : 0
-            reloadRecentChatRow(index : index, section : section)
+//            reloadRecentChatRow(index : index, section : section)
         }
     }
     
@@ -2145,7 +2152,9 @@ extension RecentChatViewController : GroupEventsDelegate {
     
     func didFetchGroupMembers(groupJid: String) {
         DispatchQueue.main.async { [weak self] in
-            self?.updateGroupInRecentChat(groupJid: groupJid)
+            if !(self?.availableFeatures.isChatHistoryEnabled ?? true) {
+                self?.updateGroupInRecentChat(groupJid: groupJid)
+            }
         }
     }
     
@@ -2182,7 +2191,9 @@ extension RecentChatViewController : GroupEventsDelegate {
                     self?.setProfile()
                 }
             }
-            self?.updateGroupInRecentChat(groupJid: groupJid)
+            if !(self?.availableFeatures.isChatHistoryEnabled ?? true) {
+                self?.updateGroupInRecentChat(groupJid: groupJid)
+            }
         }
     }
     
@@ -2317,7 +2328,13 @@ extension RecentChatViewController : UIScrollViewDelegate {
                 if !isRecentLoadingInProgress{
                     isRecentLoadingInProgress = true
                     backgroundQueue.async {
-                        self.loadNextSetOfData()
+                        if self.availableFeatures.isChatHistoryEnabled {
+                            if (self.getRecentChat.count + self.getArchiveChat.count) >= self.chatPageSize {
+                                self.getRecent(page: self.chatNextPage, size: self.chatPageSize)
+                            }
+                        } else {
+                            self.loadNextSetOfData()
+                        }
                     }
                 }
             }
@@ -2335,7 +2352,7 @@ extension RecentChatViewController : UIScrollViewDelegate {
                 //recentChatTableView?.tableFooterView = createTableFooterView()
                 if !isLoadingInProgress{
                     isLoadingInProgress = true
-                    getUsersList(pageNo: searchTerm.isEmpty ? nextPage : searchNextPage, pageSize: 20, searchTerm: searchTerm)
+                    getUsersList(pageNo: searchTerm.isEmpty ? nextPage : searchNextPage, pageSize: chatPageSize, searchTerm: searchTerm)
                 }
             }
         }

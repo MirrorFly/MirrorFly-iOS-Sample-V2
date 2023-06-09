@@ -31,7 +31,7 @@ class UserListCell: UITableViewCell {
         
         titleLabel?.text = getUserName(jid: recentChat.jid,name: recentChat.profileName, nickName: recentChat.nickName, contactType: (recentChat.isDeletedUser ? .deleted :  recentChat.isItSavedContact ? .live : .unknown))
 
-        if !recentChat.isDeletedUser{
+        if !recentChat.isDeletedUser || !(IS_LIVE && ENABLE_CONTACT_SYNC && recentChat.isItSavedContact == false) {
             checkBoxImage?.image = recentChat.isSelected ?  UIImage(named: ImageConstant.selected_user) : UIImage(named: ImageConstant.select_user)
             setImage(imageURL: recentChat.profileImage ?? "", name: getUserName(jid: recentChat.jid, name: recentChat.profileName, nickName: recentChat.nickName, contactType: recentChat.isItSavedContact ? .live : .unknown), color: color , recentChat: recentChat)
             checkBoxImage?.isHidden = false
@@ -39,7 +39,7 @@ class UserListCell: UITableViewCell {
             profileImage?.sd_setImage(with: nil, placeholderImage: UIImage(named: ImageConstant.ic_profile_placeholder)!)
             checkBoxImage?.isHidden = true
         }
-        if getisBlockedMe(jid: recentChat.jid) {
+        if getisBlockedMe(jid: recentChat.jid) || (IS_LIVE && ENABLE_CONTACT_SYNC && recentChat.isItSavedContact == false) {
             profileImage?.sd_setImage(with: nil, placeholderImage: UIImage(named: ImageConstant.ic_profile_placeholder)!)
         }
         
@@ -51,7 +51,7 @@ class UserListCell: UITableViewCell {
         var placeHolder = UIImage()
         if recentChat.profileType == .groupChat {
             placeHolder = UIImage(named: ImageConstant.ic_group_small_placeholder)!
-        }else if recentChat.isDeletedUser || getisBlockedMe(jid: recentChat.jid) {
+        }else if recentChat.isDeletedUser || getisBlockedMe(jid: recentChat.jid) || (IS_LIVE && ENABLE_CONTACT_SYNC && recentChat.isItSavedContact == false) {
             placeHolder = UIImage(named: ImageConstant.ic_profile_placeholder)!
             url = nil
         }else {

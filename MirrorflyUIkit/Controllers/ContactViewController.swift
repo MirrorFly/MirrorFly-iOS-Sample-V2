@@ -50,6 +50,7 @@ class ContactViewController: UIViewController {
     var tappedProfile : ProfileDetails? = nil
     var groupJid : String = ""
     var callUsers : [String] = []
+    var callLink: String = ""
 
     var isGroupBlockedByAdmin : Bool = false
 
@@ -442,7 +443,7 @@ class ContactViewController: UIViewController {
             case .groupChat:
                 placeholder = UIImage(named: "smallGroupPlaceHolder")
             default:
-                if profile.jid == FlyDefaults.myJid || profile.contactType == .unknown || getIsBlockedByMe(jid: profile.jid) {
+                if profile.jid == FlyDefaults.myJid || getIsBlockedByMe(jid: profile.jid) || (IS_LIVE && ENABLE_CONTACT_SYNC && profile.isItSavedContact == false) {
                     url = nil
                     placeholder = UIImage(named: "ic_profile_placeholder")
                     userImage?.backgroundColor =  Color.groupIconBackgroundGray
@@ -454,7 +455,7 @@ class ContactViewController: UIViewController {
                     userImage.backgroundColor = ChatUtils.getColorForUser(userName: name)
                 }
             }
-            if profile.contactType == .deleted || getIsBlockedByMe(jid: profile.jid) || profile.isBlockedByAdmin {
+            if profile.contactType == .deleted || getIsBlockedByMe(jid: profile.jid) || profile.isBlockedByAdmin || (IS_LIVE && ENABLE_CONTACT_SYNC && profile.isItSavedContact == false){
                 url = nil
                 placeholder = UIImage(named: "ic_profile_placeholder")
                 userImage?.backgroundColor =  Color.groupIconBackgroundGray
@@ -669,7 +670,20 @@ extension ContactViewController: UISearchBarDelegate {
             let searchString = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
             if !searchString.isEmpty || self.searchTerm != searchString{
                 resetParams()
-                searchSubject.onNext("\(searchString.lowercased().utf16)")
+                if isInvite && !groupJid.isEmpty {
+                    contacts = searchString.isEmpty ? allContacts : allContacts.filter { term in
+                        return getUserName(jid: term.jid ,name: term.name, nickName: term.nickName, contactType: term.contactType).lowercased().contains(searchString.lowercased())
+                    }
+                    isFirstPageLoaded = (contacts.count == 0) ? true : false
+                   
+                }else {
+                    searchSubject.onNext("\(searchString.lowercased().utf16)")
+                }
+            }else {
+                if isInvite && !groupJid.isEmpty {
+                    contacts = allContacts
+                    searchBar.resignFirstResponder()
+                }
             }
         }
     }
@@ -701,6 +715,66 @@ extension ContactViewController: UISearchBarDelegate {
 
 //Tableview Delegate
 extension ContactViewController :  UITableViewDelegate, UITableViewDataSource {
+    
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return 1
+    }
+    
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return isInvite ? 110 : 0
+    }
+    
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        
+        let headerView = UIView.init(frame: CGRect(x: 0, y: 0, width: tableView.frame.size.width, height: 110))
+       
+        
+        let titleLable = UILabel.init(frame: CGRect(x: 20, y: 5, width: tableView.frame.size.width - 40, height: 30))
+        titleLable.textColor = Color.color_181818
+        titleLable.font = UIFont.font14px_appSemibold()
+        titleLable.text = "Call Link"
+        headerView.addSubview(titleLable)
+        
+        let profileImg = UIImageView.init(frame: CGRect(x: 20, y: CGRectGetMaxY(titleLable.frame) + 5, width: 50, height: 50))
+        profileImg.backgroundColor = Color.color_AFBDDF
+        profileImg.image = UIImage(named: "icon_link")
+        profileImg.contentMode = .scaleAspectFit
+        profileImg.layer.cornerRadius = 50/2
+        profileImg.layer.masksToBounds = true
+        headerView.addSubview(profileImg)
+        
+        let linkLable = UILabel.init(frame: CGRect(x: CGRectGetMaxX(profileImg.frame) + 10, y: CGRectGetMaxY(titleLable.frame) + 5, width: headerView.frame.size.width - 180, height: 50))
+        linkLable.textColor = Color.color_181818
+        linkLable.font = UIFont.font14px_appSemibold()
+        linkLable.text = callLink
+        headerView.addSubview(linkLable)
+        
+        let copyButton = UIImageView.init(frame: CGRect(x: headerView.frame.size.width - 40, y:  CGRectGetMinY(profileImg.frame) + 10, width: 20, height: 20))
+        copyButton.isUserInteractionEnabled = true
+        copyButton.image = UIImage(named: "copy_link")
+        copyButton.contentMode = .scaleAspectFit
+        headerView.addSubview(copyButton)
+        
+        let tap = UITapGestureRecognizer(target: self, action: #selector(self.handleTapWithCopy(_:)))
+        copyButton.addGestureRecognizer(tap)
+        
+        
+        let borderView = UIView.init(frame: CGRect(x: 20, y: CGRectGetMaxY(headerView.frame) - 5, width: headerView.frame.size.width - 20, height: 1))
+        borderView.backgroundColor = Color.recentChatSelectionColor
+        headerView.addSubview(borderView)
+        
+        return headerView
+        
+    }
+    
+    @objc func handleTapWithCopy(_ sender: UITapGestureRecognizer? = nil) {
+        
+        let board = UIPasteboard.general
+        board.string = "\(WEB_LOGIN_URL)\(callLink)"
+        AppAlert.shared.showToast(message: "Link copied to clipboard")
+        
+    }
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if contacts.count > 0 {
             return contacts.count
@@ -735,7 +809,7 @@ extension ContactViewController :  UITableViewDelegate, UITableViewDataSource {
             cell.profileButton.addTarget(self, action: #selector( imageButtonAction(_:)), for: .touchUpInside)
             cell.name.text = name
             cell.status.text = profile.status
-            if getIsBlockedByMe(jid: profile.jid) {
+            if getIsBlockedByMe(jid: profile.jid) || (IS_LIVE && ENABLE_CONTACT_SYNC && profile.isItSavedContact == false) {
                 cell.profile.image = UIImage(named: "ic_profile_placeholder")
                 cell.status.text = ""
                 cell.status.isHidden = true
@@ -796,7 +870,7 @@ extension ContactViewController :  UITableViewDelegate, UITableViewDataSource {
                 }
                 ContactManager.shared.saveUser(profileDetails: profile)
                 if (CallManager.getCallUsersList()?.count ?? 0) + selectedProfilesJid.count  == 7  && !selectedProfilesJid.contains(profile.jid!) {
-                    AppAlert.shared.showAlert(view: self, title: "Alert", message: "Only upto 8 members are allowed for a call (including the caller)", buttonTitle: "Ok")
+                    self.showMaximumMemberAlert()
                 }else{
                     if selectedProfilesJid.contains(profile.jid!) {
                         selectedProfilesJid.remove(profile.jid!)
@@ -814,6 +888,18 @@ extension ContactViewController :  UITableViewDelegate, UITableViewDataSource {
         }else{
             openChat(index: indexPath.row)
         }
+    }
+    
+    func showMaximumMemberAlert() {
+        
+        let alertController = UIAlertController(title: "Alert", message: "Only upto 8 members are allowed for a call (including the caller)", preferredStyle: .alert)
+            
+               let removeAction = UIAlertAction(title: "Ok", style: .default) { (action:UIAlertAction!) in
+                   
+               }
+        
+               alertController.addAction(removeAction)
+               self.present(alertController, animated: true, completion:nil)
     }
     
     func openChat(index: Int) {

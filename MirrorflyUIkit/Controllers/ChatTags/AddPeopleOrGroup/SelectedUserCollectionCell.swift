@@ -22,7 +22,7 @@ class SelectedUserCollectionCell: UICollectionViewCell {
         var placeHolder = UIImage()
         if recentChat.profileType == .groupChat {
             placeHolder = UIImage(named: ImageConstant.ic_group_small_placeholder)!
-        }else if recentChat.isDeletedUser || getisBlockedMe(jid: recentChat.jid) {
+        }else if recentChat.isDeletedUser || getisBlockedMe(jid: recentChat.jid) || (IS_LIVE && ENABLE_CONTACT_SYNC && recentChat.isItSavedContact == false) {
             placeHolder = UIImage(named: ImageConstant.ic_profile_placeholder)!
             url = nil
         }else {

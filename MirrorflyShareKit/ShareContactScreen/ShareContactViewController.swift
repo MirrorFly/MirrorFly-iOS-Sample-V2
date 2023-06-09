@@ -68,10 +68,10 @@ class ShareContactViewController: UIViewController {
                     FlyMessenger.sendContactMessage(toJid: jid, contactName: contact.contactName, contactNumbers: contact.contactNumber, replyMessageId: ""){ [weak self] _,_,_  in
                     }
                 }
+                self.extensionContext?.completeRequest(returningItems: nil, completionHandler: nil)
+            } else {
+                ShareKitAlert.shared.showToast(controller: self, message: emptyContact)
             }
-            self.extensionContext?.completeRequest(returningItems: nil, completionHandler: nil)
-        } else {
-            ShareKitAlert.shared.showToast(controller: self, message: emptyContact)
         }
     }
 

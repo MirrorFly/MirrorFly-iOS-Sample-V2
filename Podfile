@@ -30,8 +30,8 @@ def uikit_pods
   pod 'SwiftLinkPreview'
   
   #submodule dependency pods
-  
-  pod 'MirrorFlySDK', '5.9.1'
+
+  pod 'MirrorFlySDK', '5.9.7'
 
 end
 
@@ -39,8 +39,8 @@ def notification_pods
 
   #submodule dependency pods
 
-  pod 'MirrorFlySDK', '5.9.1'
-  
+  pod 'MirrorFlySDK', '5.9.7'
+
 end
 
 target 'UiKitQa' do
@@ -52,9 +52,8 @@ target 'UiKitQaNotificationExtention' do
 end
 
 target 'UikitQaShareKit' do
-    uikit_pods
+  uikit_pods
 end
-
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|
