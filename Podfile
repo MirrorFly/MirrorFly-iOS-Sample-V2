@@ -31,7 +31,7 @@ def uikit_pods
   
   #submodule dependency pods
 
-  pod 'MirrorFlySDK', '5.9.7'
+  pod 'MirrorFlySDK', '5.9.8'
 
 end
 
@@ -39,7 +39,7 @@ def notification_pods
 
   #submodule dependency pods
 
-  pod 'MirrorFlySDK', '5.9.7'
+  pod 'MirrorFlySDK', '5.9.8'
 
 end
 
