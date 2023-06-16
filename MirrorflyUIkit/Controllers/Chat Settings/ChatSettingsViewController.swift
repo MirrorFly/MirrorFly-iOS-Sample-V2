@@ -365,5 +365,3 @@ extension ChatSettingsViewController : AvailableFeaturesDelegate {
     }
 }
 
-
-

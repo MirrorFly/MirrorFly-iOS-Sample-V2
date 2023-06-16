@@ -295,6 +295,7 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
     var isSearchButtonTapped: Bool = false
     var currentSelectedIndexPath: IndexPath?
     var isSearchDidChange: Bool = false
+    
     var isMention = false
     var mentionSearch = ""
     var mentionRange: NSRange!
@@ -576,7 +577,7 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
                             } else {
                                 self.nextMessagesLoadingDone = true
                             }
-                            
+
                         }
                         if shouldScrollToMessage{
                             if let indexPath = self.checkReplyMessageAvailability(replyMessageId:messageId).0{
@@ -2620,7 +2621,8 @@ extension ChatViewParentController {
                     mediaData.fileKey = fileKey
                     mediaData.mediaType = .audio
                     DispatchQueue.main.async { [weak self] in
-                        FlyMessenger.sendAudioMessage(toJid:  self?.getProfileDetails.jid ?? emptyString(), mediaData: mediaData,replyMessageId :  self?.replyMessageId ?? emptyString(), isRecorded : isRecorded) { [weak self] isSuccess,error,message in
+                        let audioParams = FileMessageParams(fileUrl: localPathURL, fileName: fileName,fileSize: fileSize, duration: duration, fileKey: fileKey)
+                        FlyMessenger.sendFileMessage(messageParams: FileMessage(toId: self?.getProfileDetails.jid ?? emptyString(), messageType: isRecorded == true ? .audioRecorded : .audio, fileMessage : audioParams, replyMessageId:  self?.replyMessageId ?? emptyString())) { [weak self] isSuccess,error,message in
                             if let chatMessage = message {
                                 if let jid =  self?.getProfileDetails.jid {
                                     FlyMessenger.saveUnsentMessage(id: jid, message: emptyString())
@@ -2659,13 +2661,9 @@ extension ChatViewParentController {
                 return
             }
             if let localPathURL = localPath, isSuccess {
-                var mediaData = MediaData()
-                mediaData.fileName = fileName
-                mediaData.fileURL = localPathURL
-                mediaData.fileSize = fileSize
-                mediaData.mediaType = .document
                 DispatchQueue.main.async { [weak self] in
-                    FlyMessenger.sendDocumentMessage(toJid: self?.getProfileDetails.jid ?? "",mediaData: mediaData,replyMessageId: self?.replyMessageId) { [weak self] isSuccess, error, message in
+                    let documentParams = FileMessageParams(fileUrl: localPathURL, fileName: fileName)
+                    FlyMessenger.sendFileMessage(messageParams: FileMessage(toId: self?.getProfileDetails.jid ?? "", messageType: .document, fileMessage: documentParams, replyMessageId: self?.replyMessageId), sendMessageListener: {  [weak self] isSuccess, error, message in
                         if let chatMessage = message {
                             if let jid =  self?.getProfileDetails.jid {
                                 FlyMessenger.saveUnsentMessage(id: jid, message: emptyString())
@@ -2688,7 +2686,7 @@ extension ChatViewParentController {
                         executeOnMainThread {
                             self?.chatTableView.reloadData()
                         }
-                    }
+                    })
                 }
             } else {
                 AppAlert.shared.showToast(message: FlyConstants.ErrorMessage.unSupportedFileFormate)
@@ -3204,7 +3202,8 @@ extension ChatViewParentController {
         selectedIndexs.removeAll()
         view.endEditing(true)
         resetUnreadMessages()
-        FlyMessenger.sendImageMessage(toJid: getProfileDetails.jid , mediaData: mediaData, replyMessageId: replyMessageId, mentionedUsersIds: mentionedUsersIds) { [weak self] isSuccess, error, sendMessage in
+            let mediaParams = FileMessageParams(fileUrl: mediaData.fileURL, fileName: mediaData.fileName,  caption : mediaData.caption, fileSize: mediaData.fileSize, duration: mediaData.duration, thumbImage: mediaData.base64Thumbnail, fileKey: mediaData.fileKey)
+        FlyMessenger.sendFileMessage(messageParams: FileMessage(toId: getProfileDetails.jid, messageType: .image, fileMessage : mediaParams, replyMessageId : replyMessageId)) { [weak self] isSuccess, error, sendMessage in
                 if let chatMessage = sendMessage {
                     self?.setLastMessage(messageId: chatMessage.messageId)
                     chatMessage.mediaChatMessage?.mediaThumbImage =  mediaData.base64Thumbnail
@@ -5407,48 +5406,49 @@ extension ChatViewParentController {
             getReplyId =  replyMessageId
             isReplyViewOpen = false
         }
-        FlyMessenger.sendTextMessage(toJid: getProfileDetails.jid, message: message,replyMessageId: getReplyId, mentionedUsersIds: mentionedUsersIds){ [weak self] isSuccess,error,textMessage in
-            if isSuccess {
-                print("loss SendText.........")
-                if self?.chatMessages.count == 0 {
-                    if let message = textMessage {
-                        self?.setLastMessage(messageId: message.messageId)
-                        self?.addNewGroupedMessage(messages: [message])
-                    }
-                } else {
-                    if let message = textMessage {
-                        self?.setLastMessage(messageId: message.messageId)
-                        if let firstMessageInSection = self?.chatMessages[0].first {
-
-                            var timeStamp = 0.0
-                            if firstMessageInSection.messageChatType == .singleChat {
-                                timeStamp =  firstMessageInSection.messageSentTime
-                            } else {
-                                timeStamp = DateFormatterUtility.shared.getGroupMilliSeconds(milliSeconds: firstMessageInSection.messageSentTime)
-                            }
-                            if String().fetchMessageDateHeader(for: timeStamp) == "TODAY" {
-                                self?.chatMessages[0].insert(message, at: 0)
-                                self?.chatTableView?.insertRows(at: [IndexPath.init(row: 0, section: 0)], with: .right)
-                                let indexPath = IndexPath(row: 0, section: 0)
-                                self?.chatTableView?.scrollToRow(at: indexPath, at: .top, animated: true)
-                                self?.chatTableView.reloadDataWithoutScroll()
-                            } else {
-                                // create new section
-                                self?.chatMessages.insert([message] , at: 0)
-                                self?.chatTableView.reloadData()
-                            }
+        let messageParams = TextMessage(toId:  getProfileDetails.jid, messageText: message, replyMessageId: getReplyId, mentionedUsersIds: mentionedUsersIds)
+        FlyMessenger.sendTextMessage(messageParams: messageParams) { [weak self] isSuccess, error, textMessage in
+                if isSuccess {
+                    print("loss SendText.........")
+                    if self?.chatMessages.count == 0 {
+                        if let message = textMessage {
+                            self?.setLastMessage(messageId: message.messageId)
+                            self?.addNewGroupedMessage(messages: [message])
                         }
-                        self?.messageTextView?.text = ""
-                        self?.replyMessageId = ""
-                        self?.tableViewBottomConstraint?.constant = CGFloat(chatBottomConstant)
-                        self?.handleSendButton()
-                        if self?.replyJid == self?.getProfileDetails.jid {
-                            self?.replyMessageObj = nil
-                            self?.isReplyViewOpen = false
+                    } else {
+                        if let message = textMessage {
+                            self?.setLastMessage(messageId: message.messageId)
+                            if let firstMessageInSection = self?.chatMessages[0].first {
+                                
+                                var timeStamp = 0.0
+                                if firstMessageInSection.messageChatType == .singleChat {
+                                    timeStamp =  firstMessageInSection.messageSentTime
+                                } else {
+                                    timeStamp = DateFormatterUtility.shared.getGroupMilliSeconds(milliSeconds: firstMessageInSection.messageSentTime)
+                                }
+                                if String().fetchMessageDateHeader(for: timeStamp) == "TODAY" {
+                                    self?.chatMessages[0].insert(message, at: 0)
+                                    self?.chatTableView?.insertRows(at: [IndexPath.init(row: 0, section: 0)], with: .right)
+                                    let indexPath = IndexPath(row: 0, section: 0)
+                                    self?.chatTableView?.scrollToRow(at: indexPath, at: .top, animated: true)
+                                    self?.chatTableView.reloadDataWithoutScroll()
+                                } else {
+                                    // create new section
+                                    self?.chatMessages.insert([message] , at: 0)
+                                    self?.chatTableView.reloadData()
+                                }
+                            }
+                            self?.messageTextView?.text = ""
+                            self?.replyMessageId = ""
+                            self?.tableViewBottomConstraint?.constant = CGFloat(chatBottomConstant)
+                            self?.handleSendButton()
+                            if self?.replyJid == self?.getProfileDetails.jid {
+                                self?.replyMessageObj = nil
+                                self?.isReplyViewOpen = false
+                            }
                         }
                     }
                 }
-            }
         }
     }
     
@@ -5473,7 +5473,8 @@ extension ChatViewParentController: ContactDelegate {
         }
         
         print("didSendPressed \(contactDetails.contactName)  \(contactDetails.contactNumber)")
-        FlyMessenger.sendContactMessage(toJid: getProfileDetails.jid, contactName: contactDetails.contactName, contactNumbers: contactDetails.contactNumber, replyMessageId: replyMessageId){ [weak self] isSuccess,error,message  in
+        let messageParams = FileMessage(toId: getProfileDetails.jid, messageType: .contact, contactMessage: ContactMessageParams(name: contactDetails.contactName, numbers: contactDetails.contactNumber), replyMessageId: replyMessageId)
+        FlyMessenger.sendFileMessage(messageParams: messageParams){ [weak self] isSuccess,error,message  in
             if isSuccess {
                 if let jid =  self?.getProfileDetails.jid {
                     FlyMessenger.saveUnsentMessage(id: jid, message: emptyString())
@@ -5521,7 +5522,8 @@ extension ChatViewParentController: LocationDelegate {
         }else {
             lastSection = ( chatTableView?.numberOfSections ?? 0) - 1
         }
-        FlyMessenger.sendLocationMessage(toJid: getProfileDetails.jid, latitude: latitude, longitude: longitude, replyMessageId: replyMessageId){ [weak self]isSuccess,error,message in
+        let messageParams = FileMessage(toId: getProfileDetails.jid, messageType: .location, locationMessage: LocationMessageParams(latitude: latitude, longitude: longitude), replyMessageId: replyMessageId)
+        FlyMessenger.sendFileMessage(messageParams: messageParams){ [weak self]isSuccess,error,message in
             if isSuccess {
                 if let jid =  self?.getProfileDetails.jid {
                     FlyMessenger.saveUnsentMessage(id: jid, message: emptyString())
@@ -5852,7 +5854,8 @@ extension ChatViewParentController {
         let tempReplyMessageId = replyMessageId
         view.endEditing(true)
         resetUnreadMessages()
-        FlyMessenger.sendVideoMessage(toJid: self.getProfileDetails.jid ?? "", mediaData: mediaData, replyMessageId: tempReplyMessageId, mentionedUsersIds: mentionedUsersIds){ [weak self] isSuccess,error,message in
+        let mediaParams = FileMessageParams(fileUrl: mediaData.fileURL, fileName: mediaData.fileName, caption: mediaData.caption, fileSize: mediaData.fileSize, duration: mediaData.duration, thumbImage: mediaData.base64Thumbnail, fileKey: mediaData.fileKey)
+        FlyMessenger.sendFileMessage(messageParams: FileMessage(toId: self.getProfileDetails.jid ?? "", messageType: .video, fileMessage : mediaParams,replyMessageId: tempReplyMessageId, mentionedUsersIds: mentionedUsersIds)){ [weak self] isSuccess,error,message in
             if let chatMessage = message {
                 self?.setLastMessage(messageId: chatMessage.messageId)
                 chatMessage.mediaChatMessage?.mediaUploadStatus = isSuccess == true ? .uploading : .not_uploaded

@@ -65,13 +65,14 @@ class ShareContactViewController: UIViewController {
                     if getUserForAdminBlock(jid: jid) {
                         return
                     }
-                    FlyMessenger.sendContactMessage(toJid: jid, contactName: contact.contactName, contactNumbers: contact.contactNumber, replyMessageId: ""){ [weak self] _,_,_  in
+                    let messageParams = FileMessage(toId: jid, messageType: .contact, contactMessage: ContactMessageParams(name: contact.contactName, numbers: contact.contactNumber), replyMessageId: emptyString())
+                    FlyMessenger.sendFileMessage(messageParams: messageParams){ [weak self] _,_,_  in
                     }
                 }
-                self.extensionContext?.completeRequest(returningItems: nil, completionHandler: nil)
-            } else {
-                ShareKitAlert.shared.showToast(controller: self, message: emptyContact)
             }
+            self.extensionContext?.completeRequest(returningItems: nil, completionHandler: nil)
+        } else {
+            ShareKitAlert.shared.showToast(controller: self, message: emptyContact)
         }
     }
 
