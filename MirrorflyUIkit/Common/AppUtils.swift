@@ -36,7 +36,7 @@ class AppUtils: NSObject {
                 print("#write : compressAndSaveImage catch \(error.localizedDescription)")
             }
         }
-        return localFilePath?.absoluteString
+        return localFilePath?.relativePath //For latest profile updation method change in SDk we need to pass relativePath instead absoluteString
     }
     
     func currentMillisecondsToTime(milliSec: Double) -> String{

@@ -1,4 +1,4 @@
-platform :ios, '12.1'
+platform :ios, '13.0'
 
 workspace 'MirrorflyUIkit.xcworkspace'
 
@@ -29,13 +29,17 @@ def uikit_pods
   pod 'RxCocoa', '6.5.0'
   pod 'SwiftLinkPreview'
   
-  pod 'MirrorFlySDK', '5.9.8'
+  #submodule dependency pods
+  
+  pod 'MirrorFlySDK', '5.10.0'
 
 end
 
 def notification_pods
-  
-  pod 'MirrorFlySDK', '5.9.8'
+
+  #submodule dependency pods
+
+  pod 'MirrorFlySDK', '5.10.0'
   
 end
 
@@ -47,10 +51,21 @@ target 'UiKitQaNotificationExtention' do
   notification_pods
 end
 
+target 'Mirrorfly' do
+  uikit_pods
+end
+
+target 'MirrorflyNotificationExtention' do
+  notification_pods
+end
+
 target 'UikitQaShareKit' do
   uikit_pods
 end
 
+target 'MirrorflyShareKit' do
+  uikit_pods
+end
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|
@@ -58,6 +73,7 @@ post_install do |installer|
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '12.1'
       config.build_settings['ENABLE_BITCODE'] = 'NO'
       config.build_settings['APPLICATION_EXTENSION_API_ONLY'] = 'No'
+      config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
       config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'YES'
       shell_script_path = "Pods/Target Support Files/#{target.name}/#{target.name}-frameworks.sh"
           if File::exist?(shell_script_path)

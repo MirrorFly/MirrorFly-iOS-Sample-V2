@@ -162,8 +162,6 @@ class ChatViewParentMessageCell: BaseTableViewCell {
             senderProfileImage?.loadFlyImage(imageURL: imageURL, name: name, chatType: chatType, jid: jid)
         } else if chatType == .groupChat {
             senderProfileImage?.image = UIImage(named: ImageConstant.ic_group_small_placeholder)!
-        }  else {
-            senderProfileImage?.image = UIImage(named: ImageConstant.ic_profile_placeholder)!
         }
     }
     

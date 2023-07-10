@@ -14,7 +14,7 @@ protocol CustomTextFieldDelegate: UITextFieldDelegate {
 
 class CustomTextField: UITextField {
     override func deleteBackward() {
-        // see if text was empty
+        text = ""
         let wasEmpty = text == nil || text! == ""
 
         // then perform normal behavior

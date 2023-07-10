@@ -74,10 +74,7 @@ class RecentChatViewController: UIViewController, UIGestureRecognizerDelegate {
             chatTagsCollectionView.isHidden = self.getChatTags.isEmpty ? true : showArchivedChat
         }
     }
-    var chatTotalPages = 1
     var chatPageSize = 40
-    var chatTotalChat = 0
-    var chatNextPage = 2
     var totalPages = 2
     var totalUsers = 0
     var nextPage = 1
@@ -115,11 +112,14 @@ class RecentChatViewController: UIViewController, UIGestureRecognizerDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        if ENABLE_CHAT_HISTORY {
+            self.startLoading(withText: "")
+        }
         getAllChatTags()
         selectionCountLabel?.textColor = UIColor(named: "buttonColor")
         contactViewModel =  ContactViewModel()
         recentChatViewModel = RecentChatViewModel()
-        fetchRecentChatParams = RecentChatListParams(limit: 80)
+        fetchRecentChatParams = RecentChatListParams(limit: 40)
         recentChatListBuilder = RecentChatListBuilder(recentChatListParams: fetchRecentChatParams!)
         setupTableviewLongPressGesture()
         handleBackgroundAndForground()
@@ -242,29 +242,6 @@ class RecentChatViewController: UIViewController, UIGestureRecognizerDelegate {
         let longPressGesture:UILongPressGestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector( handleCellLongPress))
         longPressGesture.delegate = self
         recentChatTableView?.addGestureRecognizer(longPressGesture)
-    }
-    
-    func getRecent(page: Int, size: Int) {
-        isRecentLoadingInProgress = true
-        executeOnMainThread {
-            if page == 1 {
-                self.startLoading(withText: "")
-            }
-        }
-        recentChatViewModel?.getRecentChatFromAPI(page: page, size: size, completionHandler: { [weak self] isSuccess, error, data in
-            executeOnMainThread {
-                self?.stopLoading()
-            }
-            if let list = data["chatList"] as? NSArray {
-                if list.count == size {
-                    self?.chatNextPage += 1
-                }
-            }
-            self?.chatTotalPages = data["totalPages"] as? Int ?? 1
-            self?.chatTotalChat = data["totalRecords"] as? Int ?? 1
-            self?.getRecentChatList(fromAPI: true)
-            self?.isRecentLoadingInProgress = false
-        })
     }
 
     @objc func contactSyncCompleted(notification: Notification){
@@ -398,7 +375,7 @@ class RecentChatViewController: UIViewController, UIGestureRecognizerDelegate {
         else {
             
             if CallManager.isAlreadyOnAnotherCall(){
-                AppAlert.shared.showToast(message: "You’re already on call, can't make new Mirrorfly call")
+                AppAlert.shared.showToast(message: "You’re already on call, can't make new MirrorFly call")
                 return
             }
             
@@ -458,7 +435,7 @@ class RecentChatViewController: UIViewController, UIGestureRecognizerDelegate {
         else {
             
             if CallManager.isAlreadyOnAnotherCall(){
-                AppAlert.shared.showToast(message: "You’re already on call, can't make new Mirrorfly call")
+                AppAlert.shared.showToast(message: "You’re already on call, can't make new MirrorFly call")
                 return
             }
            
@@ -681,6 +658,7 @@ class RecentChatViewController: UIViewController, UIGestureRecognizerDelegate {
                 if self?.getArchiveChat.count == 0 {
                     self?.hideArchiveHeader()
                 }
+                self?.getRecentChatList()
                 self?.recentChatTableView?.reloadData()
                 self?.selectionRecentChatList = []
             }
@@ -1460,8 +1438,8 @@ extension RecentChatViewController {
         
         if selectedChatTag?.tagId == FlyDefaults.myJid || selectedChatTag == nil {
             
-            recentChatListBuilder?.changeLimit(limit:  getAllRecentChat.isEmpty ? 80 : ((getAllRecentChat.count < 40 ? 40 : getAllRecentChat.count)))
-            recentChatListBuilder?.loadRecentChatList(fromAPI, completionHandler: {  [weak self] isSuccess, error, data in
+            recentChatListBuilder?.changeLimit(limit:  getAllRecentChat.isEmpty ? 40 : ((getAllRecentChat.count < 40 ? 40 : getAllRecentChat.count)))
+            recentChatListBuilder?.loadRecentChatList(completionHandler: {  [weak self] isSuccess, error, data in
                 var result = data
                 if  let weakSelf = self, let recentChatList = result.getData() as? [RecentChat], isSuccess{
                     weakSelf.isRecentLoadingDone = false
@@ -1511,9 +1489,6 @@ extension RecentChatViewController {
                 hideArchiveHeader()
             }
             executeOnMainThread {
-                if (self.getRecentChat.count + self.getArchiveChat.count) == self.chatTotalChat && fromAPI {
-                    self.isRecentLoadingDone = true
-                }
                 self.recentChatTableView?.reloadData()
             }
         } else {
@@ -1682,9 +1657,9 @@ extension RecentChatViewController {
                 infoView.isHidden = false
             }
             enableOrDisableChatActions(enable: true)
+            let isImageEmpty = profile.profileImage?.isEmpty ?? false
             if profile.profileType == .groupChat {
                 placeHolder = UIImage(named: ImageConstant.ic_group_placeholder)!
-                let isImageEmpty = profile.profileImage?.isEmpty ?? false
                 print("setProfile \(isImageEmpty)")
                 if isImageEmpty {
                     userImage?.backgroundColor = Color.groupIconBackgroundGray
@@ -1703,7 +1678,6 @@ extension RecentChatViewController {
                 userImage?.contentMode = .scaleAspectFill
                 userImage?.sd_setImage(with: url, placeholderImage: placeHolder)
             }
-            
             if profile.isDeletedUser || getisBlockedMe(jid: profile.jid) || profile.isBlockedByAdmin || (IS_LIVE && ENABLE_CONTACT_SYNC && profile.isItSavedContact == false){
                 userImage?.backgroundColor =  Color.groupIconBackgroundGray
                 let placeHolder = profile.isGroup ? UIImage(named: "ic_groupPlaceHolder") :  UIImage(named: "ic_profile_placeholder")
@@ -1711,8 +1685,15 @@ extension RecentChatViewController {
                 enableOrDisableChatActions(enable: true)
             }
             
+            if (IS_LIVE && ENABLE_CONTACT_SYNC && profile.isItSavedContact == false) && isImageEmpty && !profile.isGroup {
+                userImage?.image = UIImage(named: "ic_profile_placeholder")
+                userImage?.tag = 0
+                userImage?.isUserInteractionEnabled = false
+                return
+            }
+            
             let tap = UITapGestureRecognizer(target: self, action: #selector(self.openContainerImage(sender:)))
-            if userImage?.image == placeHolder || profile.isDeletedUser || getisBlockedMe(jid: profile.jid) || profile.isBlockedByAdmin {
+            if userImage?.image == placeHolder || profile.isDeletedUser || getisBlockedMe(jid: profile.jid) || profile.isBlockedByAdmin || profile.isItSavedContact == false {
                 userImage?.tag = 0
             } else {
                 userImage?.tag = 1
@@ -1967,6 +1948,9 @@ extension RecentChatViewController : ProfileEventsDelegate {
             getContactList()
         }
         setProfile()
+        executeOnMainThread {
+            self.stopLoading()  
+        }
     }
     
     func blockedThisUser(jid: String) {}
@@ -2328,13 +2312,7 @@ extension RecentChatViewController : UIScrollViewDelegate {
                 if !isRecentLoadingInProgress{
                     isRecentLoadingInProgress = true
                     backgroundQueue.async {
-                        if self.availableFeatures.isChatHistoryEnabled {
-                            if (self.getRecentChat.count + self.getArchiveChat.count) >= self.chatPageSize {
-                                self.getRecent(page: self.chatNextPage, size: self.chatPageSize)
-                            }
-                        } else {
-                            self.loadNextSetOfData()
-                        }
+                        self.loadNextSetOfData()
                     }
                 }
             }
@@ -2361,7 +2339,7 @@ extension RecentChatViewController : UIScrollViewDelegate {
     func loadNextSetOfData()  {
         if showArchivedChat == false {
             print("#scroll loadNextSetOfData")
-            recentChatListBuilder?.changeLimit(limit: 80)
+            recentChatListBuilder?.changeLimit(limit: 40)
             recentChatListBuilder?.nextSetOfData(completionHandler: {  [weak self] isSuccess, error, data in
                 var result = data
                 if  let weakSelf = self, let recentChatList = result.getData() as? [RecentChat], isSuccess, !recentChatList.isEmpty{
@@ -2552,7 +2530,7 @@ extension RecentChatViewController {
         searchView.isHidden = true
         createGroupButton.isHidden = true
         pinChatButton.isHidden = true
-        muteChatButton.isHidden = true
+       // muteChatButton.isHidden = true
         headerLabel.text = "Archive Chats"
     }
 

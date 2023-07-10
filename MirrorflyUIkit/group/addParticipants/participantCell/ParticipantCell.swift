@@ -139,6 +139,7 @@ class ParticipantCell: UITableViewCell {
         if getisBlockedMe(jid: recentChat.jid) {
             contactImageView?.sd_setImage(with: nil, placeholderImage: UIImage(named: ImageConstant.ic_profile_placeholder)!)
         }
+
         removeButton?.isHidden = true
         statusUILabel?.isHidden = false
         statusImage?.isHidden = (recentChat.isLastMessageSentByMe == true) ? false : true

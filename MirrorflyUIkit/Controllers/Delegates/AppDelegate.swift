@@ -21,18 +21,20 @@ import AVFoundation
 import MirrorFlySDK
 
 let BASE_URL = "https://api-preprod-sandbox.mirrorfly.com/api/v1/"
-let LICENSE_KEY = "xxxx"
-let XMPP_DOMAIN = "xmpp-uikit-qa.contus.us"
-let XMPP_PORT = 5249
-let SOCKETIO_SERVER_HOST = "https://signal-uikit-qa.contus.us/"
+let LICENSE_KEY = "xxxxxxxxxxx"
+let XMPP_DOMAIN = "xmpp-preprod-sandbox.mirrorfly.com"
+let XMPP_PORT = 5222
+let SOCKETIO_SERVER_HOST = "https://signal-preprod-sandbox.mirrorfly.com"
 let JANUS_URL = "wss://janus.mirrorfly.com"
 let CONTAINER_ID = "group.com.mirrorfly.qa"
 let ENABLE_CONTACT_SYNC = false
+let ENABLE_CHAT_HISTORY = false
 let IS_LIVE = false
-let WEB_LOGIN_URL = "https://webchat-uikit-qa.contus.us/"
+let WEB_LOGIN_URL = "https://webchat-preprod-sandbox.mirrorfly.com/"
 let IS_MOBILE_NUMBER_LOGIN = false
 let APP_NAME = "UiKitQa"
 let ICLOUD_CONTAINER_ID = "iCloud.com.mirrorfly.qa"
+
 
 let isMigrationDone = "isMigrationDone"
 
@@ -59,26 +61,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
     var player: AVAudioPlayer?
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-//        if !Utility.getBoolFromPreference(key: isMigrationDone) {
-//            resetData()
-//        }
         
-        let groupConfig = try? GroupConfig.Builder.enableGroupCreation(groupCreation: true)
-            .onlyAdminCanAddOrRemoveMembers(adminOnly: true)
-            .setMaximumMembersInAGroup(membersCount: 200)
-            .build()
-        assert(groupConfig != nil)
-        
-        try? ChatSDK.Builder.setAppGroupContainerID(containerID: CONTAINER_ID)
-            .setLicenseKey(key: LICENSE_KEY)
-            .isTrialLicense(isTrial: !IS_LIVE)
-            .setDomainBaseUrl(baseUrl: BASE_URL)
-            .setGroupConfiguration(groupConfig: groupConfig!)
-            .buildAndInitialize()
+        ChatManager.setAppGroupContainerId(id: CONTAINER_ID)
+        ChatManager.initializeSDK(licenseKey: LICENSE_KEY) { _, _, _ in }
         
         ChatManager.enableContactSync(isEnable: ENABLE_CONTACT_SYNC)
-//        ChatManager.enableChatHistory(isEnable: ENABLE_CHAT_HISTORY)
-        ChatManager.setSignalServer(signalServerUrl: SOCKETIO_SERVER_HOST)
+        ChatManager.enableChatHistory(isEnable: ENABLE_CHAT_HISTORY)
         ChatManager.setMaximumPinningForRecentChat(maxPinChat: 4)
         ChatManager.deleteMediaFromDevice(delete: true)
         
@@ -138,8 +126,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
         application.registerForRemoteNotifications()
         
         if Utility.getBoolFromPreference(key: isLoggedIn) {
+            FlyDefaults.isNewLoggedIn = false
             VOIPManager.sharedInstance.updateDeviceToken()
             RootViewController.sharedInstance.initCallSDK()
+        }else {
+            FlyDefaults.isNewLoggedIn = true
         }
         // Added this line so that we can start receing contact updates
         let contactPermissionStatus = CNContactStore.authorizationStatus(for: CNEntityType.contacts)
@@ -271,7 +262,6 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
             if granted {
                 DispatchQueue.main.async {
                     UIApplication.shared.registerForRemoteNotifications()
-                    FlyUtils.setBaseUrl(BASE_URL)
                 }
             }
         }
@@ -307,7 +297,7 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
         completionHandler(.noData)
     }
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-        if response.notification.request.content.threadIdentifier.contains(XMPP_DOMAIN){
+        if response.notification.request.content.threadIdentifier.contains(FlyDefaults.xmppDomain){
             if FlyDefaults.isBlockedByAdmin {
                 navigateToBlockedScreen()
             } else {
@@ -365,6 +355,7 @@ extension AppDelegate : PKPushRegistryDelegate {
         NSLog("Push VOIP Received with Payload - %@",payload.dictionaryPayload)
         print("#callopt \(FlyUtils.printTime()) pushRegistry voip received")
         VOIPManager.sharedInstance.processPayload(payload.dictionaryPayload)
+        completion()
     }
 }
 
@@ -441,25 +432,25 @@ extension AppDelegate {
     }
     
     func resetData(){
-        print("#migration resetData")
-        Utility.clearUserDefaults()
-        FlyConstants.suiteName = CONTAINER_ID
-        ChatManager.shared.resetFlyDefaults()
-        let fileManager:FileManager = FileManager.default
-        if let realmPath = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: CONTAINER_ID)?.appendingPathComponent("Realm").path {
-            if let fileList = try? FileManager.default.contentsOfDirectory(atPath: realmPath){
-                for path in fileList {
-                    let fullPath = realmPath + "/" + path
-                    if fileManager.fileExists(atPath: fullPath){
-                        try! fileManager.removeItem(atPath: fullPath)
-                        print("#migration #files \(fullPath) deleted")
-                    }else{
-                        print("#migration #files \(fullPath) unable to delete")
-                    }
-                }
-            }
-        }
-        Utility.saveInPreference(key: isMigrationDone, value: true)
+//        print("#migration resetData")
+//        Utility.clearUserDefaults()
+////        FlyConstants.suiteName = CONTAINER_ID
+//        ChatManager.shared.resetFlyDefaults()
+//        let fileManager:FileManager = FileManager.default
+//        if let realmPath = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: CONTAINER_ID)?.appendingPathComponent("Realm").path {
+//            if let fileList = try? FileManager.default.contentsOfDirectory(atPath: realmPath){
+//                for path in fileList {
+//                    let fullPath = realmPath + "/" + path
+//                    if fileManager.fileExists(atPath: fullPath){
+//                        try! fileManager.removeItem(atPath: fullPath)
+//                        print("#migration #files \(fullPath) deleted")
+//                    }else{
+//                        print("#migration #files \(fullPath) unable to delete")
+//                    }
+//                }
+//            }
+//        }
+//        Utility.saveInPreference(key: isMigrationDone, value: true)
     }
 
 }

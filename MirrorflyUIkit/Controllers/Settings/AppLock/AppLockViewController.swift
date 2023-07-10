@@ -84,6 +84,7 @@ extension AppLockViewController: UITableViewDelegate,UITableViewDataSource {
             break
         case .appLockDescription:
             let cell : AppLockDescriptionCell = tableView.dequeueReusableCell(withIdentifier: Identifiers.AppLockDescriptionCell, for: indexPath) as! AppLockDescriptionCell
+            cell.isUserInteractionEnabled = false
 
             var attributedText = NSMutableAttributedString(string: "If App Lock enabled the app will be locked automatically after 32 sec when it is not in use.\n")
             var attrs = [NSAttributedString.Key.font : UIFont(name: "SFUIDisplay-Medium", size: 13), NSAttributedString.Key.foregroundColor : Color.color_7B7B7B]

@@ -107,19 +107,24 @@ class ShareKitParticipantCell: UITableViewCell {
         if imageURL == "" || imageURL == nil {
             imageView?.sd_setImage(with: nil, placeholderImage: placeHolder)
         } else {
-            DispatchQueue.global(qos: .default).async{
-                if let url {
-                    if let data = try? Data(contentsOf: url) {
-                        executeOnMainThread {
-                            imageView?.image = ShareMediaUtils.resizeImage(image: UIImage(data: data) ?? UIImage(), targetSize: CGSize(width: 70, height: 70)) ?? placeHolder
-                        }
-                    } else {
-                        executeOnMainThread {
-                            imageView?.sd_setImage(with: nil, placeholderImage: placeHolder)
-                        }
-                    }
-                }
+            if let url {
+                imageView?.sd_setImage(with: url, placeholderImage: placeHolder, options: .scaleDownLargeImages)
+            } else {
+                imageView?.sd_setImage(with: nil, placeholderImage: placeHolder)
             }
+//            DispatchQueue.global(qos: .default).async{
+//                if let url {
+//                    if let data = try? Data(contentsOf: url) {
+//                        executeOnMainThread {
+//                            imageView?.image = ShareMediaUtils.resizeImage(image: UIImage(data: data) ?? UIImage(), targetSize: CGSize(width: 70, height: 70)) ?? placeHolder
+//                        }
+//                    } else {
+//                        executeOnMainThread {
+//                            imageView?.sd_setImage(with: nil, placeholderImage: placeHolder)
+//                        }
+//                    }
+//                }
+//            }
         }
     }
     

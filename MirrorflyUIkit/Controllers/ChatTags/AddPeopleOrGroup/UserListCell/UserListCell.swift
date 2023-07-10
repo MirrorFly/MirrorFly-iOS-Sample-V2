@@ -39,9 +39,6 @@ class UserListCell: UITableViewCell {
             profileImage?.sd_setImage(with: nil, placeholderImage: UIImage(named: ImageConstant.ic_profile_placeholder)!)
             checkBoxImage?.isHidden = true
         }
-        if getisBlockedMe(jid: recentChat.jid) || (IS_LIVE && ENABLE_CONTACT_SYNC && recentChat.isItSavedContact == false) {
-            profileImage?.sd_setImage(with: nil, placeholderImage: UIImage(named: ImageConstant.ic_profile_placeholder)!)
-        }
         
     }
     

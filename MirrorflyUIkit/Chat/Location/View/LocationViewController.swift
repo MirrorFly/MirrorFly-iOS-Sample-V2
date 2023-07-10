@@ -64,7 +64,9 @@ class LocationViewController: UIViewController, GMSMapViewDelegate, CLLocationMa
         print("LocationViewController appComestoForeground")
         switch CLLocationManager.authorizationStatus() {
             case .notDetermined:
-                locationManager.stopUpdatingLocation()
+                executeOnMainThread {
+                    self.initializeLocationManager()
+                }
                 break
             case .restricted:
                 enableLocationPermissionInSettings()

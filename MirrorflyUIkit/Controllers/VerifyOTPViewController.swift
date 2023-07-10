@@ -332,7 +332,7 @@ class VerifyOTPViewController: UIViewController
                         }
                         self?.stopTimer()
                         DispatchQueue.main.async { [weak self] in
-                            self?.registration(isForceRegister: false)
+                            self?.registration(isForceRegister: true)
                         }
                         
                     }
@@ -377,31 +377,6 @@ extension VerifyOTPViewController: UITextFieldDelegate, CustomTextFieldDelegate 
     }
     
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        if string.isEmpty {
-            if textField == txtSixth {
-                txtFifth?.becomeFirstResponder()
-            }
-            if textField == txtFifth {
-                txtForth?.becomeFirstResponder()
-            }
-            if textField == txtForth {
-                txtThird?.becomeFirstResponder()
-            }
-            if textField == txtThird {
-                txtSecond?.becomeFirstResponder()
-            }
-            if textField == txtSecond {
-                txtFirst?.becomeFirstResponder()
-            }
-            if textField == txtFirst {
-                txtFirst?.resignFirstResponder()
-            }
-            textField.text? = string
-            return false
-        }
-        if Int(string) == nil {
-            return false
-        }
         if string.count == 6 {
             let otpCode = string
             txtFirst.text = String(otpCode[otpCode.startIndex])

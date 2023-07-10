@@ -40,13 +40,7 @@ class GroupMembersTableViewCell: UITableViewCell {
         let userName = getUserName(jid : groupInfo.profileDetail?.jid ?? "", name: groupInfo.profileDetail?.name ?? "",
                                    nickName: groupInfo.profileDetail?.nickName ?? "",
                                    contactType: groupInfo.profileDetail?.contactType ?? .unknown)
-        
-        
-        if groupInfo.memberJid == FlyDefaults.myJid {
-            nameLabel.text = "You"
-            nickNameLabel.text = ""
-            setUsersImage(userName: FlyDefaults.myName, groupInfo: groupInfo)
-        }
+
         
         let profileDetails = groupInfoViewModel.checkContactType(participantJid: groupInfo.memberJid)
         if profileDetails?.mobileNumber == "" {
@@ -76,6 +70,15 @@ class GroupMembersTableViewCell: UITableViewCell {
             if profileDetails?.contactType == .deleted || blockedMe || isBlockedMyAdmin || (IS_LIVE && ENABLE_CONTACT_SYNC && profileDetails?.isItSavedContact == false && groupInfo.memberJid != FlyDefaults.myJid){
                 userImageView?.image = UIImage(named: "ic_profile_placeholder") ?? UIImage()
                 statusLabel.text = ""
+            }
+            if profileDetails?.isItSavedContact == false {
+                userImageView?.image = UIImage(named: "ic_profile_placeholder") ?? UIImage()
+            }
+
+            if groupInfo.memberJid == FlyDefaults.myJid {
+                nameLabel.text = "You"
+                nickNameLabel.text = ""
+                setUsersImage(userName: FlyDefaults.myName, groupInfo: groupInfo)
             }
         }
         

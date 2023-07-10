@@ -36,10 +36,10 @@ class BlockedContactTableViewCell: UITableViewCell {
 
     func setupCell(contact: ProfileDetails) {
         let name = FlyUtils.getUserName(jid: contact.jid, name: contact.name, nickName: contact.nickName, contactType: contact.contactType)
-        userNameLabel?.text = name
-        userContactLabel?.text = contact.mobileNumber
-        let profileImage = contact.thumbImage.isEmpty ? contact.image : contact.thumbImage
-        profileImageView?.loadFlyImage(imageURL: profileImage, name: name, jid: contact.jid, validateBlock: false)
+        userNameLabel?.text = name.isNumeric ? "+" + name : name
+        let mobileNumberWithoutCountryCode = AppUtils.shared.mobileNumberParse(phoneNo: (contact.mobileNumber))
+        userContactLabel?.text = mobileNumberWithoutCountryCode
+        profileImageView?.loadFlyImage(imageURL: contact.image, name: name, jid: contact.jid, validateBlock: false)
     }
     
 }

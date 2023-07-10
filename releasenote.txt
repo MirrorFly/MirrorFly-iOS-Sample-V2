@@ -1,7 +1,0 @@
-Bugs to test:
-https://ctproduct.atlassian.net/browse/ET-8137
-https://ctproduct.atlassian.net/browse/ET-8139
-
-#BUILD_NO# 6.1.0(361)
-#BUILD_DATE# April 04, 2023
-

@@ -133,7 +133,7 @@ class GroupCallViewController: UIViewController {
     
     @objc func buttonClicked(sender: UIButton) {
         if CallManager.isAlreadyOnAnotherCall(){
-            AppAlert.shared.showToast(message: "You’re already on call, can't make new Mirrorfly call")
+            AppAlert.shared.showToast(message: "You’re already on call, can't make new MirrorFly call")
             return
         }
         if !NetworkReachability.shared.isConnected {

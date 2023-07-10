@@ -190,11 +190,14 @@ class GroupInfoViewController: UIViewController {
     func getGroupMembers() {
       //  groupMembers = [GroupParticipantDetail]()
         let getGroupMembers = GroupManager.shared.getGroupMemebersFromLocal(groupJid: groupID).participantDetailArray.filter({$0.memberJid != FlyDefaults.myJid})
-        if groupMembers != getGroupMembers {
+        //if groupMembers != getGroupMembers {
             groupMembers = getGroupMembers
             let myJid = GroupManager.shared.getGroupMemebersFromLocal(groupJid: groupID).participantDetailArray.filter({$0.memberJid == FlyDefaults.myJid})
             groupMembers = groupMembers.sorted(by: { $0.profileDetail?.name.lowercased() ?? "" < $1.profileDetail?.name.lowercased() ?? "" })
             groupMembers.insert(contentsOf: myJid, at: 0)
+
+        //}
+        if groupMembers != getGroupMembers {
             refreshData()
         }
     }

@@ -841,7 +841,7 @@ extension ForwardViewController {
                         weakSelf.allContactsList.removeAll()
                         weakSelf.filteredContactList.removeAll()
                         weakSelf.allContactsList = contactsList
-                        weakSelf.allContactsList = weakSelf.allContactsList.sorted { $0.name.capitalized < $1.name.capitalized }
+                        weakSelf.allContactsList = weakSelf.allContactsList.sorted {getUserName(jid: $0.jid, name: $0.name, nickName: $0.nickName, contactType: $0.contactType).capitalized < getUserName(jid: $1.jid, name: $1.name, nickName: $1.nickName, contactType: $1.contactType).capitalized }
                         
                         weakSelf.allContactsList.enumerated().forEach { (index,contact) in
                             if  weakSelf.selectedMessages.filter({$0.jid == contact.jid}).count > 0 {

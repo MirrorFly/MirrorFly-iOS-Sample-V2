@@ -1415,6 +1415,10 @@ extension SharekitShareToViewController : GroupEventsDelegate {
 
 // MessageEventDelegate
 extension SharekitShareToViewController : MessageEventsDelegate {
+    func onMediaStatusFailed(error: String, messageId: String) {
+        
+    }
+    
   
     func onMessageTranslated(message: ChatMessage, jid: String) {
         
@@ -1584,7 +1588,7 @@ extension SharekitShareToViewController : UIScrollViewDelegate {
             isFirstPageLoaded = false
             initalLoader()
         }
-        if !NetStatus.shared.isConnected{
+        if !NetworkReachability.shared.isConnected{
             ShareKitAlert.shared.showToast(controller: self, message: ErrorMessage.noInternet)
             return
         }
@@ -1942,6 +1946,10 @@ class SpinnerViewController: UIViewController {
 }
 
 extension SharekitShareToViewController: ConnectionEventDelegate {
+    func onConnectionNotAuthorized() {
+        
+    }
+    
     
     func onConnectionFailed(error: FlyError) {
         
