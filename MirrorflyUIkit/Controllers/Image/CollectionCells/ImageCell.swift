@@ -67,9 +67,9 @@ class ImageCell: UICollectionViewCell, UIScrollViewDelegate {
             cellImage.image = nil
             cellImage.backgroundColor = Color.color_97A5C7
             if message?.mediaChatMessage?.audioType == AudioType.recording {
-                audioImage.image = UIImage(named: ImageConstant.ic_mic_white)
+                audioImage.image = UIImage(named: "ic_white_mic")
             } else {
-                audioImage.image = UIImage(named: ImageConstant.ic_white_headphone)
+                audioImage.image = UIImage(named: "ic_white_headeset")
             }
         } else {
             cellImage.backgroundColor = .clear

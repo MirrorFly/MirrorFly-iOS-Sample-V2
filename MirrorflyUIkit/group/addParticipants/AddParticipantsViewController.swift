@@ -132,6 +132,7 @@ class AddParticipantsViewController: UIViewController {
     func setUpTableView() {
         participantTableView.delegate = self
         participantTableView.dataSource = self
+        participantTableView.showsVerticalScrollIndicator = false
         participantTableView.register(UINib(nibName: Identifiers.participantCell , bundle: .main), forCellReuseIdentifier: Identifiers.participantCell)
         participantTableView.register(UINib(nibName: Identifiers.noResultFound , bundle: .main),forCellReuseIdentifier: Identifiers.noResultFound)
     }

@@ -10,7 +10,7 @@ import MirrorFlySDK
 
 class BlockedContactsViewController: UIViewController {
 
-
+    @IBOutlet weak var noBlockedContactsLabel: UILabel!
     @IBOutlet weak var blockedContactsTableView: UITableView! {
         didSet {
             blockedContactsTableView.register(UINib(nibName: "BlockedContactTableViewCell", bundle: nil), forCellReuseIdentifier: "BlockedContactTableViewCell")
@@ -22,7 +22,9 @@ class BlockedContactsViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        getBLockedList()
+        getUsersIBlocked()
+        noBlockedContactsLabel.text = "No Blocked Contacts found"
+        noBlockedContactsLabel.font = UIFont.font14px_appSemibold()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -42,6 +44,30 @@ class BlockedContactsViewController: UIViewController {
     @IBAction func backAction(_ sender: UIButton) {
         self.navigationController?.popViewController(animated: true)
     }
+    
+    // MARK: Public Method
+    
+    func getUsersIBlocked() {
+        ContactManager.shared.getUsersIBlocked(fetchFromServer: false) { [weak self] isSuccess, error, data in
+            if isSuccess{
+                if let blocked = data["data"] as? [ProfileDetails] {
+                    if blocked.isEmpty {
+                        self?.blockedContactsTableView.isHidden = true
+                        self?.noBlockedContactsLabel.isHidden = false
+                    } else {
+                        self?.blockedContactsTableView.isHidden = false
+                        self?.noBlockedContactsLabel.isHidden = true
+                        self?.blockedList = blocked
+                    }
+                }
+                self?.blockedContactsTableView.reloadData()
+            } else {
+                let message = AppUtils.shared.getErrorMessage(description: error?.description ?? "")
+                AppAlert.shared.showAlert(view: self!, title: "" , message: message, buttonTitle: "OK")
+                return
+            }
+        }
+    }
 
     //MARK: UnBlockUser
     private func unblockUser(contact: ProfileDetails) {
@@ -50,6 +76,10 @@ class BlockedContactsViewController: UIViewController {
             if isSuccess {
                 self?.blockedList.removeAll { detail in
                     detail.jid == contact.jid
+                }
+                if self?.blockedList.isEmpty ?? true {
+                    self?.blockedContactsTableView.isHidden = true
+                    self?.noBlockedContactsLabel.isHidden = false
                 }
                 self?.blockedContactsTableView.reloadData()
                 AppAlert.shared.showToast(message: "\(name) has been Unblocked")
@@ -78,7 +108,7 @@ class BlockedContactsViewController: UIViewController {
 
 extension BlockedContactsViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        noContactsLabel.isHidden = blockedList.count != 0
+        noBlockedContactsLabel.isHidden = blockedList.count != 0
         return blockedList.count
     }
 

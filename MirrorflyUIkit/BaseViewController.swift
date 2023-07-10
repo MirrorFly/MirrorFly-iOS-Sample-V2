@@ -68,6 +68,7 @@ class BaseViewController : UIViewController {
                 FlyDefaults.appLockPassword = ""
                 FlyDefaults.appLockenable = false
                 FlyDefaults.hideLastSeen = false
+                UIApplication.shared.applicationIconBadgeNumber = 0
                 self?.stopLoading()
                 Utility.saveInPreference(key: isProfileSaved, value: false)
                 Utility.saveInPreference(key: isLoggedIn, value: false)

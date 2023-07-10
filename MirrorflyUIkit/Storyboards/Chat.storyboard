@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="a6v-qf-Ud1">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="a6v-qf-Ud1">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21678"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -97,7 +97,7 @@
                                                         <color key="textColor" name="PrimaryTextColor2"/>
                                                         <nil key="highlightedColor"/>
                                                     </label>
-                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="C6I-tW-scf" customClass="MarqueeLabel" customModule="MarqueeLabel">
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="C6I-tW-scf" customClass="MarqueeLabel" customModule="MarqueeLabel">
                                                         <rect key="frame" x="0.0" y="0.0" width="173" height="128.66666666666666"/>
                                                         <fontDescription key="fontDescription" name="SFUIDisplay-Regular" family="SF UI Display" pointSize="10"/>
                                                         <color key="textColor" name="PrimaryTextColor2"/>
@@ -526,7 +526,6 @@
                         <outlet property="navigationView" destination="o1q-Mw-BVQ" id="vAs-7Y-boR"/>
                         <outlet property="replyButton" destination="a6k-9A-SgI" id="gaU-iX-L4r"/>
                         <outlet property="searchBar" destination="BTb-oi-EQ7" id="sCh-RG-GMl"/>
-                        <outlet property="searchDisplayController" destination="9bR-JQ-by8" id="0JB-Xd-SNY"/>
                         <outlet property="searchView" destination="uyg-cc-Sqb" id="Gjq-e8-LYP"/>
                         <outlet property="starredBackButton" destination="c97-R9-wLq" id="2EK-Nu-DBS"/>
                         <outlet property="starredSearchBarHeightCons" destination="5t3-aN-a0O" id="Y1R-YX-OOB"/>
@@ -545,14 +544,6 @@
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="svE-jh-3TX" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-                <searchDisplayController id="9bR-JQ-by8">
-                    <connections>
-                        <outlet property="delegate" destination="U3O-Rv-gdd" id="XED-b1-aF7"/>
-                        <outlet property="searchContentsController" destination="U3O-Rv-gdd" id="pSB-6D-okA"/>
-                        <outlet property="searchResultsDataSource" destination="U3O-Rv-gdd" id="e0I-XC-hCc"/>
-                        <outlet property="searchResultsDelegate" destination="U3O-Rv-gdd" id="b95-sY-8Gr"/>
-                    </connections>
-                </searchDisplayController>
             </objects>
             <point key="canvasLocation" x="133.58778625954199" y="-206.33802816901411"/>
         </scene>
@@ -1074,11 +1065,11 @@
             <objects>
                 <viewController id="Pto-9t-rvq" customClass="ChatContactViewController" customModule="Mirrorfly" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="cU1-ry-Y4x">
-                        <rect key="frame" x="0.0" y="0.0" width="393" height="842"/>
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="783"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="pXI-Lh-PO1">
-                                <rect key="frame" x="0.0" y="0.0" width="393" height="842"/>
+                                <rect key="frame" x="0.0" y="59" width="393" height="724"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" distribution="fillProportionally" translatesAutoresizingMaskIntoConstraints="NO" id="Okn-2y-Fhl">
                                         <rect key="frame" x="0.0" y="0.0" width="393" height="50"/>
@@ -1159,7 +1150,7 @@
                                         </constraints>
                                     </stackView>
                                     <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" indicatorStyle="white" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="40" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="Ry3-Py-Z1i">
-                                        <rect key="frame" x="0.0" y="130" width="393" height="712"/>
+                                        <rect key="frame" x="0.0" y="130" width="393" height="594"/>
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <color key="sectionIndexBackgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <color key="sectionIndexTrackingBackgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -1648,9 +1639,7 @@
         </scene>
     </scenes>
     <designables>
-        <designable name="C6I-tW-scf">
-            <size key="intrinsicContentSize" width="23.666666666666668" height="12"/>
-        </designable>
+        <designable name="C6I-tW-scf"/>
     </designables>
     <inferredMetricsTieBreakers>
         <segue reference="ee3-RP-eKe"/>

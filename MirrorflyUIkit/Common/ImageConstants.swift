@@ -97,6 +97,8 @@ enum ImageConstant{
     //view all media
     static let ic_white_headphone = "ic_white_headphone"
     static let ic_mic_white = "ic_mic_white"
+    static let ic_white_headset = "ic_white_headset"
+    static let ic_white_mic = "ic_white_mic"
     static let link_next_arrow = "link_next_arrow"
 
     //Auto Download Settings

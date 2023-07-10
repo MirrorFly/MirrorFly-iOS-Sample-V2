@@ -59,7 +59,7 @@ let urgentCalls = "Urgent Calls Only"
 let busy = "I am busy"
 let available = "Available"
 let sleeping = "Sleeping"
-let inMirrorfly = "I am in Mirrorfly"
+let inMirrorfly = "I am in MirrorFly"
 let emptyStatus = "Status cannot be empty"
 let busyEmptyStatus = "Busy status cannot be empty"
 
@@ -166,7 +166,7 @@ let location = NSLocalizedString("location", comment: "")
 let fileformat_NotSupport = NSLocalizedString("fileformat_NotSupport", comment: "")
 let fileSize = NSLocalizedString("fileSize", comment: "")
 
-let okButton = NSLocalizedString("Ok", comment: "")
+let okButton = NSLocalizedString("OK", comment: "")
 let okayButton = NSLocalizedString("okay", comment: "")
 let yesButton = NSLocalizedString("yes", comment: "")
 let unblock = NSLocalizedString("Unblock", comment: "")

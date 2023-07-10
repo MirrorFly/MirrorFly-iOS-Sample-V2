@@ -27,7 +27,7 @@ class SettingsViewController : BaseViewController {
         let appVersion = info?["CFBundleShortVersionString"] as? String ?? "Unknown"
         let appBuild = info?[kCFBundleVersionKey as String] as? String ?? "Unknown"
         
-        let appVersionString = "Version \(appVersion)(\(appBuild))"
+        let appVersionString = "Version \(appVersion)"
         self.lblVersion.text = appVersionString
         //   self.lblLatestRelease.isHidden = true
         self.tblSettings.register(UINib(nibName: "SettingsTableViewCell", bundle: nil), forCellReuseIdentifier: "SettingsTableViewCell")

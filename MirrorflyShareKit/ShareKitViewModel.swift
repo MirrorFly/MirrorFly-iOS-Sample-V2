@@ -15,7 +15,7 @@ import Contacts
 
 let BASE_URL =  "https://api-preprod-sandbox.mirrorfly.com/api/v1/"
 let CONTAINER_ID = "group.com.mirrorfly.qa"
-let LICENSE_KEY = "xxxx"
+let LICENSE_KEY = "xxxxxxxxxxx"
 let IS_LIVE = false
 let APP_NAME = "UiKitQa"
 let ENABLE_CONTACT_SYNC = false
@@ -51,11 +51,7 @@ class ShareKitViewModel {
     }
     
     private func initialize() {
-        try? ChatSDK.Builder.setAppGroupContainerID(containerID: CONTAINER_ID)
-            .isTrialLicense(isTrial: !IS_LIVE)
-            .setLicenseKey(key: LICENSE_KEY)
-            .setDomainBaseUrl(baseUrl: BASE_URL)
-            .buildAndInitialize()
+        ChatManager.setAppGroupContainerId(id: CONTAINER_ID)
         NetworkReachability.shared.startMonitoring()
     }
     
@@ -405,8 +401,8 @@ class ShareKitViewModel {
 
         for i in 0 ..< fetchResult.count {
             let asset = fetchResult[i]
-            let fileName = asset.value(forKey: "originalFilename") as! String
-            let fileNameWithoutSuffix = fileName.components(separatedBy: ".").first!
+            let fileName = asset.value(forKey: "originalFilename") as? String ?? ""
+            let fileNameWithoutSuffix = fileName.components(separatedBy: ".").first ?? ""
             assetDictionary[fileNameWithoutSuffix] = asset
         }
 

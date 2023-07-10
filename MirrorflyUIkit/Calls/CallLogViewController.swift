@@ -272,7 +272,7 @@ class CallLogViewController: UIViewController {
         AppAlert.shared.showAlert(view: self, title: message, message: self.getSelectedLogs().isEmpty ? clearCalllog : clearSelectedCalllog, buttonOneTitle: clearAll, buttonTwoTitle: cancelUppercase, buttonOneColor: Color.color_FD3B2F, cancelWhenTapOutside: true)
         AppAlert.shared.onAlertAction = { [weak self] (result) -> Void in
             if result == 0 {
-                self?.deleteCallLogs(isClearAll: true)
+               self?.deleteCallLogs(isClearAll: true)
             }
         }
     }
@@ -588,7 +588,7 @@ extension CallLogViewController : UITableViewDataSource, UITableViewDelegate {
         }
 
         if CallManager.isAlreadyOnAnotherCall(){
-            AppAlert.shared.showToast(message: "You’re already on call, can't make new Mirrorfly call")
+            AppAlert.shared.showToast(message: "You’re already on call, can't make new MirrorFly call")
             return
         }
         if !NetworkReachability.shared.isConnected {

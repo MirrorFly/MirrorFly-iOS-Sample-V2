@@ -208,8 +208,10 @@ extension AddPeopleOrGroupController : UICollectionViewDelegate, UICollectionVie
         print(profile)
 
         let hashcode = recentChat.profileName.hashValue
+        
+        let name = getUserName(jid: recentChat.jid,name: recentChat.profileName , nickName: recentChat.nickName, contactType: (recentChat.isDeletedUser ? .deleted :  recentChat.isItSavedContact ? .live : .unknown))
         let color = randomColors[abs(hashcode) % randomColors.count]
-        cell.setImage(imageURL: recentChat.profileImage ?? "", name: getUserName(jid: recentChat.jid, name: recentChat.profileName, nickName: recentChat.nickName, contactType: recentChat.isItSavedContact ? .live : .unknown), color: color ?? .gray , recentChat: recentChat)
+        cell.setImage(imageURL: recentChat.profileImage ?? "", name: name, color: color ?? .gray , recentChat: recentChat)
        
         return cell
         
@@ -256,10 +258,10 @@ extension AddPeopleOrGroupController: UISearchBarDelegate {
         
         print("#Search \(searchText)")
         if searchText.trim().count > 0 {
-            
             isSearchEnabled = true
             getRecentChat = searchText.isEmpty ? getAllRecentChat : getAllRecentChat.filter({ recentChat -> Bool in
-                return (recentChat.profileName.capitalized.range(of: searchText.trim().capitalized, options: [.caseInsensitive, .diacriticInsensitive]) != nil && recentChat.isDeletedUser == false) ||
+                let name = getUserName(jid: recentChat.jid,name: recentChat.profileName , nickName: recentChat.nickName, contactType: (recentChat.isDeletedUser ? .deleted :  recentChat.isItSavedContact ? .live : .unknown))
+                return (name.capitalized.range(of: searchText.trim().capitalized, options: [.caseInsensitive, .diacriticInsensitive]) != nil && recentChat.isDeletedUser == false) ||
                 (recentChat.lastMessageContent.capitalized.range(of: searchText.trim().capitalized, options: [.caseInsensitive, .diacriticInsensitive]) != nil && recentChat.isDeletedUser == false)
             })
             

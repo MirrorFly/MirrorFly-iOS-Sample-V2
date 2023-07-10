@@ -128,7 +128,12 @@ class FingerPrintPINViewController: UIViewController {
         if isNotEnrolled {
             initialViewController.noFingerprintAdded = true
         }
-        self.navigationController?.pushViewController(initialViewController, animated: false)
+        if let _ = self.navigationController {
+            self.navigationController?.pushViewController(initialViewController, animated: false)
+        } else {
+            initialViewController.modalPresentationStyle = .fullScreen
+            self.present(initialViewController, animated: false)
+        }
     }
 
 

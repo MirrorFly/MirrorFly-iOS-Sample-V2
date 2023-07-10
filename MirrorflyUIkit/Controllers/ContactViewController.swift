@@ -496,7 +496,7 @@ class ContactViewController: UIViewController {
     @IBAction func call(_ sender: Any) {
         let profile = contacts[currentIndex]
         if CallManager.isAlreadyOnAnotherCall(){
-            AppAlert.shared.showToast(message: "You’re already on call, can't make new Mirrorfly call")
+            AppAlert.shared.showToast(message: "You’re already on call, can't make new MirrorFly call")
             return
         }
         if !NetworkReachability.shared.isConnected {
@@ -521,7 +521,7 @@ class ContactViewController: UIViewController {
     @IBAction func videoCall(_ sender: Any) {
         let profile = contacts[currentIndex]
         if CallManager.isAlreadyOnAnotherCall(){
-            AppAlert.shared.showToast(message: "You’re already on call, can't make new Mirrorfly call")
+            AppAlert.shared.showToast(message: "You’re already on call, can't make new MirrorFly call")
             return
         }
         let callType = CallType.Video
@@ -1102,7 +1102,7 @@ extension ContactViewController {
         }
         
         if CallManager.isAlreadyOnAnotherCall() && !isInvite{
-            AppAlert.shared.showToast(message: "You’re already on call, can't make new Mirrorfly call")
+            AppAlert.shared.showToast(message: "You’re already on call, can't make new MirrorFly call")
             return
         }
         
@@ -1113,8 +1113,14 @@ extension ContactViewController {
                         let errorMessage = AppUtils.shared.getErrorMessage(description: message)
                         AppAlert.shared.showAlert(view: self, title: "", message: errorMessage, buttonTitle: "Okay")
                     } else {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500)) {
                             self.navigationController?.popViewController(animated: true)
+                            for item in self.navigationController?.viewControllers ?? [] {
+                                if let vc = item as? CallViewController {
+                                    vc.reloadForInVite = true
+                                }
+                            }
+                           
                         }
                     }
                 }

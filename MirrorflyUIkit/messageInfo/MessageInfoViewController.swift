@@ -162,6 +162,7 @@ extension MessageInfoViewController : UITableViewDelegate, UITableViewDataSource
                     cell = cell?.getCellFor(message, at: indexPath, isShowForwardView: false, profileDetails: profileDetails)
                     cell.selectionStyle = .none
                     cell?.contentView.backgroundColor = .clear
+                    cell.senderStackView?.isHidden = true
                     cell.isAllowSwipe = false
                     return cell
                     
@@ -174,6 +175,7 @@ extension MessageInfoViewController : UITableViewDelegate, UITableViewDataSource
                     cell?.contentView.backgroundColor = .clear
                     cell.quickForwardView?.isHidden = true
                     cell.isAllowSwipe = false
+                    cell.senderStackView?.isHidden = true
                     return cell
                     
                 case .contact:
@@ -184,6 +186,7 @@ extension MessageInfoViewController : UITableViewDelegate, UITableViewDataSource
                     cell?.contentView.backgroundColor = .clear
                     cell.isAllowSwipe = false
                     cell.quickForwardView?.isHidden = true
+                    cell.senderStackView?.isHidden = true
                     return cell
                     
                 case .audio:
@@ -199,6 +202,7 @@ extension MessageInfoViewController : UITableViewDelegate, UITableViewDataSource
                     audioCell = cell
                     cell?.isAllowSwipe = false
                     cell?.fwdViw?.isHidden = true
+                    cell?.senderStackView?.isHidden = true
                     return cell ?? UITableViewCell()
                     
                 case .image, .video:
@@ -212,6 +216,7 @@ extension MessageInfoViewController : UITableViewDelegate, UITableViewDataSource
                     cell.quickFwdBtn?.isHidden = true
                     cell.quickfwdView?.isHidden = true
                     cell.isAllowSwipe = false
+                    cell.senderStackView?.isHidden = true
                     return cell
                     
                 case .document:
@@ -225,6 +230,7 @@ extension MessageInfoViewController : UITableViewDelegate, UITableViewDataSource
                     cell.forwardButton?.isHidden = true
                     cell.fwdButton?.isHidden = true
                     cell.isAllowSwipe = false
+                    cell.senderStackView?.isHidden = true
                     return cell
                 default:
                     return UITableViewCell()

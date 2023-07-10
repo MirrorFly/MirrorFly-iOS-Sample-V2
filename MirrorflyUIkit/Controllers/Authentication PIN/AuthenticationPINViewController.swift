@@ -541,6 +541,7 @@ class AuthenticationPINViewController: BaseViewController, UITextFieldDelegate {
             FlyDefaults.passwordAuthenticationAttemps = 0
             self?.navigationController?.popToRootViewController(animated: false)
             self?.dismiss(animated: false)
+            self?.presentingViewController?.dismiss(animated: false)
         }
     }
     

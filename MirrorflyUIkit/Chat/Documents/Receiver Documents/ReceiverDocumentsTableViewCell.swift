@@ -1,4 +1,4 @@
-//
+/// - Handling Reply Messages//
 //  ReceiverDocumentsTableViewCell.swift
 //  UiKitQa
 //
@@ -145,7 +145,7 @@ class ReceiverDocumentsTableViewCell: BaseTableViewCell {
         currentIndexPath = indexPath
         replyUserNameLabel?.text = ""
         // Starred Messages
-        starredMessageImageView?.isHidden =  message!.isMessageStarred ? false : true
+        starredMessageImageView?.isHidden =  message?.isMessageStarred ?? false ? false : true
         viewDocumentButton?.isHidden = message?.mediaChatMessage?.mediaDownloadStatus == .downloaded && isShowForwardView == false ? false : true
         showHideForwardView(message: message, isShowForwardView: isShowForwardView, isDeletedMessageSelected: isDeletedOrStarredSelected)
         if isDeletedOrStarredSelected == false {
@@ -167,7 +167,7 @@ class ReceiverDocumentsTableViewCell: BaseTableViewCell {
         }
         
         // Starred Messages
-        favImageView?.isHidden =  message!.isMessageStarred ? false : true
+        favImageView?.isHidden =  message?.isMessageStarred ?? false ? false : true
         
         if selectedForwardMessage?.filter({$0.chatMessage.messageId == message?.messageId}).first?.isSelected == true {
             forwardView?.makeCircleView(borderColor: Color.forwardCircleBorderColor.cgColor, borderWidth: 0.0)
@@ -202,8 +202,7 @@ class ReceiverDocumentsTableViewCell: BaseTableViewCell {
         isAllowSwipe = message?.messageStatus == .notAcknowledged ? false : true
         
         /// - Handling Reply Messages
-        
-        if(message!.isReplyMessage) {
+        if((message?.isReplyMessage) != nil) {
             replyTypeImageView?.isHidden = true
             replyView?.isHidden = false
             groupSenderNameView?.isHidden = true
@@ -230,6 +229,7 @@ class ReceiverDocumentsTableViewCell: BaseTableViewCell {
                 replyTypeIconImageView?.isHidden = true
                 replyTypeIconView?.isHidden = true
                 replyImageWidthCons?.isActive = false
+                replyView?.isHidden = true
                 replyStackViewTrailingCons?.constant = 10
             } else if replyMessage?.mediaChatMessage != nil {
                 replyTypeIconImageView?.isHidden = false

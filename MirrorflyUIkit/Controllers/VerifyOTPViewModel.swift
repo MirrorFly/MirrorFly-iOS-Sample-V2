@@ -50,26 +50,56 @@ class VerifyOTPViewModel : NSObject
         var voipToken = Utility.getStringFromPreference(key: voipToken)
         print(deviceToken, mobileNumber)
         voipToken = voipToken.isEmpty ? deviceToken : voipToken
+        
+        if FlyDefaults.baseURL.isEmpty {
+            ChatManager.initializeSDK(licenseKey: LICENSE_KEY) { licenseSuccess, error, data in
+                if licenseSuccess {
+                    try! ChatManager.registerApiService(for: uniqueIdentifier, deviceToken: deviceToken, voipDeviceToken: voipToken, isExport: ISEXPORT, isForceRegister: isForceRegister, userType: userType) { isSuccess, flyError, flyData in
+                        var data = flyData
+                        if isSuccess {
+                            if  data["newLogin"] as? Bool ?? false{
+                                CallLogManager().deleteCallLogs()
+                                ChatManager.deleteAllChatTags()
+                                iCloudmanager().deleteLoaclBackup()
+                                Utility.saveInPreference(key: "clLastPageNumber", value: "1")
+                                Utility.saveInPreference(key: "clLastTotalPages", value: "0")
+                                Utility.saveInPreference(key: "clLastTotalRecords", value: "0")
 
-        try! ChatManager.registerApiService(for: uniqueIdentifier, deviceToken: deviceToken, voipDeviceToken: voipToken, isExport: ISEXPORT, isForceRegister: isForceRegister, userType: userType) { isSuccess, flyError, flyData in
-            var data = flyData
-            if isSuccess {
-                if  data["newLogin"] as? Bool ?? false{
-                    CallLogManager().deleteCallLogs()
-                    ChatManager.deleteAllChatTags()
-                    iCloudmanager().deleteLoaclBackup()
-                    Utility.saveInPreference(key: "clLastPageNumber", value: "1")
-                    Utility.saveInPreference(key: "clLastTotalPages", value: "0")
-                    Utility.saveInPreference(key: "clLastTotalRecords", value: "0")
-
+                            }
+                            completionHandler(data, nil)
+                        }else{
+                            
+                            let err = flyError?.description ?? ""
+                            let error = err.contains("405") ? err : data.getMessage()
+                            //let error = data.getMessage()
+                            completionHandler(data, error as? String)
+                        }
+                    }
+                }else{
+                    completionHandler(data, error as? String)
                 }
-                completionHandler(data, nil)
-            }else{
-                
-                let err = flyError?.description ?? ""
-                let error = err.contains("405") ? err : data.getMessage()
-                //let error = data.getMessage()
-                completionHandler(data, error as? String)
+            }
+        }else{
+            try! ChatManager.registerApiService(for: uniqueIdentifier, deviceToken: deviceToken, voipDeviceToken: voipToken, isExport: ISEXPORT, isForceRegister: isForceRegister, userType: userType) { isSuccess, flyError, flyData in
+                var data = flyData
+                if isSuccess {
+                    if  data["newLogin"] as? Bool ?? false{
+                        CallLogManager().deleteCallLogs()
+                        ChatManager.deleteAllChatTags()
+                        iCloudmanager().deleteLoaclBackup()
+                        Utility.saveInPreference(key: "clLastPageNumber", value: "1")
+                        Utility.saveInPreference(key: "clLastTotalPages", value: "0")
+                        Utility.saveInPreference(key: "clLastTotalRecords", value: "0")
+
+                    }
+                    completionHandler(data, nil)
+                }else{
+                    
+                    let err = flyError?.description ?? ""
+                    let error = err.contains("405") ? err : data.getMessage()
+                    //let error = data.getMessage()
+                    completionHandler(data, error as? String)
+                }
             }
         }
     }

@@ -154,7 +154,8 @@ class ChatTextView: UIView, UITextViewDelegate {
                 if !mentionedUsers.isEmpty, let replyMessage = message.mediaChatMessage?.mediaCaptionText, replyMessage.isNotEmpty {
                     messageTypeLabel?.text = ChatUtils.getMentionTextContent(message: replyMessage, uiLabel: messageTypeLabel, isMessageSentByMe: isMessageSentByMe, mentionedUsers: mentionedUsers).string
                 } else {
-                    messageTypeLabel?.text = "Photo"
+                    let replyMessage = message.mediaChatMessage?.mediaCaptionText
+                    messageTypeLabel?.text = !(replyMessage?.isEmpty ?? false) ? message.mediaChatMessage?.mediaCaptionText : "Photo"
                 }
                 messageTypeWidthCons?.constant = 13
                 spacierView?.isHidden = false
@@ -174,6 +175,11 @@ class ChatTextView: UIView, UITextViewDelegate {
                 let mediaFileName = message.mediaChatMessage?.mediaFileName.capitalized
                 messageTypeLabel?.text = mediaFileName
                 messageTypeWidthCons?.constant = 13
+                spacierView?.isHidden = false
+            case .video:
+                let replyMessage = message.mediaChatMessage?.mediaCaptionText
+                messageTypeLabel?.text = !(replyMessage?.isEmpty ?? false) ? message.mediaChatMessage?.mediaCaptionText : message.messageType.rawValue.capitalized
+                messageTypeWidthCons?.constant = 12
                 spacierView?.isHidden = false
             default:
                 messageTypeLabel?.text = message.messageType.rawValue.capitalized

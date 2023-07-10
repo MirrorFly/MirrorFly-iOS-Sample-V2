@@ -94,7 +94,7 @@ RecentChatViewModel  {
         return ChatManager.getRechtChat(jid: jid)
     }
     func getRecentChatFromAPI(page: Int, size: Int, completionHandler : @escaping FlyCompletionHandler) {
-        RecentChatListBuilder(recentChatListParams: RecentChatListParams(limit: 80)).getRecentChatFromApi(page: page, size: size, completionHandler: completionHandler)
+        RecentChatListBuilder(recentChatListParams: RecentChatListParams(limit: size)).getRecentChatFromApi(page: page, size: size, completionHandler: completionHandler)
         
     }
 }

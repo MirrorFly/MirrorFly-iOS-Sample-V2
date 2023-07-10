@@ -12,9 +12,10 @@ import MirrorFlySDK
 
 let BASE_URL =  "https://api-preprod-sandbox.mirrorfly.com/api/v1/"
 let CONTAINER_ID = "group.com.mirrorfly.qa"
-let LICENSE_KEY = "xxxx"
+let LICENSE_KEY = "xxxxxxxxxx"
 let IS_LIVE = false
-let APP_NAME = "UiKitQa"
+let APP_NAME = "UiKit"
+let ENABLE_CONTACT_SYNC = false
 
 class NotificationService: UNNotificationServiceExtension {
     
@@ -27,11 +28,7 @@ class NotificationService: UNNotificationServiceExtension {
         self.contentHandler = contentHandler
         bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
         let payloadType = bestAttemptContent?.userInfo["type"] as? String
-        try? ChatSDK.Builder.setAppGroupContainerID(containerID: CONTAINER_ID)
-            .isTrialLicense(isTrial: !IS_LIVE)
-            .setLicenseKey(key: LICENSE_KEY)
-            .setDomainBaseUrl(baseUrl: BASE_URL)
-            .buildAndInitialize()
+        ChatManager.setAppGroupContainerId(id: CONTAINER_ID)
         print("#push-api withContentHandler received")
         if payloadType == "media_call" {
             NotificationExtensionSupport.shared.didReceiveNotificationRequest(request.content.mutableCopy() as? UNMutableNotificationContent, appName: FlyDefaults.appName, onCompletion: { [self] bestAttemptContent in

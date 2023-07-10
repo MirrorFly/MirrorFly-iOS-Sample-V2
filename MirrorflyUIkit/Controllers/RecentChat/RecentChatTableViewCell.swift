@@ -199,7 +199,7 @@ class RecentChatTableViewCell: UITableViewCell {
         statusViewTralingCons?.constant = 5
         statusImageCons?.constant = 7
         senderNameLabel?.textColor = Color.primaryTextColor
-        if recentChatMessage.profileType == .groupChat && senderName.isNotEmpty && (!(chatMessage?.isMessageSentByMe ?? false)) && recentChatMessage.lastMessageType != .notification && !forSearch {
+        if recentChatMessage.profileType == .groupChat && senderName.isNotEmpty && (!(chatMessage?.isMessageSentByMe ?? false)) && recentChatMessage.lastMessageType != .notification && !forSearch  && !(chatMessage?.isMessageDeleted ?? false) {
             senderNameLabel?.text =  "\(senderName): "
             senderNameLabel?.isHidden = false
         } else {
@@ -209,9 +209,9 @@ class RecentChatTableViewCell: UITableViewCell {
         muteImageView.isHidden = !recentChatMessage.isMuted
         archivedStatusLabel.isHidden = !recentChatMessage.isChatArchived
 
-        if fromArchive {
-            muteImageView.isHidden = true
-        }
+//        if fromArchive {
+//            muteImageView.isHidden = true
+//        }
         let profileImage = ((recentChatMessage.profileThumbImage?.isEmpty ?? true) ? recentChatMessage.profileImage : recentChatMessage.profileThumbImage) ?? ""
         let userName = getUserName(jid: recentChatMessage.jid,name: recentChatMessage.profileName, nickName: recentChatMessage.nickName, contactType: recentChatMessage.isItSavedContact ? .live : .unknown)
         if profileImage.isEmpty && recentChatMessage.profileType == .singleChat {
@@ -221,7 +221,7 @@ class RecentChatTableViewCell: UITableViewCell {
                                            chatType: recentChatMessage.profileType, jid: recentChatMessage.jid, isBlockedByAdmin: recentChatMessage.isBlockedByAdmin, validateBlock: false)
         }
         
-        if recentChatMessage.isBlockedMe || getisBlockedMe(jid: recentChatMessage.jid) || recentChatMessage.isBlockedByAdmin || (IS_LIVE && ENABLE_CONTACT_SYNC && recentChatMessage.isItSavedContact == false){
+        if recentChatMessage.isBlockedMe || getisBlockedMe(jid: recentChatMessage.jid) || recentChatMessage.isBlockedByAdmin || (IS_LIVE && ENABLE_CONTACT_SYNC) && recentChatMessage.isItSavedContact == false {
             profileImageView?.backgroundColor =  Color.groupIconBackgroundGray
             let placeHolder = recentChatMessage.isGroup ? UIImage(named: "ic_groupPlaceHolder") :  UIImage(named: "ic_profile_placeholder")
             profileImageView?.sd_setImage(with: nil, placeholderImage: placeHolder ?? UIImage())
@@ -230,7 +230,7 @@ class RecentChatTableViewCell: UITableViewCell {
         let messageTime = recentChatMessage.lastMessageTime
         //chatMessage?.messageChatType == .singleChat ? recentChatMessage.lastMessageTime : DateFormatterUtility.shared.getGroupMilliSeconds(milliSeconds: recentChatMessage.lastMessageTime)
       
-        chatTimeLabel?.text = recentChatMessage.lastMessageId == "" ? "" : String().fetchMessageDate(for: messageTime)
+        chatTimeLabel?.text = (recentChatMessage.lastMessageId == "" || (chatMessage?.isMessageDeleted ?? false)) ? "" : String().fetchMessageDate(for: messageTime)
         countLabel?.text = recentChatMessage.unreadMessageCount > 99 ? "99+" : String(recentChatMessage.unreadMessageCount)
         chatTimeLabel?.isHidden = false
         countView?.isHidden = (recentChatMessage.unreadMessageCount > 0) ? false : true

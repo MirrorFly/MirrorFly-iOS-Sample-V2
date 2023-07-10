@@ -37,7 +37,6 @@ class CallMember: NSObject {
 #else
     var videoTrackView = RTCEAGLVideoView(frame: .zero)
 #endif
-    
     var isVideoTrackAdded: Bool = false
 }
 

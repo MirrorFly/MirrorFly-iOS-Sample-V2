@@ -132,7 +132,7 @@ class Utility: NSObject{
         var restEndUrl:String = ""
         
         if (!restEnd.hasPrefix("http://") && !restEnd.hasPrefix("https://")) {
-            restEndUrl = BASE_URL + restEnd
+            restEndUrl = FlyDefaults.baseURL + restEnd
         }
         return restEndUrl
     }

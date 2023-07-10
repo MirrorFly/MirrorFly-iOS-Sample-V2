@@ -556,6 +556,7 @@ class ImageEditController: UIViewController {
                 let nxtimgDta = imageAray[imageEditIndex]
                 botmImageIndex = imageEditIndex
                 self.captionTxt?.text = nxtimgDta.caption
+                captionTxt?.text = (nxtimgDta.caption?.isNotEmpty ?? false) ? nxtimgDta.caption : addCaption
             }
         }
     }
@@ -600,6 +601,7 @@ class ImageEditController: UIViewController {
     func popView() {
         navigationController?.popViewController(animated: true)
         selectedAssets = []
+        captionTxt?.text = ""
     }
     
     func closeKeyboard() {
