@@ -436,7 +436,19 @@ extension ShareKitPreviewController: UICollectionViewDelegate, UICollectionViewD
             let cell:EditImageCell = collectionView.dequeueReusableCell(withReuseIdentifier: Identifiers.editImageCell, for: indexPath) as! EditImageCell
             let imgeDetail = imageAray[indexPath.row]
             cell.cellImage?.contentMode = .scaleAspectFit
-            cell.cellImage?.image = ShareMediaUtils.resizeImage(image: imgeDetail.image ?? UIImage(), targetSize: CGSize(width: cell.cellImage?.bounds.width ?? 300, height: cell.cellImage?.bounds.height ?? 300))
+            autoreleasepool {
+                if let asset = imageAray[indexPath.row].phAsset {
+                    let manager = PHImageManager.default()
+                    let option = PHImageRequestOptions()
+                    option.isSynchronous = true
+                    option.version = .current
+                    manager.requestImage(for: asset, targetSize: CGSize(width: cell.cellImage?.bounds.width ?? 100, height: cell.cellImage?.bounds.height ?? 100), contentMode: .aspectFit, options: option, resultHandler: {(result, info)->Void in
+                        cell.cellImage?.image = result
+                    })
+                } else {
+                    cell.cellImage?.image = ShareMediaUtils.resizeImage(image: imgeDetail.image ?? UIImage(), targetSize: CGSize(width: cell.cellImage?.bounds.width ?? 300, height: cell.cellImage?.bounds.height ?? 300))
+                }
+            }
             cell.playButton?.isHidden = true
             print("ImageEditorController \(imgeDetail.isVideo)")
             if imgeDetail.isVideo {
@@ -449,7 +461,18 @@ extension ShareKitPreviewController: UICollectionViewDelegate, UICollectionViewD
             let cell:ListImageCell = collectionView.dequeueReusableCell(withReuseIdentifier: Identifiers.listImageCell, for: indexPath) as! ListImageCell
             let imgeDetail = imageAray[indexPath.row]
             cell.cellImage.contentMode = .scaleAspectFill
-            cell.cellImage.image = ShareMediaUtils.resizeImage(image: imgeDetail.image ?? UIImage(), targetSize: CGSize(width: 100, height: 100))
+            autoreleasepool {
+                if let asset = imageAray[indexPath.row].phAsset {
+                    let manager = PHImageManager.default()
+                    let option = PHImageRequestOptions()
+                    option.isSynchronous = true
+                    manager.requestImage(for: asset, targetSize: CGSize(width: cell.cellImage?.bounds.width ?? 100, height: cell.cellImage?.bounds.height ?? 100), contentMode: .aspectFit, options: option, resultHandler: {(result, info)->Void in
+                        cell.cellImage?.image = result
+                    })
+                } else {
+                    cell.cellImage.image = ShareMediaUtils.resizeImage(image: imgeDetail.image ?? UIImage(), targetSize: CGSize(width: 100, height: 100))
+                }
+            }
             if botmImageIndex == indexPath.row {
                 cell.setBorder()
             }else {
@@ -675,7 +698,7 @@ extension ShareKitPreviewController {
                                 if imageAsset.count > 0 {
                                     imageAray.append(imageAsset[0])
                                 } else {
-                                    imageAray.append(ImageData(image: image, caption: nil, isVideo: false, isSlowMotion: false,mediaData : data, fileName : fileName, base64Image : MediaUtils.convertImageToBase64(img: thumbImage), fileExtension : fileExtension, fileSize: size))
+                                    imageAray.append(ImageData(image: image, caption: nil, isVideo: false, phAsset: asset, isSlowMotion: false,mediaData : data, fileName : fileName, base64Image : MediaUtils.convertImageToBase64(img: thumbImage), fileExtension : fileExtension, fileSize: size))
                                 }
                             }
                         }

@@ -468,7 +468,7 @@ class ContactViewController: UIViewController {
                     userImage.loadFlyImage(imageURL: profile.image, name: name, chatType: profile.profileChatType, jid: profile.jid)
                 }
             }
-          
+            userImage.sd_imageIndicator = SDWebImageActivityIndicator.grayLarge
             userImage.sd_setImage(with: url, placeholderImage: placeholder)
             if userImage?.image == placeholder {
                 userImage?.isUserInteractionEnabled = false

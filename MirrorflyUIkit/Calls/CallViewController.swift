@@ -424,7 +424,7 @@ class CallViewController: UIViewController ,AVPictureInPictureControllerDelegate
         } else {
             for member in members {
                 if member.callStatus == .connected && CallManager.getCallType() == .Video {
-                   // _ = requestForVideoTrack(jid: member.jid)
+                    addGroupTracks(jid: member.jid)
                 }
             }
             showGroupCallUI()
@@ -1173,10 +1173,11 @@ extension CallViewController : UICollectionViewDelegate , UICollectionViewDataSo
                 if isBackCamera {
                     groupCell.videoBaseView.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
                 }else {
-                    groupCell.videoBaseView.transform = CGAffineTransform(scaleX: -1.0, y: 1.0)
+                   // groupCell.videoBaseView.transform = CGAffineTransform(scaleX: -1.0, y: 1.0)
                 }
             } else {
                // groupCell.profileImage.isHidden = false
+                groupCell.videoBaseView.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
             }
         } else {
             groupCell.profileName.text = member.name
@@ -1194,71 +1195,64 @@ extension CallViewController : UICollectionViewDelegate , UICollectionViewDataSo
             groupCell.profileName.font = AppFont.Regular.size(14)
         }
         
-        if member.isVideoMuted || CallManager.getCallType() == .Audio {
+        
+        if let profileDetail = ContactManager.shared.getUserProfileDetails(for: member.jid) {
             
-            if let profileDetail = ContactManager.shared.getUserProfileDetails(for: member.jid) {
-                
-                print(profileDetail)
-                
-                let profileImageStr = profileDetail.thumbImage.isEmpty ? profileDetail.image : profileDetail.thumbImage
-                
-                groupCell.videoBaseView.loadFlyImage(imageURL: profileImageStr, name: getUserName(jid : profileDetail.jid ,name: profileDetail.name, nickName: profileDetail.nickName, contactType: profileDetail.contactType), chatType: profileDetail.profileChatType,contactType: profileDetail.contactType, jid: profileDetail.jid, isBlockedByAdmin: ContactManager.shared.getUserProfileDetails(for: profileDetail.jid)?.isBlockedByAdmin ?? false)
-                
-                if !profileImageStr.isEmpty {
-                    groupCell.videoBaseView.contentMode = .scaleAspectFill
-                }else{
-                    Utility.IntialLetter(name: member.name, imageView: groupCell.videoBaseView, colorCode: member.color,frameSize: 128,fontSize: 64)
-                }
-            }else {
-                
-                let (userName, profileImg) = CallManager.getUserNameAndImage(userId: member.jid)
+            let profileImageStr = profileDetail.thumbImage.isEmpty ? profileDetail.image : profileDetail.thumbImage
+            
+            groupCell.videoBaseView.loadFlyImage(imageURL: profileImageStr, name: getUserName(jid : profileDetail.jid ,name: profileDetail.name, nickName: profileDetail.nickName, contactType: profileDetail.contactType), chatType: profileDetail.profileChatType,contactType: profileDetail.contactType, jid: profileDetail.jid, isBlockedByAdmin: ContactManager.shared.getUserProfileDetails(for: profileDetail.jid)?.isBlockedByAdmin ?? false)
+            
+            if !profileImageStr.isEmpty {
+                groupCell.videoBaseView.contentMode = .scaleAspectFill
+            }else{
                 Utility.IntialLetter(name: member.name, imageView: groupCell.videoBaseView, colorCode: member.color,frameSize: 128,fontSize: 64)
-                Utility.download(token: profileImg, profileImage: groupCell.videoBaseView, uniqueId: member.jid,name: userName,colorCode: member.color,frameSize: 128,fontSize: 64,notify: true, completion: {
-                })
-                
-                try? ContactManager.shared.getUserProfile(for:  member.jid, fetchFromServer: true) { isSuccess, error, data in
-                    if isSuccess{
-                        print("#profile is fetched")
-                    }
-                }
-                
             }
         }else {
-           // groupCell.videoBaseView.addSubview(member.videoTrackView)
             
-            if member.videoTrack == nil {
-                
-                if let profileDetail = ContactManager.shared.getUserProfileDetails(for: member.jid) {
-                    
-                    print(profileDetail)
-                    
-                    let profileImageStr = profileDetail.thumbImage.isEmpty ? profileDetail.image : profileDetail.thumbImage
-                    
-                    groupCell.videoBaseView.loadFlyImage(imageURL: profileImageStr, name: getUserName(jid : profileDetail.jid ,name: profileDetail.name, nickName: profileDetail.nickName, contactType: profileDetail.contactType), chatType: profileDetail.profileChatType,contactType: profileDetail.contactType, jid: profileDetail.jid, isBlockedByAdmin: ContactManager.shared.getUserProfileDetails(for: profileDetail.jid)?.isBlockedByAdmin ?? false)
-                    
-                    if !profileImageStr.isEmpty {
-                        groupCell.videoBaseView.contentMode = .scaleAspectFill
-                    }else{
-                        Utility.IntialLetter(name: member.name, imageView: groupCell.videoBaseView, colorCode: member.color,frameSize: 128,fontSize: 64)
-                    }
-                }else {
-                    
-                    let (userName, profileImg) = CallManager.getUserNameAndImage(userId: member.jid)
-                    Utility.IntialLetter(name: member.name, imageView: groupCell.videoBaseView, colorCode: member.color,frameSize: 128,fontSize: 64)
-                    Utility.download(token: profileImg, profileImage: groupCell.videoBaseView, uniqueId: member.jid,name: userName,colorCode: member.color,frameSize: 128,fontSize: 64,notify: true, completion: {
-                    })
-                    
-                    try? ContactManager.shared.getUserProfile(for:  member.jid, fetchFromServer: true) { isSuccess, error, data in
-                        if isSuccess{
-                            print("#profile is fetched")
-                        }
-                    }
-                    
+            let (userName, profileImg) = CallManager.getUserNameAndImage(userId: member.jid)
+            Utility.IntialLetter(name: member.name, imageView: groupCell.videoBaseView, colorCode: member.color,frameSize: 128,fontSize: 64)
+            Utility.download(token: profileImg, profileImage: groupCell.videoBaseView, uniqueId: member.jid,name: userName,colorCode: member.color,frameSize: 128,fontSize: 64,notify: true, completion: {
+            })
+            
+            try? ContactManager.shared.getUserProfile(for:  member.jid, fetchFromServer: true) { isSuccess, error, data in
+                if isSuccess{
+                    print("#profile is fetched")
                 }
             }
+            groupCell.profileName.text = isLastRow ? "You" : userName
+            
         }
-         
-        
+
+        if CallManager.getCallType() == .Video && !member.isVideoMuted {
+
+            if let videoView = groupCell.videoBaseView {
+                member.videoTrackView.removeFromSuperview()
+                videoView.willRemoveSubview(member.videoTrackView)
+            }
+            #if arch(arm64)
+            let localRen = RTCMTLVideoView(frame: .zero)
+            #else
+            let localRen = RTCEAGLVideoView(frame: .zero)
+            #endif
+            if let baseView = groupCell.videoBaseView {
+                member.videoTrackView = localRen
+                member.videoTrackView.frame = CGRect(x: 0, y: 0, width: baseView.bounds.width, height: baseView.bounds.height)
+                if member.jid == FlyDefaults.myJid {
+                    let track = CallManager.getRemoteVideoTrack(jid: member.jid)
+                    print("#remoteTrack 1243 \(member.jid), \(track)")
+                    member.videoTrack = track
+                    track?.add(member.videoTrackView)
+                    //member.videoTrack?.add(member.videoTrackView)
+                } else {
+                    let videoTrack = CallManager.getRemoteVideoTrack(jid: member.jid)
+                    print("#remoteTrack 1248 \(member.jid), \(videoTrack)")
+                    videoTrack?.add(member.videoTrackView)
+                }
+                baseView.addSubview(member.videoTrackView)
+                groupCell.videoMuteImage.isHidden = true
+            }
+        }
+
         return groupCell
     }
     
@@ -1487,11 +1481,20 @@ extension CallViewController : CallManagerDelegate {
             if CallManager.isOneToOneCall() {
                 self.addRemoteTrackToView()
             } else {
-                if let index = self.findIndexOfUser(jid: userId) {
-                    self.members[index].videoTrack = track
-                    self.members[index].isVideoTrackAdded = true
-                    self.addGroupTracks(jid: FlyDefaults.myJid)
-                    self.addGroupTracks(jid: userId)
+                executeOnMainThread {
+                    self.collectionView.reloadData()
+                }
+//                if let index = self.findIndexOfUser(jid: userId) {
+//                    self.members[index].videoTrack = track
+//                    self.members[index].isVideoTrackAdded = true
+////                    self.addGroupTracks(jid: FlyDefaults.myJid)
+////                    self.addGroupTracks(jid: userId)
+//                }
+
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    self.members.forEach { member in
+                        self.addGroupTracks(jid: member.jid)
+                    }
                 }
             }
             self.setVideoBtnIcon()
@@ -1514,7 +1517,12 @@ extension CallViewController : CallManagerDelegate {
             if !CallManager.isCallConnected() {
                 executeOnMainThread {
                     autoreleasepool {
-                        self.addlocalTrackToView(videoTrack: videoTrack)
+                        if let index = self.findIndexOfUser(jid: userId) {
+                           let currentMember = self.members[index]
+                            if !currentMember.isVideoMuted {
+                                self.addlocalTrackToView(videoTrack: videoTrack)
+                            }
+                        }
                     }
                 }
             }
@@ -1525,19 +1533,21 @@ extension CallViewController : CallManagerDelegate {
     }
     
     func addlocalTrackToView(videoTrack: RTCVideoTrack) {
-        if self.outgoingCallView != nil {
-            if let localView = self.outgoingCallView?.localUserVideoView {
-                self.localRenderer.removeFromSuperview()
-                localView.willRemoveSubview(self.localRenderer)
-              #if arch(arm64)
-                let localRen = RTCMTLVideoView(frame: .zero)
-              #else
-                let localRen = RTCEAGLVideoView(frame: .zero)
-              #endif
-                self.localRenderer = localRen
-                self.localRenderer.frame = CGRect(x: 0, y: 0, width: localView.bounds.width, height: localView.bounds.height)
-                localView.addSubview(self.localRenderer)
-                videoTrack.add(self.localRenderer)
+        if videoTrack.isEnabled {
+            if self.outgoingCallView != nil {
+                if let localView = self.outgoingCallView?.localUserVideoView {
+                    self.localRenderer.removeFromSuperview()
+                    localView.willRemoveSubview(self.localRenderer)
+                    #if arch(arm64)
+                    let localRen = RTCMTLVideoView(frame: .zero)
+                    #else
+                    let localRen = RTCEAGLVideoView(frame: .zero)
+                    #endif
+                    self.localRenderer = localRen
+                    self.localRenderer.frame = CGRect(x: 0, y: 0, width: localView.bounds.width, height: localView.bounds.height)
+                    localView.addSubview(self.localRenderer)
+                    videoTrack.add(self.localRenderer)
+                }
             }
         }
     }
@@ -1586,7 +1596,7 @@ extension CallViewController : CallManagerDelegate {
         callMember.image = FlyDefaults.myImageUrl
         callMember.isCaller = CallManager.getCallDirection() == .Incoming ? false : true
         callMember.jid = FlyDefaults.myJid
-        callMember.isVideoMuted = CallManager.getCallType() == .Audio
+        callMember.isVideoMuted = CallManager.getMuteStatus(jid: FlyDefaults.myJid, isAudioStatus: false) //CallManager.getCallType() == .Audio
         callMember.callStatus = CallManager.getCallDirection() == .Incoming ? (CallManager.isCallConnected() ? .connected : .connecting) : (CallManager.isCallConnected() ? .connected : .calling)
         
         if let index = findIndexOfUser(jid: FlyDefaults.myJid) {
@@ -1612,7 +1622,7 @@ extension CallViewController : CallManagerDelegate {
         callMember.name = getUserName(jid: remoteUserProfile?.jid ?? "",name: remoteUserProfile?.name ?? userId, nickName: remoteUserProfile?.nickName ?? userId,contactType: remoteUserProfile?.contactType ?? .unknown)
         callMember.image = remoteUserProfile?.image ?? user.image
         callMember.color = remoteUserProfile?.colorCode ?? "#00008B"
-        callMember.isVideoMuted = CallManager.getCallType() == .Audio
+        callMember.isVideoMuted = CallManager.getMuteStatus(jid: FlyDefaults.myJid, isAudioStatus: false) //CallManager.getCallType() == .Audio
         callMember.isVideoTrackAdded = false
         remoteImage = remoteUserProfile?.image ?? user.image
         if let index = findIndexOfUser(jid: user.jid){
@@ -1632,7 +1642,7 @@ extension CallViewController : CallManagerDelegate {
         if FlyDefaults.hideNotificationContent{
             userString.append(FlyDefaults.appName)
         }else{
-            for JID in IncomingUser where JID != FlyDefaults.myJid{
+            for JID in IncomingUser where JID != FlyDefaults.myJid {
                 print("#jid \(JID)")
                 if let contact = ChatManager.getContact(jid: JID.lowercased()){
                     if ENABLE_CONTACT_SYNC{
@@ -1789,6 +1799,8 @@ extension CallViewController : CallManagerDelegate {
                         self?.updateOneToOneAudioCallUI()
                     }
                 } else {
+                    _ = self?.validateAndAddMember(jid: userId, with: .connected)
+                    self?.collectionView.reloadData()
                     if self?.checkIfGroupCallUiIsVisible() ?? false { self?.showGroupCallUI() }
                     //_ = self?.requestForVideoTrack(jid: userId)
                     self?.addGroupTracks(jid: FlyDefaults.myJid)
@@ -1814,6 +1826,14 @@ extension CallViewController : CallManagerDelegate {
                 self?.onMuteStatusUpdated(muteEvent: (audioMuteStatus == true) ? MuteEvent.ACTION_REMOTE_AUDIO_MUTE : MuteEvent.ACTION_REMOTE_AUDIO_UN_MUTE, userId: userId)
                 self?.onMuteStatusUpdated(muteEvent: (vidooMuteStatus == true) ? MuteEvent.ACTION_REMOTE_VIDEO_MUTE : MuteEvent.ACTION_REMOTE_VIDEO_UN_MUTE , userId: userId)
                 FlyLogWriter.sharedInstance.writeText("#call UI .CONNECTED => \(userId) \(self?.members.count)")
+                
+                if !CallManager.isOneToOneCall() && CallManager.getCallType() == .Video {
+                    executeInBackground {
+                        for member in self!.members.map({$0.jid!}) {
+                            self?.addGroupTracks(jid: member)
+                        }
+                    }
+                }
             case .DISCONNECTED:
 //                self?.myCallStatus = .disconnected
 //                self?.isCallConnected = false
@@ -1822,6 +1842,11 @@ extension CallViewController : CallManagerDelegate {
                 }else {
                     if let index = self?.findIndexOfUser(jid: userId) {
                         self?.removeDisConnectedUser(userIndex: index)
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                        for member in self!.members.map({$0.jid!}) {
+                            self?.addGroupTracks(jid: member)
+                        }
                     }
                 }
                 self?.callHoldLabel.removeFromSuperview()
@@ -1846,7 +1871,7 @@ extension CallViewController : CallManagerDelegate {
                 self?.isOnCall = true
                 let userId = userId.isEmpty ? FlyDefaults.myJid : userId
                 var indexValue : Int? = nil
-                if userId == FlyDefaults.myJid{
+                if userId == FlyDefaults.myJid {
                     self?.myCallStatus = .connected
                 }
                 if let index =  self?.findIndexOfUser(jid: userId) {
@@ -1858,7 +1883,7 @@ extension CallViewController : CallManagerDelegate {
                     self?.outgoingCallView?.OutgoingRingingStatusLabel.text =  CallStatus.connected.rawValue
                     self?.myCallStatus = .connected
                 }else{
-                    if !CallManager.getMuteStatus(jid: userId, isAudioStatus: false) && userId != FlyDefaults.myJid{
+                    if !CallManager.getMuteStatus(jid: userId, isAudioStatus: false) && userId != FlyDefaults.myJid {
                         print("#callStatusRE ON_RESUME If")
                         self?.onCallAction(callAction: .ACTION_REMOTE_VIDEO_ADDED, userId: userId)
                     }else{
@@ -2210,35 +2235,40 @@ extension CallViewController {
     
     func updateVideoMuteStatus(index: Int, userid: String, isMute : Bool) {
         if !CallManager.isOneToOneCall() && self.collectionView != nil {
-            if let groupCell = self.collectionView?.cellForItem(at: IndexPath(item: index, section: 0)) as? GroupCallCell {
-                let member = members[index]
-                if CallManager.getCallType() == .Video {
-                    groupCell.videoMuteImage.isHidden = !isMute
-                    if isMute {
-                        member.videoTrackView.removeFromSuperview()
-                        groupCell.videoBaseView.willRemoveSubview(member.videoTrackView)
-                        if userid == FlyDefaults.myJid {
-                            groupCell.videoBaseView.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
+            self.collectionView.performBatchUpdates {
+                if let groupCell = self.collectionView?.cellForItem(at: IndexPath(item: index, section: 0)) as? GroupCallCell {
+                    let member = members[index]
+                    if CallManager.getCallType() == .Video {
+                        groupCell.videoMuteImage.isHidden = !isMute
+                        if isMute {
+                            member.videoTrackView.removeFromSuperview()
+                            groupCell.videoBaseView.willRemoveSubview(member.videoTrackView)
+                            if userid == FlyDefaults.myJid {
+                                groupCell.videoBaseView.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
+                            }
+                        } else {
+                            addGroupTracks(jid: userid)
+                            if userid == FlyDefaults.myJid {
+                                groupCell.videoBaseView.transform = CGAffineTransform(scaleX: -1.0, y: 1.0)
+                            }
                         }
-                    } else {
-                        addGroupTracks(jid: userid)
-                        if userid == FlyDefaults.myJid {
-                            groupCell.videoBaseView.transform = CGAffineTransform(scaleX: -1.0, y: 1.0)
+                        members[index].isVideoMuted = isMute
+                    }else {
+                        if isMute {
+                            member.videoTrackView.removeFromSuperview()
+                            groupCell.videoBaseView.willRemoveSubview(member.videoTrackView)
+                            groupCell.videoMuteImage.isHidden = !isMute
+                            if userid == FlyDefaults.myJid {
+                                groupCell.videoBaseView.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
+                            }
+                        } else {
+                            addGroupTracks(jid: userid)
+                            if userid == FlyDefaults.myJid {
+                                groupCell.videoBaseView.transform = CGAffineTransform(scaleX: -1.0, y: 1.0)
+                            }
+                            groupCell.videoMuteImage.isHidden = !isMute
                         }
-                    }
-                    members[index].isVideoMuted = isMute
-                }else {
-                    if isMute {
-                        member.videoTrackView.removeFromSuperview()
-                        groupCell.videoBaseView.willRemoveSubview(member.videoTrackView)
-                        if userid == FlyDefaults.myJid {
-                            groupCell.videoBaseView.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
-                        }
-                    } else {
-                        addGroupTracks(jid: userid)
-                        if userid == FlyDefaults.myJid {
-                            groupCell.videoBaseView.transform = CGAffineTransform(scaleX: -1.0, y: 1.0)
-                        }
+                        members[index].isVideoMuted = isMute
                     }
                 }
             }
@@ -2349,8 +2379,11 @@ extension CallViewController {
                 updateCallStatus(jid: userJid, status: status)
             }
             if !skipTracks{
+                collectionView?.reloadData()
                 for member in members {
-                    addGroupTracks(jid: member.jid)
+                    collectionView?.performBatchUpdates {
+                        addGroupTracks(jid: member.jid)
+                    }
                 }
             }
         }
@@ -2363,6 +2396,7 @@ extension CallViewController {
             outgoingCallView?.audioMuteStackView.isHidden = true
             executeOnMainThread {
                 self.collectionView.reloadItems(at: [IndexPath(item: userIndex, section: 0)])
+                self.collectionView?.reloadData()
             }
         }
     }
@@ -2495,7 +2529,7 @@ extension CallViewController {
         } else {
             outgoingCallView?.viewHeight.constant = 100
             outgoingCallView?.timerTop.constant = 0
-            outgoingCallView?.imageHeight.constant = 100
+            outgoingCallView?.imageHeight.constant = 0
         }
         outgoingCallView?.nameTop.constant = 8
         outgoingCallView?.imageTop.constant = 8
@@ -2733,27 +2767,38 @@ extension CallViewController {
     func addGroupTracks(jid: String) {
         if let index = self.findIndexOfUser(jid: jid) {
             let member = self.members[index]
-            if let collectionView = self.collectionView, let groupCell = collectionView.cellForItem(at: IndexPath(item: index, section: 0)) as? GroupCallCell {
-                if let videoView = groupCell.videoBaseView {
-                    member.videoTrackView.removeFromSuperview()
-                    videoView.willRemoveSubview(member.videoTrackView)
-                }
-                #if arch(arm64)
-                  let localRen = RTCMTLVideoView(frame: .zero)
-                #else
-                  let localRen = RTCEAGLVideoView(frame: .zero)
-                #endif
-                if let baseView = groupCell.videoBaseView {
-                    member.videoTrackView = localRen
-                    member.videoTrackView.frame = CGRect(x: 0, y: 0, width: baseView.bounds.width, height: baseView.bounds.height)
-                    if jid == FlyDefaults.myJid {
-                        member.videoTrack?.add(member.videoTrackView)
-                    } else {
-                        let videoTrack = CallManager.getRemoteVideoTrack(jid: jid)
-                        videoTrack?.add(member.videoTrackView)
+            if let collectionView = self.collectionView {
+                executeOnMainThread {
+                    collectionView.performBatchUpdates {
+                        if let groupCell = collectionView.cellForItem(at: IndexPath(item: index, section: 0)) as? GroupCallCell {
+                            if let videoView = groupCell.videoBaseView {
+                                member.videoTrackView.removeFromSuperview()
+                                videoView.willRemoveSubview(member.videoTrackView)
+                            }
+                            #if arch(arm64)
+                            let localRen = RTCMTLVideoView(frame: .zero)
+                            #else
+                            let localRen = RTCEAGLVideoView(frame: .zero)
+                            #endif
+                            if let baseView = groupCell.videoBaseView {
+                                member.videoTrackView = localRen
+                                member.videoTrackView.frame = CGRect(x: 0, y: 0, width: baseView.bounds.width, height: baseView.bounds.height)
+                                if jid == FlyDefaults.myJid {
+                                    if !member.isVideoMuted {
+                                        let track = CallManager.getRemoteVideoTrack(jid: jid)
+                                        track?.add(member.videoTrackView)
+                                    }
+                                } else {
+                                    if !member.isVideoMuted {
+                                        let videoTrack = CallManager.getRemoteVideoTrack(jid: jid)
+                                        videoTrack?.add(member.videoTrackView)
+                                    }
+                                }
+                                baseView.addSubview(member.videoTrackView)
+                                groupCell.videoMuteImage.isHidden = (CallManager.getCallType() == .Video && member.isVideoMuted) ? false : true
+                            }
+                        }
                     }
-                    baseView.addSubview(member.videoTrackView)
-                    groupCell.videoMuteImage.isHidden = true
                 }
             }
         }
@@ -2997,6 +3042,7 @@ extension CallViewController {
                 self?.isVideoPermissionEnabled = true
                 break
             case .notDetermined:
+                self?.isVideoPermissionEnabled = true
                 break
             @unknown default:
                 print("Permission failed")

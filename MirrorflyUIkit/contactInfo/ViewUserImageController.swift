@@ -31,6 +31,7 @@ class ViewUserImageController: ViewController {
         let name = getUserName(jid: profileDetails?.jid ?? "",name: profileDetails?.name ?? "", nickName: profileDetails?.nickName ?? "", contactType : profileDetails?.contactType ?? .unknown)
         let placeholder = ChatUtils.getPlaceholder(name: profileDetails?.name ?? "", userColor: ChatUtils.getColorForUser(userName: name), userImage: userImage ?? UIImageView())
         let imageUrl = profileDetails?.image  ?? ""
+        userImage?.sd_imageIndicator = SDWebImageActivityIndicator.gray
         userImage?.loadFlyImage(imageURL: imageUrl, name: name, chatType: profileDetails?.profileChatType ?? .singleChat, jid: profileDetails?.jid ?? "")
         userImage?.backgroundColor = .white
         titleLabel?.text = name

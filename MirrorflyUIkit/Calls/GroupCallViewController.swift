@@ -32,26 +32,22 @@ class GroupCallViewController: UIViewController {
     @IBOutlet weak var imgThree: UIImageView!
     @IBOutlet weak var imgFour: UIImageView!
     @IBOutlet weak var plusCountLbl: UILabel!
-    var contactJidArr = NSMutableArray()
     var isGroup = false
     @IBOutlet weak var imgeOneHeight: NSLayoutConstraint!
     @IBOutlet weak var imgOneWidth: NSLayoutConstraint!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        print(callLog)
         setUpStatusBar()
         var userList = callLog.userList
         userList.removeAll { jid in
             jid == FlyDefaults.myJid
         }
         let fullNameArr = userList
-        for JID in fullNameArr{
-            if let contact = ChatManager.getContact(jid: JID){
-                callUserProfiles.append(contact)
-                contactJidArr.add(JID)
-            }
+        if isGroup{
+            callLog.userProfileList.removeLast()
         }
+        callUserProfiles = callLog.userProfileList.compactMap({$0})
         imgOne.layer.cornerRadius = imgOne.frame.size.height / 2
         imgOne.layer.masksToBounds = true
         
@@ -74,7 +70,7 @@ class GroupCallViewController: UIViewController {
             imgThree.isHidden = true
             imgFour.isHidden = true
             plusCountLbl.isHidden = true
-            if let contact = ChatManager.getContact(jid: callLog.groupId!){
+            if let contact = ChatManager.getContact(jid: callLog.groupId!) {
                 imgOne.loadFlyImage(imageURL: contact.image, name:  getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType), chatType: contact.profileChatType ,contactType: contact.contactType, jid: contact.jid)
             }
         }else{
@@ -141,23 +137,16 @@ class GroupCallViewController: UIViewController {
             return
         }
         let fullNameArr = callLog.userList
-        var callUserProfiles = [ProfileDetails]()
-        for JID in fullNameArr{
-            if let contact = ChatManager.getContact(jid: JID){
-                if contact.contactType != .deleted{
-                    callUserProfiles.append(contact)
-                }
-            }
-        }
+        let callUserProfiles = callLog.userProfileList
         if callLog.callType == .Audio {
-            RootViewController.sharedInstance.callViewController?.makeCall(usersList: callUserProfiles.compactMap{$0.jid}, callType: .Audio, groupId: callLog.groupId ?? emptyString(), onCompletion: { isSuccess, message in
+            RootViewController.sharedInstance.callViewController?.makeCall(usersList: callUserProfiles.compactMap{$0?.jid}, callType: .Audio, groupId: callLog.groupId ?? emptyString(), onCompletion: { isSuccess, message in
                 if(!isSuccess){
                     let errorMessage = AppUtils.shared.getErrorMessage(description: message)
                     AppAlert.shared.showAlert(view: self, title: "", message: errorMessage, buttonTitle: "Okay")
                 }
             })
         } else {
-            RootViewController.sharedInstance.callViewController?.makeCall(usersList: callUserProfiles.compactMap{$0.jid}, callType: .Video, groupId: callLog.groupId ?? emptyString(), onCompletion: { isSuccess, message in
+            RootViewController.sharedInstance.callViewController?.makeCall(usersList: callUserProfiles.compactMap{$0?.jid}, callType: .Video, groupId: callLog.groupId ?? emptyString(), onCompletion: { isSuccess, message in
                 if(!isSuccess){
                     let errorMessage = AppUtils.shared.getErrorMessage(description: message)
                     AppAlert.shared.showAlert(view: self, title: "", message: errorMessage, buttonTitle: "Okay")
@@ -172,36 +161,28 @@ class GroupCallViewController: UIViewController {
             jid == FlyDefaults.myJid
         }
         
-        if contactJidArr.count == 2 {
+        if callLog.userProfileList.count == 2 {
             imgTwo.isHidden = true
             imgOneLeading.constant = 10
             imgThree.isHidden = true
             imgFour.isHidden = false
             plusCountLbl.isHidden = true
-            for i in 0...contactJidArr.count - 1{
-                if let contact = ChatManager.getContact(jid: contactJidArr[i] as! String){
-                    if i == 0{
-                        imgOne.loadFlyImage(imageURL: contact.image, name:  getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType), contactType: contact.contactType, jid: contact.jid)
-                    }
-                    if i == 1{
-                        imgFour.loadFlyImage(imageURL: contact.image, name:  getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType), contactType: contact.contactType, jid: contact.jid)
-                    }
-                }
-            }
             
-        }else if contactJidArr.count == 3{
-            for i in 0...contactJidArr.count - 1{
-                if let contact = ChatManager.getContact(jid: contactJidArr[i] as! String){
-                    if i == 0{
-                        imgOne.loadFlyImage(imageURL: contact.image, name:  getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType), contactType: contact.contactType, jid: contact.jid)
-                    }
-                    if i == 1{
-                        imgThree.loadFlyImage(imageURL: contact.image, name:  getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType), contactType: contact.contactType, jid: contact.jid)
-                    }
-                    if i == 2{
-                        imgFour.loadFlyImage(imageURL: contact.image, name:  getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType), contactType: contact.contactType, jid: contact.jid)
-                    }
-                }
+            if let contact = callLog.userProfileList[0]{
+                imgOne.loadFlyImage(imageURL: contact.image, name:  getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType), contactType: contact.contactType, jid: contact.jid)
+            }
+            if let contact = callLog.userProfileList[1] {
+                imgFour.loadFlyImage(imageURL: contact.image, name:  getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType), contactType: contact.contactType, jid: contact.jid)
+            }
+        } else if callLog.userProfileList.count == 3{
+            if let contact = callLog.userProfileList[0]{
+                imgOne.loadFlyImage(imageURL: contact.image, name:  getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType), contactType: contact.contactType, jid: contact.jid)
+            }
+            if let contact = callLog.userProfileList[1] {
+                imgThree.loadFlyImage(imageURL: contact.image, name:  getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType), contactType: contact.contactType, jid: contact.jid)
+            }
+            if let contact = callLog.userProfileList[2] {
+                imgFour.loadFlyImage(imageURL: contact.image, name:  getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType), contactType: contact.contactType, jid: contact.jid)
             }
             imgTwo.isHidden = true
             imgOneLeading.constant = 15
@@ -209,50 +190,42 @@ class GroupCallViewController: UIViewController {
             imgFour.isHidden = false
             plusCountLbl.isHidden = true
             
-        }else if contactJidArr.count == 4{
-            for i in 0...contactJidArr.count - 1{
-                if let contact = ChatManager.getContact(jid: contactJidArr[i] as! String){
-                    if i == 0{
-                        imgOne.loadFlyImage(imageURL: contact.image, name:  getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType), contactType: contact.contactType, jid: contact.jid)
-                    }
-                    if i == 1{
-                        imgTwo.loadFlyImage(imageURL: contact.image, name:  getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType), contactType: contact.contactType, jid: contact.jid)
-                    }
-                    if i == 2{
-                        imgThree.loadFlyImage(imageURL: contact.image, name:  getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType), contactType: contact.contactType, jid: contact.jid)
-                    }
-                    if i == 3{
-                        imgFour.loadFlyImage(imageURL: contact.image, name:  getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType), contactType: contact.contactType, jid: contact.jid)
-                    }
-                }
+        }else if callLog.userProfileList.count == 4{
+            if let contact = callLog.userProfileList[0]{
+                imgOne.loadFlyImage(imageURL: contact.image, name:  getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType), contactType: contact.contactType, jid: contact.jid)
+            }
+            if let contact = callLog.userProfileList[1] {
+                imgTwo.loadFlyImage(imageURL: contact.image, name:  getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType), contactType: contact.contactType, jid: contact.jid)
+            }
+            if let contact = callLog.userProfileList[2] {
+                imgThree.loadFlyImage(imageURL: contact.image, name:  getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType), contactType: contact.contactType, jid: contact.jid)
+            }
+            if let contact = callLog.userProfileList[3] {
+                imgFour.loadFlyImage(imageURL: contact.image, name:  getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType), contactType: contact.contactType, jid: contact.jid)
             }
             imgTwo.isHidden = false
             imgThree.isHidden = false
             imgFour.isHidden = false
             plusCountLbl.isHidden = true
             
-        }else if contactJidArr.count != 0{
+        }else if callLog.userProfileList.count != 0{
             imgOne.isHidden = false
             imgTwo.isHidden = false
             imgThree.isHidden = false
             imgFour.isHidden = false
             plusCountLbl.isHidden = false
             plusCountLbl.text =  "+ " + "\(userList.count - 4)"
-            for i in 0...contactJidArr.count - 1{
-                if let contact = ChatManager.getContact(jid: contactJidArr[i] as! String){
-                    if i == 0{
-                        imgOne.loadFlyImage(imageURL: contact.image, name: getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType), contactType: contact.contactType, jid: contact.jid)
-                    }
-                    if i == 1{
-                        imgTwo.loadFlyImage(imageURL: contact.image, name:  getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType), contactType: contact.contactType, jid: contact.jid)
-                    }
-                    if i == 2{
-                        imgThree.loadFlyImage(imageURL: contact.image, name:  getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType), contactType: contact.contactType, jid: contact.jid)
-                    }
-                    if i == 3{
-                        imgFour.loadFlyImage(imageURL: contact.image, name:  getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType), contactType: contact.contactType, jid: contact.jid)
-                    }
-                }
+            if let contact = callLog.userProfileList[0]{
+                imgOne.loadFlyImage(imageURL: contact.image, name:  getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType), contactType: contact.contactType, jid: contact.jid)
+            }
+            if let contact = callLog.userProfileList[1] {
+                imgTwo.loadFlyImage(imageURL: contact.image, name:  getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType), contactType: contact.contactType, jid: contact.jid)
+            }
+            if let contact = callLog.userProfileList[2] {
+                imgThree.loadFlyImage(imageURL: contact.image, name:  getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType), contactType: contact.contactType, jid: contact.jid)
+            }
+            if let contact = callLog.userProfileList[3] {
+                imgFour.loadFlyImage(imageURL: contact.image, name:  getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType), contactType: contact.contactType, jid: contact.jid)
             }
         }
     }
@@ -303,14 +276,11 @@ extension GroupCallViewController : ProfileEventsDelegate {
             jid == FlyDefaults.myJid
         }
         callUserProfiles.removeAll()
-        for JID in userList{
-            if let contact = ChatManager.getContact(jid: JID){
-                callUserProfiles.append(contact)
-            }
-        }
         let contactArr = NSMutableArray()
-        for contact in callUserProfiles{
-            contactArr.add(getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType))
+        for contact in callLog.userProfileList {
+            if let contact {
+                contactArr.add(getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType))
+            }
         }
         if isGroup{
             groupCallNameLbl.text = groupCallName

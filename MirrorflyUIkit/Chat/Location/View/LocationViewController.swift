@@ -58,6 +58,7 @@ class LocationViewController: UIViewController, GMSMapViewDelegate, CLLocationMa
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         navigationView.isHidden = true
+        googleMapView = nil
     }
     
     @objc override func willCometoForeground() {

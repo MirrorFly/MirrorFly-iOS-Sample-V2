@@ -617,59 +617,64 @@ class ChatViewParentMessageCell: BaseTableViewCell {
 
     func processTextMessage(message : String, uiLabel : UILabel, fromChat: Bool = false, isMessageSearch: Bool = false, searchText: String = "", isMessageSentByMe: Bool, mentionedUsers: [String], profileDetails: ProfileDetails) -> NSMutableAttributedString? {
 
+        uiLabel.isUserInteractionEnabled = true
         var attributedString : NSMutableAttributedString?
         if !message.isEmpty {
             attributedString = NSMutableAttributedString(string: message)
-            let gestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapTextLabel(sender:)))
-            let textArray = message.trim().split(separator: " ")
-            if isStarredMessagePage == true && searchText.trim().isNotEmpty == true {
-                let range = (message.lowercased() as NSString).range(of: searchText.lowercased())
-                attributedString?.addAttributes([NSAttributedString.Key.foregroundColor: UIColor.systemBlue], range: range)
-            }
-            for (index, tempText) in textArray.enumerated() {
-                print("processTextMessage index \(index) item \(tempText)")
-                print("processTextMessage tempText \(tempText)")
-                 let text = String(tempText).trim()
-                 if text.isNumber && text.count >= 6 && text.count <= 13 {
-                     print("processTextMessage isNumber \(tempText)")
-                     let numberRange = (message as NSString).range(of: text)
-                     attributedString?.addAttribute(NSAttributedString.Key.underlineStyle,value: NSUnderlineStyle.single.rawValue, range: numberRange)
-                     let gestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapTextLabel(sender:)))
-                     uiLabel.addGestureRecognizer(gestureRecognizer)
-                 } else if text.trim().isURL {
-                     print("processTextMessage text.isURL \(tempText)")
-                     let urlRange = (message as NSString).range(of: text )
-                     attributedString?.addAttribute(NSAttributedString.Key.underlineStyle,value: NSUnderlineStyle.single.rawValue, range: urlRange)
-                     uiLabel.addGestureRecognizer(gestureRecognizer)
-                     
-                     if text.contains(WEB_LOGIN_URL) {
-                         
-                         let callID = self.getCallLinkID(callLink: text)
-                         
-                         if callID.components(separatedBy: "-").count == 3 {
-                             
-                             if(isMessageSentByMe) {
-                                 linkView?.isHidden = false
-                             }else {
-                                 receiverLinkView?.isHidden = false
-                             }
-                         }
-                     }
-                 }
 
-                if fromChat && isMessageSearch {
-                    do {
-                        let regex = try NSRegularExpression(pattern:  NSRegularExpression.escapedPattern(for: searchText.trim().lowercased()).folding(options: .regularExpression, locale: .current), options: .caseInsensitive)
-                        let range = NSRange(location: 0, length: message.utf16.count)
-                        for match in regex.matches(in: message.lowercased().folding(options: .regularExpression, locale: .current), options: .withTransparentBounds, range: range) {
-                            attributedString?.addAttribute(NSAttributedString.Key.backgroundColor, value: Color.color_3276E2 ?? .blue, range: match.range)
+            let linkTypes: NSTextCheckingResult.CheckingType = .link
+
+            let linkDetector = try? NSDataDetector(types: linkTypes.rawValue)
+
+            if let detect = linkDetector {
+                let matches = detect.matches(in: message, options: .reportCompletion, range: NSMakeRange(0, message.count))
+                for match in matches {
+                    if let urlString = match.url?.absoluteString.lowercased() {
+                        let range = (message.lowercased() as NSString).range(of: urlString )
+                        attributedString?.addAttributes([NSAttributedString.Key.foregroundColor: UIColor.systemBlue], range: range)
+                        attributedString?.addAttribute(.underlineStyle,
+                                                       value: NSUnderlineStyle.single.rawValue,
+                                                       range: range)
+                        if urlString.contains(WEB_LOGIN_URL) {
+                            
+                            let callID = self.getCallLinkID(callLink: urlString)
+                            
+                            if callID.components(separatedBy: "-").count == 3 {
+                                
+                                if(isMessageSentByMe) {
+                                    linkView?.isHidden = false
+                                }else {
+                                    receiverLinkView?.isHidden = false
+                                }
+                            }
                         }
                     }
-                    catch {
+                   
+                }
+                
+            }
+            
+            let numTypes: NSTextCheckingResult.CheckingType = .phoneNumber
+
+            let phoneNumberDetector = try? NSDataDetector(types: numTypes.rawValue)
+            
+            if let phoneNumberDetector = phoneNumberDetector {
+                let matches = phoneNumberDetector.matches(in: message, options: .reportCompletion, range: NSMakeRange(0, message.count))
+                for match in matches {
+                    if let urlString = match.phoneNumber?.lowercased(), urlString.count >= 6 && urlString.count <= 13 {
+                        let range = (message.lowercased() as NSString).range(of: urlString )
+                        attributedString?.addAttributes([NSAttributedString.Key.foregroundColor: UIColor.systemBlue], range: range)
+                        attributedString?.addAttribute(.underlineStyle,
+                                                       value: NSUnderlineStyle.single.rawValue,
+                                                       range: range)
+
                     }
                 }
-                 print("processTextMessage After else \(tempText)")
             }
+            
+            let gestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapTextLabel(sender:)))
+            uiLabel.addGestureRecognizer(gestureRecognizer)
+            
             if !mentionedUsers.isEmpty {
                 if profileDetails.profileChatType == .groupChat {
                     attributedString = ChatUtils.getMentionTextContent(message: message, uiLabel: uiLabel, isMessageSentByMe: isMessageSentByMe, mentionedUsers: mentionedUsers, searchedText: searchText)
@@ -691,33 +696,50 @@ class ChatViewParentMessageCell: BaseTableViewCell {
 }
 
 extension UITapGestureRecognizer {
-    func didTapAttributedTextInLabel(label: UILabel, inRange targetRange: NSRange) -> Bool {
-            // Create instances of NSLayoutManager, NSTextContainer and NSTextStorage
-            let layoutManager = NSLayoutManager()
-            let textContainer = NSTextContainer(size: CGSize.zero)
-            let textStorage = NSTextStorage(attributedString: label.attributedText!)
-            
-            // Configure layoutManager and textStorage
-            layoutManager.addTextContainer(textContainer)
-            textStorage.addLayoutManager(layoutManager)
-            
-            // Configure textContainer
-            textContainer.lineFragmentPadding = 0.0
-            textContainer.lineBreakMode = label.lineBreakMode
-            textContainer.maximumNumberOfLines = label.numberOfLines
-            let labelSize = label.bounds.size
-            textContainer.size = labelSize
-            
-            // Find the tapped character location and compare it to the specified range
-            let locationOfTouchInLabel = self.location(in: label)
-            let textBoundingBox = layoutManager.usedRect(for: textContainer)
-            let textContainerOffset = CGPoint(x: (labelSize.width - textBoundingBox.size.width) * 0.5 - textBoundingBox.origin.x,
-                                              y: (labelSize.height - textBoundingBox.size.height) * 0.5 - textBoundingBox.origin.y);
-            let locationOfTouchInTextContainer = CGPoint(x: locationOfTouchInLabel.x - textContainerOffset.x,
-                                                         y: locationOfTouchInLabel.y - textContainerOffset.y);
-            var indexOfCharacter = layoutManager.characterIndex(for: locationOfTouchInTextContainer, in: textContainer, fractionOfDistanceBetweenInsertionPoints: nil)
-            indexOfCharacter = indexOfCharacter + 4
-            return NSLocationInRange(indexOfCharacter, targetRange)
+    func didTapAttributedTextInLabel(label: UILabel, inRange targetRange: NSRange, edgeInset: UIEdgeInsets? = nil) -> Bool {
+        // Create instances of NSLayoutManager, NSTextContainer and NSTextStorage
+        let layoutManager = NSLayoutManager()
+        let textContainer = NSTextContainer(size: CGSize.zero)
+        let textStorage = NSTextStorage(attributedString: label.attributedText!)
+        
+        // Configure layoutManager and textStorage
+        layoutManager.addTextContainer(textContainer)
+        textStorage.addLayoutManager(layoutManager)
+        let alignment = label.textAlignment ?? .center
+        // Configure textContainer
+        textContainer.lineFragmentPadding = 0.0
+        textContainer.lineBreakMode = label.lineBreakMode
+        textContainer.maximumNumberOfLines = label.numberOfLines
+        let labelSize = CGSize(width: label.bounds.width - (edgeInset?.left ?? 0) - (edgeInset?.right ?? 0), height: label.bounds.height - (edgeInset?.top
+                                                                                                                                            ?? 0) - (edgeInset?.bottom ?? 0))
+        textContainer.size = labelSize
+        
+        // Find the tapped character location and compare it to the specified range
+        let locationOfTouchInLabel = self.location(in: label)
+        let textBoundingBox = layoutManager.usedRect(for: textContainer)
+        var xOffset: CGFloat = 0
+        var yOffset: CGFloat = 0
+        if alignment == .left {
+            xOffset = (edgeInset?.left ?? 0) - textBoundingBox.origin.x
+            yOffset = (labelSize.height - textBoundingBox.size.height) * 0.5 - textBoundingBox.origin.y + (edgeInset?.top ?? 0)
+        } else if alignment == .right {
+            xOffset = label.bounds.width - (edgeInset?.right ?? 0) - labelSize.width - textBoundingBox.origin.x
+            yOffset = (labelSize.height - textBoundingBox.size.height) * 0.5 - textBoundingBox.origin.y + (edgeInset?.top ?? 0)
+        } else {
+            xOffset = (labelSize.width - textBoundingBox.size.width) * 0.5 - textBoundingBox.origin.x + (edgeInset?.left ?? 0)
+            yOffset = (labelSize.height - textBoundingBox.size.height) * 0.5 - textBoundingBox.origin.y + (edgeInset?.top ?? 0)
+        }
+        let textContainerOffset = CGPoint(
+            x: xOffset,
+            y: yOffset
+        )
+        let locationOfTouchInTextContainer = CGPoint(
+            x: locationOfTouchInLabel.x - textContainerOffset.x,
+            y: locationOfTouchInLabel.y - textContainerOffset.y
+        )
+        let indexOfCharacter = layoutManager.characterIndex(for: locationOfTouchInTextContainer, in: textContainer, fractionOfDistanceBetweenInsertionPoints: nil)
+        
+        return NSLocationInRange(indexOfCharacter, targetRange)
     }
 }
 
