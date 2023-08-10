@@ -15,9 +15,9 @@ import Contacts
 
 let BASE_URL =  "https://api-preprod-sandbox.mirrorfly.com/api/v1/"
 let CONTAINER_ID = "group.com.mirrorfly.qa"
-let LICENSE_KEY = "xxxxxxxxxxx"
+let LICENSE_KEY = "XXXXXXXXXXXXXXX"
 let IS_LIVE = false
-let APP_NAME = "UiKitQa"
+let APP_NAME = "UiKit"
 let ENABLE_CONTACT_SYNC = false
 
 protocol ShareKitDelegate {
@@ -110,6 +110,9 @@ class ShareKitViewModel {
         }
         locationDisptachGroup.notify(queue: .main) {
             if (hasText && hasUrl) || (hasText && hasUrl && hasVcard) {
+                self.locationList.append(locationValues.joined(separator: "\n"))
+                return
+            } else if (hasUrl) {
                 self.locationList.append(locationValues.joined(separator: "\n"))
                 return
             }
@@ -276,6 +279,7 @@ class ShareKitViewModel {
                 }
                 break
             default:
+                textList.append(locationValues.first ?? emptyString())
                 dispatchGroup.leave()
                 break
             }

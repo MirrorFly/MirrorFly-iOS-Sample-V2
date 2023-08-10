@@ -221,6 +221,7 @@ extension ContactInfoViewController : UITableViewDelegate, UITableViewDataSource
                 let urlString = FlyDefaults.baseURL + "media/" + (imageUrl ?? emptyString()) + "?mf=" + FlyDefaults.authtoken
                 var url = URL(string: urlString)
                 placeholder = ChatUtils.getPlaceholder(name: name, userColor: ChatUtils.getColorForUser(userName: name), userImage: cell.userImage ?? UIImageView(), isRounded: false)
+                cell.userImage?.sd_imageIndicator = SDWebImageActivityIndicator.grayLarge
                 cell.userImage?.sd_setImage(with: url, placeholderImage: placeholder)
             }
             let gestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapImage(sender:)))

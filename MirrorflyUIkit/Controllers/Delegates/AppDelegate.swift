@@ -21,7 +21,7 @@ import AVFoundation
 import MirrorFlySDK
 
 let BASE_URL = "https://api-preprod-sandbox.mirrorfly.com/api/v1/"
-let LICENSE_KEY = "xxxxxxxxxxx"
+let LICENSE_KEY = "XXXXXXXXXXXXXXX"
 let XMPP_DOMAIN = "xmpp-preprod-sandbox.mirrorfly.com"
 let XMPP_PORT = 5222
 let SOCKETIO_SERVER_HOST = "https://signal-preprod-sandbox.mirrorfly.com"
@@ -34,6 +34,7 @@ let WEB_LOGIN_URL = "https://webchat-preprod-sandbox.mirrorfly.com/"
 let IS_MOBILE_NUMBER_LOGIN = false
 let APP_NAME = "UiKitQa"
 let ICLOUD_CONTAINER_ID = "iCloud.com.mirrorfly.qa"
+
 
 
 let isMigrationDone = "isMigrationDone"

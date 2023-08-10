@@ -328,6 +328,7 @@ extension GroupInfoViewController: UITableViewDelegate, UITableViewDataSource {
             cell.onlineStatus?.text = ("\(groupMembers.count) Participants")
             cell.onlineStatus?.font = AppFont.Light.size(12)
             let imageUrl = profileDetails?.image ?? ""
+            cell.userImage?.sd_imageIndicator = SDWebImageActivityIndicator.grayLarge
             cell.userImage?.loadFlyImage(imageURL: imageUrl, name: getUserName(jid: profileDetails?.jid ?? "", name: profileDetails?.name ?? "", nickName: profileDetails?.nickName ?? "", contactType: profileDetails?.contactType ?? .local), chatType: profileDetails?.profileChatType ?? .groupChat, jid: profileDetails?.jid ?? "")
             let gestureRecognizer = UITapGestureRecognizer(target: self,
                                                            action: #selector(didTapImage(sender:)))

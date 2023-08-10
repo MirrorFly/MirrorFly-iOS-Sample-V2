@@ -108,19 +108,10 @@ class CallLogViewController: UIViewController {
             
         }
        
-        if NetworkReachability.shared.isConnected {
-            fetchCallLogsFromServer()
-        }
         callLogManager.syncCallLogs { isSuccess, error, data in
             if isSuccess {
                 print(data)
             }
-        }
-        if !isSearchEnabled {
-            callLogArray = CallLogManager.getAllCallLogs()
-            allCallLogArray = callLogArray
-        } else {
-            noCallLogView.isHidden = true
         }
         self.updateButtons()
         if let fab = floaty{
@@ -171,6 +162,31 @@ class CallLogViewController: UIViewController {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
             self?.callLogsBadgeCountUpdation()
         }
+        if !isSearchEnabled {
+            self.startLoading(withText: "")
+            executeInBackground { [weak self] in
+                guard let self else {return}
+                self.callLogArray = CallLogManager.getAllCallLogs()
+                self.allCallLogArray = self.callLogArray
+                executeOnMainThread {
+                    self.noCallLogView.isHidden = !self.callLogArray.isEmpty
+                    self.deleteAllBtn.isHidden = self.callLogArray.isEmpty
+                    self.updateButtons()
+                    self.callLogTableView.reloadData()
+                    self.stopLoading()
+                }
+                if self.callLogArray.isEmpty {
+                    if NetworkReachability.shared.isConnected {
+                        executeInBackground { [weak self] in
+                            guard let self else {return}
+                            self.fetchCallLogsFromServer()
+                        }
+                    }
+                }
+            }
+        } else {
+            noCallLogView.isHidden = true
+        }
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -185,8 +201,6 @@ class CallLogViewController: UIViewController {
 //        appBadgeCount = appBadgeCount - FlyDefaults.unreadMissedCallCount
 //        UIApplication.shared.applicationIconBadgeNumber = appBadgeCount
 //        //CallLogs Badge Count
-//        FlyDefaults.unreadMissedCallCount = 0
-//        NotificationCenter.default.post(name: NSNotification.Name("updateUnReadMissedCallCount"), object: FlyDefaults.unreadMissedCallCount)
         callLogsBadgeCountUpdation()
         
         CallManager.callLogDelegate = nil
@@ -198,6 +212,7 @@ class CallLogViewController: UIViewController {
             floaty.close()
             floaty.removeFromSuperview()
         }
+        NotificationCenter.default.removeObserver(self, name: Notification.Name("PrivateChatAlertView"), object: nil)
     }
     
     @objc func handleRefresh(_ refreshControl: UIRefreshControl) {
@@ -281,11 +296,11 @@ class CallLogViewController: UIViewController {
         
         //Application Badge Count
         var appBadgeCount = UIApplication.shared.applicationIconBadgeNumber
-        appBadgeCount = appBadgeCount - FlyDefaults.unreadMissedCallCount
+        appBadgeCount = appBadgeCount - CallLogManager.getUnreadMissedCallCount()
         UIApplication.shared.applicationIconBadgeNumber = appBadgeCount
         //CallLogs Badge Count
-        FlyDefaults.unreadMissedCallCount = 0
-        NotificationCenter.default.post(name: NSNotification.Name("updateUnReadMissedCallCount"), object: FlyDefaults.unreadMissedCallCount)
+        CallLogManager.resetUnreadMissedCallCount()
+        NotificationCenter.default.post(name: NSNotification.Name("updateUnReadMissedCallCount"), object: CallLogManager.getUnreadMissedCallCount())
     }
     
 }
@@ -328,7 +343,7 @@ extension CallLogViewController : UITableViewDataSource, UITableViewDelegate {
                 jidString = callLog.fromUserId
             }
             let jid =  (callLog.groupId?.count ?? 0 == 0) ? jidString : callLog.groupId!
-            if let contact = ChatManager.getContact(jid: jid){
+            if let contact = callLog.userProfileList.first(where: {$0?.jid == jid}), let contact {
                 memberCell?.contactNamelabel.attributedText = getAttributedUserName(name: getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType), searchText: (callLogSearchBar.text ?? "").trim())
                 memberCell?.userImageView.layer.cornerRadius = (memberCell?.userImageView.frame.size.height)!/2
                 memberCell?.userImageView.layer.masksToBounds = true
@@ -337,6 +352,11 @@ extension CallLogViewController : UITableViewDataSource, UITableViewDelegate {
                 if getIsBlockedByMe(jid: jid) {
                     memberCell?.userImageView.image = UIImage(named: "ic_profile_placeholder")
                 }
+            } else {
+                memberCell?.contactNamelabel.text = "Deleted User"
+                memberCell?.userImageView.layer.cornerRadius = (memberCell?.userImageView.frame.size.height)!/2
+                memberCell?.userImageView.layer.masksToBounds = true
+                memberCell?.userImageView.image = UIImage(named: "ic_profile_placeholder")
             }
         }else{
             memberCell?.imgOne.layer.cornerRadius = (memberCell?.imgOne.frame.size.height)! / 2
@@ -357,30 +377,23 @@ extension CallLogViewController : UITableViewDataSource, UITableViewDelegate {
             userList.removeAll { jid in
                 jid == FlyDefaults.myJid
             }
-            let fullNameArr = userList
-            let contactArr = NSMutableArray()
-            let contactJidArr = NSMutableArray()
-            for JID in fullNameArr{
-                if let contact = ChatManager.getContact(jid: JID){
-                    contactArr.add(getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType))
-                    contactJidArr.add(JID)
-                }
-            }
             if callLog.groupId?.count ?? 0 > 0 {
-                memberCell?.contactNamelabel.attributedText =  getAttributedUserName(name: ChatManager.getContact(jid: callLog.groupId!)?.name ?? "", searchText: (callLogSearchBar.text ?? "").trim())
+                memberCell?.contactNamelabel.attributedText =  getAttributedUserName(name: callLog.displayName, searchText: (callLogSearchBar.text ?? "").trim())
             } else {
-                memberCell?.contactNamelabel.attributedText =  getAttributedUserName(name: contactArr.componentsJoined(by: ","), searchText: (callLogSearchBar.text ?? "").trim())
+                memberCell?.contactNamelabel.attributedText =  getAttributedUserName(name: callLog.displayName, searchText: (callLogSearchBar.text ?? "").trim())
             }
-            if contactJidArr.count == 1 {
+            if callLog.userProfileList.count == 0 {
                 
-            } else if contactJidArr.count == 2 {
+            } else if callLog.userProfileList.count == 1 {
+                
+            } else if callLog.userProfileList.count == 2 {
                 memberCell?.imgTwo.isHidden = true
                 memberCell?.leadingConstant.constant = 10
                 memberCell?.imgThree.isHidden = true
                 memberCell?.imgFour.isHidden = false
                 memberCell?.plusCountLbl.isHidden = true
-                for i in 0...contactJidArr.count - 1{
-                    if let contact = ChatManager.getContact(jid: contactJidArr[i] as! String){
+                for i in 0...callLog.userProfileList.count - 1{
+                    if let contact = callLog.userProfileList[i]{
                         let profileImage = contact.thumbImage.isEmpty ? contact.image : contact.thumbImage
                         if i == 0{
                             memberCell?.imgOne.loadFlyImage(imageURL: profileImage, name: getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType), contactType: contact.contactType, jid: contact.jid)
@@ -392,9 +405,9 @@ extension CallLogViewController : UITableViewDataSource, UITableViewDelegate {
                     }
                 }
                 
-            } else if contactJidArr.count == 3 {
-                for i in 0...contactJidArr.count - 1{
-                    if let contact = ChatManager.getContact(jid: contactJidArr[i] as! String){
+            } else if callLog.userProfileList.count == 3 {
+                for i in 0...callLog.userProfileList.count - 1{
+                    if let contact = callLog.userProfileList[i]{
                         let profileImage = contact.thumbImage.isEmpty ? contact.image : contact.thumbImage
                         if i == 0{
                             memberCell?.imgOne.loadFlyImage(imageURL: profileImage, name: getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType), contactType: contact.contactType, jid: contact.jid)
@@ -414,62 +427,61 @@ extension CallLogViewController : UITableViewDataSource, UITableViewDelegate {
                 memberCell?.imgFour.isHidden = false
                 memberCell?.plusCountLbl.isHidden = true
                 
-            } else if contactJidArr.count == 4 {
-                for i in 0...contactJidArr.count - 1{
-                    if let contact = ChatManager.getContact(jid: contactJidArr[i] as! String){
-                        let profileImage = contact.thumbImage.isEmpty ? contact.image : contact.thumbImage
-                        if i == 0{
-                            memberCell?.imgOne.loadFlyImage(imageURL: profileImage, name: getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType),contactType: contact.contactType, jid: contact.jid)
-                        }
-                        else if i == 1{
-                            memberCell?.imgTwo.loadFlyImage(imageURL: profileImage, name: getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType),contactType: contact.contactType, jid: contact.jid)
-                        }
-
-                        else if i == 2{
-                            memberCell?.imgThree.loadFlyImage(imageURL: profileImage, name: getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType),contactType: contact.contactType, jid: contact.jid)
-                        }
-                        else if i == 3{
-                            memberCell?.imgFour.loadFlyImage(imageURL: profileImage, name: getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType),contactType: contact.contactType, jid: contact.jid)
-                        }
-                        else {
-                            break
-                        }
-                    }
+            } else if callLog.userProfileList.count == 4 {
+                if let contact = callLog.userProfileList[0]{
+                    let profileImage = contact.thumbImage.isEmpty ? contact.image : contact.thumbImage
+                    memberCell?.imgOne.loadFlyImage(imageURL: profileImage, name: getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType),contactType: contact.contactType, jid: contact.jid)
+                }
+                if let contact = callLog.userProfileList[1]{
+                    let profileImage = contact.thumbImage.isEmpty ? contact.image : contact.thumbImage
+                    memberCell?.imgTwo.loadFlyImage(imageURL: profileImage, name: getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType),contactType: contact.contactType, jid: contact.jid)
+                }
+                if let contact = callLog.userProfileList[2]{
+                    let profileImage = contact.thumbImage.isEmpty ? contact.image : contact.thumbImage
+                    memberCell?.imgThree.loadFlyImage(imageURL: profileImage, name: getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType),contactType: contact.contactType, jid: contact.jid)
+                }
+                if let contact = callLog.userProfileList[3]{
+                    let profileImage = contact.thumbImage.isEmpty ? contact.image : contact.thumbImage
+                    memberCell?.imgFour.loadFlyImage(imageURL: profileImage, name: getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType),contactType: contact.contactType, jid: contact.jid)
                 }
                 memberCell?.imgTwo.isHidden = false
                 memberCell?.leadingConstant.constant = 0
                 memberCell?.imgThree.isHidden = false
                 memberCell?.imgFour.isHidden = false
                 memberCell?.plusCountLbl.isHidden = true
-                
-            } else if contactJidArr.count != 0 {
+            }
+            else if callLog.userProfileList.count > 4 {
                 memberCell?.imgOne.isHidden = false
                 memberCell?.imgTwo.isHidden = false
                 memberCell?.imgThree.isHidden = false
                 memberCell?.imgFour.isHidden = false
                 memberCell?.leadingConstant.constant = 0
                 memberCell?.plusCountLbl.isHidden = false
-                memberCell?.plusCountLbl.text =  "+ " + "\(fullNameArr.count - 4)"
-                for i in 0...contactJidArr.count - 1{
-                    if let contact = ChatManager.getContact(jid: contactJidArr[i] as! String){
+                memberCell?.plusCountLbl.text =  "+ " + "\(userList.count - 4)"
+                
+                if let contact = callLog.userProfileList[0]{
+//                    executeInBackground {
                         let profileImage = contact.thumbImage.isEmpty ? contact.image : contact.thumbImage
-                        if i == 0{
-                            memberCell?.imgOne.loadFlyImage(imageURL: profileImage, name: getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType), contactType: contact.contactType, jid: contact.jid)
-                        }
-                        else if i == 1{
-                            memberCell?.imgTwo.loadFlyImage(imageURL: profileImage, name: getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType), contactType: contact.contactType, jid: contact.jid)
-                        }
-
-                        else if i == 2{
-                            memberCell?.imgThree.loadFlyImage(imageURL: profileImage, name: getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType), contactType: contact.contactType, jid: contact.jid)
-                        }
-                        else if i == 3{
-                            memberCell?.imgFour.loadFlyImage(imageURL: profileImage, name: getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType), contactType: contact.contactType, jid: contact.jid)
-                        }
-                        else {
-                            break
-                        }
-                    }
+                        memberCell?.imgOne.loadFlyImage(imageURL: profileImage, name: getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType),contactType: contact.contactType, jid: contact.jid)
+//                    }
+                }
+                if let contact = callLog.userProfileList[1]{
+//                    executeInBackground {
+                        let profileImage = contact.thumbImage.isEmpty ? contact.image : contact.thumbImage
+                        memberCell?.imgTwo.loadFlyImage(imageURL: profileImage, name: getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType),contactType: contact.contactType, jid: contact.jid)
+//                    }
+                }
+                if let contact = callLog.userProfileList[2]{
+//                    executeInBackground {
+                        let profileImage = contact.thumbImage.isEmpty ? contact.image : contact.thumbImage
+                        memberCell?.imgThree.loadFlyImage(imageURL: profileImage, name: getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType),contactType: contact.contactType, jid: contact.jid)
+//                    }
+                }
+                if let contact = callLog.userProfileList[3]{
+//                    executeInBackground {
+                        let profileImage = contact.thumbImage.isEmpty ? contact.image : contact.thumbImage
+                        memberCell?.imgFour.loadFlyImage(imageURL: profileImage, name: getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType),contactType: contact.contactType, jid: contact.jid)
+//                    }
                 }
             }
             
@@ -604,7 +616,7 @@ extension CallLogViewController : UITableViewDataSource, UITableViewDelegate {
             }
             var callUserProfiles = [ProfileDetails]()
 
-            if let contact = ChatManager.getContact(jid: jidString)
+            if let contact = callLog.userProfileList.first(where: {$0?.jid == jidString}), let contact
             {
                 if contact.contactType != .deleted{
                     callUserProfiles.append(contact)
@@ -750,7 +762,7 @@ extension CallLogViewController : UITableViewDataSource, UITableViewDelegate {
             return
         }
         if getSelectedLogs().isEmpty {
-            if seletedCallLog.callMode == .ONE_TO_ONE && (seletedCallLog.groupId?.isEmpty ?? true){
+            if seletedCallLog.callMode == .ONE_TO_ONE && (seletedCallLog.groupId?.isEmpty ?? true) && ContactManager.shared.getUserProfileDetails(for: (seletedCallLog.fromUserId == FlyDefaults.myJid) ? seletedCallLog.toUserId :  seletedCallLog.fromUserId) != nil{
                 let vc = UIStoryboard.init(name: Storyboards.chat, bundle: Bundle.main).instantiateViewController(withIdentifier: Identifiers.chatViewParentController) as? ChatViewParentController
                 var jidString = String()
                 if seletedCallLog.fromUserId == FlyDefaults.myJid {
@@ -767,25 +779,29 @@ extension CallLogViewController : UITableViewDataSource, UITableViewDelegate {
                 navigationController?.modalPresentationStyle = .overFullScreen
                 navigationController?.pushViewController(vc!, animated: true)
             }else{
+                if !(seletedCallLog.groupId?.isEmpty ?? true) && ContactManager.shared.getUserProfileDetails(for: seletedCallLog.groupId!) == nil{
+                    return
+                }
                 let storyboard = UIStoryboard(name: "Call", bundle: nil)
                 groupCallViewController = storyboard.instantiateViewController(withIdentifier: "GroupCallViewController") as? GroupCallViewController
                 groupCallViewController?.callLog = seletedCallLog
-                let fullNameArr = seletedCallLog.userList
-                var name = ""
+                var name = seletedCallLog.displayName
                 if !(seletedCallLog.groupId?.isEmpty ?? true){
-                    if let contact = ChatManager.getContact(jid: seletedCallLog.groupId!){
-                        name = contact.name
-                    }
+//                    if let contact = ChatManager.getContact(jid: seletedCallLog.groupId!){
+//                        name = contact.name
+//                    }
+                    
                     groupCallViewController?.isGroup = true
-                }else{
-                    let contactArr = NSMutableArray()
-                    for JID in fullNameArr{
-                        if let contact = ChatManager.getContact(jid: JID){
-                            contactArr.add(getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType))
-                        }
-                    }
-                    name = contactArr.componentsJoined(by: ",")
                 }
+//                else{
+//                    let contactArr = NSMutableArray()
+//                    for JID in fullNameArr{
+//                        if let contact = ChatManager.getContact(jid: JID){
+//                            contactArr.add(getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType))
+//                        }
+//                    }
+//                    name = contactArr.componentsJoined(by: ",")
+//                }
                 groupCallViewController?.groupCallName = name
                 let time = seletedCallLog.callReceivedTime
                 let todayTimeStamp = FlyCallUtils.generateTimestamp()
@@ -849,18 +865,24 @@ extension CallLogViewController {
             if self.getSelectedLogs().isEmpty {
                 ChatManager.deleteCallLog(isClearAll: true, callLogIds: [self.callLogArray.first?.callLogId ?? emptyString()]) { isSuccess, error, data in
                     self.updateButtons()
+                    self.callLogArray = CallLogManager.getAllCallLogs()
+                    self.allCallLogArray = self.callLogArray
                     self.callLogTableView.reloadData()
                     self.callLogsBadgeCountUpdation()
                 }
             } else {
                 let calllogIds = self.getSelectedLogs().compactMap({ $0.callLogId })
                 ChatManager.deleteCallLog(isClearAll: false, callLogIds: calllogIds) { isSuccess, error, data in
+                    self.callLogArray = CallLogManager.getAllCallLogs()
+                    self.allCallLogArray = self.callLogArray
                     self.updateButtons()
                     self.callLogTableView.reloadData()
                 }
             }
         } else {
             ChatManager.deleteCallLog(isClearAll: false, callLogIds: [self.seletedCallLog.callLogId]) { isSuccess, error, data in
+                self.callLogArray = CallLogManager.getAllCallLogs()
+                self.allCallLogArray = self.callLogArray
                 self.updateButtons()
                 self.callLogTableView.reloadData()
             }
@@ -1037,7 +1059,7 @@ extension CallLogViewController: UIScrollViewDelegate {
         
         if ((scrollView.contentOffset.y + scrollView.frame.size.height) > scrollView.contentSize.height){
             
-            if !isPaginationCompleted() && !isLoadingInProgress{
+            if !isPaginationCompleted() && !isLoadingInProgress && !isSearchEnabled{
                 print("call next page")
                 self.loadNextPage()
             }
@@ -1161,40 +1183,8 @@ extension CallLogViewController: UISearchBarDelegate {
 
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         if searchText.trim().count > 0 {
-            callLogArray = allCallLogArray.filter {
-                let isGroupCall =  ($0.groupId?.count ?? 0 != 0)
-                if $0.callMode == .ONE_TO_ONE || isGroupCall {
-                    var jidString = String()
-                    if $0.fromUserId == FlyDefaults.myJid {
-                        jidString = $0.toUserId
-                    } else {
-                        jidString = $0.fromUserId
-                    }
-                    let jid =  ($0.groupId?.count ?? 0 == 0) ? jidString : $0.groupId!
-                    if let contact = ChatManager.getContact(jid: jid){
-                        return getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType).localizedCaseInsensitiveContains(searchText.trim())
-                    }
-                }else{
-                    var userList = $0.userList
-                    userList.removeAll { jid in
-                        jid == FlyDefaults.myJid
-                    }
-                    let fullNameArr = userList
-                    let contactArr = NSMutableArray()
-                    let contactJidArr = NSMutableArray()
-                    for JID in fullNameArr{
-                        if let contact = ChatManager.getContact(jid: JID){
-                            contactArr.add(getUserName(jid : contact.jid ,name: contact.name, nickName: contact.nickName, contactType: contact.contactType))
-                            contactJidArr.add(JID)
-                        }
-                    }
-                    if $0.groupId?.count ?? 0 > 0 {
-                        return (ChatManager.getContact(jid: $0.groupId!)?.name ?? "").localizedCaseInsensitiveContains(searchText.trim())
-                    } else {
-                        return contactArr.componentsJoined(by: ",").localizedCaseInsensitiveContains(searchText.trim())
-                    }
-                }
-                return false
+            callLogArray = allCallLogArray.filter{
+                return $0.displayName.localizedCaseInsensitiveContains(searchText.trim())
             }
         } else {
             callLogArray = allCallLogArray
@@ -1244,8 +1234,8 @@ extension CallLogViewController : CallLogDelegate {
     func deleteCallLogs(callLogId : String) {
         if let index = callLogArray.firstIndex(where: {$0.callLogId == callLogId}), !callLogArray.isEmpty {
             executeOnMainThread {
-                self.callLogArray.remove(at: index)
-                self.allCallLogArray.remove(at: index)
+//                self.callLogArray.remove(at: index)
+//                self.allCallLogArray.remove(at: index)
                 self.callLogTableView.reloadData()
                 self.updateButtons()
                 self.noCallLogView.isHidden = !self.callLogArray.isEmpty

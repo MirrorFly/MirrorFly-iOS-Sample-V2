@@ -86,18 +86,15 @@ class GroupMembersTableViewCell: UITableViewCell {
     
     func setUsersImage(userName: String, groupInfo: GroupParticipantDetail) {
         
-        let urlString = "\(FlyDefaults.baseURL)\(media)/\(groupInfo.profileDetail?.image ?? "")?mf=\(FlyDefaults.authtoken)"
-        let imageURL = URL(string: urlString)
-        var placeholderImage: UIImage
-        
-        if (imageURL != nil) {
-            placeholderImage = ChatUtils.getPlaceholder(name: userName, userColor: ChatUtils.getColorForUser(userName: userName),
-                                                        userImage: userImageView)
-            userImageView?.sd_setImage(with: imageURL, placeholderImage: placeholderImage)
-        } else {
-            userImageView?.loadFlyImage(imageURL: groupInfo.profileDetail?.image ?? "", name: userName,
-                                        chatType: groupInfo.profileDetail?.profileChatType ?? .singleChat,
-                                        jid: groupInfo.profileDetail?.jid ?? "")
+        if let profileDetail = groupInfo.profileDetail {
+            let profileImage = profileDetail.thumbImage.isEmpty ? profileDetail.image : profileDetail.thumbImage
+            if profileImage.isEmpty {
+                userImageView?.image = ChatUtils.getPlaceholder(name: userName, userColor: ChatUtils.getColorForUser(userName: userName), userImage: userImageView)
+            } else {
+                userImageView?.loadFlyImage(imageURL: profileImage, name: userName,
+                                            chatType: profileDetail.profileChatType,
+                                            jid: profileDetail.jid)
+            }
         }
     }
 }

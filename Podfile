@@ -31,7 +31,7 @@ def uikit_pods
   
   #submodule dependency pods
   
-  pod 'MirrorFlySDK', '5.10.1'
+  pod 'MirrorFlySDK', '5.10.6'
 
 end
 
@@ -39,7 +39,7 @@ def notification_pods
 
   #submodule dependency pods
 
-  pod 'MirrorFlySDK', '5.10.1'
+  pod 'MirrorFlySDK', '5.10.6'
   
 end
 
@@ -51,21 +51,10 @@ target 'UiKitQaNotificationExtention' do
   notification_pods
 end
 
-target 'Mirrorfly' do
-  uikit_pods
-end
-
-target 'MirrorflyNotificationExtention' do
-  notification_pods
-end
-
 target 'UikitQaShareKit' do
   uikit_pods
 end
 
-target 'MirrorflyShareKit' do
-  uikit_pods
-end
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|

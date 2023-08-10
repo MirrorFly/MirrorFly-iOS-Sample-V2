@@ -192,6 +192,8 @@ class RecentChatViewController: UIViewController, UIGestureRecognizerDelegate {
         if !FlyDefaults.showAppLock {
             openChat(jid: pushChatId ?? "")
         }
+        
+        getProfile()
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -1823,6 +1825,9 @@ extension RecentChatViewController : ConnectionEventDelegate {
     }
     
     func onConnected() {
+        
+        getProfile()
+        
         if !Utility.getBoolFromPreference(key: "oneTimeSync") {
             ContactSyncManager.shared.syncContacts(){ isSuccess,_,_ in
                 if isSuccess {
@@ -2675,5 +2680,20 @@ extension RecentChatViewController : UICollectionViewDelegate, UICollectionViewD
                     }
                 }
         }
+    }
+}
+
+extension RecentChatViewController {
+    
+    func getProfile() {
+            do {
+                let JID = FlyDefaults.myXmppUsername + "@" + FlyDefaults.xmppDomain
+                try ContactManager.shared.getUserProfile(for:  JID, fetchFromServer: true, saveAsFriend: true) { [weak self] isSuccess, flyError, flyData in
+                    if(isSuccess) {
+                    }
+                }
+            } catch {
+                print("Error")
+            }
     }
 }

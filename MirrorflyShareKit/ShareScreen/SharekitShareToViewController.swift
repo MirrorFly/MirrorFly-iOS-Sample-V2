@@ -413,9 +413,19 @@ class SharekitShareToViewController: ShareKitBaseViewController {
                 }
             } else {
                 self.removeLoader()
-                ShareKitAlert.shared.showToast(controller: self, message: "No files to share")
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                    self.closeShareKit()
+                if shareModel.locationList.isEmpty {
+                    ShareKitAlert.shared.showToast(controller: self, message: "No files to share")
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                        self.closeShareKit()
+                    }
+                } else {
+                    var profilesList = self.selectedProfiles
+                    if !profilesList.isEmpty {
+                        let profile = profilesList.first!
+                        let messageParams = TextMessage(toId: profile.jid, messageText : shareModel.locationList.joined(separator: " "))
+                        FlyMessenger.sendTextMessage(messageParams: messageParams) { _, _, _ in
+                        }
+                    }
                 }
             }
         }
