@@ -10,7 +10,6 @@ import MirrorFlySDK
 
 class BlockedContactsViewController: UIViewController {
 
-    @IBOutlet weak var noBlockedContactsLabel: UILabel!
     @IBOutlet weak var blockedContactsTableView: UITableView! {
         didSet {
             blockedContactsTableView.register(UINib(nibName: "BlockedContactTableViewCell", bundle: nil), forCellReuseIdentifier: "BlockedContactTableViewCell")
@@ -23,8 +22,8 @@ class BlockedContactsViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         getUsersIBlocked()
-        noBlockedContactsLabel.text = "No Blocked Contacts found"
-        noBlockedContactsLabel.font = UIFont.font14px_appSemibold()
+        noContactsLabel.text = "No Blocked Contacts found"
+        noContactsLabel.font = UIFont.font14px_appSemibold()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -53,10 +52,10 @@ class BlockedContactsViewController: UIViewController {
                 if let blocked = data["data"] as? [ProfileDetails] {
                     if blocked.isEmpty {
                         self?.blockedContactsTableView.isHidden = true
-                        self?.noBlockedContactsLabel.isHidden = false
+                        self?.noContactsLabel.isHidden = false
                     } else {
                         self?.blockedContactsTableView.isHidden = false
-                        self?.noBlockedContactsLabel.isHidden = true
+                        self?.noContactsLabel.isHidden = true
                         self?.blockedList = blocked
                     }
                 }
@@ -79,7 +78,7 @@ class BlockedContactsViewController: UIViewController {
                 }
                 if self?.blockedList.isEmpty ?? true {
                     self?.blockedContactsTableView.isHidden = true
-                    self?.noBlockedContactsLabel.isHidden = false
+                    self?.noContactsLabel.isHidden = false
                 }
                 self?.blockedContactsTableView.reloadData()
                 AppAlert.shared.showToast(message: "\(name) has been Unblocked")
@@ -108,7 +107,7 @@ class BlockedContactsViewController: UIViewController {
 
 extension BlockedContactsViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        noBlockedContactsLabel.isHidden = blockedList.count != 0
+        noContactsLabel.isHidden = blockedList.count != 0
         return blockedList.count
     }
 

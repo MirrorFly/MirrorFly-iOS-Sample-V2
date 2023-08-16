@@ -147,7 +147,8 @@ class SenderDocumentsTableViewCell: BaseTableViewCell {
             forwardButton?.isSelected = !(forwardButton?.isSelected ?? false)
             forwardView?.makeCircleView(borderColor: Color.forwardCircleBorderColor.cgColor, borderWidth: 1.5)
         }
-        isAllowSwipe = (message?.messageStatus == .notAcknowledged || message?.mediaChatMessage?.mediaUploadStatus == .not_uploaded || message?.mediaChatMessage?.mediaUploadStatus == .failed  || message?.mediaChatMessage?.mediaUploadStatus == .uploading) ? false : true
+        isAllowSwipe = ( message?.mediaChatMessage?.mediaUploadStatus == .uploaded || message?.mediaChatMessage?.mediaDownloadStatus == .downloaded ) ? true : false
+        
         if message?.isCarbonMessage == true {
             if isDeletedMessageSelected == false {
                 if  (message?.mediaChatMessage?.mediaDownloadStatus == .downloaded && isShowForwardView == true) {
@@ -170,7 +171,7 @@ class SenderDocumentsTableViewCell: BaseTableViewCell {
             }
         }
         
-        if  (message?.mediaChatMessage?.mediaUploadStatus == .not_uploaded || message?.mediaChatMessage?.mediaUploadStatus == .failed || message?.mediaChatMessage?.mediaUploadStatus == .uploading || message?.messageStatus == .notAcknowledged || isShowForwardView == true || isStarredMessagePage == true) {
+        if  ((!(message?.isCarbonMessage ?? true) && message?.mediaChatMessage?.mediaUploadStatus != .uploaded) || ( message?.isCarbonMessage ?? false && message?.mediaChatMessage?.mediaDownloadStatus != .downloaded ) || isShowForwardView == true || isStarredMessagePage == true) {
             fwdButton?.isHidden = true
         } else {
             fwdButton?.isHidden = false
@@ -479,7 +480,7 @@ class SenderDocumentsTableViewCell: BaseTableViewCell {
     }
     
     func showHideForwardView(message: ChatMessage?, isShowForwardView: Bool?,isDeletedMessageSelected: Bool?) {
-        if isDeletedMessageSelected == true || isStarredMessagePage == true {
+        if isDeletedMessageSelected == true {
             // Forward view elements and its data
             forwardView?.isHidden = (isShowForwardView == false || message?.mediaChatMessage?.mediaUploadStatus == .uploading)  || (message?.isMessageRecalled == true) ? true : false
             forwardButton?.isHidden = (isShowForwardView == false || message?.mediaChatMessage?.mediaUploadStatus == .uploading)  || (message?.isMessageRecalled == true) ? true : false

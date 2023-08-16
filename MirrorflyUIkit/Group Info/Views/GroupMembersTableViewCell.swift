@@ -67,7 +67,7 @@ class GroupMembersTableViewCell: UITableViewCell {
             let blockedMe = profileDetails?.isBlockedMe ?? false
             let isBlockedMyAdmin = profileDetails?.isBlockedByAdmin ?? false
             
-            if profileDetails?.contactType == .deleted || blockedMe || isBlockedMyAdmin || (IS_LIVE && ENABLE_CONTACT_SYNC && profileDetails?.isItSavedContact == false && groupInfo.memberJid != FlyDefaults.myJid){
+            if profileDetails?.contactType == .deleted || blockedMe || isBlockedMyAdmin || (IS_LIVE && ENABLE_CONTACT_SYNC && profileDetails?.isItSavedContact == false && groupInfo.memberJid != AppUtils.getMyJid()){
                 userImageView?.image = UIImage(named: "ic_profile_placeholder") ?? UIImage()
                 statusLabel.text = ""
             }
@@ -75,26 +75,29 @@ class GroupMembersTableViewCell: UITableViewCell {
                 userImageView?.image = UIImage(named: "ic_profile_placeholder") ?? UIImage()
             }
 
-            if groupInfo.memberJid == FlyDefaults.myJid {
+            if groupInfo.memberJid == AppUtils.getMyJid() {
                 nameLabel.text = "You"
                 nickNameLabel.text = ""
-                setUsersImage(userName: FlyDefaults.myName, groupInfo: groupInfo)
+                setUsersImage(userName: ContactManager.getMyProfile().name, groupInfo: groupInfo)
             }
         }
         
     }
     
     func setUsersImage(userName: String, groupInfo: GroupParticipantDetail) {
+        let urlString = ChatManager.getImageUrl(imageName: groupInfo.profileDetail?.image ?? "")
+       // let urlString = ChatManager.makeImageUrl(media: media, imageName: groupInfo.profileDetail?.image ?? "")
+        let imageURL = URL(string: urlString)
+        var placeholderImage: UIImage
         
-        if let profileDetail = groupInfo.profileDetail {
-            let profileImage = profileDetail.thumbImage.isEmpty ? profileDetail.image : profileDetail.thumbImage
-            if profileImage.isEmpty {
-                userImageView?.image = ChatUtils.getPlaceholder(name: userName, userColor: ChatUtils.getColorForUser(userName: userName), userImage: userImageView)
-            } else {
-                userImageView?.loadFlyImage(imageURL: profileImage, name: userName,
-                                            chatType: profileDetail.profileChatType,
-                                            jid: profileDetail.jid)
-            }
+        if (imageURL != nil) {
+            placeholderImage = ChatUtils.getPlaceholder(name: userName, userColor: ChatUtils.getColorForUser(userName: userName),
+                                                        userImage: userImageView)
+            userImageView?.sd_setImage(with: imageURL, placeholderImage: placeholderImage)
+        } else {
+            userImageView?.loadFlyImage(imageURL: groupInfo.profileDetail?.image ?? "", name: userName,
+                                        chatType: groupInfo.profileDetail?.profileChatType ?? .singleChat,
+                                        jid: groupInfo.profileDetail?.jid ?? "")
         }
     }
 }

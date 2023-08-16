@@ -79,7 +79,7 @@ class ContactCell: UITableViewCell {
     }
     
     func setImage(imageURL: String, name: String, color: UIColor) {
-        let urlString = FlyDefaults.baseURL + "media/" + imageURL + "?mf=" + FlyDefaults.authtoken
+        let urlString = ChatManager.getImageUrl(imageName: imageURL)
         let url = URL(string: urlString)
         profile.sd_setImage(with: url, placeholderImage: getPlaceholder(name: name, color: color))
     }

@@ -66,12 +66,12 @@ class AppLockPasswordViewController: UIViewController, UITextFieldDelegate {
         else if enterNewPassword.text ?? "" == confirmNewPassword.text ?? "" {
             print("saved")
             if fingerPINisOn == true{
-                FlyDefaults.appFingerprintenable = true
+                CommonDefaults.appFingerprintenable = true
             }
-            FlyDefaults.appLockenable = true
-            FlyDefaults.appLockPassword = confirmNewPassword.text ?? ""
-            FlyDefaults.appLockPasswordDate = Date()
-            FlyDefaults.passwordAuthenticationAttemps = 0
+            CommonDefaults.appLockenable = true
+            CommonDefaults.appLockPassword = confirmNewPassword.text ?? ""
+            CommonDefaults.appLockPasswordDate = Date()
+            CommonDefaults.passwordAuthenticationAttemps = 0
             ShareKitAlert.shared.showToast(controller: self, message: SuccessMessage.PINsetsuccessfully)
             self.navigationController?.popViewController(animated: true)
         }
@@ -93,7 +93,7 @@ class AppLockPasswordViewController: UIViewController, UITextFieldDelegate {
             ShareKitAlert.shared.showToast(controller: self, message: ErrorMessage.passwordShouldbeSame)
             return false
         }
-        else if enterNewPassword.text == FlyDefaults.appLockPassword {
+        else if enterNewPassword.text == CommonDefaults.appLockPassword {
             ShareKitAlert.shared.showToast(controller: self, message: ErrorMessage.oldPINnewPINsholdnotSame)
             return false
         }

@@ -23,7 +23,7 @@ class VerifyOTPViewModel : NSObject
     }
     
     func validateUser(params: NSDictionary, completionHandler:  @escaping (VerifyToken?, Error?)-> Void)  {
-        let Baseurl = FlyDefaults.baseURL
+        let Baseurl = ChatManager.getAppConfigDetails().baseURL
         let url = Baseurl + verifyUser
         print("verifyOTPViewModel.validateUser \(url)")
         apiService.post(withEndPoint: url, params: params as? Parameters, headers: nil).responseJSON { (response) in
@@ -51,7 +51,7 @@ class VerifyOTPViewModel : NSObject
         print(deviceToken, mobileNumber)
         voipToken = voipToken.isEmpty ? deviceToken : voipToken
         
-        if FlyDefaults.baseURL.isEmpty {
+        if ChatManager.getAppConfigDetails().baseURL.isEmpty {
             ChatManager.initializeSDK(licenseKey: LICENSE_KEY) { licenseSuccess, error, data in
                 if licenseSuccess {
                     try! ChatManager.registerApiService(for: uniqueIdentifier, deviceToken: deviceToken, voipDeviceToken: voipToken, isExport: ISEXPORT, isForceRegister: isForceRegister, userType: userType) { isSuccess, flyError, flyData in
@@ -104,9 +104,9 @@ class VerifyOTPViewModel : NSObject
         }
     }
     
-    func initializeChatCredentials(username: String, secretKey: String){
-            FlyDefaults.isLoggedIn = true
-            RootViewController.sharedInstance.initCallSDK()
-            VOIPManager.sharedInstance.updateDeviceToken()
+    func initializeChatCredentials() {
+        ChatManager.updateAppLoggedIn(isLoggedin: true)
+        RootViewController.sharedInstance.initCallSDK()
+        VOIPManager.sharedInstance.updateDeviceToken()
     }
 }

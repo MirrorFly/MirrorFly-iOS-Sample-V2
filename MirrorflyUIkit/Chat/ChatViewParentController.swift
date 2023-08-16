@@ -304,6 +304,14 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
     var mentionUsersList: [String] = []
     var mentionRanges: [(String, NSRange)] = []
     var searchGroupMembers = [GroupParticipantDetail]()
+
+    var groupIdForPrivateChat: String?
+    var isFromSearchSelect: Bool = false
+    var isFromNotificationSelect: Bool = false
+    var lockScreenShown = false
+    var isFromContactScreen = false
+    var isFromForward = false
+    var isFromPrivateChat = false
         
     @IBOutlet weak var mentionBaseView: UIView!
     @IBOutlet weak var mentionBottom: NSLayoutConstraint!
@@ -313,6 +321,23 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
     override func viewDidLoad() {
         super.viewDidLoad()
         checkifStarredMessages()
+        if isFromContactScreen || isFromForward || isFromGroupInfo {
+            if ChatManager.isPrivateChat(jid: getProfileDetails.jid) {
+                //if recent.isPrivateChat {
+                    if let group = groupIdForPrivateChat {
+                        if ChatManager.isPrivateChat(jid: group) {
+
+                        } else {
+                            showLockScreen()
+                        }
+                    } else if isFromForward && isFromPrivateChat {
+                        
+                    } else {
+                        showLockScreen()
+                    }
+                //}
+            }
+        }
     }
     
     @objc internal override func keyboardWillShow(notification: NSNotification) {
@@ -353,7 +378,7 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
     
     func checkifStarredMessages() {
         if !isStarredMessagePage {
-            searchGroupMembers = groupMembers.sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() }).filter({$0.memberJid != FlyDefaults.myJid})
+            searchGroupMembers = groupMembers.sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() }).filter({$0.memberJid != AppUtils.getMyJid()})
             mentionBaseView.isHidden = true
             mentionBaseView.addBorder(toSide: .Top, withColor: .lightGray.withAlphaComponent(0.8), andThickness: 0.5)
             mentionTableView.register(UINib(nibName: "MentionTableViewCell",
@@ -367,8 +392,8 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
             handleSendButton()
             audioButton.imageEdgeInsets = UIEdgeInsets(top: 6, left: 8, bottom: 6, right: 8)
             videoButton.imageEdgeInsets = UIEdgeInsets(top: 6, left: 6, bottom: 6, right: 6)
-            print("MYJId \(FlyDefaults.myJid)")
-            print("username : \(FlyDefaults.myXmppUsername)")
+            print("MYJId \(AppUtils.getMyJid())")
+            print("username : \(ChatManager.getXMPPDetails().XMPPUsername)")
             checkGalleryPermission()
             chatTextViewXib?.cannotSendMessageView?.isHidden = true
             UNUserNotificationCenter.current().getDeliveredNotifications { notifications in
@@ -465,12 +490,19 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
         } else {
             print("Keyboard is not presented")
         }
-        
+        if ChatManager.isPrivateChat(jid: getProfileDetails.jid ?? "") {
+           // if recent.isPrivateChat {
+                CommonDefaults.appLockOnPrivateChat = false
+                CommonDefaults.privateChatOnChatScreen = true
+                self.view.addLaunchSubview()
+            //}
+        }
         removeUnreadMessageLabelFromChat()
     }
     
     @objc override func willCometoForeground() {
         print("ChatViewParentController ABC appComestoForeground")
+        self.view.removeLaunchSubview()
         self.viewDidLayoutSubviews()
         self.mentionBaseView.isHidden = !isMention
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
@@ -498,6 +530,12 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
             self?.isFromBackground = true
             self?.getInitialMessages()
             self?.checkUserBlocked()
+        }
+        if CommonDefaults.privateChatOnChatScreen && !CommonDefaults.showAppLock {
+            if lockScreenShown == false {
+                showLockScreen()
+                lockScreenShown = true
+            }
         }
     }
     
@@ -599,6 +637,15 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
     }
 
     override func viewDidLayoutSubviews() {
+
+//        if let pushId = pushChatId {
+//            if let recent = ChatManager.getRechtChat(jid: pushId) {
+//                if recent.isPrivateChat {
+//                    showLockScreen()
+//                }
+//            }
+//        }
+
         pushChatId = nil
         if !isStarredMessagePage {
             self.chatTableView.backgroundView = UIImageView(image: UIImage(named: "chat_background"))
@@ -716,6 +763,8 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
         view.backgroundColor = .white
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(notification:)), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(willEnterForeground),
+                                                       name: NSNotification.Name(didBecomeActive), object: nil)
         if !isStarredMessagePage {
             let unsentMessage = FlyMessenger.getUnsentMessageOf(id: getProfileDetails.jid)
             if !unsentMessage.mentionSearch.isEmpty {
@@ -732,6 +781,27 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
                 mentionBaseView.isHidden = false
             }
         }
+        if isFromSearchSelect || isFromNotificationSelect {
+            if let recent = ChatManager.getRechtChat(jid: getProfileDetails.jid) {
+                if recent.isPrivateChat && !CommonDefaults.isInPrivateChat {
+                    showLockScreen()
+                    isFromNotificationSelect = false
+                }
+            }
+            isFromSearchSelect = false
+        } else if (pushNotificationSelected && CommonDefaults.showAppLock == false) {
+//            if CommonDefaults.isInPrivateChat == true {
+//                showLockScreen()
+//            } else {
+//
+//            }
+            showLockScreen()
+        }
+        lockScreenShown = false
+    }
+
+    @objc func willEnterForeground() {
+        self.view.removeLaunchSubview()
     }
     
     private func presentPreviewScreen() {
@@ -838,7 +908,26 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
         chatTableView.reloadData()
        
     }
-    
+
+    func showLockScreen() {
+        if CommonDefaults.appFingerprintenable {
+            let vc = PrivateChatFingerPrintPINViewController(nibName: "PrivateChatFingerPrintPINViewController", bundle: nil)
+            vc.isFromSearchSelect = isFromSearchSelect
+            vc.isFromNotificationSelect = isFromNotificationSelect
+            vc.isFromContactScreen = isFromContactScreen
+            vc.isFromForward = isFromForward
+            vc.isFromGroupInfo = isFromGroupInfo
+            self.navigationController?.pushViewController(vc, animated: false)
+        } else {
+            let vc = PrivateChatAuthenticationPINViewController(nibName:"PrivateChatAuthenticationPINViewController", bundle: nil)
+            vc.isFromSearchSelect = isFromSearchSelect
+            vc.isFromNotificationSelect = isFromNotificationSelect
+            vc.isFromContactScreen = isFromContactScreen
+            vc.isFromForward = isFromForward
+            vc.isFromGroupInfo = isFromGroupInfo
+            self.navigationController?.pushViewController(vc, animated: false)
+        }
+    }
     
     func showDeletePicker() {
         executeOnMainThread {  [weak self] in
@@ -1621,7 +1710,7 @@ extension ChatViewParentController {
         if getProfileDetails != nil {
             userNameLabel.text = getUserName(jid : getProfileDetails.jid ,name: getProfileDetails.name, nickName: getProfileDetails.nickName, contactType: getProfileDetails.contactType)
             let imageUrl = (getProfileDetails?.thumbImage.isEmpty ?? true) ? getProfileDetails?.image : getProfileDetails.thumbImage
-            let urlString = FlyDefaults.baseURL + "media/" + (imageUrl ?? emptyString()) + "?mf=" + FlyDefaults.authtoken
+            let urlString = ChatManager.getImageUrl(imageName: imageUrl ?? emptyString())
             print("setProfile \(urlString)")
             var url = URL(string: urlString)
             var placeholder = UIImage()
@@ -1719,6 +1808,12 @@ extension ChatViewParentController {
         if !isStarredMessagePage {
             destination.fromJid = getProfileDetails.jid
         }
+        if ChatManager.isPrivateChat(jid: getProfileDetails.jid) {
+            destination.hidePrivateChatUsers = false
+        } else {
+            destination.hidePrivateChatUsers = true
+        }
+        destination.isFromPrivateChat = isFromPrivateChat
         presentViewController(source: self, destination: destination)
     }
     
@@ -2347,7 +2442,7 @@ extension ChatViewParentController : QLPreviewControllerDataSource {
             if getProfileDetails.profileChatType == .groupChat {
                 self.mentionshouldChangeTextIn(textView, shouldChangeTextIn: range, replacementText: text)
             }
-            return true
+            //return true
         }
         if getProfileDetails.profileChatType == .groupChat {
             self.mentionshouldChangeTextIn(textView, shouldChangeTextIn: range, replacementText: text)
@@ -3296,7 +3391,7 @@ extension ChatViewParentController {
         controller.textMentioned = messageTextView.mentionedUsers
         controller.selectedAssets = self.selectedAssets
         controller.profileName = getProfileDetails.name
-        controller.groupMembers = groupMembers.filter({$0.memberJid != FlyDefaults.myJid})
+        controller.groupMembers = groupMembers.filter({$0.memberJid != AppUtils.getMyJid()})
         controller.getProfileDetails = getProfileDetails
         navigationController?.navigationBar.isHidden = true
         navigationController?.pushViewController(controller, animated: false)
@@ -3652,7 +3747,7 @@ extension ChatViewParentController {
             guard let queryString = queryString else {return}
             
             //MARK: - GoogleApi call for the translation
-            FlyTranslationManager.shared.languageTransalation(jid: getProfileDetails.jid, messageId: message.messageId, QueryString: queryString, targetLanguageCode: FlyDefaults.targetLanguageCode, GooogleAPIKey: googleApiKey_Translation){ (translatedText,isSuccess,errorMessage) in
+            FlyTranslationManager.shared.languageTransalation(jid: getProfileDetails.jid, messageId: message.messageId, QueryString: queryString, targetLanguageCode: CommonDefaults.targetLanguageCode, GooogleAPIKey: googleApiKey_Translation){ (translatedText,isSuccess,errorMessage) in
                 if isSuccess{
                     print("translatedText-->", translatedText)
                 } else
@@ -3866,7 +3961,7 @@ extension ChatViewParentController : UITableViewDataSource ,UITableViewDelegate,
                     
                     //MARK: - Adding Double Tap Gesture for the Incoming Messages
                     
-                    if  FlyDefaults.isTranlationEnabled {
+                    if CommonDefaults.isTranlationEnabled {
                         let  tap = UITapGestureRecognizer(target: self, action: #selector(self.translationLanguage(_:)))
                         tap.numberOfTapsRequired = 2
                         cell.addGestureRecognizer(tap)
@@ -4247,7 +4342,7 @@ extension ChatViewParentController : UITableViewDataSource ,UITableViewDelegate,
                     cell = cell.getCellFor(message, at: indexPath, isShowForwardView: isShowForwardView, isDeleteMessageSelected: isStarredMessageSelected ? true : isDeleteSelected, fromChat: true, isMessageSearch: isStarredMessagePage == true && isStarredSearchEnabled == true ? true : messageSearchEnabled, searchText: isStarredSearchEnabled == true ? searchBar?.text ?? "" : messageSearchBar?.text ?? "", profileDetails: getProfileDetails)!
                     
                     //MARK: - Double tap gesture for VideoIncomingCel
-                    if FlyDefaults.isTranlationEnabled {
+                    if CommonDefaults.isTranlationEnabled {
                         let  tapVideoCaption = UITapGestureRecognizer(target: self, action: #selector(self.translationLanguage(_:)))
                         tapVideoCaption.numberOfTapsRequired = 2
                         cell.captionView.isUserInteractionEnabled = true
@@ -4745,9 +4840,9 @@ extension ChatViewParentController : MessageEventsDelegate {
             if (self?.getProfileDetails.jid == message.chatUserJid){
                 self?.selectedIndexs.removeAll()
                 self?.removeUnreadMessageLabelFromChat()
-                if FlyDefaults.myJid != chatJid {
+                if AppUtils.getMyJid() != chatJid {
                     self?.appendNewMessage(message: message)
-                } else if FlyDefaults.myJid == chatJid && message.chatUserJid == self?.getProfileDetails.jid {
+                } else if AppUtils.getMyJid() == chatJid && message.chatUserJid == self?.getProfileDetails.jid {
                     if self?.getProfileDetails.profileChatType == .singleChat {
                         self?.appendNewMessage(message: message)
                     } else if self?.getProfileDetails.profileChatType == .groupChat {
@@ -5996,7 +6091,7 @@ extension ChatViewParentController {
                 FlyMessenger.downloadMedia(messageId: chatMessage?.messageId ?? "") { [weak self] isSuccess, error, message in                    print("videoDownload \(success) \(error)")
                     if message?.messageType == .image {
                         if let cell = self?.chatTableView.cellForRow(at: indexPath) as? ChatViewVideoIncomingCell {
-                            cell.getCellFor(message, at: indexPath, isShowForwardView: self?.isShowForwardView, isDeleteMessageSelected: self?.isDeleteSelected, profileDetails: self?.getProfileDetails ?? ProfileDetails(jid: FlyDefaults.myJid))
+                            cell.getCellFor(message, at: indexPath, isShowForwardView: self?.isShowForwardView, isDeleteMessageSelected: self?.isDeleteSelected, profileDetails: self?.getProfileDetails ?? ProfileDetails(jid: AppUtils.getMyJid()))
                         }
                     }
                 }
@@ -6611,7 +6706,7 @@ extension ChatViewParentController {
 extension ChatViewParentController {
     
     @objc func makeCall(_ sender : UIButton){
-        print("#callopt \(FlyUtils.printTime()) makeCall from \(FlyDefaults.myJid)")
+        print("#callopt \(FlyUtils.printTime()) makeCall from \(AppUtils.getMyJid())")
         if CallManager.isAlreadyOnAnotherCall(){
             AppAlert.shared.showToast(message: "You’re already on call, can't make new MirrorFly call")
             return
@@ -6663,7 +6758,7 @@ extension ChatViewParentController : TypingStatusDelegate {
     
     func onGroupTypingStatus(groupJid: String, groupUserJid: String, status: TypingStatus) {
         executeOnMainThread { [weak self] in
-            if groupJid == self?.getProfileDetails.jid && groupUserJid != FlyDefaults.myJid {
+            if groupJid == self?.getProfileDetails.jid && groupUserJid != AppUtils.getMyJid() {
                 if status == TypingStatus.composing {
                     let user = self?.groupMembers.filter({$0.memberJid == groupUserJid}).first
                     let name = getUserName(jid: user?.profileDetail?.jid ?? "", name: user?.profileDetail?.name ?? "", nickName: user?.profileDetail?.nickName ?? "", contactType: user?.profileDetail?.contactType ?? .unknown)
@@ -6770,13 +6865,13 @@ extension ChatViewParentController {
     }
     
     func isParticipantExist() -> (doesExist : Bool, message : String) {
-       return GroupManager.shared.isParticiapntExistingIn(groupJid: getProfileDetails.jid, participantJid: FlyDefaults.myJid)
+       return GroupManager.shared.isParticiapntExistingIn(groupJid: getProfileDetails.jid, participantJid: AppUtils.getMyJid())
     }
     
     func getGroupMember() {
         print("getGrouMember")
         groupMembers = [GroupParticipantDetail]()
-        groupMembers =  GroupManager.shared.getGroupMemebersFromLocal(groupJid: getProfileDetails.jid).participantDetailArray.filter({$0.memberJid != FlyDefaults.myJid})
+        groupMembers =  GroupManager.shared.getGroupMemebersFromLocal(groupJid: getProfileDetails.jid).participantDetailArray.filter({$0.memberJid != AppUtils.getMyJid()})
         print("getGrouMember \(groupMembers.count)")
         if mentionSearch.isEmpty {
             searchGroupMembers = mentionArrayFilter().sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() })
@@ -6797,7 +6892,7 @@ extension ChatViewParentController {
             let members = self?.groupMembers ?? [GroupParticipantDetail]()
             for (index, member) in members.enumerated() {
                 let profileDetail = member.profileDetail
-                let myProfile = self?.contactManager.getUserProfileDetails(for: FlyDefaults.myJid)
+                let myProfile = self?.contactManager.getUserProfileDetails(for: AppUtils.getMyJid())
                 if myProfile?.jid != profileDetail?.jid {
                     let participantName = getUserName(jid : profileDetail?.jid ?? "" ,name: profileDetail?.name ?? "", nickName: profileDetail?.nickName ?? "", contactType: profileDetail?.contactType ?? .live)
                     memberList.append(participantName)
@@ -6805,15 +6900,15 @@ extension ChatViewParentController {
             }
 
             members.forEach { member in
-                if FlyDefaults.myJid == member.profileDetail?.jid {
-                    memberList.append("You")
+                if AppUtils.getMyJid() == member.profileDetail?.jid {
+                    memberList.append("You ")
                 }
             }
 
             self?.groupMemberLable.type = .continuous
             self?.groupMemberLable.animationCurve = .linear
             self?.groupMemberLable.speed = .duration(45)
-            self?.groupMemberLable.text = memberList.joined(separator: ",")
+            self?.groupMemberLable.text = memberList.joined(separator: ", ")
             
             print("setGroupMemberInHeader \(memberList)")
         }
@@ -8555,7 +8650,7 @@ extension ChatViewParentController : UIScrollViewDelegate {
                 print("#scroll loadPreviousMessages success")
                 if let chatMessages = result.getData() as? [ChatMessage]{
                     self.groupOldMessages(messages: chatMessages)
-                    if self.availableFeatures.isChatHistoryEnabled && FlyDefaults.chatHistoryEnabled {
+                    if self.availableFeatures.isChatHistoryEnabled && CommonDefaults.chatHistoryEnabled {
                         if chatMessages.isEmpty {
                             self.previousMessagesLoadingDone = true
                         } else {
@@ -8777,7 +8872,7 @@ extension ChatViewParentController {
         if ChatManager.shared.isBusyStatusEnabled() && getProfileDetails.profileChatType == .singleChat {
             let alertController = UIAlertController.init(title: "Disable busy Status. Do you want to continue?" , message: "", preferredStyle: .alert)
             let forwardAction = UIAlertAction(title: "Yes", style: .default) {_ in
-                ChatManager.shared.enableDisableBusyStatus(!FlyDefaults.isUserBusyStatusEnabled)
+                ChatManager.shared.enableDisableBusyStatus(!ChatManager.shared.isBusyStatusEnabled())
                 completion(true)
             }
             let cancelAction = UIAlertAction(title: "No", style: .cancel) { [weak controller] (action) in
@@ -8997,7 +9092,7 @@ extension ChatViewParentController {
 
 extension ChatViewParentController {
     func getStarredMessageList() -> [ChatMessage] {
-        return isStarredMessagePage ? chatViewModel?.getAllFavouriteList().reversed() ?? [] : []
+        return isStarredMessagePage ? chatViewModel?.getAllFavouriteList().filter { !(ChatManager.getRechtChat(jid: $0.chatUserJid)?.isPrivateChat ?? false) }.reversed() ?? [] : []
     }
     
     func scrollToSelectedMessage() {
@@ -9070,8 +9165,10 @@ extension ChatViewParentController: UISearchBarDelegate {
                         let receiverName = getUserName(jid : $0.chatUserJid ,name: ChatManager.profileDetaisFor(jid: $0.chatUserJid )?.name ?? "", nickName: ChatManager.profileDetaisFor(jid: $0.chatUserJid )?.nickName ?? "", contactType: ChatManager.profileDetaisFor(jid: $0.chatUserJid )?.contactType ?? .local)
                         let senderName = getUserName(jid : $0.chatUserJid ,name: ChatManager.profileDetaisFor(jid: $0.senderUserJid)?.name ?? "", nickName: ChatManager.profileDetaisFor(jid: $0.senderUserJid )?.nickName ?? "", contactType: ChatManager.profileDetaisFor(jid: $0.senderUserJid )?.contactType ?? .local)
                         
-                        return ((FlyDefaults.myName == senderName ? "" : senderName.lowercased()).localizedCaseInsensitiveContains(searchText.lowercased()) ||
-                                (FlyDefaults.myName == receiverName ? "" : receiverName.lowercased()).localizedCaseInsensitiveContains(searchText.lowercased()) ||
+                        let myName = ContactManager.getMyProfile().name
+                        
+                        return ((myName == senderName ? "" : senderName.lowercased()).localizedCaseInsensitiveContains(searchText.lowercased()) ||
+                                (myName == receiverName ? "" : receiverName.lowercased()).localizedCaseInsensitiveContains(searchText.lowercased()) ||
                                 "You".localizedCaseInsensitiveContains(searchText.lowercased()) ||
                                 $0.mediaChatMessage?.mediaCaptionText.lowercased().localizedCaseInsensitiveContains(searchText.lowercased()) ?? false ||
                                 $0.messageTextContent.lowercased().localizedCaseInsensitiveContains(searchText.lowercased()) ||
@@ -9499,11 +9596,11 @@ extension ChatViewParentController {
     }
     
     func mentionArrayFilter() -> [GroupParticipantDetail] {
-        groupMembers.filter({ $0.memberJid != FlyDefaults.myJid && $0.profileDetail?.isBlockedByAdmin == false && $0.profileDetail?.contactType != .deleted })
+        groupMembers.filter({ $0.memberJid != AppUtils.getMyJid() && $0.profileDetail?.isBlockedByAdmin == false && $0.profileDetail?.contactType != .deleted })
     }
     
     func mentionArraySearchFilter() -> [GroupParticipantDetail] {
-        groupMembers.filter({ $0.displayName.lowercased().contains(mentionSearch.lowercased()) && $0.memberJid != FlyDefaults.myJid && $0.profileDetail?.isBlockedByAdmin == false && $0.profileDetail?.contactType != .deleted })
+        groupMembers.filter({ $0.displayName.lowercased().contains(mentionSearch.lowercased()) && $0.memberJid != AppUtils.getMyJid() && $0.profileDetail?.isBlockedByAdmin == false && $0.profileDetail?.contactType != .deleted })
     }
 }
 

@@ -36,9 +36,9 @@ class AppLockViewController: UIViewController {
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        if FlyDefaults.appLockPassword == "" {
-            FlyDefaults.appLockenable = false
-            FlyDefaults.appFingerprintenable = false
+        if CommonDefaults.appLockPassword == "" {
+            CommonDefaults.appLockenable = false
+            CommonDefaults.appFingerprintenable = false
         }
         
         AppLockTableview.reloadData()
@@ -68,8 +68,8 @@ extension AppLockViewController: UITableViewDelegate,UITableViewDataSource {
             cell.helpTextView.addGestureRecognizer(tap)
             cell.formaImageView.isUserInteractionEnabled = true
             cell.formaImageView.addGestureRecognizer(formaImageViewTap)
-            cell.switchOutlet.isOn = FlyDefaults.appLockenable
-            cell.separaterView.isHidden = FlyDefaults.appLockenable ? false : true
+            cell.switchOutlet.isOn = CommonDefaults.appLockenable
+            cell.separaterView.isHidden = CommonDefaults.appLockenable ? false : true
             cell.switchOutlet.addTarget(self, action:#selector(AppLockViewController.categorySwitchValueChanged(_:)), for: .valueChanged)
             break
         case .fingerPrintID:
@@ -77,7 +77,7 @@ extension AppLockViewController: UITableViewDelegate,UITableViewDataSource {
             cell.helpTextLabel.text = useFingerPrintIDorFaceID
             cell.helpTextView.isHidden = true
             cell.separaterView.isHidden = true
-            cell.switchOutlet.isOn = FlyDefaults.appFingerprintenable 
+            cell.switchOutlet.isOn = CommonDefaults.appFingerprintenable
             cell.switchOutlet.addTarget(self, action:#selector(AppLockViewController.categorySwitchFingerPrintValueChanged(_:)), for: .valueChanged)
             
        
@@ -114,7 +114,7 @@ extension AppLockViewController: UITableViewDelegate,UITableViewDataSource {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         switch AppLockSettingsArray[indexPath.row]{
         case.pinlock:
-            if FlyDefaults.appLockenable {
+            if CommonDefaults.appLockenable {
                 return selectedCellHeight
             }
             else {
@@ -133,9 +133,11 @@ extension AppLockViewController: UITableViewDelegate,UITableViewDataSource {
     }
     
     @objc func categorySwitchValueChanged(_ sender : UISwitch!){
-        if !FlyDefaults.appLockenable {
-            if FlyDefaults.appLockPassword != "" {
-                FlyDefaults.appLockenable = true
+        if !CommonDefaults.appLockenable {
+            if CommonDefaults.appLockPassword != "" {
+                CommonDefaults.appLockenable = true
+                CommonDefaults.appLockPasswordDate = Date()
+                CommonDefaults.passwordAuthenticationAttemps = 0
             }
             else {
                 let vc = AppLockPasswordViewController(nibName:Identifiers.appLockPasswordViewController, bundle: nil)
@@ -160,16 +162,15 @@ extension AppLockViewController: UITableViewDelegate,UITableViewDataSource {
             AppAlert.shared.showToast(message: ErrorMessage.pleaseEnablefingerPrintonYourdevice)
         }
         
-        if !FlyDefaults.appFingerprintenable && context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error){
+        if !CommonDefaults.appFingerprintenable && context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error){
             
-            if FlyDefaults.appLockPassword != "" && FlyDefaults.appLockenable == true{
-                FlyDefaults.appLockenable = true
+            if CommonDefaults.appLockPassword != "" && CommonDefaults.appLockenable == true{
+                CommonDefaults.appLockenable = true
                 let vc = AuthenticationPINViewController(nibName:Identifiers.authenticationPINViewController, bundle: nil)
                 self.navigationController?.pushViewController(vc, animated: true)
                 vc.fingerPrintEnable = true
             }
-            
-            else if FlyDefaults.appLockPassword == "" && FlyDefaults.appLockenable == false || FlyDefaults.appLockPassword != "" && FlyDefaults.appLockenable == false{
+            else if CommonDefaults.appLockPassword == "" && CommonDefaults.appLockenable == false {
                 AppAlert.shared.showAlert(view: self, title: warning, message: biometricAuthentication, buttonTitle: okButton)
                 AppAlert.shared.onAlertAction = { [weak self] (result)  ->
                     Void in
@@ -180,10 +181,11 @@ extension AppLockViewController: UITableViewDelegate,UITableViewDataSource {
                     }
                 }
                 
+            } else if CommonDefaults.appLockPassword != "" && CommonDefaults.appLockenable == false {
+                AppAlert.shared.showAlert(view: self, title: warning, message: pinAuthentication, buttonTitle: okButton)
             }
         }
-       
-        else if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) && FlyDefaults.appFingerprintenable == true {
+        else if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) && CommonDefaults.appFingerprintenable == true {
             let vc = AuthenticationPINViewController(nibName:Identifiers.authenticationPINViewController, bundle: nil)
             self.navigationController?.pushViewController(vc, animated: true)
             vc.fingerPrintLogout = true

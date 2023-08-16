@@ -19,11 +19,14 @@ class ContactViewModel : NSObject
         if fromServer{
             syncContacts()
         }
+        guard let myJid = try? FlyUtils.getMyJid() else {
+            return
+        }
         ContactManager.shared.getRegisteredUsers(fromServer: fromServer) {  isSuccess, flyError, flyData in
             var data  = flyData
             if isSuccess {
                 if  let  contactsList = data.getData() as? [ProfileDetails]  {
-                    var filteredContact = contactsList.filter( {$0.profileChatType != .groupChat && $0.jid != FlyDefaults.myJid && $0.isBlockedByAdmin == false})
+                    var filteredContact = contactsList.filter( {$0.profileChatType != .groupChat && $0.jid != myJid && $0.isBlockedByAdmin == false})
                     filteredContact.removeAll { pd in
                         removeContacts.contains(pd.jid)
                     }

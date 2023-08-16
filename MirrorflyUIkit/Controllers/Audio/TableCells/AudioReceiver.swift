@@ -387,7 +387,7 @@ class AudioReceiver: BaseTableViewCell, AVAudioPlayerDelegate {
 }
     
     func showHideForwardView(message: ChatMessage?,isShowForwardView: Bool?,isDeletedMessageSelected: Bool?) {
-        if isDeletedMessageSelected ?? false || isStarredMessagePage == true {
+        if isDeletedMessageSelected ?? false {
             // Forward view elements and its data
             forwardView?.isHidden = (isShowForwardView == false || message?.mediaChatMessage?.mediaDownloadStatus == .downloading) ? true : false
             forwardView?.makeCircleView(borderColor: Color.forwardCircleBorderColor.cgColor, borderWidth: 1.5)

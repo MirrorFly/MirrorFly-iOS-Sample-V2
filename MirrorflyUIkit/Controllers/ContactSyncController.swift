@@ -23,7 +23,7 @@ class ContactSyncController: UIViewController {
         syncImage.isHidden = true
         NotificationCenter.default.addObserver(self, selector: #selector(networkChange(_:)), name:  Notification.Name(NetStatus.networkNotificationObserver), object: nil)
         progressInfoLabel.text = ""
-        userName.text = FlyDefaults.myName
+        userName.text = ContactManager.getMyProfile().name
         
         let authorizationStatus = CNContactStore.authorizationStatus(for: .contacts)
         if authorizationStatus == .authorized || authorizationStatus == .denied{
@@ -86,11 +86,11 @@ class ContactSyncController: UIViewController {
     func startSyncingContacts(initialSync : Bool = true) {
         let authorizationStatus = CNContactStore.authorizationStatus(for: .contacts)
         if authorizationStatus == .authorized{
-            FlyDefaults.isContactPermissionDenied = false
-            FlyDefaults.isContactSyncNeeded = true
+            ContactSyncManager.updateContactPermission(isDeined: false)
+            ContactSyncManager.needContactSync(isSync: true)
         } else if authorizationStatus == .denied{
-            FlyDefaults.isContactPermissionDenied = true
-            FlyDefaults.isContactSyncNeeded = false
+            ContactSyncManager.updateContactPermission(isDeined: true)
+            ContactSyncManager.needContactSync(isSync: false)
         }
         if NetworkReachability.shared.isConnected{
             executeOnMainThread {

@@ -22,6 +22,8 @@ class MainTabBarController: UITabBarController{
     var avilableFeatures = ChatManager.getAvailableFeatures()
     
     static var tabBarDelegagte : TabBarDelegate? = nil
+
+    static var privateChatTabBarDelegate : PrivateChatSwitchDelegate? = nil
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,6 +32,7 @@ class MainTabBarController: UITabBarController{
             tabViewControllers = vcs
         }
         MainTabBarController.tabBarDelegagte = self
+        MainTabBarController.privateChatTabBarDelegate = self
         shouldShowCallTab = avilableFeatures.isOneToOneCallEnabled || avilableFeatures.isGroupCallEnabled
         if !shouldShowCallTab{
             setupUI()
@@ -52,49 +55,78 @@ class MainTabBarController: UITabBarController{
 
     func navigateToAuthentication() {
 
-        if (FlyDefaults.appLockenable || FlyDefaults.appFingerprintenable) {
-            let secondsDifference = Calendar.current.dateComponents([.minute, .second], from: FlyDefaults.appBackgroundTime, to: Date())
+        if (CommonDefaults.appLockenable || CommonDefaults.appFingerprintenable) {
+            let secondsDifference = Calendar.current.dateComponents([.minute, .second], from: CommonDefaults.appBackgroundTime, to: Date())
             if secondsDifference.second ?? 0 > 32 || secondsDifference.minute ?? 0 > 0 {
-                FlyDefaults.showAppLock = true
+                CommonDefaults.showAppLock = true
+                CommonDefaults.appLockOnPrivateChat = false
+                CommonDefaults.privateChatOnChatScreen = false
             }
         }
 
-        if FlyDefaults.appFingerprintenable  && FlyDefaults.appLockenable && FlyDefaults.showAppLock {
-            
-            let current = UIApplication.shared.keyWindow?.getTopViewController()
-            if (current is AuthenticationPINViewController || current is FingerPrintPINViewController) {
-                if let vc = current as? FingerPrintPINViewController {
-                    vc.authenticationWithTouchID()
-                }
-               return
-            }
-            
-            if !FlyDefaults.faceOrFingerAuthenticationFails {
-                let initialViewController = FingerPrintPINViewController(nibName: "FingerPrintPINViewController", bundle: nil)
-                let navigationController =  UINavigationController(rootViewController: initialViewController)
-                self.navigationController?.setNavigationBarHidden(true, animated: true)
-                self.navigationController?.pushViewController(initialViewController, animated: false)
+        if CommonDefaults.appFingerprintenable  && CommonDefaults.appLockenable && CommonDefaults.showAppLock {
+            if CommonDefaults.showPrivateLockRecent {
+                showLockScreen()
             } else {
+                let current = UIApplication.shared.keyWindow?.getTopViewController()
+                if (current is AuthenticationPINViewController || current is FingerPrintPINViewController) {
+                    if let vc = current as? FingerPrintPINViewController {
+                        vc.authenticationWithTouchID()
+                    }
+                    return
+                }
+
+                if !CommonDefaults.faceOrFingerAuthenticationFails {
+                    let initialViewController = FingerPrintPINViewController(nibName: "FingerPrintPINViewController", bundle: nil)
+                    let navigationController =  UINavigationController(rootViewController: initialViewController)
+                    self.navigationController?.setNavigationBarHidden(true, animated: true)
+                    self.navigationController?.pushViewController(initialViewController, animated: false)
+                } else {
+                    let initialViewController = AuthenticationPINViewController(nibName: "AuthenticationPINViewController", bundle: nil)
+                    initialViewController.login = true
+                    self.navigationController?.setNavigationBarHidden(true, animated: true)
+                    self.navigationController?.pushViewController(initialViewController, animated: false)
+                }
+            }
+        }
+        else if CommonDefaults.appLockenable && CommonDefaults.appFingerprintenable == false && CommonDefaults.showAppLock {
+            if CommonDefaults.showPrivateLockRecent {
+                showLockScreen()
+            } else {
+                let current = UIApplication.shared.keyWindow?.getTopViewController()
+                if (current is AuthenticationPINViewController || current is FingerPrintPINViewController) {
+                    if let vc = current as? FingerPrintPINViewController {
+                        vc.authenticationWithTouchID()
+                    }
+                    return
+                }
+                
                 let initialViewController = AuthenticationPINViewController(nibName: "AuthenticationPINViewController", bundle: nil)
                 initialViewController.login = true
                 self.navigationController?.setNavigationBarHidden(true, animated: true)
                 self.navigationController?.pushViewController(initialViewController, animated: false)
             }
-        }
-        else if FlyDefaults.appLockenable && FlyDefaults.appFingerprintenable == false && FlyDefaults.showAppLock {
-            
-            let current = UIApplication.shared.keyWindow?.getTopViewController()
-            if (current is AuthenticationPINViewController || current is FingerPrintPINViewController) {
-                if let vc = current as? FingerPrintPINViewController {
-                    vc.authenticationWithTouchID()
-                }
-               return
+        } else if CommonDefaults.showPrivateLockRecent {
+            if !pushNotificationSelected {
+                showLockScreen()
             }
-            
-            let initialViewController = AuthenticationPINViewController(nibName: "AuthenticationPINViewController", bundle: nil)
-            initialViewController.login = true
-            self.navigationController?.setNavigationBarHidden(true, animated: true)
-            self.navigationController?.pushViewController(initialViewController, animated: false)
+        }
+    }
+
+    func showLockScreen() {
+        let current = UIApplication.shared.keyWindow?.getTopViewController()
+        if (current is PrivateChatAuthenticationPINViewController || current is PrivateChatFingerPrintPINViewController) {
+            if let vc = current as? PrivateChatFingerPrintPINViewController {
+                vc.authenticationWithTouchID()
+            }
+           return
+        }
+        if CommonDefaults.appFingerprintenable {
+            let vc = PrivateChatFingerPrintPINViewController(nibName: "PrivateChatFingerPrintPINViewController", bundle: nil)
+            self.navigationController?.pushViewController(vc, animated: false)
+        } else {
+            let vc = PrivateChatAuthenticationPINViewController(nibName:"PrivateChatAuthenticationPINViewController", bundle: nil)
+            self.navigationController?.pushViewController(vc, animated: true)
         }
     }
     
@@ -129,13 +161,13 @@ class MainTabBarController: UITabBarController{
     }
     
     func saveMyJidAsContacts() {
-        let profileData = ProfileDetails(jid: FlyDefaults.myJid)
-        profileData.name = FlyDefaults.myName
-        profileData.nickName = FlyDefaults.myNickName
-        profileData.mobileNumber  = FlyDefaults.myMobileNumber
-        profileData.email = FlyDefaults.myEmail
-        profileData.status = FlyDefaults.myStatus
-        profileData.image = FlyDefaults.myImageUrl
+        let profileData = ProfileDetails(jid: AppUtils.getMyJid())
+        profileData.name = ContactManager.getMyProfile().name
+        profileData.nickName = ContactManager.getMyProfile().nickName
+        profileData.mobileNumber  = ContactManager.getMyProfile().mobileNumber
+        profileData.email = ContactManager.getMyProfile().email
+        profileData.status = ContactManager.getMyProfile().status
+        profileData.image = ContactManager.getMyProfile().image
         
 //        FlyDatabaseController.shared.rosterManager.saveContact(profileDetailsArray: [profileData], chatType: .singleChat, contactType: .live, saveAsTemp: false, calledBy: "")
     }
@@ -160,7 +192,7 @@ class MainTabBarController: UITabBarController{
     func updateUnReadMissedCallBadgeCount() {
         
         if let item : UITabBarItem = chatTabBars?.items?[2] {
-            let missedCallCount = FlyDefaults.unreadMissedCallCount
+            let missedCallCount = CallLogManager.getUnreadMissedCallCount()
             item.badgeValue = (missedCallCount == 0) ? nil : "\(missedCallCount)"
         }
     }
@@ -178,10 +210,8 @@ extension MainTabBarController : ConnectionEventDelegate {
     }
     
     func onConnected() {
-        if FlyDefaults.isFriendsListSyncPending {
-            ContactManager.shared.getRegisteredUsers(fromServer: true){isSuccess,_,_ in
-                FlyDefaults.isFriendsListSyncPending = !isSuccess
-            }
+        if ContactSyncManager.getFriendListSyncStatus() {
+            ContactSyncManager.getRegisterdUsers()
         }
         
     }
@@ -231,6 +261,13 @@ extension MainTabBarController : TabBarDelegate{
     
 }
 
+extension MainTabBarController: PrivateChatSwitchDelegate {
+    func moveToRecentInTabBar() {
+        self.selectedIndex = 0
+        NotificationCenter.default.post(name: Notification.Name("PrivateChatSwitch"), object: nil)
+    }
+}
+
 public protocol TabBarDelegate {
     
     func removeTabAt(index : Int)
@@ -241,3 +278,8 @@ public protocol TabBarDelegate {
 }
 
 
+public protocol PrivateChatSwitchDelegate {
+
+    func moveToRecentInTabBar()
+
+}

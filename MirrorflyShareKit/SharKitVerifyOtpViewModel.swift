@@ -23,7 +23,7 @@ class ShareVerifyOTPViewModel : NSObject
     }
     
     func validateUser(params: NSDictionary, completionHandler:  @escaping (VerifyToken?, Error?)-> Void)  {
-        let Baseurl = FlyDefaults.baseURL
+        let Baseurl = ChatManager.getAppConfigDetails().baseURL
         let url = Baseurl + verifyUser
         print("verifyOTPViewModel.validateUser \(url)")
         apiService.post(withEndPoint: url, params: params as? Parameters, headers: nil).responseJSON { (response) in

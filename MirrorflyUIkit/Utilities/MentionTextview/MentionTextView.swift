@@ -164,7 +164,7 @@ extension MentionTextView {
             if let slices = textString.slice(from: "`", to: "`") {
                 let mentionRange = (textString as NSString).range(of: "`\(slices)`")
                 let mentionRange2 = (copyMessage as NSString).range(of: "@`\(slices)`")
-                if users != FlyDefaults.myXmppUsername {
+                if users != ChatManager.getXMPPDetails().XMPPUsername {
                     highlightUsers.append((slices, NSRange(location: mentionRange2.location, length: mentionRange2.length-2)))
                     highlightCustomUsers.append((users, NSRange(location: mentionRange2.location, length: mentionRange2.length-2)))
                 }

@@ -28,10 +28,11 @@ def uikit_pods
   pod 'RxSwift', '6.5.0'
   pod 'RxCocoa', '6.5.0'
   pod 'SwiftLinkPreview'
+  pod 'lottie-ios'
   
   #submodule dependency pods
-  
-  pod 'MirrorFlySDK', '5.10.6'
+
+  pod 'MirrorFlySDK', '5.11.1'
 
 end
 
@@ -39,8 +40,8 @@ def notification_pods
 
   #submodule dependency pods
 
-  pod 'MirrorFlySDK', '5.10.6'
-  
+  pod 'MirrorFlySDK', '5.11.1'
+
 end
 
 target 'UiKitQa' do
@@ -54,7 +55,6 @@ end
 target 'UikitQaShareKit' do
   uikit_pods
 end
-
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|

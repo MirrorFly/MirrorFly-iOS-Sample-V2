@@ -140,3 +140,24 @@ extension UIWindow {
 public func getCGSize(width: Int, height: Int) -> CGSize {
    return CGSize(width: 15, height: 15)
 }
+
+extension UIView {
+    func addLaunchSubview() {
+        let view = UIView()
+        view.accessibilityIdentifier = "addLaunchSubview"
+        view.frame = self.bounds
+        if let launch = LockScreenController(nibName: "LockScreenController", bundle: nil).view {
+            launch.frame = self.bounds
+            view.addSubview(launch)
+        }
+        self.addSubview(view)
+    }
+
+    func removeLaunchSubview() {
+        for view in self.subviews {
+            if view.accessibilityIdentifier == "addLaunchSubview" {
+                view.removeFromSuperview()
+            }
+        }
+    }
+}

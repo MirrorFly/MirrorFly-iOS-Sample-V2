@@ -233,15 +233,18 @@ extension UIImageView {
     }
 
     func loadFlyImage(imageURL: String, name: String, chatType: ChatType = .singleChat, uniqueId: String = "", contactType : ContactType = .unknown,jid: String, isBlockedByAdmin: Bool = false, validateBlock: Bool = true){
-        let urlString = FlyDefaults.baseURL + "media/" + imageURL + "?mf=" + FlyDefaults.authtoken
+        let urlString = ChatManager.getImageUrl(imageName: imageURL)
         var url = URL(string: urlString)
         var placeholder : UIImage?
+        guard let myJid = try? FlyUtils.getMyJid() else {
+            return
+        }
         if validateBlock {
             switch chatType {
             case .groupChat:
                 placeholder = UIImage(named: "smallGroupPlaceHolder")
             default:
-                if uniqueId == FlyDefaults.myJid || contactType == .unknown || getIsBlockedByMe(jid: jid) || isBlockedByAdmin {
+                if uniqueId == myJid || contactType == .unknown || getIsBlockedByMe(jid: jid) || isBlockedByAdmin {
                     placeholder = UIImage(named: "ic_profile_placeholder")
                 } else {
                     let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -256,7 +259,7 @@ extension UIImageView {
             case .groupChat:
                 placeholder = UIImage(named: "smallGroupPlaceHolder")
             default:
-                if uniqueId == FlyDefaults.myJid || getIsBlockedByMe(jid: jid) || isBlockedByAdmin {
+                if uniqueId == myJid || getIsBlockedByMe(jid: jid) || isBlockedByAdmin {
                     placeholder = UIImage(named: "ic_profile_placeholder")
                 } else {
                     let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)

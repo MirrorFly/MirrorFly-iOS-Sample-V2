@@ -163,7 +163,7 @@ class ContactViewController: UIViewController {
             topBarViewHeight.constant = 98
             serachFieldTopMargin.constant = 4
         }
-        
+        NotificationCenter.default.addObserver(self, selector: #selector(self.methodOfReceivedPrivateChatNotification(notification:)), name: Notification.Name("PrivateChatAlertView"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(self.methodOfReceivedNotification(notification:)), name: Notification.Name(Identifiers.ncContactRefresh), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(self.contactSyncCompleted(notification:)), name: NSNotification.Name(FlyConstants.contactSyncState), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(networkChange(_:)),name:Notification.Name(NetStatus.networkNotificationObserver),object: nil)
@@ -200,6 +200,11 @@ class ContactViewController: UIViewController {
         ChatManager.shared.adminBlockDelegate = nil
         ChatManager.shared.availableFeaturesDelegate = nil
     }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        NotificationCenter.default.removeObserver(self, name: Notification.Name("PrivateChatAlertView"), object: nil)
+    }
     
     func setupUI() {
         navigationController?.view.backgroundColor = .white
@@ -210,6 +215,7 @@ class ContactViewController: UIViewController {
         searchTxt.placeholder = search
         contactList.estimatedRowHeight = 60
         contactList.tableFooterView = UIView()
+        contactList.tableHeaderView = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: 0.1))
     }
     
     func configureDefaults() {
@@ -243,6 +249,10 @@ class ContactViewController: UIViewController {
         UIView.transition(with: profilePopupContainer, duration: 0.5, options: .transitionFlipFromLeft, animations: { [weak self] in
             self?.profilePopupContainer.isHidden = true
         })
+    }
+
+    @objc func methodOfReceivedPrivateChatNotification(notification: Notification) {
+        MainTabBarController.privateChatTabBarDelegate?.moveToRecentInTabBar()
     }
     
     @objc func methodOfReceivedNotification(notification: Notification) {
@@ -299,7 +309,7 @@ class ContactViewController: UIViewController {
                 }
             }
         }else{
-            var groupMembers =  GroupManager.shared.getGroupMemebersFromLocal(groupJid: groupJid).participantDetailArray.filter({$0.memberJid != FlyDefaults.myJid && $0.profileDetail?.isBlockedByAdmin == false})
+            var groupMembers =  GroupManager.shared.getGroupMemebersFromLocal(groupJid: groupJid).participantDetailArray.filter({$0.memberJid != AppUtils.getMyJid() && $0.profileDetail?.isBlockedByAdmin == false})
             if isInvite{
                 groupMembers.removeAll { member in
                     callUsers.contains(member.memberJid)
@@ -335,7 +345,7 @@ class ContactViewController: UIViewController {
     }
     
     func refreshContacts() {
-        if ENABLE_CONTACT_SYNC && CNContactStore.authorizationStatus(for: CNEntityType.contacts) == .denied && groupJid.isEmpty || FlyDefaults.isContactPermissionSkipped && ENABLE_CONTACT_SYNC{
+        if ENABLE_CONTACT_SYNC && CNContactStore.authorizationStatus(for: CNEntityType.contacts) == .denied && groupJid.isEmpty || ContactSyncManager.isPermissionSkipped() && ENABLE_CONTACT_SYNC{
             contacts.removeAll()
             allContacts.removeAll()
             return
@@ -436,14 +446,14 @@ class ContactViewController: UIViewController {
         if let profile =  tappedProfile{
             let name = getUserName(jid: profile.jid,name: profile.name, nickName: profile.nickName, contactType: profile.contactType)
             self.userName.text = name
-            let urlString = FlyDefaults.baseURL + "media/" + profile.image + "?mf=" + FlyDefaults.authtoken
+            let urlString = ChatManager.getImageUrl(imageName: profile.image)
             var url = URL(string: urlString)
             var placeholder : UIImage?
             switch profile.profileChatType {
             case .groupChat:
                 placeholder = UIImage(named: "smallGroupPlaceHolder")
             default:
-                if profile.jid == FlyDefaults.myJid || getIsBlockedByMe(jid: profile.jid) || (IS_LIVE && ENABLE_CONTACT_SYNC && profile.isItSavedContact == false) {
+                if profile.jid == AppUtils.getMyJid() || getIsBlockedByMe(jid: profile.jid) || (IS_LIVE && ENABLE_CONTACT_SYNC && profile.isItSavedContact == false) {
                     url = nil
                     placeholder = UIImage(named: "ic_profile_placeholder")
                     userImage?.backgroundColor =  Color.groupIconBackgroundGray
@@ -544,6 +554,7 @@ class ContactViewController: UIViewController {
         if profile.profileChatType == .singleChat{
             let vc = UIStoryboard.init(name: Storyboards.chat, bundle: Bundle.main).instantiateViewController(withIdentifier: Identifiers.contactInfoViewController) as? ContactInfoViewController
             vc?.contactJid = profile.jid
+            vc?.isFromContactInfo = true
             vc?.navigationController?.modalPresentationStyle = .overFullScreen
             self.navigationController?.pushViewController(vc!, animated: true)
         }
@@ -555,7 +566,7 @@ class ContactViewController: UIViewController {
         
         let contactPermissionStatus = CNContactStore.authorizationStatus(for: CNEntityType.contacts)
         
-        if FlyDefaults.isContactPermissionSkipped && contactPermissionStatus == .authorized{
+        if ContactSyncManager.isPermissionSkipped() && contactPermissionStatus == .authorized{
             syncSkippedDialog()
         }else if ENABLE_CONTACT_SYNC {
             
@@ -572,7 +583,7 @@ class ContactViewController: UIViewController {
             } else if (contactPermissionStatus == .restricted || contactPermissionStatus == .notDetermined){
                 CNContactStore().requestAccess(for: .contacts){ [weak self] (access, error)  in
                     executeOnMainThread {
-                        FlyDefaults.isContactPermissionSkipped = false
+                        ContactSyncManager.updateContactPermission(isSkipped: false)
                         self?.contactViewModel.syncContacts()
                         self?.refreshControl.endRefreshing()
                     }
@@ -611,7 +622,7 @@ class ContactViewController: UIViewController {
                                       preferredStyle: UIAlertController.Style.alert)
         alert.addAction(UIAlertAction(title: "Yes", style: .default, handler: { (alert) -> Void in
             executeOnMainThread { [weak self] in
-                FlyDefaults.isContactPermissionSkipped = false
+                ContactSyncManager.updateContactPermission(isSkipped: false)
                 self?.contactViewModel.syncContacts()
             }
         }))
@@ -646,11 +657,32 @@ extension ContactViewController: CallStatusContactDelegate {
             callUsers.removeAll { user in
                 user == userId
             }
-            resetParams()
-            allContacts.removeAll()
-            contacts.removeAll()
-            contactList.reloadData()
-            getUsersList(pageNo: 1, pageSize: 20, searchTerm: searchTerm)
+            if isInvite && !groupJid.isEmpty {
+                executeOnMainThread {
+                    let  profileDetail = self.allContacts.filter { profile in
+                        return profile.jid == userId
+                    }
+                    let contact = self.contacts.filter({$0.jid == userId})
+                    if (contact.count == 0) {
+                        self.contacts.append(contentsOf: profileDetail)
+                    }
+                    self.contactList.reloadData()
+                }
+            }else {
+                resetParams()
+                allContacts.removeAll()
+                contacts.removeAll()
+                contactList.reloadData()
+                getUsersList(pageNo: 1, pageSize: 20, searchTerm: searchTerm)
+            }
+        case .CONNECTED:
+            executeOnMainThread {
+                self.contacts.removeAll { pd in
+                    pd.jid == userId
+                }
+                self.contactList.reloadData()
+            }
+           
         default: break
         }
     }
@@ -749,14 +781,17 @@ extension ContactViewController :  UITableViewDelegate, UITableViewDataSource {
         linkLable.text = callLink
         headerView.addSubview(linkLable)
         
-        let copyButton = UIImageView.init(frame: CGRect(x: headerView.frame.size.width - 40, y:  CGRectGetMinY(profileImg.frame) + 10, width: 20, height: 20))
-        copyButton.isUserInteractionEnabled = true
-        copyButton.image = UIImage(named: "copy_link")
-        copyButton.contentMode = .scaleAspectFit
+        let copyButton = UIButton()
+        copyButton.translatesAutoresizingMaskIntoConstraints = false
         headerView.addSubview(copyButton)
+        copyButton.rightAnchor.constraint(equalTo: headerView.rightAnchor, constant: -10).isActive = true
+        copyButton.widthAnchor.constraint(equalToConstant: 40).isActive = true
+        copyButton.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        copyButton.centerYAnchor.constraint(equalTo: profileImg.centerYAnchor, constant: 0).isActive = true
+        copyButton.isUserInteractionEnabled = true
+        copyButton.setImage(UIImage(named: "copy_link"), for: .normal)
         
-        let tap = UITapGestureRecognizer(target: self, action: #selector(self.handleTapWithCopy(_:)))
-        copyButton.addGestureRecognizer(tap)
+        copyButton.addTarget(self, action: #selector(handleTapWithCopy), for: .touchUpInside)
         
         
         let borderView = UIView.init(frame: CGRect(x: 20, y: CGRectGetMaxY(headerView.frame) - 5, width: headerView.frame.size.width - 20, height: 1))
@@ -913,6 +948,7 @@ extension ContactViewController :  UITableViewDelegate, UITableViewDataSource {
             vc?.replyMessageObj = replyMessageObj
             vc?.replyMessagesDelegate = self
             vc?.messageText = messageTxt
+            vc?.isFromContactScreen = true
             ContactManager.shared.saveUser(profileDetails: profile, saveAs: .live)
             navigationController?.modalPresentationStyle = .fullScreen
             guard let viewController = vc else { return }

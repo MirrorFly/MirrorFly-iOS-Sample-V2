@@ -155,7 +155,7 @@ class AuthenticationPINViewController: ShareKitBaseViewController, UITextFieldDe
     }
 
     func showChangePinAlert() {
-        FlyDefaults.pinChangeAlertShownDate = Date().xmppDateString
+        CommonDefaults.pinChangeAlertShownDate = Date().xmppDateString
 
         let values : [String] = ["Change PIN", "OK"]
         var actions = [(String, UIAlertAction.Style)]()
@@ -163,7 +163,7 @@ class AuthenticationPINViewController: ShareKitBaseViewController, UITextFieldDe
             actions.append((title, UIAlertAction.Style.default))
         }
 
-        ShareKitActionSheet.shared.showActionSeet(view: self, title : "", message: "Your PIN will be expired in \(31 - daysBetween(start: FlyDefaults.appLockPasswordDate, end: Date())) day(s)", showCancel: false, actions: actions, style: .alert, sheetCallBack: { [weak self] didCancelTap, tappedTitle in
+        ShareKitActionSheet.shared.showActionSeet(view: self, title : "", message: "Your PIN will be expired in \(31 - daysBetween(start: CommonDefaults.appLockPasswordDate, end: Date())) day(s)", showCancel: false, actions: actions, style: .alert, sheetCallBack: { [weak self] didCancelTap, tappedTitle in
             if !didCancelTap {
                 switch tappedTitle {
                 case "Change PIN":
@@ -246,7 +246,7 @@ class AuthenticationPINViewController: ShareKitBaseViewController, UITextFieldDe
         txtSixth.delegate = self
         verifyOTPViewModel =  ShareVerifyOTPViewModel()
         otpViewModel = ShareOTPViewModel()
-        phoneNumber = FlyDefaults.myMobileNumber
+        phoneNumber = ContactManager.getMyProfile().mobileNumber
         
         self.collectionview.register(UINib(nibName:Identifiers.authenticationPINCollectionViewCell, bundle: .main), forCellWithReuseIdentifier:Identifiers.authenticationPINCollectionViewCell)
         
@@ -439,69 +439,69 @@ class AuthenticationPINViewController: ShareKitBaseViewController, UITextFieldDe
     
     //PIN VALIDATION
     func validateAppPIN() {
-        if FlyDefaults.passwordAuthenticationAttemps > 4 {
+        if CommonDefaults.passwordAuthenticationAttemps > 4 {
             showfailedAttempsActionAlert()
         }
 
-        if pinInput == FlyDefaults.appLockPassword  {
+        if pinInput == CommonDefaults.appLockPassword  {
             if isResetByFailedAttempts {
 //                if FlyDefaults.showAppLock {
 //                    self.navigationController?.popToRootViewController(animated: false)
 //                } else {
 //                    self.navigationController?.popViewController(animated: true)
 //                }
-                FlyDefaults.showAppLock = false
-                FlyDefaults.faceOrFingerAuthenticationFails = false
+                CommonDefaults.showAppLock = false
+                CommonDefaults.faceOrFingerAuthenticationFails = false
             } else if isDisablePin {
-                FlyDefaults.appLockenable = false
-                FlyDefaults.appFingerprintenable = false
-                if FlyDefaults.showAppLock {
+                CommonDefaults.appLockenable = false
+                CommonDefaults.appFingerprintenable = false
+                if CommonDefaults.showAppLock {
                     self.navigationController?.popToRootViewController(animated: false)
                 } else {
                     self.navigationController?.popViewController(animated: true)
                 }
-                FlyDefaults.showAppLock = false
-                FlyDefaults.faceOrFingerAuthenticationFails = false
+                CommonDefaults.showAppLock = false
+                CommonDefaults.faceOrFingerAuthenticationFails = false
             } else {
                 if login == true {
-                    FlyDefaults.appLockenable = true
+                    CommonDefaults.appLockenable = true
                 }
                 else if logout == true{
-                    FlyDefaults.appLockenable = false
+                    CommonDefaults.appLockenable = false
                     requestLogout()
                 }
-                else if FlyDefaults.appLockenable == true {
+                else if CommonDefaults.appLockenable == true {
                     if  disableBothPIN == true {
-                        FlyDefaults.appLockenable = false
-                        FlyDefaults.appFingerprintenable = false
+                        CommonDefaults.appLockenable = false
+                        CommonDefaults.appFingerprintenable = false
                     }
                     else if fingerPrintEnable == true{
-                        FlyDefaults.appFingerprintenable = true
-                        FlyDefaults.appLockenable = true
+                        CommonDefaults.appFingerprintenable = true
+                        CommonDefaults.appLockenable = true
                     }
                 }
 
-                if FlyDefaults.appFingerprintenable == true && FlyDefaults.appLockenable == true {
+                if CommonDefaults.appFingerprintenable == true && CommonDefaults.appLockenable == true {
                     if fingerPrintLogin == true {
-                        FlyDefaults.appFingerprintenable = true
-                        FlyDefaults.appLockenable = true
+                        CommonDefaults.appFingerprintenable = true
+                        CommonDefaults.appLockenable = true
                     }
                     else if fingerPrintLogout == true  {
-                        FlyDefaults.appFingerprintenable = false
+                        CommonDefaults.appFingerprintenable = false
                     }
                 }
                 if fingerPrintLogin || noFingerprintAdded{
                     if noFingerprintAdded == true{
-                        FlyDefaults.appFingerprintenable = false
+                        CommonDefaults.appFingerprintenable = false
                     }
-                    FlyDefaults.showAppLock = false
-                    FlyDefaults.faceOrFingerAuthenticationFails = false
+                    CommonDefaults.showAppLock = false
+                    CommonDefaults.faceOrFingerAuthenticationFails = false
                     let initialViewController = SharekitShareToViewController(nibName: "SharekitShareToViewController", bundle: nil)
                     self.navigationController?.setNavigationBarHidden(true, animated: true)
                     self.navigationController?.pushViewController(initialViewController, animated: false)
                 } else {
-                    FlyDefaults.showAppLock = false
-                    FlyDefaults.faceOrFingerAuthenticationFails = false
+                    CommonDefaults.showAppLock = false
+                    CommonDefaults.faceOrFingerAuthenticationFails = false
                     let initialViewController = SharekitShareToViewController(nibName: "SharekitShareToViewController", bundle: nil)
                     self.navigationController?.setNavigationBarHidden(true, animated: true)
                     self.navigationController?.pushViewController(initialViewController, animated: false)
@@ -523,7 +523,7 @@ class AuthenticationPINViewController: ShareKitBaseViewController, UITextFieldDe
     }
 
     func forgotPassword() {
-        phoneNumber = "+"+FlyDefaults.myMobileNumber
+        phoneNumber = "+" + ContactManager.getMyProfile().mobileNumber
         if NetworkReachability.shared.isConnected {
             startLoading(view: self, withText: pleaseWait)
             //Request SMS
@@ -601,7 +601,9 @@ extension AuthenticationPINViewController: UICollectionViewDelegate,UICollection
                 cell.passwordImage.image = UIImage(named: ImageConstant.otpPin)
             }
             if (pinInput.count == 4 && indexPath.item == 3){
-                validateAppPIN()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
+                    self?.validateAppPIN()
+                }
             }
             
             return cell
@@ -623,7 +625,7 @@ extension AuthenticationPINViewController: UICollectionViewDelegate,UICollection
             print(array[indexPath.row])
             if indexPath.row != 11 && indexPath.row != 9{
                 let text = array[indexPath.row]
-                if (pinInput.count <= 4) {
+                if (pinInput.count < 4) {
                     pinInput.append(text)
                 }
                 print("pinInput",pinInput)

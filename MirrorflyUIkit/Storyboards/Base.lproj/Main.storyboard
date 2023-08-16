@@ -2351,6 +2351,8 @@
                         <outlet property="chatActionVideoCallButton" destination="0o3-I6-IzL" id="b8J-gH-fe2"/>
                         <outlet property="chatTabBarItem" destination="J3e-cQ-YgM" id="ssl-9i-WB7"/>
                         <outlet property="chatTagsCollectionView" destination="UaY-kQ-Wcb" id="TxE-zJ-3sO"/>
+                        <outlet property="contactFloatButton" destination="vQT-ih-oEM" id="9tX-jB-4Ld"/>
+                        <outlet property="contactFloatView" destination="c9J-Ef-EZk" id="ISm-Jg-gCg"/>
                         <outlet property="createGroupButton" destination="z9e-xZ-arx" id="03I-aj-Lsb"/>
                         <outlet property="deleteChatButton" destination="gJQ-mF-wJ0" id="Rx7-sW-WfJ"/>
                         <outlet property="descriptionMessageText" destination="rGP-Gi-au4" id="mFf-H9-NP3"/>
@@ -4232,7 +4234,7 @@
                                         <rect key="frame" x="0.0" y="20" width="414" height="50"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="About and Help" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LCM-1d-T0D">
-                                                <rect key="frame" x="131.66666666666666" y="11" width="150.99999999999997" height="26"/>
+                                                <rect key="frame" x="131.66666666666666" y="11.666666666666666" width="150.99999999999997" height="24.666666666666671"/>
                                                 <fontDescription key="fontDescription" name="SFUIDisplay-Bold" family="SF UI Display" pointSize="21"/>
                                                 <color key="textColor" name="PrimaryTextColor"/>
                                                 <nil key="highlightedColor"/>
@@ -4326,7 +4328,7 @@
                                         <rect key="frame" x="0.0" y="20" width="414" height="50"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="About and Help" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zgg-fF-1m8">
-                                                <rect key="frame" x="131.66666666666666" y="11" width="150.99999999999997" height="26"/>
+                                                <rect key="frame" x="131.66666666666666" y="11.666666666666666" width="150.99999999999997" height="24.666666666666671"/>
                                                 <fontDescription key="fontDescription" name="SFUIDisplay-Bold" family="SF UI Display" pointSize="21"/>
                                                 <color key="textColor" name="PrimaryTextColor"/>
                                                 <nil key="highlightedColor"/>
@@ -4756,7 +4758,7 @@
                                         <rect key="frame" x="0.0" y="20" width="414" height="50"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="About and Help" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tBb-wx-yyt">
-                                                <rect key="frame" x="131.66666666666666" y="11" width="150.99999999999997" height="26"/>
+                                                <rect key="frame" x="131.66666666666666" y="11.666666666666666" width="150.99999999999997" height="24.666666666666671"/>
                                                 <fontDescription key="fontDescription" name="SFUIDisplay-Bold" family="SF UI Display" pointSize="21"/>
                                                 <color key="textColor" name="PrimaryTextColor"/>
                                                 <nil key="highlightedColor"/>
