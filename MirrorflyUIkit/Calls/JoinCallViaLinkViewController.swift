@@ -48,7 +48,7 @@ class JoinCallViaLinkViewController: UIViewController {
         CallManager.startVideoCapture()
         localRenderer.frame = CGRect(x: 0, y: 0, width: videoView.bounds.width, height: videoView.bounds.height)
         
-        CallManager.subscribeToCallEvents(link: self.callLink, name:  FlyDefaults.myName) { isSuccess, flyError in
+        CallManager.subscribeToCallEvents(link: self.callLink, name: ContactManager.getMyProfile().name) { isSuccess, flyError in
             if !isSuccess {
                 let error = flyError?.description ?? ""
                 self.handleErrorResponse(errorMessage: error)
@@ -83,9 +83,14 @@ class JoinCallViaLinkViewController: UIViewController {
     
     func setupUI() {
         
+        NotificationCenter.default.addObserver(self, selector: #selector(willEnterForeground), name: UIApplication.willEnterForegroundNotification
+                    , object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(didEnterBackground), name: UIApplication.didEnterBackgroundNotification
+                    , object: nil)
+        
         self.networkMonitor()
         
-        if let profileDetail = ContactManager.shared.getUserProfileDetails(for: FlyDefaults.myJid) {
+        if let profileDetail = ContactManager.shared.getUserProfileDetails(for: AppUtils.getMyJid()) {
            
             let profileImageStr = profileDetail.thumbImage.isEmpty ? profileDetail.image : profileDetail.thumbImage
             
@@ -109,6 +114,30 @@ class JoinCallViaLinkViewController: UIViewController {
         
         self.localRenderer.frame = CGRect(x: 0, y: 0, width: videoView.bounds.width, height: videoView.bounds.height)
         videoView.addSubview(self.localRenderer)
+    }
+    
+    @objc func willEnterForeground() {
+        initJoinLink()
+    }
+    
+    func initJoinLink() {
+        CallManager.setJoinCallDelegate(delegate: self)
+        CallManager.setupJoinCallViaLink()
+        CallManager.subscribeToCallEvents(link: self.callLink, name: ContactManager.getMyProfile().name) { isSuccess, flyError in
+            if !isSuccess {
+                let error = flyError?.description ?? ""
+                self.handleErrorResponse(errorMessage: error)
+            }else{
+                self.joinButton.isEnabled = true
+                self.joinButton.alpha = 1
+                self.checkMicPermission()
+                self.checkCameraPermission(sourceType: .camera)
+            }
+        }
+    }
+    
+    @objc func didEnterBackground() {
+        CallManager.cleanUpJoinCallViaLink()
     }
     
     @IBAction func backButtonAction(_ sender: UIButton) {
@@ -144,8 +173,10 @@ class JoinCallViaLinkViewController: UIViewController {
                 
                 userProfileImage.isHidden = true
                 videoButton.isSelected = false
-                localRenderer.isHidden = false
                 CallManager.muteVideo(false)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    self.localRenderer.isHidden = false
+                }
                 
             }else {
                 
@@ -242,6 +273,7 @@ class JoinCallViaLinkViewController: UIViewController {
                     let userName = CallManager.getUserName(userId: jid)
                     unknowGroupMembers.append(userName)
                     profileImage[index].image = UIImage(named: "ic_profile_placeholder")
+                    profileImage[index].isHidden = false
                     countLabel.isHidden = true
                 }
                 
@@ -289,6 +321,7 @@ class JoinCallViaLinkViewController: UIViewController {
         NetworkReachability.shared.netStatusChangeHandler = {
             if !NetworkReachability.shared.isConnected {
                 executeOnMainThread {
+                    self.initJoinLink()
                     self.alertLabel.isHidden = false
                     self.alertLabel.text = "Please check you’re internet connection"
                 }
@@ -351,7 +384,7 @@ extension JoinCallViaLinkViewController: JoinCallDelegate {
     
     func onUsersUpdated(usersList: [String]) {
         
-        if usersList.count == 8 && usersList.contains(FlyDefaults.myJid){
+        if usersList.count == 8 && usersList.contains(AppUtils.getMyJid()){
             return
         }
         self.updateUsersDetails(usersList: usersList)

@@ -163,7 +163,7 @@ class ChatViewVideoIncomingCell: BaseTableViewCell {
         replyTextLabel?.text = ""
         replyUserLabel?.text = ""
         translatedCaptionLabel?.text = ""
-        captionViewHolder?.spacing = FlyDefaults.isTranlationEnabled && message?.isMessageTranslated ?? false ? 10 : 0
+        captionViewHolder?.spacing = CommonDefaults.isTranlationEnabled && message?.isMessageTranslated ?? false ? 10 : 0
         // Starred Messages
         // Starred Messages
         if let captionTxt = message?.mediaChatMessage?.mediaCaptionText, captionTxt == "" {
@@ -427,7 +427,7 @@ class ChatViewVideoIncomingCell: BaseTableViewCell {
         
         //MARK: - Populating the Incoming Cell with the translated message
         
-        if (message!.isMessageTranslated && FlyDefaults.isTranlationEnabled) {
+        if (message!.isMessageTranslated && CommonDefaults.isTranlationEnabled) {
             guard let chatMessage = message else {return self }
             print(chatMessage.mediaChatMessage?.mediaCaptionText)
             print(chatMessage.translatedMessageTextContent)
@@ -438,7 +438,7 @@ class ChatViewVideoIncomingCell: BaseTableViewCell {
     }
     
     func showHideForwardView(message : ChatMessage?,isDeletedSelected: Bool?,isShowForwardView: Bool?) {
-        if isDeletedSelected ?? false || isStarredMessagePage == true {
+        if isDeletedSelected ?? false {
             // Forward view elements and its data
             forwardView?.isHidden = (isShowForwardView == false || message?.mediaChatMessage?.mediaDownloadStatus == .downloading) ? true : false
             forwardView?.makeCircleView(borderColor: Color.forwardCircleBorderColor.cgColor, borderWidth: 1.5)

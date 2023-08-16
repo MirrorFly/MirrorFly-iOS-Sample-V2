@@ -103,7 +103,6 @@ class OTPViewController: UIViewController {
             let phoneNumber = countryCode + mobileNumber
             if mobileNumber.count >= minimumMobileNumber {
                 if phoneNumberKit.isValidPhoneNumber(phoneNumber) {
-                    FlyDefaults.myMobileNumber =  phoneNumber
                     if mobileNumber.isValidMobileNumber(mobileNumber: mobileNumber) {
                         if NetworkReachability.shared.isConnected {
                             startLoading(withText: pleaseWait)

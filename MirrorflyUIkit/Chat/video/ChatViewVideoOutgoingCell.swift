@@ -422,7 +422,7 @@ class ChatViewVideoOutgoingCell: BaseTableViewCell {
     }
     
     func showHideForwardView(message: ChatMessage?,isShowForwardView: Bool?,isDeleteMessageSelected: Bool?) {
-        if isDeleteMessageSelected ?? false || isStarredMessagePage == true {
+        if isDeleteMessageSelected ?? false {
             // Forward view elements and its data
             forwardView?.isHidden = (isShowForwardView == false || message?.mediaChatMessage?.mediaUploadStatus == .uploading)  || (message?.isMessageRecalled == true) ? true : false
             forwardView?.makeCircleView(borderColor: Color.forwardCircleBorderColor.cgColor, borderWidth: 1.5)

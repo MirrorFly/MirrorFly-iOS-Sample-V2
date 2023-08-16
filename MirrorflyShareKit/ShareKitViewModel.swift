@@ -15,7 +15,7 @@ import Contacts
 
 let BASE_URL =  "https://api-preprod-sandbox.mirrorfly.com/api/v1/"
 let CONTAINER_ID = "group.com.mirrorfly.qa"
-let LICENSE_KEY = "XXXXXXXXXXXXXXX"
+let LICENSE_KEY = "xxxxxxxxxxxxxxxxxx"
 let IS_LIVE = false
 let APP_NAME = "UiKit"
 let ENABLE_CONTACT_SYNC = false
@@ -56,7 +56,7 @@ class ShareKitViewModel {
     }
     
     func isLoggedIn() -> Bool {
-        return FlyDefaults.isLoggedIn
+        return ChatManager.getAppLoggedIn()
     }
 
     func clearModel() {

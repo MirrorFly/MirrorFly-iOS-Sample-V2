@@ -132,7 +132,7 @@ class Utility: NSObject{
         var restEndUrl:String = ""
         
         if (!restEnd.hasPrefix("http://") && !restEnd.hasPrefix("https://")) {
-            restEndUrl = FlyDefaults.baseURL + restEnd
+            restEndUrl = ChatManager.getAppConfigDetails().baseURL + restEnd
         }
         return restEndUrl
     }
@@ -190,7 +190,7 @@ class Utility: NSObject{
                     let headers: HTTPHeaders
                     headers = [
                         "Content-Type": "application/json",
-                        "Authorization": FlyDefaults.authtoken,
+                        "Authorization": ChatManager.getAppConfigDetails().authtoken,
                         "messageID" : ""
                     ]
                     AF.download(endPoint, method: .get, headers: headers, to: destination)

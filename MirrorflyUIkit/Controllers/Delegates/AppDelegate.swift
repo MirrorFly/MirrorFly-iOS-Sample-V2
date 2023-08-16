@@ -21,7 +21,7 @@ import AVFoundation
 import MirrorFlySDK
 
 let BASE_URL = "https://api-preprod-sandbox.mirrorfly.com/api/v1/"
-let LICENSE_KEY = "XXXXXXXXXXXXXXX"
+let LICENSE_KEY = "xxxxxxxxxxxxxxxxxx"
 let XMPP_DOMAIN = "xmpp-preprod-sandbox.mirrorfly.com"
 let XMPP_PORT = 5222
 let SOCKETIO_SERVER_HOST = "https://signal-preprod-sandbox.mirrorfly.com"
@@ -36,8 +36,8 @@ let APP_NAME = "UiKitQa"
 let ICLOUD_CONTAINER_ID = "iCloud.com.mirrorfly.qa"
 
 
-
 let isMigrationDone = "isMigrationDone"
+let isHideNotificationContent = false
 
 #if DEBUG
 
@@ -48,6 +48,7 @@ let ISEXPORT = true
 
 
 var pushChatId: String?
+var pushNotificationSelected: Bool = false
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
@@ -70,10 +71,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
         ChatManager.enableChatHistory(isEnable: ENABLE_CHAT_HISTORY)
         ChatManager.setMaximumPinningForRecentChat(maxPinChat: 4)
         ChatManager.deleteMediaFromDevice(delete: true)
+        ChatManager.updateLoginDetails(isMobileNumLogin: IS_MOBILE_NUMBER_LOGIN)
+        ChatManager.updateWebUrlDetails(webLoginUrl: WEB_LOGIN_URL)
         
-        
-        FlyDefaults.isMobileNumberLogin = IS_MOBILE_NUMBER_LOGIN
-        FlyDefaults.webLoginUrl = WEB_LOGIN_URL
         if ENABLE_CONTACT_SYNC{
             startObservingContactChanges()
         }
@@ -87,15 +87,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
         NetworkReachability.shared.startMonitoring()
         KeyboardStateListener.shared.start()
 
-        if FlyDefaults.appLockenable || FlyDefaults.appFingerprintenable {
-            FlyDefaults.showAppLock = true
+        if CommonDefaults.appLockenable || CommonDefaults.appFingerprintenable {
+            CommonDefaults.showAppLock = true
         }
+        CommonDefaults.isInPrivateChat = false
+        CommonDefaults.showPrivateLockRecent = false
 
         // Clear Push
         clearPushNotifications()
         registerForPushNotifications()
         
-        if FlyDefaults.isBlockedByAdmin {
+        if ContactManager.isBlockedByAdmin() {
             navigateToBlockedScreen()
         } else {
             navigateTo()
@@ -127,16 +129,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
         application.registerForRemoteNotifications()
         
         if Utility.getBoolFromPreference(key: isLoggedIn) {
-            FlyDefaults.isNewLoggedIn = false
+//            FlyDefaults.isNewLoggedIn = false
             VOIPManager.sharedInstance.updateDeviceToken()
             RootViewController.sharedInstance.initCallSDK()
         }else {
-            FlyDefaults.isNewLoggedIn = true
+//            FlyDefaults.isNewLoggedIn = true
         }
         // Added this line so that we can start receing contact updates
         let contactPermissionStatus = CNContactStore.authorizationStatus(for: CNEntityType.contacts)
         if contactPermissionStatus == .authorized || contactPermissionStatus == .denied{
-            FlyDefaults.isContactPermissionSkipped = false
+            ContactSyncManager.updateContactPermission(isSkipped: false)
         }
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.CNContactStoreDidChange, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(contactsDidChange), name: NSNotification.Name.CNContactStoreDidChange, object: nil)
@@ -147,7 +149,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
             // Fallback on earlier versions
         }
         ChatManager.setMediaEncryption(isEnable: false)
-        ChatManager.hideNotificationContent(hide: false)
+        ChatManager.hideNotificationContent(hide: isHideNotificationContent)
         FlyUtils.setAppName(appName: APP_NAME)
         VOIPManager.sharedInstance.updateDeviceToken()
         networkMonitor()
@@ -177,14 +179,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
     func applicationDidBecomeActive(_ application: UIApplication) {
         print("#appDelegate applicationDidBecomeActive")
         
-        if FlyDefaults.isBlockedByAdmin {
+        if ContactManager.isBlockedByAdmin() {
             navigateToBlockedScreen()
             return
         }
 
-        if Utility.getBoolFromPreference(key: isLoggedIn) && (FlyDefaults.isLoggedIn) {
+        //if Utility.getBoolFromPreference(key: isLoggedIn) && (FlyDefaults.isLoggedIn) {
 //            ChatManager.connect()
-        }
+       // }
         let current = UIApplication.shared.keyWindow?.getTopViewController()
         if (current is AuthenticationPINViewController || current is FingerPrintPINViewController) {
             if let vc = current as? FingerPrintPINViewController {
@@ -199,7 +201,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
 
     func applicationDidEnterBackground(_ application: UIApplication) {
         print("#appDelegate applicationDidEnterBackground")
-        FlyDefaults.appBackgroundTime = Date()
+        CommonDefaults.appBackgroundTime = Date()
         postNotificationdidEnterBackground = NotificationCenter.default
         postNotificationdidEnterBackground?.post(name: Notification.Name(didEnterBackground), object: nil)
     }
@@ -208,8 +210,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
         contactSyncSubscription?.dispose()
 
         NetStatus.shared.stopMonitoring()
-        if FlyDefaults.appLockenable || FlyDefaults.appFingerprintenable {
-            FlyDefaults.showAppLock = true
+        if CommonDefaults.appLockenable || CommonDefaults.appFingerprintenable {
+            CommonDefaults.showAppLock = true
         }
 
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.CNContactStoreDidChange, object: nil)
@@ -217,9 +219,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
 
     func applicationProtectedDataDidBecomeAvailable(_ application: UIApplication) {
         print("applicationProtectedDataDidBecomeAvailable")
-        if (FlyDefaults.appLockenable || FlyDefaults.appFingerprintenable) {
-            FlyDefaults.showAppLock = true
+        if CommonDefaults.showAppLock == true {
             showApplockScreen()
+        }
+    }
+
+    func applicationProtectedDataWillBecomeUnavailable(_ application: UIApplication) {
+        if (CommonDefaults.appLockenable || CommonDefaults.appFingerprintenable) {
+            CommonDefaults.showAppLock = true
         }
     }
 
@@ -232,8 +239,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
         
         let window = UIApplication.shared.windows.filter {$0.isKeyWindow}.first
         let navigationController = window?.rootViewController  as? UINavigationController
-        if FlyDefaults.appFingerprintenable  && FlyDefaults.appLockenable && FlyDefaults.showAppLock {
-            if !FlyDefaults.faceOrFingerAuthenticationFails {
+        if CommonDefaults.appFingerprintenable  && CommonDefaults.appLockenable && CommonDefaults.showAppLock && !CommonDefaults.appLockOnPrivateChat {
+            if !CommonDefaults.faceOrFingerAuthenticationFails {
                 let initialViewController = FingerPrintPINViewController(nibName: "FingerPrintPINViewController", bundle: nil)
                 initialViewController.modalPresentationStyle = .overFullScreen
                 navigationController?.present(initialViewController, animated: false)
@@ -244,7 +251,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
                 navigationController?.pushViewController(initialViewController, animated: false)
             }
         }
-        else if FlyDefaults.appLockenable && FlyDefaults.appFingerprintenable == false && FlyDefaults.showAppLock {
+        else if CommonDefaults.appLockenable && CommonDefaults.appFingerprintenable == false && CommonDefaults.showAppLock {
             let initialViewController = AuthenticationPINViewController(nibName: "AuthenticationPINViewController", bundle: nil)
             initialViewController.modalPresentationStyle = .overFullScreen
             //navigationController?.present(initialViewController, animated: false)
@@ -298,17 +305,35 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
         completionHandler(.noData)
     }
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-        if response.notification.request.content.threadIdentifier.contains(FlyDefaults.xmppDomain){
-            if FlyDefaults.isBlockedByAdmin {
+        if response.notification.request.content.threadIdentifier.contains(ChatManager.getXMPPDetails().XMPPDomain){
+            if ContactManager.isBlockedByAdmin() {
                 navigateToBlockedScreen()
             } else {
                 let messageId = response.notification.request.content.userInfo["message_id"] as? String ?? ""
                 let message = FlyMessenger.getMessageOfId(messageId: messageId)
                 if response.notification.request.trigger is UNPushNotificationTrigger {
+
+                    let current = UIApplication.shared.keyWindow?.getTopViewController()
+                    if (current is PrivateChatFingerPrintPINViewController) {
+                        if let vc = current as? PrivateChatFingerPrintPINViewController {
+                            return
+                        }
+                    }
+
                     pushChatId = message?.chatUserJid ?? ""
+                    if let recent = ChatManager.getRechtChat(jid: pushChatId ?? "") {
+                        if recent.isPrivateChat && !CommonDefaults.privateChatOnChatScreen && !CommonDefaults.appLockOnPrivateChat {
+                            pushNotificationSelected = true
+                            pushChatId = nil
+                            navigateToChatScreen(chatId: message?.chatUserJid ?? "", completionHandler: completionHandler)
+                        } else {
+                            pushChatId = nil
+                            navigateToChatScreen(chatId: message?.chatUserJid ?? "", completionHandler: completionHandler)
+                        }
+                    }
                 } else {
                     pushChatId = message?.chatUserJid ?? ""
-                    if !FlyDefaults.showAppLock {
+                    if !CommonDefaults.showAppLock {
                         pushChatId = nil
                         navigateToChatScreen(chatId: message?.chatUserJid ?? "", completionHandler: completionHandler)
                     }
@@ -316,7 +341,7 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
             }
         }else if response.notification.request.content.threadIdentifier == "media-call" {
             pushChatId = "media-call"
-            if FlyDefaults.isBlockedByAdmin {
+            if ContactManager.isBlockedByAdmin() {
                 navigateToBlockedScreen()
             } else {
                
@@ -366,7 +391,7 @@ extension AppDelegate {
     func startObservingContactChanges(){
         contactSyncSubscription = contactSyncSubject.throttle(.seconds(3), latest: false ,scheduler: MainScheduler.instance).subscribe(onNext: { bool in
             if bool{
-                if !FlyDefaults.isContactPermissionSkipped{
+                if !ContactSyncManager.isPermissionSkipped() {
                     ContactSyncManager.shared.syncContacts(){ isSuccess,_,_ in
                        print("#contact Sync status => \(isSuccess)")
                     }
@@ -379,7 +404,7 @@ extension AppDelegate {
     @objc func contactsDidChange(notification: NSNotification){
         print("#contact #appdelegate @contactsDidChange")
         if Utility.getBoolFromPreference(key: isLoggedIn) && ENABLE_CONTACT_SYNC {
-            FlyDefaults.isContactSyncNeeded = true
+            ContactSyncManager.needContactSync(isSync: true)
             contactSyncSubject.onNext(true)
         }
     }
@@ -387,7 +412,7 @@ extension AppDelegate {
     
     func navigateToChatScreen(chatId : String,completionHandler: @escaping () -> Void){
         var dismisLastViewController = false
-        if let profileDetails = ContactManager.shared.getUserProfileDetails(for: chatId) , chatId != FlyDefaults.myJid{
+        if let profileDetails = ContactManager.shared.getUserProfileDetails(for: chatId) , chatId != AppUtils.getMyJid() {
             if #available(iOS 13, *) {
                 guard let rootViewController = (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.window?.rootViewController else {
                     completionHandler()
@@ -402,6 +427,11 @@ extension AppDelegate {
                 
                 if let chatViewController =  UIStoryboard.init(name: Storyboards.chat, bundle: Bundle.main).instantiateViewController(withIdentifier: Identifiers.chatViewParentController) as? ChatViewParentController, let navigationController = rootViewController as? UINavigationController{
                     chatViewController.getProfileDetails = profileDetails
+                    if let recent = ChatManager.getRechtChat(jid: profileDetails.jid) {
+                        if recent.isPrivateChat && pushNotificationSelected == false {
+                            chatViewController.isFromNotificationSelect = true
+                        }
+                    }
                     let color = getColor(userName: getUserName(jid: profileDetails.jid,name: profileDetails.name, nickName: profileDetails.nickName, contactType: profileDetails.contactType))
                     chatViewController.contactColor = color
                     if dismisLastViewController{
@@ -421,6 +451,11 @@ extension AppDelegate {
                     chatViewController.getProfileDetails = profileDetails
                     let color = getColor(userName: getUserName(jid: profileDetails.jid,name: profileDetails.name, nickName: profileDetails.nickName, contactType: profileDetails.contactType))
                     chatViewController.contactColor = color
+                    if let recent = ChatManager.getRechtChat(jid: profileDetails.jid) {
+                        if recent.isPrivateChat && pushNotificationSelected == false {
+                            chatViewController.isFromNotificationSelect = true
+                        }
+                    }
                     if dismisLastViewController{
                         navigationController.popViewController(animated: false)
                     }
@@ -510,7 +545,6 @@ extension AppDelegate {
            Utility.saveInPreference(key: isLoggedIn, value: false)
            ChatManager.disconnect()
            ChatManager.shared.resetFlyDefaults()
-           FlyDefaults.isBlockedByAdmin = false
     }
     
     func navigateToBlockedScreen() {
@@ -544,7 +578,7 @@ extension AppDelegate {
             }
             UIApplication.shared.keyWindow?.rootViewController = navigationController
             UIApplication.shared.keyWindow?.makeKeyAndVisible()
-        }else if Utility.getBoolFromPreference(key: isLoggedIn) && FlyDefaults.myMobileNumber != "" {
+        }else if Utility.getBoolFromPreference(key: isLoggedIn) && ContactManager.getMyProfile().mobileNumber != "" {
             let storyboard = UIStoryboard(name: "Profile", bundle: nil)
             let initialViewController = storyboard.instantiateViewController(withIdentifier: "ProfileViewController") as! ProfileViewController
             UIApplication.shared.keyWindow?.rootViewController =  UINavigationController(rootViewController: initialViewController)
@@ -572,7 +606,7 @@ extension AppDelegate : LocalNotificationDelegate {
         if (current is RestoreViewController || current is BackupProgressViewController) {
             return
         }
-        if ChatManager.onGoingChatUserJid == chatMessage.senderUserJid || (ChatManager.onGoingChatUserJid == groupId  && groupId != "") {
+        if (ChatManager.onGoingChatUserJid == chatMessage.senderUserJid && groupId == "") || (ChatManager.onGoingChatUserJid == groupId  && groupId != "") {
             
             if !CallManager.isOngoingCall() {
                 self.playSound()
@@ -591,6 +625,11 @@ extension AppDelegate : LocalNotificationDelegate {
             title = userName
             var message = chatMessage.messageTextContent
             if chatMessage.isMessageRecalled == true {
+//                if let chat = ChatManager.getRechtChat(jid: groupId.isEmpty ? jid : groupId) {
+//                    if chat.isPrivateChat {
+//                        return
+//                    }
+//                }
                 message = "This message was deleted"
             } else {
                 switch chatMessage.messageType{
@@ -605,7 +644,7 @@ extension AppDelegate : LocalNotificationDelegate {
                 }
             }
             var isCarbon = false
-            if FlyDefaults.hideNotificationContent{
+            if isHideNotificationContent {
                 let (messageCount, chatCount) = ChatManager.getUNreadMessageAndChatCount()
                 var titleContent = emptyString()
                 if chatCount == 1{
@@ -613,7 +652,7 @@ extension AppDelegate : LocalNotificationDelegate {
                 }else{
                     titleContent = "\(messageCount) messages from \(chatCount) chats"
                 }
-                title = FlyDefaults.appName + " (\(titleContent))"
+                title = APP_NAME + " (\(titleContent))"
                 message = "New Message"
             }else{
                 if groupId.isEmpty{
@@ -625,7 +664,7 @@ extension AppDelegate : LocalNotificationDelegate {
                 }
             }
             
-            if chatMessage.senderUserJid == FlyDefaults.myJid{
+            if chatMessage.senderUserJid == AppUtils.getMyJid() {
                 isCarbon = true
             }
             if isCarbon {
@@ -634,6 +673,14 @@ extension AppDelegate : LocalNotificationDelegate {
             
             if !chatMessage.mentionedUsersIds.isEmpty {
                 message = ChatUtils.getMentionTextContent(message: message, isMessageSentByMe: chatMessage.isMessageSentByMe, mentionedUsers: chatMessage.mentionedUsersIds).string
+            }
+
+            if let chat = ChatManager.getRechtChat(jid: groupId.isEmpty ? jid : groupId) {
+                if chat.isPrivateChat {
+                    title = APP_NAME
+                    let (messageCount, _) = ChatManager.getUnreadPrivateChatMessageAndChatCount()
+                    message = "\(messageCount) new message"
+                }
             }
 
             executeOnMainThread {
@@ -651,11 +698,11 @@ extension AppDelegate : MissedCallNotificationDelegate {
         if (current is CallLogViewController) {
             //Application Badge Count
             var appBadgeCount = UIApplication.shared.applicationIconBadgeNumber
-            appBadgeCount = appBadgeCount - FlyDefaults.unreadMissedCallCount
+            appBadgeCount = appBadgeCount - CallLogManager.getUnreadMissedCallCount()
             UIApplication.shared.applicationIconBadgeNumber = appBadgeCount
             //CallLogs Badge Count
-            FlyDefaults.unreadMissedCallCount = 0
-            NotificationCenter.default.post(name: NSNotification.Name("updateUnReadMissedCallCount"), object: FlyDefaults.unreadMissedCallCount)
+            CallLogManager.resetUnreadMissedCallCount()
+            NotificationCenter.default.post(name: NSNotification.Name("updateUnReadMissedCallCount"), object: CallLogManager.getUnreadMissedCallCount())
         }
         
         var callMode = ""
@@ -715,7 +762,7 @@ extension AppDelegate {
                 
                 self.playSound()
                 
-                if FlyDefaults.vibrationEnable {
+                if CommonDefaults.vibrationEnable {
                     AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
                 }
             }
@@ -757,6 +804,9 @@ extension AppDelegate {
             if (current is ProfileViewController) {
                 return
             }
+            if (current is PrivateChatFingerPrintPINViewController) {
+                return
+            }
             if (current is CallViewController) {
                 (current as! CallViewController).showCallOverlay()
             }
@@ -766,14 +816,14 @@ extension AppDelegate {
                 
                 print("Tap on a Notification View \(message)")
                 
-                if FlyDefaults.isBlockedByAdmin {
+                if ContactManager.isBlockedByAdmin() {
                     navigateToBlockedScreen()
                 } else {
                     let messageId = message.messageId
                     let message = FlyMessenger.getMessageOfId(messageId: messageId)
                     pushChatId = message?.chatUserJid ?? ""
                     
-                    if !FlyDefaults.showAppLock {
+                    if !CommonDefaults.showAppLock {
                         pushChatId = nil
                         navigateToChatScreen(chatId: message?.chatUserJid ?? "", completionHandler: {})
                     }
@@ -784,7 +834,7 @@ extension AppDelegate {
             if let message = sender?.view?.accessibilityElements as? [String] {
                 print("Tap on a Call View \(message)")
                 pushChatId = "media-call"
-                if FlyDefaults.isBlockedByAdmin {
+                if ContactManager.isBlockedByAdmin() {
                     navigateToBlockedScreen()
                 } else {
                     
@@ -804,7 +854,7 @@ extension AppDelegate {
 
         func playSound() {
             
-            if !(FlyDefaults.selectedNotificationSoundName[NotificationSoundKeys.name.rawValue]?.contains("None") ?? false) && FlyDefaults.notificationSoundEnable {
+            if !(CommonDefaults.selectedNotificationSoundName[NotificationSoundKeys.name.rawValue]?.contains("None") ?? false) && CommonDefaults.notificationSoundEnable {
                 
                 guard let path = Bundle.main.path(forResource: "wheep", ofType:"mp3") else {
                     return }

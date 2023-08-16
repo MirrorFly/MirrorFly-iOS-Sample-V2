@@ -62,7 +62,7 @@ class SettingsViewController : BaseViewController {
         AppAlert.shared.onAlertAction = { [weak self] (result) ->
             Void in
             if result == 0 {
-                if FlyDefaults.appLockenable == true{
+                if CommonDefaults.appLockenable == true{
                     let secondView = AuthenticationPINViewController(nibName: "AuthenticationPINViewController", bundle: nil)
                     secondView.logout = true
                     self?.navigationController?.pushViewController(secondView, animated: true)
@@ -116,7 +116,7 @@ extension SettingsViewController : UITableViewDelegate, UITableViewDataSource {
         case "Starred Messages":
             if let vc = UIStoryboard(name: "Chat", bundle: nil).instantiateViewController(withIdentifier: "ChatViewParentController") as? ChatViewParentController {
                 vc.isStarredMessagePage = true
-                vc.getProfileDetails = ChatManager.profileDetaisFor(jid: FlyDefaults.myJid)
+                vc.getProfileDetails = ChatManager.profileDetaisFor(jid: AppUtils.getMyJid())
                 self.navigationController?.pushViewController(vc, animated: true)
             }
             break

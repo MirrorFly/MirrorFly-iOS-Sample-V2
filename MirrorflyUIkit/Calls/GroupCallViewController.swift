@@ -41,7 +41,7 @@ class GroupCallViewController: UIViewController {
         setUpStatusBar()
         var userList = callLog.userList
         userList.removeAll { jid in
-            jid == FlyDefaults.myJid
+            jid == AppUtils.getMyJid()
         }
         let fullNameArr = userList
         if isGroup{
@@ -158,7 +158,7 @@ class GroupCallViewController: UIViewController {
     func loadImagesForMutiUserCall(){
         var userList = callLog.userList
         userList.removeAll { jid in
-            jid == FlyDefaults.myJid
+            jid == AppUtils.getMyJid()
         }
         
         if callLog.userProfileList.count == 2 {
@@ -273,7 +273,7 @@ extension GroupCallViewController : ProfileEventsDelegate {
     func usersProfilesFetched() {
         var userList = callLog.userList
         userList.removeAll { jid in
-            jid == FlyDefaults.myJid
+            jid == AppUtils.getMyJid()
         }
         callUserProfiles.removeAll()
         let contactArr = NSMutableArray()

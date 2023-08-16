@@ -53,14 +53,14 @@ extension NotificationAlertViewController : UITableViewDelegate,UITableViewDataS
         case .NotificationSound:
             cell.lblTitle.text = self.NotificationList[indexPath.row].rawValue
             cell.helpTextLabel.text = playSoundsForIncomingMessages
-            cell.selectedImageView.image =  FlyDefaults.notificationSoundEnable ? UIImage(named: ImageConstant.ic_selected) : UIImage(named: ImageConstant.Translate_Unselected)
+            cell.selectedImageView.image =  CommonDefaults.notificationSoundEnable ? UIImage(named: ImageConstant.ic_selected) : UIImage(named: ImageConstant.Translate_Unselected)
             cell.separaterView.isHidden = true
             cell.helpTextView.isHidden = true
             
         case .NotificationPopUP:
             cell.lblTitle.text = self.NotificationList[indexPath.row].rawValue
             cell.helpTextLabel.text = showingPopUpforIncomingMessages
-            cell.selectedImageView.image = FlyDefaults.notificationPopUPEnable ? UIImage(named: ImageConstant.ic_selected) : UIImage(named: ImageConstant.Translate_Unselected)
+            cell.selectedImageView.image = CommonDefaults.notificationPopUPEnable ? UIImage(named: ImageConstant.ic_selected) : UIImage(named: ImageConstant.Translate_Unselected)
             cell.separaterView.isHidden = true
             cell.helpTextView.isHidden = true
           
@@ -68,14 +68,14 @@ extension NotificationAlertViewController : UITableViewDelegate,UITableViewDataS
         case .Vibration:
             cell.lblTitle.text = self.NotificationList[indexPath.row].rawValue
             cell.helpTextLabel.text = vibrateWhenANewMessageArrivesWhileApplicationArrives
-            cell.selectedImageView.image = FlyDefaults.vibrationEnable ? UIImage(named: ImageConstant.ic_selected) : UIImage(named: ImageConstant.Translate_Unselected)
+            cell.selectedImageView.image = CommonDefaults.vibrationEnable ? UIImage(named: ImageConstant.ic_selected) : UIImage(named: ImageConstant.Translate_Unselected)
             cell.separaterView.isHidden = true
             cell.helpTextView.isHidden = true
        
         case .MuteNotification:
             cell.lblTitle.text = self.NotificationList[indexPath.row].rawValue
             cell.helpTextLabel.text = thisWillMuteAllNotificationsAlertsForIncomingMessages
-            cell.selectedImageView.image = FlyDefaults.muteNotificationEnable ? UIImage(named: ImageConstant.ic_selected) : UIImage(named: ImageConstant.Translate_Unselected)
+            cell.selectedImageView.image = CommonDefaults.muteNotificationEnable ? UIImage(named: ImageConstant.ic_selected) : UIImage(named: ImageConstant.Translate_Unselected)
             cell.separaterView.isHidden = true
             cell.helpTextView.isHidden = true
        
@@ -92,41 +92,41 @@ extension NotificationAlertViewController : UITableViewDelegate,UITableViewDataS
         switch self.NotificationList[indexPath.row]{
             
         case .NotificationSound:
-            FlyDefaults.notificationSoundEnable = !FlyDefaults.notificationSoundEnable
-            if FlyDefaults.notificationSoundEnable == true  {
-                FlyDefaults.muteNotificationEnable = false
-                FlyDefaults.notificationPopUPEnable = true
+            CommonDefaults.notificationSoundEnable = !CommonDefaults.notificationSoundEnable
+            if CommonDefaults.notificationSoundEnable == true  {
+                CommonDefaults.muteNotificationEnable = false
+                CommonDefaults.notificationPopUPEnable = true
             }
             break
         case .NotificationPopUP:
-            FlyDefaults.notificationPopUPEnable = !FlyDefaults.notificationPopUPEnable
-            if FlyDefaults.notificationPopUPEnable == false {
-                FlyDefaults.vibrationEnable = false
-                FlyDefaults.notificationSoundEnable = false
-                FlyDefaults.muteNotificationEnable = false
+            CommonDefaults.notificationPopUPEnable = !CommonDefaults.notificationPopUPEnable
+            if CommonDefaults.notificationPopUPEnable == false {
+                CommonDefaults.vibrationEnable = false
+                CommonDefaults.notificationSoundEnable = false
+                CommonDefaults.muteNotificationEnable = false
             }
-            else if FlyDefaults.notificationPopUPEnable == true {
+            else if CommonDefaults.notificationPopUPEnable == true {
                 
             }
             
             break
         case .Vibration:
             //AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
-            FlyDefaults.vibrationEnable = !FlyDefaults.vibrationEnable
-            if FlyDefaults.vibrationEnable == true {
-                FlyDefaults.muteNotificationEnable = false
-                FlyDefaults.notificationPopUPEnable = true
+            CommonDefaults.vibrationEnable = !CommonDefaults.vibrationEnable
+            if CommonDefaults.vibrationEnable == true {
+                CommonDefaults.muteNotificationEnable = false
+                CommonDefaults.notificationPopUPEnable = true
             }
         case .MuteNotification:
-            FlyDefaults.muteNotificationEnable = !FlyDefaults.muteNotificationEnable
-            if FlyDefaults.muteNotificationEnable == true {
-                FlyDefaults.vibrationEnable = false
-                FlyDefaults.notificationSoundEnable = false
-                FlyDefaults.notificationPopUPEnable = true
+            CommonDefaults.muteNotificationEnable = !CommonDefaults.muteNotificationEnable
+            if CommonDefaults.muteNotificationEnable == true {
+                CommonDefaults.vibrationEnable = false
+                CommonDefaults.notificationSoundEnable = false
+                CommonDefaults.notificationPopUPEnable = true
             }
             else {
-                FlyDefaults.notificationSoundEnable = true
-                FlyDefaults.notificationPopUPEnable = true
+                CommonDefaults.notificationSoundEnable = true
+                CommonDefaults.notificationPopUPEnable = true
             }
             break
             

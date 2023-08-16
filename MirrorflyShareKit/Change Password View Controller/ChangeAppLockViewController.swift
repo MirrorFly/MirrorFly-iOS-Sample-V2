@@ -80,9 +80,9 @@ class ChangeAppLockViewController: UIViewController, UITextFieldDelegate {
         if changePassword() == false {
             return
         }
-        if enterOldPassword.text == FlyDefaults.appLockPassword &&  enterNewPassword.text == confirmNewPassword.text{
-            FlyDefaults.appLockPassword = confirmNewPassword.text ?? ""
-            FlyDefaults.appLockPasswordDate = Date()
+        if enterOldPassword.text == CommonDefaults.appLockPassword &&  enterNewPassword.text == confirmNewPassword.text{
+            CommonDefaults.appLockPassword = confirmNewPassword.text ?? ""
+            CommonDefaults.appLockPasswordDate = Date()
             print(confirmNewPassword.text ?? "")
             ShareKitAlert.shared.showToast(controller: self, message: SuccessMessage.PINsetsuccessfully)
         }
@@ -139,7 +139,7 @@ class ChangeAppLockViewController: UIViewController, UITextFieldDelegate {
             ShareKitAlert.shared.showToast(controller: self, message: ErrorMessage.enterValidPIN)
             return false
         }
-        if enterOldPassword.text != FlyDefaults.appLockPassword{
+        if enterOldPassword.text != CommonDefaults.appLockPassword{
             ShareKitAlert.shared.showToast(controller: self, message: ErrorMessage.invalidOLDPIN)
             return false
         }

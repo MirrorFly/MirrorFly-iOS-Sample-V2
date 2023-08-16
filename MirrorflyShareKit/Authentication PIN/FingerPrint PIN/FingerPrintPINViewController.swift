@@ -39,7 +39,7 @@ class FingerPrintPINViewController: ShareKitBaseViewController {
                 print("\(TAG) #### evaluatePolicy \(success) \(authenticationError.debugDescription)")
                 DispatchQueue.main.async {
                     if success {
-                        FlyDefaults.showAppLock = false
+                        CommonDefaults.showAppLock = false
                         let initialViewController = SharekitShareToViewController(nibName: "SharekitShareToViewController", bundle: nil)
                         self?.navigationController?.setNavigationBarHidden(true, animated: true)
                         self?.navigationController?.pushViewController(initialViewController, animated: false)
@@ -63,7 +63,7 @@ class FingerPrintPINViewController: ShareKitBaseViewController {
         switch errorCode {
         case LAError.authenticationFailed.rawValue:
             navigateToAuthentication()
-            FlyDefaults.faceOrFingerAuthenticationFails = true
+            CommonDefaults.faceOrFingerAuthenticationFails = true
         case LAError.userCancel.rawValue:
             navigateToAuthentication()
         case LAError.userFallback.rawValue:

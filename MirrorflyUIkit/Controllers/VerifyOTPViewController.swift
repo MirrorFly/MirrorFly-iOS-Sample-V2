@@ -234,17 +234,17 @@ class VerifyOTPViewController: UIViewController
                 guard let profileUpdateStatus = result?["isProfileUpdated"] as? Int else{
                     return
                 }
-                FlyDefaults.isLoggedIn = true
+                ChatManager.updateAppLoggedIn(isLoggedin: true)
                 Utility.saveInPreference(key: isLoggedIn, value: true)
                 Utility.saveInPreference(key: username, value: userName)
                 Utility.saveInPreference(key: password, value: userPassword)
-                FlyDefaults.myXmppPassword = userPassword
-                FlyDefaults.myXmppUsername = userName
-                FlyDefaults.myMobileNumber = self?.getMobileNumber ?? ""
-                FlyDefaults.isProfileUpdated = profileUpdateStatus == 1
+//                FlyDefaults.myXmppPassword = userPassword
+//                FlyDefaults.myXmppUsername = userName
+//                FlyDefaults.myMobileNumber = self?.getMobileNumber ?? ""
+                CommonDefaults.isProfileUpdated = profileUpdateStatus == 1
                 AppAlert.shared.showToast(message: SuccessMessage.successAuth)
                 self?.isAuthorizedSuccess = true
-                self?.verifyOTPViewModel.initializeChatCredentials(username: userName, secretKey: userPassword)
+                self?.verifyOTPViewModel.initializeChatCredentials()
                 self?.startLoading(withText: pleaseWait)
             }
         }

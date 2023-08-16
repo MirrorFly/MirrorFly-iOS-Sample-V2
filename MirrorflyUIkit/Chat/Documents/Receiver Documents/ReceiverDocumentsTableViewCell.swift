@@ -183,12 +183,12 @@ class ReceiverDocumentsTableViewCell: BaseTableViewCell {
         
             if isDeletedOrStarredSelected == false {
                 if message?.mediaChatMessage?.mediaDownloadStatus == .downloaded && !(isShowForwardView ?? false) {
-                    forwardView?.isHidden = false
-                    forwardButton?.isHidden = false
-                    isAllowSwipe = true
-                } else {
                     forwardView?.isHidden = true
                     forwardButton?.isHidden = true
+                    isAllowSwipe = true
+                } else {
+                    forwardView?.isHidden = false
+                    forwardButton?.isHidden = false
                     isAllowSwipe = false
                 }
             }
@@ -411,7 +411,7 @@ class ReceiverDocumentsTableViewCell: BaseTableViewCell {
     }
     
     func showHideForwardView(message: ChatMessage?,isShowForwardView: Bool?,isDeletedMessageSelected: Bool?) {
-        if isDeletedMessageSelected == true || isStarredMessagePage == true {
+        if isDeletedMessageSelected == true {
             // Forward view elements and its data
             forwardView?.isHidden = (isShowForwardView == false || message?.mediaChatMessage?.mediaDownloadStatus == .downloading) ? true : false
             forwardView?.makeCircleView(borderColor: Color.forwardCircleBorderColor.cgColor, borderWidth: 1.5)

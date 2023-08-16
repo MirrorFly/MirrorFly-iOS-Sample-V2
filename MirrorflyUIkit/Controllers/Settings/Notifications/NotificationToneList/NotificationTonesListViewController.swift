@@ -37,7 +37,7 @@ class NotificationTonesListViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        selectedNotificationSoundName = FlyDefaults.selectedNotificationSoundName
+        selectedNotificationSoundName = CommonDefaults.selectedNotificationSoundName
         soundList = notificationViewModel.getSystemSounds()
 
         if let id = soundList.filter({ $0 == selectedNotificationSoundName }).first {
@@ -56,14 +56,14 @@ class NotificationTonesListViewController: UIViewController {
     @IBAction func cancelAction(_ sender: UIButton) {
         AudioServicesDisposeSystemSoundID(SystemSoundID(defaultSoundId))
         player?.stop()
-        selectedNotificationSoundName = FlyDefaults.selectedNotificationSoundName
+        selectedNotificationSoundName = CommonDefaults.selectedNotificationSoundName
         self.dismiss(animated: false)
     }
     
     @IBAction func saveAction(_ sender: UIButton) {
         AudioServicesDisposeSystemSoundID(SystemSoundID(defaultSoundId))
         player?.stop()
-        FlyDefaults.selectedNotificationSoundName = selectedNotificationSoundName
+        CommonDefaults.selectedNotificationSoundName = selectedNotificationSoundName
         self.dismiss(animated: false)
     }
 

@@ -72,15 +72,20 @@ class FingerPrintPINViewController: UIViewController {
                 [weak self] success, authenticationError in
                 DispatchQueue.main.async {
                     if success {
-                        if self?.daysBetween(start: FlyDefaults.appLockPasswordDate, end: Date()) ?? 0 >= 31 {
-                            let initialViewController = AuthenticationPINViewController(nibName: "AuthenticationPINViewController", bundle: nil)
-                            initialViewController.noFingerprintAdded = true
-                            self?.navigationController?.pushViewController(initialViewController, animated: false)
+                        if CommonDefaults.privateChatOnChatScreen {
+                            self?.navigationController?.popViewController(animated: true)
+                            CommonDefaults.privateChatOnChatScreen = false
                         } else {
-                            FlyDefaults.showAppLock = false
-                            FlyDefaults.passwordAuthenticationAttemps = 0
-                            self?.navigationController?.popToRootViewController(animated: false)
-                            self?.dismiss(animated: false)
+                            if self?.daysBetween(start: CommonDefaults.appLockPasswordDate, end: Date()) ?? 0 >= 31 {
+                                let initialViewController = AuthenticationPINViewController(nibName: "AuthenticationPINViewController", bundle: nil)
+                                initialViewController.noFingerprintAdded = true
+                                self?.navigationController?.pushViewController(initialViewController, animated: false)
+                            } else {
+                                CommonDefaults.showAppLock = false
+                                CommonDefaults.passwordAuthenticationAttemps = 0
+                                self?.navigationController?.popToRootViewController(animated: false)
+                                self?.dismiss(animated: false)
+                            }
                         }
                     } else {
                         guard let error = authenticationError else {
@@ -99,7 +104,7 @@ class FingerPrintPINViewController: UIViewController {
         switch errorCode {
         case LAError.authenticationFailed.rawValue:
             navigateToAuthentication()
-            FlyDefaults.faceOrFingerAuthenticationFails = true
+            CommonDefaults.faceOrFingerAuthenticationFails = true
         case LAError.userCancel.rawValue:
             navigateToAuthentication()
         case LAError.userFallback.rawValue:

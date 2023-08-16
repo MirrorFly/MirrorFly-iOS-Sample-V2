@@ -152,6 +152,11 @@
 		CE5BB0A02900281B00D16A49 /* NotificationTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = CE5BB09E2900281B00D16A49 /* NotificationTableViewCell.xib */; };
 		CE5BB0A229002FAF00D16A49 /* NotificationAlertViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE5BB0A129002FAF00D16A49 /* NotificationAlertViewController.swift */; };
 		CE5E31C52959CE4F00D1C802 /* LinkCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = CE5E31C42959CE4F00D1C802 /* LinkCell.xib */; };
+		CE5FD3422A6976E60047D654 /* PrivateChatEnableController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE5FD3402A6976E60047D654 /* PrivateChatEnableController.swift */; };
+		CE5FD3442A6976E60047D654 /* PrivateChatEnableController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CE5FD3412A6976E60047D654 /* PrivateChatEnableController.xib */; };
+		CE5FD34C2A6E98540047D654 /* PrivateChatPopupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE5FD34A2A6E98540047D654 /* PrivateChatPopupViewController.swift */; };
+		CE5FD34E2A6E98540047D654 /* PrivateChatPopupViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CE5FD34B2A6E98540047D654 /* PrivateChatPopupViewController.xib */; };
+		CE5FD3512A6FDEF70047D654 /* Animation.json in Resources */ = {isa = PBXBuildFile; fileRef = CE5FD3502A6FDEF60047D654 /* Animation.json */; };
 		CE60641727E1A716003AE9F0 /* MirrorflyUIkit-info.plist in Resources */ = {isa = PBXBuildFile; fileRef = CEA2F93626569C5C0013F5E8 /* MirrorflyUIkit-info.plist */; };
 		CE613AEF293A18F900995C9B /* ClearAllChatTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE613AED293A18F900995C9B /* ClearAllChatTableViewCell.swift */; };
 		CE613AF1293A18F900995C9B /* ClearAllChatTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = CE613AEE293A18F900995C9B /* ClearAllChatTableViewCell.xib */; };
@@ -165,6 +170,8 @@
 		CE6C986328045C4D009D508E /* LanguageSelectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE6C986228045C4D009D508E /* LanguageSelectionViewController.swift */; };
 		CE6C9868280477E9009D508E /* LanguageSelectionTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE6C9867280477E9009D508E /* LanguageSelectionTableViewCell.swift */; };
 		CE6C986A28047807009D508E /* LanguageSelectionTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = CE6C986928047807009D508E /* LanguageSelectionTableViewCell.xib */; };
+		CE6E5F112A696F5600CB2257 /* PrivateChatCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE6E5F0F2A696F5600CB2257 /* PrivateChatCell.swift */; };
+		CE6E5F122A696F5600CB2257 /* PrivateChatCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = CE6E5F102A696F5600CB2257 /* PrivateChatCell.xib */; };
 		CE72209827D07BFF001F64FF /* GroupInfoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE72209727D07BFF001F64FF /* GroupInfoViewController.swift */; };
 		CE728406292F54C70023FDB4 /* BlockedContactsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE728405292F54C70023FDB4 /* BlockedContactsViewController.swift */; };
 		CE79DEA828FD2A150008B3D7 /* MessageInfoDivider.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE79DEA628FD2A150008B3D7 /* MessageInfoDivider.swift */; };
@@ -210,6 +217,8 @@
 		CE91211A279549AE00B007E0 /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE912119279549AE00B007E0 /* QRScannerView.swift */; };
 		CE91211E279563FF00B007E0 /* QRCodeScannerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE91211D279563FF00B007E0 /* QRCodeScannerViewModel.swift */; };
 		CE94E80426D9FA9800F2E3A7 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = CE94E80326D9FA9800F2E3A7 /* GoogleService-Info.plist */; };
+		CE9536192A8393A500E510CA /* LockScreenController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE9536172A8393A500E510CA /* LockScreenController.swift */; };
+		CE95361B2A8393A500E510CA /* LockScreenController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CE9536182A8393A500E510CA /* LockScreenController.xib */; };
 		CE955ACA295EFD75006525EA /* popcorn.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = CE955ABE295EFD73006525EA /* popcorn.mp3 */; };
 		CE955ACC295EFD75006525EA /* bell.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = CE955ABF295EFD73006525EA /* bell.mp3 */; };
 		CE955ACE295EFD75006525EA /* twitters.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = CE955AC0295EFD73006525EA /* twitters.mp3 */; };
@@ -362,6 +371,10 @@
 		CED5EE0827990D850071A109 /* WebSettingsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED5EE0627990D850071A109 /* WebSettingsCell.swift */; };
 		CED5EE0927990D850071A109 /* WebSettingsCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = CED5EE0727990D850071A109 /* WebSettingsCell.xib */; };
 		CED70D44274B6069005895ED /* CustomPhotoAlbum.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED70D43274B6069005895ED /* CustomPhotoAlbum.swift */; };
+		CED7F7FA2A76311D00DA50D8 /* PrivateChatFingerPrintPINViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED7F7F62A76311C00DA50D8 /* PrivateChatFingerPrintPINViewController.swift */; };
+		CED7F7FC2A76311D00DA50D8 /* PrivateChatAuthenticationPINViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CED7F7F72A76311C00DA50D8 /* PrivateChatAuthenticationPINViewController.xib */; };
+		CED7F7FE2A76311D00DA50D8 /* PrivateChatFingerPrintPINViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CED7F7F82A76311D00DA50D8 /* PrivateChatFingerPrintPINViewController.xib */; };
+		CED7F8002A76311D00DA50D8 /* PrivateChatAuthenticationPINViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED7F7F92A76311D00DA50D8 /* PrivateChatAuthenticationPINViewController.swift */; };
 		CED877AE2911F327004E425E /* ConversionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED877AD2911F327004E425E /* ConversionViewModel.swift */; };
 		CEE70878276893D90072A50F /* ForwardViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEE70876276893D90072A50F /* ForwardViewController.swift */; };
 		CEE70879276893D90072A50F /* ForwardViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CEE70877276893D90072A50F /* ForwardViewController.xib */; };
@@ -613,6 +626,11 @@
 		CE5BB09E2900281B00D16A49 /* NotificationTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = NotificationTableViewCell.xib; sourceTree = "<group>"; };
 		CE5BB0A129002FAF00D16A49 /* NotificationAlertViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationAlertViewController.swift; sourceTree = "<group>"; };
 		CE5E31C42959CE4F00D1C802 /* LinkCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LinkCell.xib; sourceTree = "<group>"; };
+		CE5FD3402A6976E60047D654 /* PrivateChatEnableController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateChatEnableController.swift; sourceTree = "<group>"; };
+		CE5FD3412A6976E60047D654 /* PrivateChatEnableController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = PrivateChatEnableController.xib; sourceTree = "<group>"; };
+		CE5FD34A2A6E98540047D654 /* PrivateChatPopupViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PrivateChatPopupViewController.swift; sourceTree = "<group>"; };
+		CE5FD34B2A6E98540047D654 /* PrivateChatPopupViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PrivateChatPopupViewController.xib; sourceTree = "<group>"; };
+		CE5FD3502A6FDEF60047D654 /* Animation.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = Animation.json; sourceTree = "<group>"; };
 		CE613AED293A18F900995C9B /* ClearAllChatTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClearAllChatTableViewCell.swift; sourceTree = "<group>"; };
 		CE613AEE293A18F900995C9B /* ClearAllChatTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ClearAllChatTableViewCell.xib; sourceTree = "<group>"; };
 		CE62CD9B275E85E100E77310 /* BaseTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseTableViewCell.swift; sourceTree = "<group>"; };
@@ -625,6 +643,8 @@
 		CE6C986228045C4D009D508E /* LanguageSelectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageSelectionViewController.swift; sourceTree = "<group>"; };
 		CE6C9867280477E9009D508E /* LanguageSelectionTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageSelectionTableViewCell.swift; sourceTree = "<group>"; };
 		CE6C986928047807009D508E /* LanguageSelectionTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = LanguageSelectionTableViewCell.xib; sourceTree = "<group>"; };
+		CE6E5F0F2A696F5600CB2257 /* PrivateChatCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateChatCell.swift; sourceTree = "<group>"; };
+		CE6E5F102A696F5600CB2257 /* PrivateChatCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = PrivateChatCell.xib; sourceTree = "<group>"; };
 		CE72209727D07BFF001F64FF /* GroupInfoViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupInfoViewController.swift; sourceTree = "<group>"; };
 		CE728405292F54C70023FDB4 /* BlockedContactsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockedContactsViewController.swift; sourceTree = "<group>"; };
 		CE79DEA628FD2A150008B3D7 /* MessageInfoDivider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageInfoDivider.swift; sourceTree = "<group>"; };
@@ -686,6 +706,8 @@
 		CE912119279549AE00B007E0 /* QRScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScannerView.swift; sourceTree = "<group>"; };
 		CE91211D279563FF00B007E0 /* QRCodeScannerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeScannerViewModel.swift; sourceTree = "<group>"; };
 		CE94E80326D9FA9800F2E3A7 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		CE9536172A8393A500E510CA /* LockScreenController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockScreenController.swift; sourceTree = "<group>"; };
+		CE9536182A8393A500E510CA /* LockScreenController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = LockScreenController.xib; sourceTree = "<group>"; };
 		CE955ABE295EFD73006525EA /* popcorn.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = popcorn.mp3; sourceTree = "<group>"; };
 		CE955ABF295EFD73006525EA /* bell.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = bell.mp3; sourceTree = "<group>"; };
 		CE955AC0295EFD73006525EA /* twitters.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = twitters.mp3; sourceTree = "<group>"; };
@@ -826,12 +848,12 @@
 		CEB66AC429ADDE630084559C /* ShareKitParticipantCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ShareKitParticipantCell.xib; sourceTree = "<group>"; };
 		CEB66AC929AE2DC90084559C /* ShareKitShareViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareKitShareViewModel.swift; sourceTree = "<group>"; };
 		CEBE3BD82959CF1F004E7C49 /* FooterSectionCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FooterSectionCell.xib; sourceTree = "<group>"; };
-		CEC08B7227E23B9F005E48C5 /* MirrorflyNotificationExtention-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "MirrorflyNotificationExtention-Info.plist"; path = "/Users/user/Desktop/UiKit/MirrorflyNotificationExtention-Info.plist"; sourceTree = "<absolute>"; };
 		CEC08B7427E243D9005E48C5 /* MirrorflyNotificationextention.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = MirrorflyNotificationextention.entitlements; sourceTree = "<group>"; };
 		CEC08B7E27E24F41005E48C5 /* GoogleService-Qa-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Qa-Info.plist"; sourceTree = "<group>"; };
 		CEC2D48827A5AAA700AB107A /* ContactInfoViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactInfoViewModel.swift; sourceTree = "<group>"; };
 		CEC3E76F29E6C6850073705C /* ChatTags.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = ChatTags.storyboard; sourceTree = "<group>"; };
 		CECB62482933B0400041D2B1 /* NavigationControllerExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationControllerExtension.swift; sourceTree = "<group>"; };
+		CECB98F426CE658D00B24448 /* Mirrorfly.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Mirrorfly.entitlements; sourceTree = "<group>"; };
 		CECB98F526CE65EE00B24448 /* MirrorflyUIkitQa.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MirrorflyUIkitQa.entitlements; sourceTree = "<group>"; };
 		CECB992426CE71BF00B24448 /* SF-UI-Display-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SF-UI-Display-Bold.otf"; sourceTree = "<group>"; };
 		CECB992626CE71CB00B24448 /* SF-UI-Display-Heavy.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SF-UI-Display-Heavy.otf"; sourceTree = "<group>"; };
@@ -847,6 +869,10 @@
 		CED5EE0627990D850071A109 /* WebSettingsCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSettingsCell.swift; sourceTree = "<group>"; };
 		CED5EE0727990D850071A109 /* WebSettingsCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = WebSettingsCell.xib; sourceTree = "<group>"; };
 		CED70D43274B6069005895ED /* CustomPhotoAlbum.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomPhotoAlbum.swift; sourceTree = "<group>"; };
+		CED7F7F62A76311C00DA50D8 /* PrivateChatFingerPrintPINViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PrivateChatFingerPrintPINViewController.swift; sourceTree = "<group>"; };
+		CED7F7F72A76311C00DA50D8 /* PrivateChatAuthenticationPINViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PrivateChatAuthenticationPINViewController.xib; sourceTree = "<group>"; };
+		CED7F7F82A76311D00DA50D8 /* PrivateChatFingerPrintPINViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PrivateChatFingerPrintPINViewController.xib; sourceTree = "<group>"; };
+		CED7F7F92A76311D00DA50D8 /* PrivateChatAuthenticationPINViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PrivateChatAuthenticationPINViewController.swift; sourceTree = "<group>"; };
 		CED877AD2911F327004E425E /* ConversionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversionViewModel.swift; sourceTree = "<group>"; };
 		CEE08DD529A738000057D295 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		CEE70876276893D90072A50F /* ForwardViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForwardViewController.swift; sourceTree = "<group>"; };
@@ -1047,6 +1073,7 @@
 		CE0B4FAA27A3E35C005349EB /* contactInfo */ = {
 			isa = PBXGroup;
 			children = (
+				CE6E5F0E2A696F2C00CB2257 /* privateChat */,
 				CE0B4FB427A3E487005349EB /* contactData */,
 				CE0B4FB327A3E47B005349EB /* viewAllMedia */,
 				CE0B4FB227A3E463005349EB /* muteNotification */,
@@ -1521,6 +1548,25 @@
 			path = footersection;
 			sourceTree = "<group>";
 		};
+		CE5FD33F2A69766E0047D654 /* PrivateChatScreen */ = {
+			isa = PBXGroup;
+			children = (
+				CE5FD3502A6FDEF60047D654 /* Animation.json */,
+				CE5FD3402A6976E60047D654 /* PrivateChatEnableController.swift */,
+				CE5FD3412A6976E60047D654 /* PrivateChatEnableController.xib */,
+			);
+			path = PrivateChatScreen;
+			sourceTree = "<group>";
+		};
+		CE5FD3492A6E98280047D654 /* privateChatAlert */ = {
+			isa = PBXGroup;
+			children = (
+				CE5FD34A2A6E98540047D654 /* PrivateChatPopupViewController.swift */,
+				CE5FD34B2A6E98540047D654 /* PrivateChatPopupViewController.xib */,
+			);
+			path = privateChatAlert;
+			sourceTree = "<group>";
+		};
 		CE6C985728040039009D508E /* Chat Settings */ = {
 			isa = PBXGroup;
 			children = (
@@ -1560,6 +1606,20 @@
 				CE6C986928047807009D508E /* LanguageSelectionTableViewCell.xib */,
 			);
 			path = View;
+			sourceTree = "<group>";
+		};
+		CE6E5F0E2A696F2C00CB2257 /* privateChat */ = {
+			isa = PBXGroup;
+			children = (
+				CED7F7F52A76310800DA50D8 /* Authentication */,
+				CE5FD3492A6E98280047D654 /* privateChatAlert */,
+				CE5FD33F2A69766E0047D654 /* PrivateChatScreen */,
+				CE6E5F0F2A696F5600CB2257 /* PrivateChatCell.swift */,
+				CE6E5F102A696F5600CB2257 /* PrivateChatCell.xib */,
+				CE9536172A8393A500E510CA /* LockScreenController.swift */,
+				CE9536182A8393A500E510CA /* LockScreenController.xib */,
+			);
+			path = privateChat;
 			sourceTree = "<group>";
 		};
 		CE72209527D07BCB001F64FF /* Group Info */ = {
@@ -1968,6 +2028,7 @@
 				CE9121122795453100B007E0 /* qrCode */,
 				CE968372274B94E600701ADF /* group */,
 				CECB98F526CE65EE00B24448 /* MirrorflyUIkitQa.entitlements */,
+				CECB98F426CE658D00B24448 /* Mirrorfly.entitlements */,
 				CE31D80A274365760052FFFF /* ViewModels */,
 				CEF4371827390BDA008D0F39 /* Calls */,
 				CEA2F9C62657D0210013F5E8 /* Strings */,
@@ -2420,6 +2481,17 @@
 			name = WebSetting;
 			sourceTree = "<group>";
 		};
+		CED7F7F52A76310800DA50D8 /* Authentication */ = {
+			isa = PBXGroup;
+			children = (
+				CED7F7F92A76311D00DA50D8 /* PrivateChatAuthenticationPINViewController.swift */,
+				CED7F7F72A76311C00DA50D8 /* PrivateChatAuthenticationPINViewController.xib */,
+				CED7F7F62A76311C00DA50D8 /* PrivateChatFingerPrintPINViewController.swift */,
+				CED7F7F82A76311D00DA50D8 /* PrivateChatFingerPrintPINViewController.xib */,
+			);
+			path = Authentication;
+			sourceTree = "<group>";
+		};
 		CEE70875276893AE0072A50F /* ForwardMessages */ = {
 			isa = PBXGroup;
 			children = (
@@ -2578,7 +2650,6 @@
 				CEC08B7427E243D9005E48C5 /* MirrorflyNotificationextention.entitlements */,
 				CEF43750273BCAB2008D0F39 /* NotificationExtentionQa.entitlements */,
 				CEF43746273BCA77008D0F39 /* NotificationService.swift */,
-				CEC08B7227E23B9F005E48C5 /* MirrorflyNotificationExtention-Info.plist */,
 				CEF43748273BCA77008D0F39 /* Info.plist */,
 			);
 			path = NotificationExtention;
@@ -2749,6 +2820,7 @@
 				CE46745829BAF39900169A96 /* ChatTagsFooterCell.xib in Resources */,
 				CE955AD8295EFD75006525EA /* coin_drop.mp3 in Resources */,
 				CE46746229BAF39900169A96 /* UserListCell.xib in Resources */,
+				CE5FD3512A6FDEF70047D654 /* Animation.json in Resources */,
 				CE56254426E14E200020BDD3 /* ChatViewLocationIncomingCell.xib in Resources */,
 				CE613AF1293A18F900995C9B /* ClearAllChatTableViewCell.xib in Resources */,
 				CE1391FB29C86BC400F31957 /* ProgressBar.xib in Resources */,
@@ -2760,6 +2832,7 @@
 				CE79DEC928FD7DFA0008B3D7 /* GroupDividerCell.xib in Resources */,
 				CE8C1AB226E6225C00433470 /* test-image.jpg in Resources */,
 				CE9CD31B2951DB2200EFE68A /* AutoBackupPopupViewController.xib in Resources */,
+				CE5FD34E2A6E98540047D654 /* PrivateChatPopupViewController.xib in Resources */,
 				CEA3D8C827F4283200C9BE92 /* PrivacyHelpTableViewCell.xib in Resources */,
 				CE79DEAA28FD2A150008B3D7 /* MessageInfoDivider.xib in Resources */,
 				CE4AF3AA26F23AA3001EBB3B /* AudioSender.xib in Resources */,
@@ -2790,10 +2863,12 @@
 				CEE71270291B7DE200C16387 /* AuthenticationPINViewController.xib in Resources */,
 				3DF9C9A928E6E6A300154BBE /* DeleteMessageForEveryOneAlertController.xib in Resources */,
 				CE501496294A1D9300B61CE3 /* FingerPrintPINViewController.xib in Resources */,
+				CED7F7FE2A76311D00DA50D8 /* PrivateChatFingerPrintPINViewController.xib in Resources */,
 				CE9705D9294C6DA6007246A8 /* RestoreInstructionsTableViewCell.xib in Resources */,
 				3D3C47DD28E5315D001F2520 /* DeleteForEveryOneViewCell.xib in Resources */,
 				CE9B7FD02A00D47D000349B2 /* MentionTableViewCell.xib in Resources */,
 				CE9A65562754A997007DB23C /* NoResultFoundCell.xib in Resources */,
+				CE95361B2A8393A500E510CA /* LockScreenController.xib in Resources */,
 				CEFA0EC7292F56EF003CBE9C /* BlockedContactTableViewCell.xib in Resources */,
 				CE4549FD2907C2350041212C /* NotDeliveredCell.xib in Resources */,
 				CE2A390C29227862005F7AF0 /* AppLockTableViewCell.xib in Resources */,
@@ -2815,6 +2890,7 @@
 				CECD351E29E3E44500A728F8 /* GoogleService-Prod-Info.plist in Resources */,
 				CEA2F93526569C5C0013F5E8 /* LaunchScreen.storyboard in Resources */,
 				CECB992726CE71CB00B24448 /* SF-UI-Display-Heavy.otf in Resources */,
+				CE5FD3442A6976E60047D654 /* PrivateChatEnableController.xib in Resources */,
 				CE56257026E2B49D0020BDD3 /* ChatViewContactIncomingCell.xib in Resources */,
 				CE955AE9295EFDE3006525EA /* NotificationTonesListViewController.xib in Resources */,
 				CEFD043026CD25B90017287F /* countries.json in Resources */,
@@ -2825,6 +2901,7 @@
 				CE955AD6295EFD75006525EA /* ding.mp3 in Resources */,
 				CE8F53D32743AD7C00B201F4 /* ChatViewVideoOutgoingCell.xib in Resources */,
 				CE5B64B527FADBFE003F9038 /* ChatViewTextOutgoingCell.xib in Resources */,
+				CE6E5F122A696F5600CB2257 /* PrivateChatCell.xib in Resources */,
 				CEC3E77029E6C6850073705C /* ChatTags.storyboard in Resources */,
 				CE46745229BAF39900169A96 /* CustomChatTagsCell.xib in Resources */,
 				CE9705BD294C5E7B007246A8 /* BackupRestore.storyboard in Resources */,
@@ -2836,6 +2913,7 @@
 				CE955AE0295EFD75006525EA /* spell.mp3 in Resources */,
 				CE955AD2295EFD75006525EA /* tri_tone.mp3 in Resources */,
 				CEA2F93026569C590013F5E8 /* Main.storyboard in Resources */,
+				CED7F7FC2A76311D00DA50D8 /* PrivateChatAuthenticationPINViewController.xib in Resources */,
 				CE56256E26E2B4850020BDD3 /* ChatViewContactOutgoingCell.xib in Resources */,
 				CE955AED295EFDE3006525EA /* NotificationToneListCell.xib in Resources */,
 				CE0B4FC027A414E3005349EB /* ContactInfoCell.xib in Resources */,
@@ -3138,10 +3216,12 @@
 				CE2FA0542812B38E004C0A85 /* ContactUsController.swift in Sources */,
 				CE56250A26E0ED550020BDD3 /* LocationViewController.swift in Sources */,
 				CEF8A4C92959CD5100D669B6 /* SectionHeaderView.swift in Sources */,
+				CE5FD34C2A6E98540047D654 /* PrivateChatPopupViewController.swift in Sources */,
 				CE0B4FAC27A3E3E9005349EB /* ContactInfoViewController.swift in Sources */,
 				CEF4372727391D78008D0F39 /* GroupCallViewController.swift in Sources */,
 				CEA22E0C26F4B54C002034C0 /* AppUtils.swift in Sources */,
 				CEA22F2426F62901002034C0 /* TableviewExtension.swift in Sources */,
+				CE5FD3422A6976E60047D654 /* PrivateChatEnableController.swift in Sources */,
 				CEA4FFB926DFBB42004A1268 /* ProfileModel.swift in Sources */,
 				CE9705C7294C6D9C007246A8 /* BackupPopupViewController.swift in Sources */,
 				CE8FAC6B27269AA000C92634 /* AudioView.swift in Sources */,
@@ -3160,6 +3240,7 @@
 				CEE70878276893D90072A50F /* ForwardViewController.swift in Sources */,
 				CEA22DBD26F4A5F4002034C0 /* MenuItemWithIndexPath.swift in Sources */,
 				CE9EC7F126CA71FD0089D9EB /* UserDefaultsExtension.swift in Sources */,
+				CE9536192A8393A500E510CA /* LockScreenController.swift in Sources */,
 				CE084E462747687F005D304E /* DateFormatterUtility.swift in Sources */,
 				CE9F7F0C26F2BB1B002BF24A /* IPImage.swift in Sources */,
 				CE9705CD294C6D9C007246A8 /* RestoreInstructionViewController.swift in Sources */,
@@ -3191,6 +3272,7 @@
 				CE91211E279563FF00B007E0 /* QRCodeScannerViewModel.swift in Sources */,
 				CE85EDF6274CDAED002A6D50 /* AddParticipantsViewController.swift in Sources */,
 				CE46745429BAF39900169A96 /* ChatTagsCell.swift in Sources */,
+				CED7F7FA2A76311D00DA50D8 /* PrivateChatFingerPrintPINViewController.swift in Sources */,
 				CEF8A4D22959CD5100D669B6 /* LinkCell.swift in Sources */,
 				CE4AF3A826F23AA3001EBB3B /* AudioReceiver.swift in Sources */,
 				CE56257226E2B7400020BDD3 /* ChatContactViewController.swift in Sources */,
@@ -3271,10 +3353,12 @@
 				CE40C5CA26DDC0B5001F829F /* OTPViewController.swift in Sources */,
 				CE005CA729C9D431009BE471 /* AuthenticationExtenison.swift in Sources */,
 				CEF2D9C628F3F7470059693B /* MessageInfoViewController.swift in Sources */,
+				CED7F8002A76311D00DA50D8 /* PrivateChatAuthenticationPINViewController.swift in Sources */,
 				CE9B7FC52A00D46B000349B2 /* MentionTextView.swift in Sources */,
 				3D12788F27A7AC6D00A34436 /* UserProfileViewController.swift in Sources */,
 				CE9FA02826F06BC70082EFA5 /* SearchRecentChatTableViewCell.swift in Sources */,
 				CEA2F94626569F2F0013F5E8 /* ApiEndPoints.swift in Sources */,
+				CE6E5F112A696F5600CB2257 /* PrivateChatCell.swift in Sources */,
 				CE79DEC728FD7DFA0008B3D7 /* GroupDividerCell.swift in Sources */,
 				CE501490294A1D3B00B61CE3 /* ContextMenu.swift in Sources */,
 				CED0F3DB26CBB35E002E376A /* NetworkReachability.swift in Sources */,
@@ -3527,7 +3611,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 379;
+				CURRENT_PROJECT_VERSION = 380;
 				DEVELOPMENT_TEAM = G44VFA67ZG;
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = G44VFA67ZG;
 				ENABLE_BITCODE = NO;
@@ -3580,7 +3664,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 379;
+				CURRENT_PROJECT_VERSION = 380;
 				DEVELOPMENT_TEAM = G44VFA67ZG;
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = G44VFA67ZG;
 				ENABLE_BITCODE = NO;
@@ -3628,7 +3712,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 379;
+				CURRENT_PROJECT_VERSION = 380;
 				DEVELOPMENT_TEAM = G44VFA67ZG;
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = G44VFA67ZG;
 				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
@@ -3637,6 +3721,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = MirrorFlyQa;
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Identify Yourself!";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3665,7 +3750,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 379;
+				CURRENT_PROJECT_VERSION = 380;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = G44VFA67ZG;
 				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
@@ -3702,7 +3787,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 379;
+				CURRENT_PROJECT_VERSION = 380;
 				DEVELOPMENT_TEAM = G44VFA67ZG;
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = G44VFA67ZG;
 				ENABLE_BITCODE = NO;
@@ -3749,7 +3834,7 @@
 				CODE_SIGN_ENTITLEMENTS = notificationextention/NotificationExtentionQa.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Distribution: CONTUS SUPPORT INTERACTIVE PRIVATE LIMITED";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 379;
+				CURRENT_PROJECT_VERSION = 380;
 				DEVELOPMENT_TEAM = G44VFA67ZG;
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = G44VFA67ZG;
 				ENABLE_BITCODE = NO;

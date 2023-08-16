@@ -47,7 +47,7 @@ class DeleteMyAccountVC: UIViewController, UITextFieldDelegate {
             }
         })
         mobileNumberField.keyboardType = .phonePad
-        if let accountNumber = FlyDefaults.myMobileNumber.components(separatedBy: " ").last?.replacingOccurrences(of: "+", with: ""){
+        if let accountNumber = ContactManager.getMyProfile().mobileNumber.components(separatedBy: " ").last?.replacingOccurrences(of: "+", with: ""){
             accountNumberCount = accountNumber.count
         }
     }
@@ -71,8 +71,8 @@ class DeleteMyAccountVC: UIViewController, UITextFieldDelegate {
         }
         if !mobileNumber.isEmpty{
     
-            let accountCountryCode = FlyDefaults.myMobileNumber.replacingOccurrences(of: mobileNumber, with: "").replacingOccurrences(of: "+", with: "").replacingOccurrences(of: " ", with: "")
-            let accountNumber = FlyDefaults.myMobileNumber.substring(from: accountCountryCode.count).replacingOccurrences(of: "+", with: "").replacingOccurrences(of: " ", with: "")
+            let accountCountryCode = ContactManager.getMyProfile().mobileNumber.replacingOccurrences(of: mobileNumber, with: "").replacingOccurrences(of: "+", with: "").replacingOccurrences(of: " ", with: "")
+            let accountNumber = ContactManager.getMyProfile().mobileNumber.substring(from: accountCountryCode.count).replacingOccurrences(of: "+", with: "").replacingOccurrences(of: " ", with: "")
             
             
             if mobileNumber == accountNumber{
