@@ -31,8 +31,6 @@ class AutodownloadSelectionViewController: UIViewController {
     
     var sectionlist = NetworkType.allCases
     var downloadfiles = MessageDownloadType.allCases
-    var mobiledata = [String : Bool]()
-    var wifi = [String : Bool]()
     var sectionName = [DownlaodList]()
     
     @IBOutlet weak var autoDownloadTableview: UITableView!
@@ -42,8 +40,6 @@ class AutodownloadSelectionViewController: UIViewController {
 
         self.autoDownloadTableview.dataSource = self
         sectionName = [DownlaodList(isopened: false, sectionTitle:sectionlist, sectionValues: downloadfiles),DownlaodList(isopened: false, sectionTitle:sectionlist, sectionValues: downloadfiles)]
-        mobiledata = FlyDefaults.autoDownloadMobile
-        wifi = FlyDefaults.autoDownloadWifi
         
         autoDownloadTableview.reloadData()
     }
@@ -103,33 +99,35 @@ extension AutodownloadSelectionViewController : UITableViewDelegate,UITableViewD
         let cell = tableView.dequeueReusableCell(withIdentifier: "AutodownloadsTableViewCell", for: indexPath) as! AutodownloadsTableViewCell
         
         if indexPath.section == 0 {
+            let autoDownloadMobile = ChatManager.autoDownloadMobileConfig()
             cell.labeltitle.text = sectionName[indexPath.section].sectionValues[indexPath.row].rawValue
             
             switch sectionName[0].sectionValues[indexPath.row] {
             case .Photos:
-                cell.selectedImageoutlet.image = getSelectedImage(isselected: FlyDefaults.autoDownloadMobile["photo"] ?? false)
+                cell.selectedImageoutlet.image = getSelectedImage(isselected: autoDownloadMobile[AutoDownloadType.photo.rawValue] ?? false)
             case .Videos:
-                cell.selectedImageoutlet.image =   getSelectedImage(isselected: FlyDefaults.autoDownloadMobile["videos"] ?? false)
+                cell.selectedImageoutlet.image =   getSelectedImage(isselected: autoDownloadMobile[AutoDownloadType.videos.rawValue] ?? false)
             case .Audios:
-                cell.selectedImageoutlet.image =  getSelectedImage(isselected: FlyDefaults.autoDownloadMobile["audio"] ?? false)
+                cell.selectedImageoutlet.image =  getSelectedImage(isselected: autoDownloadMobile[AutoDownloadType.audio.rawValue] ?? false)
             case .Documents:
-                cell.selectedImageoutlet.image =  getSelectedImage(isselected: FlyDefaults.autoDownloadMobile["documents"] ?? false)
+                cell.selectedImageoutlet.image =  getSelectedImage(isselected: autoDownloadMobile[AutoDownloadType.documents.rawValue] ?? false)
          
                 break
             }
             
         }
         else{
+            let autoDownloadWiFi = ChatManager.autoDownloadWiFiConfig()
             cell.labeltitle.text = sectionName[indexPath.section].sectionValues[indexPath.row].rawValue
             switch sectionName[1].sectionValues[indexPath.row] {
             case .Photos:
-                cell.selectedImageoutlet.image = getSelectedImage(isselected: FlyDefaults.autoDownloadWifi["photo"] ?? false )
+                cell.selectedImageoutlet.image = getSelectedImage(isselected: autoDownloadWiFi[AutoDownloadType.photo.rawValue] ?? false )
             case .Videos:
-                cell.selectedImageoutlet.image = getSelectedImage(isselected: FlyDefaults.autoDownloadWifi["videos"] ?? false)
+                cell.selectedImageoutlet.image = getSelectedImage(isselected: autoDownloadWiFi[AutoDownloadType.videos.rawValue] ?? false)
             case .Audios:
-                cell.selectedImageoutlet.image = getSelectedImage(isselected: FlyDefaults.autoDownloadWifi["audio"] ?? false)
+                cell.selectedImageoutlet.image = getSelectedImage(isselected: autoDownloadWiFi[AutoDownloadType.audio.rawValue] ?? false)
             case .Documents:
-                cell.selectedImageoutlet.image = getSelectedImage(isselected: FlyDefaults.autoDownloadWifi["documents"] ?? false)
+                cell.selectedImageoutlet.image = getSelectedImage(isselected: autoDownloadWiFi[AutoDownloadType.documents.rawValue] ?? false)
            
                 break
             }
@@ -146,51 +144,37 @@ extension AutodownloadSelectionViewController : UITableViewDelegate,UITableViewD
             switch sectionName[0].sectionValues[indexPath.row] {
                 
             case .Photos:
-                let isPhotoEnabled = !(mobiledata["photo"] ?? false)
-                mobiledata["photo"] = isPhotoEnabled
-                FlyDefaults.autoDownloadTimeMobileDataImage = isPhotoEnabled ? FlyUtils.getTimeInMillis() : 0
+                let status = ChatManager.autoDownloadMobileConfig()[AutoDownloadType.photo.rawValue] ?? false
+                ChatManager.updateAutoDownloadMobile(type: .photo, enable: !status)
             case .Videos:
-                let isVideoEnabled = !(mobiledata["videos"] ?? false)
-                mobiledata["videos"]  = isVideoEnabled
-                FlyDefaults.autoDownloadTimeMobileDataVideo = isVideoEnabled ? FlyUtils.getTimeInMillis() : 0
+                let status = ChatManager.autoDownloadMobileConfig()[AutoDownloadType.videos.rawValue] ?? false
+                ChatManager.updateAutoDownloadMobile(type: .videos, enable: !status)
             case .Audios:
-                let isAudioEnabled = !(mobiledata["audio"] ?? false)
-                mobiledata["audio"] = isAudioEnabled
-                FlyDefaults.autoDownloadTimeMobileDataAudio = isAudioEnabled ? FlyUtils.getTimeInMillis() : 0
+                let status = ChatManager.autoDownloadMobileConfig()[AutoDownloadType.audio.rawValue] ?? false
+                ChatManager.updateAutoDownloadMobile(type: .audio, enable: !status)
             case .Documents:
-                let isDocumentEnalbed = !(mobiledata["documents"] ?? false)
-                mobiledata["documents"] = isDocumentEnalbed
-                FlyDefaults.autoDownloadTimeMobileDataDocument = isDocumentEnalbed ? FlyUtils.getTimeInMillis() : 0
+                let status = ChatManager.autoDownloadMobileConfig()[AutoDownloadType.documents.rawValue] ?? false
+                ChatManager.updateAutoDownloadMobile(type: .documents, enable: !status)
             }
         case 1:
             switch sectionName[1].sectionValues[indexPath.row] {
                
             case .Photos:
-                let isPhotoEnabled = !(wifi["photo"] ?? false)
-                wifi["photo"] = isPhotoEnabled
-                FlyDefaults.autoDownloadTimeWifiImage = isPhotoEnabled ? FlyUtils.getTimeInMillis() : 0
+                let status = ChatManager.autoDownloadWiFiConfig()[AutoDownloadType.photo.rawValue] ?? false
+                ChatManager.updateAutoDownloadWiFi(type: .photo, enable: !status)
             case .Videos:
-                let isVideoEnabled = !(wifi["videos"] ?? false)
-                wifi["videos"] = isVideoEnabled
-                FlyDefaults.autoDownloadTimeWifiVideo = isVideoEnabled ? FlyUtils.getTimeInMillis() : 0
+                let status = ChatManager.autoDownloadWiFiConfig()[AutoDownloadType.videos.rawValue] ?? false
+                ChatManager.updateAutoDownloadWiFi(type: .videos, enable: !status)
             case .Audios:
-                let isAudioEnabled = !(wifi["audio"] ?? false)
-                wifi["audio"] = isAudioEnabled
-                FlyDefaults.autoDownloadTimeWifiAudio = isAudioEnabled ? FlyUtils.getTimeInMillis() : 0
+                let status = ChatManager.autoDownloadWiFiConfig()[AutoDownloadType.audio.rawValue] ?? false
+                ChatManager.updateAutoDownloadWiFi(type: .audio, enable: !status)
             case .Documents:
-                let isDocumentDownload = !(wifi["documents"] ?? false)
-                wifi["documents"] = isDocumentDownload
-                FlyDefaults.autoDownloadTimeWifiDocument = isDocumentDownload ? FlyUtils.getTimeInMillis() : 0
+                let status = ChatManager.autoDownloadWiFiConfig()[AutoDownloadType.documents.rawValue] ?? false
+                ChatManager.updateAutoDownloadWiFi(type: .documents, enable: !status)
             }
         default:
             break
         }
-        
-        FlyDefaults.autoDownloadMobile = mobiledata
-        FlyDefaults.autoDownloadWifi = wifi
-        
-        print("case0",mobiledata)
-        print("case1",wifi)
         
         
         self.autoDownloadTableview.reloadData()

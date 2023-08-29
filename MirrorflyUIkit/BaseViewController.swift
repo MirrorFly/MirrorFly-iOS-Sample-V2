@@ -65,9 +65,18 @@ class BaseViewController : UIViewController {
         ChatManager.logoutApi { [weak self] isSuccess, flyError, flyData in
             
             if isSuccess {
-                FlyDefaults.appLockPassword = ""
-                FlyDefaults.appLockenable = false
-                FlyDefaults.hideLastSeen = false
+                CommonDefaults.appLockPassword = ""
+                CommonDefaults.appLockenable = false
+                CommonDefaults.appFingerprintenable = false
+
+                ChatManager.getPrivateChatList { isSuccess, error, data in
+                    if let list = data["data"] as? [RecentChat] {
+                        for chat in list {
+                            ChatManager.setPrivateChat(jid: chat.jid, isPrivate: false)
+                        }
+                    }
+                }
+
                 UIApplication.shared.applicationIconBadgeNumber = 0
                 self?.stopLoading()
                 Utility.saveInPreference(key: isProfileSaved, value: false)

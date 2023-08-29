@@ -56,10 +56,10 @@ class ProfileViewModel {
     func contactSync() {
         return
         let  apiService =  ApiService()
-        let params = ["licenseKey": FlyDefaults.licenseKey]
-        let url = FlyDefaults.baseURL + "contacts/sandbox/" + syncContacts
+        let params = ["licenseKey": ChatManager.getAppConfigDetails().licenseKey]
+        let url = ChatManager.getAppConfigDetails().baseURL + "contacts/sandbox/" + syncContacts
         let headers: HTTPHeaders
-        let authtoken = FlyDefaults.authtoken
+        let authtoken = ChatManager.getAppConfigDetails().authtoken
         headers = [
             FlyConstants.authorization: authtoken, "content-type": "application/json"]
         print(headers)

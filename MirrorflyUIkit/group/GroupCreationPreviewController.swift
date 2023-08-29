@@ -100,7 +100,10 @@ class GroupCreationPreviewController: UIViewController {
     
     func showSuccessOrFailure(isSuccess : Bool, message: String) {
         print("showSuccessOrFailure \(isSuccess)")
-        stopLoading()
+        executeOnMainThread {
+            self.stopLoading()
+        }
+        
         if isSuccess {
             AppAlert.shared.showAlert(view: self, title: alert, message: groupCreatedSuccess, buttonTitle: okButton)
             groupCreationViewModel.initializeGroupCreationData()

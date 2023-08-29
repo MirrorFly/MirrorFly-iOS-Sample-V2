@@ -60,7 +60,7 @@ extension NotificationsViewController : UITableViewDelegate,UITableViewDataSourc
 
         case .notificationTone:
             cell.titlelabel.text = self.NotificationList[indexPath.row].rawValue
-            cell.detailLabel.text = FlyDefaults.selectedNotificationSoundName[NotificationSoundKeys.name.rawValue]
+            cell.detailLabel.text = CommonDefaults.selectedNotificationSoundName[NotificationSoundKeys.name.rawValue]
             break
 
         case .notificationNotWorking:

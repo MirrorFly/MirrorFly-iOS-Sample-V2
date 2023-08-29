@@ -57,14 +57,13 @@ class DMAReasonVC: UIViewController {
                 ContactManager.shared.deleteMyAccountRequest(reason: reason, feedback: feedBack) { isSuccess, error, data in
                     let message = data["message"] as? String ?? ""
                     if isSuccess{
-                        FlyDefaults.appLockPassword = ""
-                        FlyDefaults.appLockenable = false
-                        FlyDefaults.hideLastSeen = false
+                        CommonDefaults.appLockPassword = ""
+                        CommonDefaults.appLockenable = false
                         Utility.saveInPreference(key: firstTimeSandboxContactSyncDone, value: false)
                         CallLogManager().deleteCallLogs()
                         ChatManager.deleteAllRecentChats()
                         //CallLogs Badge Count
-                        FlyDefaults.unreadMissedCallCount = 0
+                        CallLogManager.resetUnreadMissedCallCount()
                         UIApplication.shared.applicationIconBadgeNumber = 0
                         AppAlert.shared.showToast(message: "Your Mirrorfly account has been deleted.")
                     }else{

@@ -221,7 +221,11 @@ class SharekitShareToViewController: ShareKitBaseViewController {
     }
     
     func isParticipantExist(jid: String) -> (doesExist : Bool, message : String) {
-        return GroupManager.shared.isParticiapntExistingIn(groupJid: jid, participantJid: FlyDefaults.myJid)
+        guard let myJid = try? FlyUtils.getMyJid() else {
+            ShareKitUtility.shared.exitApp()
+            return (false,emptyString())
+        }
+        return GroupManager.shared.isParticiapntExistingIn(groupJid: jid, participantJid: myJid)
     }
     
     func getLastMesssage() -> [ChatMessage]? {
@@ -708,6 +712,9 @@ extension SharekitShareToViewController : UITableViewDelegate, UITableViewDataSo
                         cell.statusUILabel?.text = recentChatDetails.lastMessageContent + (recentChatDetails.lastMessageType?.rawValue ?? "")
                     }
                 }
+                if ChatManager.isPrivateChat(jid: recentChatDetails.jid) {
+                    cell.statusUILabel?.text = ""
+                }
                 showHideEmptyMessage(totalCount: isSearchEnabled == true ? getRecentChat.filter({$0.profileType == .groupChat}).count : getAllRecentChat.filter({$0.profileType == .groupChat}).count)
             case 3:
                 showHideEmptyMessage(totalCount: 0)
@@ -743,6 +750,9 @@ extension SharekitShareToViewController : UITableViewDelegate, UITableViewDataSo
                 cell.statusUILabel?.isHidden = false
                 cell.removeButton?.isHidden = true
                 cell.removeIcon?.isHidden = true
+                if ChatManager.isPrivateChat(jid: recentChatDetails.jid) {
+                    cell.statusUILabel?.text = ""
+                }
                 showHideEmptyMessage(totalCount: isSearchEnabled == true ? getRecentChat.count : getAllRecentChat.count)
             default:
                 break
@@ -1803,7 +1813,7 @@ extension SharekitShareToViewController {
         if ChatManager.shared.isBusyStatusEnabled() && ContactManager.shared.getUserProfileDetails(for: jid)?.profileChatType == .singleChat {
             let alertController = UIAlertController.init(title: "Disable busy Status. Do you want to continue?" , message: "", preferredStyle: .alert)
             let shareAction = UIAlertAction(title: "Yes", style: .default) {_ in
-                ChatManager.shared.enableDisableBusyStatus(!FlyDefaults.isUserBusyStatusEnabled)
+                ChatManager.shared.enableDisableBusyStatus(!ChatManager.shared.isBusyStatusEnabled())
                 completion(true)
             }
             let cancelAction = UIAlertAction(title: "No", style: .cancel) { [weak controller] (action) in

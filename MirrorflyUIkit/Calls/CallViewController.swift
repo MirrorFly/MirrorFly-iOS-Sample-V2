@@ -147,7 +147,7 @@ class CallViewController: UIViewController ,AVPictureInPictureControllerDelegate
         var jidToCheck = ""
         if CallManager.isOneToOneCall() {
 
-            let filteredJid = members.filter({$0.jid != FlyDefaults.myJid})
+            let filteredJid = members.filter({$0.jid != AppUtils.getMyJid()})
             if filteredJid.count > 0 {
                 jidToCheck = filteredJid[0].jid
             }
@@ -344,8 +344,8 @@ class CallViewController: UIViewController ,AVPictureInPictureControllerDelegate
         print(members)
         var membersJid = members.compactMap { $0.jid }
         
-        if membersJid.contains(FlyDefaults.myJid){
-            membersJid.removeAll(where: { $0 == FlyDefaults.myJid})
+        if membersJid.contains(AppUtils.getMyJid()){
+            membersJid.removeAll(where: { $0 == AppUtils.getMyJid()})
         }
         if membersJid.count == 1{
             returnToCall.image = UIImage(named: "Default Avatar_ic")
@@ -698,7 +698,7 @@ class CallViewController: UIViewController ,AVPictureInPictureControllerDelegate
                     self?.oneToOneVideoViewTransforms()
                 })
             }else{
-                if let myCell = collectionView?.cellForItem(at: IndexPath(item: findIndexOfUser(jid: FlyDefaults.myJid) ?? members.count - 1, section: 0)) as? GroupCallCell{
+                if let myCell = collectionView?.cellForItem(at: IndexPath(item: findIndexOfUser(jid: AppUtils.getMyJid()) ?? members.count - 1, section: 0)) as? GroupCallCell{
                     DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(600)) {
                         myCell.videoBaseView.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
                     }
@@ -710,7 +710,7 @@ class CallViewController: UIViewController ,AVPictureInPictureControllerDelegate
                     self?.oneToOneVideoViewTransforms()
                 })
             }else{
-                if let myCell = collectionView?.cellForItem(at: IndexPath(item: findIndexOfUser(jid: FlyDefaults.myJid) ?? members.count - 1, section: 0)) as? GroupCallCell{
+                if let myCell = collectionView?.cellForItem(at: IndexPath(item: findIndexOfUser(jid: AppUtils.getMyJid()) ?? members.count - 1, section: 0)) as? GroupCallCell{
                     DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(600)) {
                         myCell.videoBaseView.transform = CGAffineTransform(scaleX: -1.0, y: 1.0)
                     }
@@ -861,7 +861,7 @@ class CallViewController: UIViewController ,AVPictureInPictureControllerDelegate
     
     func getContactNames(){
         var unknowGroupMembers = [String]()
-        let membersJid = members.compactMap { $0.jid }.filter {$0 != FlyDefaults.myJid}
+        let membersJid = members.compactMap { $0.jid }.filter {$0 != AppUtils.getMyJid()}
         if membersJid.count == 1 {
             if let contact = ChatManager.getContact(jid: membersJid[0].lowercased()){
                 outgoingCallView?.OutGoingPersonLabel.text = getNameStringWithGroupName(userNames: getUserName(jid: contact.jid, name: contact.name, nickName: contact.nickName, contactType: contact.contactType))
@@ -1149,7 +1149,7 @@ extension CallViewController : UICollectionViewDelegate , UICollectionViewDataSo
         let member = members[indexPath.row]
         let isLastRow = (indexPath.row == members.count - 1)
         let callStatus =  isLastRow ? (CallManager.getCallStatus(userId: member.jid) == .ON_HOLD  ? .onHold : .connected) : convertCallStatus(status: CallManager.getCallStatus(userId: member.jid))
-        if member.jid == FlyDefaults.myJid && CallManager.getCallStatus(userId: member.jid) == .ON_HOLD{
+        if member.jid == AppUtils.getMyJid() && CallManager.getCallStatus(userId: member.jid) == .ON_HOLD{
             _ = updateCallStatus(jid: member.jid, status: .onHold)
         }
         groupCell.contentView.backgroundColor = UIColor(hexString: member.color)
@@ -1237,7 +1237,7 @@ extension CallViewController : UICollectionViewDelegate , UICollectionViewDataSo
             if let baseView = groupCell.videoBaseView {
                 member.videoTrackView = localRen
                 member.videoTrackView.frame = CGRect(x: 0, y: 0, width: baseView.bounds.width, height: baseView.bounds.height)
-                if member.jid == FlyDefaults.myJid {
+                if member.jid == AppUtils.getMyJid() {
                     let track = CallManager.getRemoteVideoTrack(jid: member.jid)
                     print("#remoteTrack 1243 \(member.jid), \(track)")
                     member.videoTrack = track
@@ -1336,10 +1336,10 @@ extension CallViewController : CallViewControllerDelegate {
             setVideoBtnIcon()
             outgoingCallView?.cameraButton.isHidden = isVideoMuted
             if !isVideoMuted {
-                addGroupTracks(jid: FlyDefaults.myJid)
+                addGroupTracks(jid: AppUtils.getMyJid())
             } else {
-                if let index = findIndexOfUser(jid: FlyDefaults.myJid) {
-                    updateVideoMuteStatus(index: index, userid: FlyDefaults.myJid, isMute: status)
+                if let index = findIndexOfUser(jid: AppUtils.getMyJid()) {
+                    updateVideoMuteStatus(index: index, userid: AppUtils.getMyJid(), isMute: status)
                 }
             }
             AudioManager.shared().autoReRoute()
@@ -1348,7 +1348,7 @@ extension CallViewController : CallViewControllerDelegate {
     
     func onAudioMute(status:Bool) {
         outgoingCallView?.audioButton.setImage(UIImage(named: isAudioMuted ? "IconAudioOn" :  "IconAudioOff" ), for: .normal)
-        updateSpeakingUI(userId: FlyDefaults.myJid, isSpeaking: false)
+        updateSpeakingUI(userId: AppUtils.getMyJid(), isSpeaking: false)
         CallManager.muteAudio(status)
     }
     
@@ -1369,7 +1369,7 @@ extension CallViewController : CallViewControllerDelegate {
 extension CallViewController {
     
     func makeCall(usersList : [String], callType: CallType, groupId : String = "", onCompletion: @escaping (_ isSuccess: Bool, _ message: String) -> Void) {
-        CallManager.setMyInfo(name: FlyDefaults.myName, imageUrl: FlyDefaults.myImageUrl)
+        CallManager.setMyInfo(name: ContactManager.getMyProfile().name, imageUrl: ContactManager.getMyProfile().image)
         self.groupId = groupId
         AudioManager.shared().audioManagerDelegate = self
         print("#lifecycle makeCall")
@@ -1379,7 +1379,7 @@ extension CallViewController {
         }
         self.callType = callType
         addMyInfoToMembersArray()
-        for userJid in usersList where userJid != FlyDefaults.myJid {
+        for userJid in usersList where userJid != AppUtils.getMyJid() {
             let _ = addRemoteMembers(for: ChatManager.getContact(jid: userJid.lowercased())!)
         }
         var membersJid = members.compactMap { $0.jid }
@@ -1466,7 +1466,7 @@ extension CallViewController : CallManagerDelegate {
 
             if let contact = ContactManager.shared.getUserProfileDetails(for: self.members.first?.jid ?? "") {
                 if !contact.image.isEmpty {
-                    if let contact = ChatManager.profileDetaisFor(jid: FlyDefaults.myJid), !contact.image.isEmpty{
+                    if let contact = ChatManager.profileDetaisFor(jid: AppUtils.getMyJid()), !contact.image.isEmpty{
                         //localProfileImageView.contentMode = .scaleAspectFill
                         self.outgoingCallView?.remoteImageView.loadFlyImage(imageURL: contact.image, name: getUserName(jid: contact.jid, name: contact.name, nickName: contact.nickName, contactType: contact.contactType), jid: contact.jid)
                     }
@@ -1573,15 +1573,15 @@ extension CallViewController : CallManagerDelegate {
     
     func addMyInfoToMembersArray(videoTrack: RTCVideoTrack) {
         let callMember = CallMember()
-        callMember.name = FlyDefaults.myName
-        callMember.image = FlyDefaults.myImageUrl
+        callMember.name = ContactManager.getMyProfile().name
+        callMember.image = ContactManager.getMyProfile().image
         callMember.isCaller = CallManager.getCallDirection() == .Incoming ? false : true
-        callMember.jid = FlyDefaults.myJid
+        callMember.jid = AppUtils.getMyJid()
         callMember.isVideoMuted = CallManager.getCallType() == .Audio
         callMember.callStatus = CallManager.getCallDirection() == .Incoming ? (CallManager.isCallConnected() ? .connected : .connecting) : (CallManager.isCallConnected() ? .connected : .calling)
         callMember.videoTrack = videoTrack
         
-        if let index = findIndexOfUser(jid: FlyDefaults.myJid) {
+        if let index = findIndexOfUser(jid: AppUtils.getMyJid()) {
             members[index].videoTrack = videoTrack
         } else {
             isVideoMuted = callMember.isVideoMuted
@@ -1592,14 +1592,14 @@ extension CallViewController : CallManagerDelegate {
     
     func addMyInfoToMembersArray() {
         let callMember = CallMember()
-        callMember.name = FlyDefaults.myName
-        callMember.image = FlyDefaults.myImageUrl
+        callMember.name = ContactManager.getMyProfile().name
+        callMember.image = ContactManager.getMyProfile().image
         callMember.isCaller = CallManager.getCallDirection() == .Incoming ? false : true
-        callMember.jid = FlyDefaults.myJid
-        callMember.isVideoMuted = CallManager.getMuteStatus(jid: FlyDefaults.myJid, isAudioStatus: false) //CallManager.getCallType() == .Audio
+        callMember.jid = AppUtils.getMyJid()
+        callMember.isVideoMuted = CallManager.getMuteStatus(jid: AppUtils.getMyJid(), isAudioStatus: false) //CallManager.getCallType() == .Audio
         callMember.callStatus = CallManager.getCallDirection() == .Incoming ? (CallManager.isCallConnected() ? .connected : .connecting) : (CallManager.isCallConnected() ? .connected : .calling)
         
-        if let index = findIndexOfUser(jid: FlyDefaults.myJid) {
+        if let index = findIndexOfUser(jid: AppUtils.getMyJid()) {
             
         } else {
             isVideoMuted = callMember.isVideoMuted
@@ -1622,7 +1622,7 @@ extension CallViewController : CallManagerDelegate {
         callMember.name = getUserName(jid: remoteUserProfile?.jid ?? "",name: remoteUserProfile?.name ?? userId, nickName: remoteUserProfile?.nickName ?? userId,contactType: remoteUserProfile?.contactType ?? .unknown)
         callMember.image = remoteUserProfile?.image ?? user.image
         callMember.color = remoteUserProfile?.colorCode ?? "#00008B"
-        callMember.isVideoMuted = CallManager.getMuteStatus(jid: FlyDefaults.myJid, isAudioStatus: false) //CallManager.getCallType() == .Audio
+        callMember.isVideoMuted = CallManager.getMuteStatus(jid: AppUtils.getMyJid(), isAudioStatus: false) //CallManager.getCallType() == .Audio
         callMember.isVideoTrackAdded = false
         remoteImage = remoteUserProfile?.image ?? user.image
         if let index = findIndexOfUser(jid: user.jid){
@@ -1639,10 +1639,10 @@ extension CallViewController : CallManagerDelegate {
     
     func getDisplayName(IncomingUser :[String]) {
         var userString = [String]()
-        if FlyDefaults.hideNotificationContent{
-            userString.append(FlyDefaults.appName)
+        if isHideNotificationContent {
+            userString.append(APP_NAME)
         }else{
-            for JID in IncomingUser where JID != FlyDefaults.myJid {
+            for JID in IncomingUser where JID != AppUtils.getMyJid() {
                 print("#jid \(JID)")
                 if let contact = ChatManager.getContact(jid: JID.lowercased()){
                     if ENABLE_CONTACT_SYNC{
@@ -1666,8 +1666,8 @@ extension CallViewController : CallManagerDelegate {
     
     func getGroupName(_ groupId : String) {
         self.groupId = groupId
-        if FlyDefaults.hideNotificationContent{
-            CallManager.getContactNames(IncomingUserName: [FlyDefaults.appName])
+        if isHideNotificationContent {
+            CallManager.getContactNames(IncomingUserName: [APP_NAME])
         }else{
             if let groupContact =  ChatManager.getContact(jid: groupId.lowercased()){
                 CallManager.getContactNames(IncomingUserName: [groupContact.name])
@@ -1698,7 +1698,7 @@ extension CallViewController : CallManagerDelegate {
         
         DispatchQueue.main.async { [weak self] in
             
-            if userId == FlyDefaults.myJid && (callStatus != .RECONNECTING && callStatus != .RECONNECTED) {
+            if userId == AppUtils.getMyJid() && (callStatus != .RECONNECTING && callStatus != .RECONNECTED) {
                 return
             }
             
@@ -1777,7 +1777,7 @@ extension CallViewController : CallManagerDelegate {
                 }
                 print("#call CONNECTED : \(userId)")
                 self?.myCallStatus = .connected
-                _ = self?.updateCallStatus(jid:  userId.isEmpty ? FlyDefaults.myJid : userId, status: .connected)
+                _ = self?.updateCallStatus(jid:  userId.isEmpty ? AppUtils.getMyJid() : userId, status: .connected)
                 self?.showHideCallAgainView(show: false, status: "Connected")
 
                 self?.enableButtons(buttons:self?.outgoingCallView?.videoButton, isEnable: true)
@@ -1803,9 +1803,9 @@ extension CallViewController : CallManagerDelegate {
                     self?.collectionView.reloadData()
                     if self?.checkIfGroupCallUiIsVisible() ?? false { self?.showGroupCallUI() }
                     //_ = self?.requestForVideoTrack(jid: userId)
-                    self?.addGroupTracks(jid: FlyDefaults.myJid)
+                    self?.addGroupTracks(jid: AppUtils.getMyJid())
                     _ = self?.updateMuteStatus(jid: userId, isMute: false, isAudio: CallManager.getCallType() == .Audio)
-                    if CallManager.getCallStatus(userId:  userId.isEmpty ? FlyDefaults.myJid : userId ) == .ON_HOLD{
+                    if CallManager.getCallStatus(userId:  userId.isEmpty ? AppUtils.getMyJid() : userId ) == .ON_HOLD{
                         self?.addUpdateCallUsersWithStatus(userJid: userId, status: .onHold, reload: true)
                     }else{
                         self?.addUpdateCallUsersWithStatus(userJid: userId, status: .connected, reload: true)
@@ -1854,7 +1854,7 @@ extension CallViewController : CallManagerDelegate {
                 FlyLogWriter.sharedInstance.writeText("#call UI .DISCONNECTED => \(userId) \(self?.members.count)")
             case .ON_HOLD:
                 self?.isOnCall = true
-                let userId = userId.isEmpty ? FlyDefaults.myJid : userId
+                let userId = userId.isEmpty ? AppUtils.getMyJid() : userId
                 if let index =  self?.findIndexOfUser(jid: userId) {
                     print("#callStatus onCallStatus ====  .ON_HOLD for \(userId) at \(index)  \(CallManager.isOneToOneCall())  \(String(describing: self?.members.count ?? 0))")
                     self?.members[index].callStatus = .onHold
@@ -1869,9 +1869,9 @@ extension CallViewController : CallManagerDelegate {
                 FlyLogWriter.sharedInstance.writeText("#call UI .ON_HOLD => \(userId) \(self?.members.count)")
             case .ON_RESUME:
                 self?.isOnCall = true
-                let userId = userId.isEmpty ? FlyDefaults.myJid : userId
+                let userId = userId.isEmpty ? AppUtils.getMyJid() : userId
                 var indexValue : Int? = nil
-                if userId == FlyDefaults.myJid {
+                if userId == AppUtils.getMyJid() {
                     self?.myCallStatus = .connected
                 }
                 if let index =  self?.findIndexOfUser(jid: userId) {
@@ -1883,7 +1883,7 @@ extension CallViewController : CallManagerDelegate {
                     self?.outgoingCallView?.OutgoingRingingStatusLabel.text =  CallStatus.connected.rawValue
                     self?.myCallStatus = .connected
                 }else{
-                    if !CallManager.getMuteStatus(jid: userId, isAudioStatus: false) && userId != FlyDefaults.myJid {
+                    if !CallManager.getMuteStatus(jid: userId, isAudioStatus: false) && userId != AppUtils.getMyJid() {
                         print("#callStatusRE ON_RESUME If")
                         self?.onCallAction(callAction: .ACTION_REMOTE_VIDEO_ADDED, userId: userId)
                     }else{
@@ -1996,7 +1996,7 @@ extension CallViewController : CallManagerDelegate {
     }
     
     func onCallAction(callAction: CallAction, userId: String) {
-        if userId == FlyDefaults.myJid {
+        if userId == AppUtils.getMyJid() {
             return
         }
         
@@ -2150,12 +2150,12 @@ extension CallViewController {
     
     func validateAndAddMember(jid: String? = nil, with status: CallStatus = .calling) -> Bool {
         
-        if members.isEmpty || !members.contains(where: {$0.jid == FlyDefaults.myJid}) {
+        if members.isEmpty || !members.contains(where: {$0.jid == AppUtils.getMyJid()}) {
             //addMyInfoToMembersArray(requestTrack: CallManager.getCallType() == .Video)
             addMyInfoToMembersArray()
         }
         
-        if let jid = jid, jid != FlyDefaults.myJid {
+        if let jid = jid, jid != AppUtils.getMyJid() {
             if !(members.contains{$0.jid == jid} ) {
                 let profileDetails = ProfileDetails(jid: jid)
                 _ = addRemoteMembers(for: profileDetails, with: status)
@@ -2243,12 +2243,12 @@ extension CallViewController {
                         if isMute {
                             member.videoTrackView.removeFromSuperview()
                             groupCell.videoBaseView.willRemoveSubview(member.videoTrackView)
-                            if userid == FlyDefaults.myJid {
+                            if userid == AppUtils.getMyJid() {
                                 groupCell.videoBaseView.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
                             }
                         } else {
                             addGroupTracks(jid: userid)
-                            if userid == FlyDefaults.myJid {
+                            if userid == AppUtils.getMyJid() {
                                 groupCell.videoBaseView.transform = CGAffineTransform(scaleX: -1.0, y: 1.0)
                             }
                         }
@@ -2258,12 +2258,12 @@ extension CallViewController {
                             member.videoTrackView.removeFromSuperview()
                             groupCell.videoBaseView.willRemoveSubview(member.videoTrackView)
                             groupCell.videoMuteImage.isHidden = !isMute
-                            if userid == FlyDefaults.myJid {
+                            if userid == AppUtils.getMyJid() {
                                 groupCell.videoBaseView.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
                             }
                         } else {
                             addGroupTracks(jid: userid)
-                            if userid == FlyDefaults.myJid {
+                            if userid == AppUtils.getMyJid() {
                                 groupCell.videoBaseView.transform = CGAffineTransform(scaleX: -1.0, y: 1.0)
                             }
                             groupCell.videoMuteImage.isHidden = !isMute
@@ -2597,7 +2597,7 @@ extension CallViewController {
     }
     
     func isCallOnHoldForOneToCall() -> Bool {
-        if let firstUserJid = members.first?.jid , let firstStatus = CallManager.getCallStatus(userId: firstUserJid), let myStatus = CallManager.getCallStatus(userId: FlyDefaults.myJid) {
+        if let firstUserJid = members.first?.jid , let firstStatus = CallManager.getCallStatus(userId: firstUserJid), let myStatus = CallManager.getCallStatus(userId: AppUtils.getMyJid()) {
             if firstStatus == .ON_HOLD || myStatus == .ON_HOLD{
                return true
             }
@@ -2612,13 +2612,15 @@ extension CallViewController : ConnectionEventDelegate{
         if error.description.contains(FlyConstants.ErrorMessage.authorization_error) {
             CallManager.disconnectCall()
             dismiss()
-            FlyDefaults.myMobileNumber = ""
-            FlyDefaults.myXmppUsername = ""
-            FlyDefaults.myXmppPassword = ""
-            FlyDefaults.myXmppResource = ""
-            FlyDefaults.xmppDomain = ""
-            FlyDefaults.xmppPort = 0
-            FlyDefaults.isLoggedIn = false
+            ChatManager.shared.resetFlyDefaults()
+            //Commented private flydefaults
+//            FlyDefaults.myMobileNumber = ""
+//            FlyDefaults.myXmppUsername = ""
+//            FlyDefaults.myXmppPassword = ""
+//            FlyDefaults.myXmppResource = ""
+//            FlyDefaults.xmppDomain = ""
+//            FlyDefaults.xmppPort = 0
+            ChatManager.updateAppLoggedIn(isLoggedin: false)
             let window = UIApplication.shared.windows.filter {$0.isKeyWindow}.first
             let controller : OTPViewController
             if #available(iOS 13.0, *) {
@@ -2708,7 +2710,7 @@ extension CallViewController {
     
     func updateSpeakingUI(userId : String, isSpeaking : Bool, audioLevel : Int = 0 ){
         if !CallManager.isOneToOneCall()  {
-            if userId == FlyDefaults.myJid && isAudioMuted == true && isSpeaking == true {
+            if userId == AppUtils.getMyJid() && isAudioMuted == true && isSpeaking == true {
                 updateSpeakingUI(userId: userId, isSpeaking: false)
             }
             if getCallStatusOf(userId: userId) != .connected{
@@ -2783,7 +2785,7 @@ extension CallViewController {
                             if let baseView = groupCell.videoBaseView {
                                 member.videoTrackView = localRen
                                 member.videoTrackView.frame = CGRect(x: 0, y: 0, width: baseView.bounds.width, height: baseView.bounds.height)
-                                if jid == FlyDefaults.myJid {
+                                if jid == AppUtils.getMyJid() {
                                     if !member.isVideoMuted {
                                         let track = CallManager.getRemoteVideoTrack(jid: jid)
                                         track?.add(member.videoTrackView)
@@ -2864,7 +2866,7 @@ extension CallViewController {
 
             if let contact = ContactManager.shared.getUserProfileDetails(for: members.last?.jid ?? "") {
                 if !contact.image.isEmpty {
-                    if let contact = ChatManager.profileDetaisFor(jid: FlyDefaults.myJid), !contact.image.isEmpty{
+                    if let contact = ChatManager.profileDetaisFor(jid: AppUtils.getMyJid()), !contact.image.isEmpty{
                         localProfileImageView.contentMode = .scaleAspectFill
                         localProfileImageView.loadFlyImage(imageURL: contact.image, name: getUserName(jid: contact.jid, name: contact.name, nickName: contact.nickName, contactType: contact.contactType), jid: contact.jid)
                     }

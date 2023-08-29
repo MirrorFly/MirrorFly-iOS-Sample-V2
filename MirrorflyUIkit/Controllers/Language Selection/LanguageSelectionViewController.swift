@@ -68,7 +68,7 @@ extension LanguageSelectionViewController: UITableViewDataSource, UITableViewDel
         let cell : LanguageSelectionTableViewCell = tableView.dequeueReusableCell(withIdentifier: Identifiers.LanguageSelectionTableViewCell, for: indexPath) as! LanguageSelectionTableViewCell
         //cell.selectedImageView.isHidden = true
         cell.languageLabel.text = self.languageArray[indexPath.row].name
-        if checkedRow == indexPath.row || self.languageArray[indexPath.row].name == FlyDefaults.selectedLanguage {
+        if checkedRow == indexPath.row || self.languageArray[indexPath.row].name == CommonDefaults.selectedLanguage {
             cell.selectedImageView.isHidden = false
         } else {
             cell.selectedImageView.isHidden = true
@@ -84,8 +84,8 @@ extension LanguageSelectionViewController: UITableViewDataSource, UITableViewDel
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         checkedRow = indexPath.row
         self.languageSelectionTable.reloadData()
-        FlyDefaults.selectedLanguage = self.languageArray[indexPath.row].name ?? ""
-        FlyDefaults.targetLanguageCode = self.languageArray[indexPath.row].language ?? ""
+        CommonDefaults.selectedLanguage = self.languageArray[indexPath.row].name ?? ""
+        CommonDefaults.targetLanguageCode = self.languageArray[indexPath.row].language ?? ""
         self.navigationController?.popViewController(animated: true)
     }
 }

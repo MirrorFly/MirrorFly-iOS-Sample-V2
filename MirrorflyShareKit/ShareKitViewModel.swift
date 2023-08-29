@@ -15,7 +15,7 @@ import Contacts
 
 let BASE_URL =  "https://api-preprod-sandbox.mirrorfly.com/api/v1/"
 let CONTAINER_ID = "group.com.mirrorfly.qa"
-let LICENSE_KEY = "XXXXXXXXXXXXXXX"
+let LICENSE_KEY = "xxxxxxxxxxxxxxxxxxx"
 let IS_LIVE = false
 let APP_NAME = "UiKit"
 let ENABLE_CONTACT_SYNC = false
@@ -56,7 +56,7 @@ class ShareKitViewModel {
     }
     
     func isLoggedIn() -> Bool {
-        return FlyDefaults.isLoggedIn
+        return ChatManager.getAppLoggedIn()
     }
 
     func clearModel() {
@@ -75,7 +75,8 @@ class ShareKitViewModel {
         var hasText = false
         var hasVcard = false
         var hasUrl = false
-
+        var hasExternalUrl = false
+        
         var locationValues = [String]()
 
         attachments.forEach { attachment in
@@ -101,6 +102,9 @@ class ShareKitViewModel {
                 locationDisptachGroup.enter()
                 attachment.loadItem(forTypeIdentifier: "public.url", options: nil) { [weak self] data, error in
                     hasUrl = true
+                    if !String(describing: data).contains("file://") {
+                        hasExternalUrl = true
+                    }
                     if let data {
                         locationValues.append(String(describing: data))
                     }
@@ -112,7 +116,7 @@ class ShareKitViewModel {
             if (hasText && hasUrl) || (hasText && hasUrl && hasVcard) {
                 self.locationList.append(locationValues.joined(separator: "\n"))
                 return
-            } else if (hasUrl) {
+            } else if (hasUrl && hasExternalUrl) {
                 self.locationList.append(locationValues.joined(separator: "\n"))
                 return
             }

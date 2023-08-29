@@ -35,15 +35,15 @@ class ShareViewController: ShareKitBaseViewController {
 extension ShareViewController {
 
     func handleDisplayStatus() {
-        if (FlyDefaults.appLockenable || FlyDefaults.appFingerprintenable) {
-            FlyDefaults.showAppLock = true
+        if (CommonDefaults.appLockenable || CommonDefaults.appFingerprintenable) {
+            CommonDefaults.showAppLock = true
         }
         exit(0)
     }
 
     @objc func handleBackgroundStatus() {
-        if (FlyDefaults.appLockenable || FlyDefaults.appFingerprintenable) {
-            FlyDefaults.showAppLock = true
+        if (CommonDefaults.appLockenable || CommonDefaults.appFingerprintenable) {
+            CommonDefaults.showAppLock = true
         }
         exit(0)
     }
@@ -64,9 +64,9 @@ extension ShareViewController {
 extension ShareViewController {
     
     private func checkForAppLock() {
-        if FlyDefaults.showAppLock {
-            if FlyDefaults.appFingerprintenable  && FlyDefaults.appLockenable {
-                if !FlyDefaults.faceOrFingerAuthenticationFails {
+        if CommonDefaults.showAppLock {
+            if CommonDefaults.appFingerprintenable  && CommonDefaults.appLockenable {
+                if !CommonDefaults.faceOrFingerAuthenticationFails {
                     let initialViewController = FingerPrintPINViewController(nibName: "FingerPrintPINViewController", bundle: nil)
                     self.navigationController?.setNavigationBarHidden(true, animated: true)
                     self.navigationController?.pushViewController(initialViewController, animated: false)
@@ -77,7 +77,7 @@ extension ShareViewController {
                     self.navigationController?.setNavigationBarHidden(true, animated: true)
                     self.navigationController?.pushViewController(initialViewController, animated: false)
                 }
-            } else if FlyDefaults.appLockenable && FlyDefaults.appFingerprintenable == false {
+            } else if CommonDefaults.appLockenable && CommonDefaults.appFingerprintenable == false {
                 let initialViewController = AuthenticationPINViewController(nibName: "AuthenticationPINViewController", bundle: nil)
                 initialViewController.login = true
                 initialViewController.modalPresentationStyle = .fullScreen

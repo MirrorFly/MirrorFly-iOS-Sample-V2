@@ -43,7 +43,7 @@ class UserListCell: UITableViewCell {
     }
     
     func setImage(imageURL: String, name: String, color: UIColor , recentChat : RecentChat) {
-        let urlString = "\(FlyDefaults.baseURL + "" + media + "/" + imageURL + "?mf=" + "" + FlyDefaults.authtoken)"
+        let urlString = ChatManager.getImageUrl(imageName: imageURL)
         var url = URL(string: urlString)
         var placeHolder = UIImage()
         if recentChat.profileType == .groupChat {

@@ -13,7 +13,12 @@ class AppLockPasswordViewController: UIViewController, UITextFieldDelegate {
     var appLockPassword : String?
     
     var fingerPINisOn : Bool = false
-   
+
+    var isFromPrivateChat: Bool = false
+    var isChangePin: Bool = false
+    var isFromPrivateRecentChat: Bool = false
+
+    var privateChatDelegate: PrivateChatDelegate?
     
     @IBOutlet weak var scrollview: UIScrollView!
     
@@ -73,15 +78,27 @@ class AppLockPasswordViewController: UIViewController, UITextFieldDelegate {
         }
         else if enterNewPassword.text ?? "" == confirmNewPassword.text ?? "" {
             print("saved")
-            if fingerPINisOn == true{
-                FlyDefaults.appFingerprintenable = true
+            if isFromPrivateChat {
+                CommonDefaults.appLockPassword = confirmNewPassword.text ?? ""
+                CommonDefaults.passwordAuthenticationAttemps = 0
+            } else {
+                if fingerPINisOn == true{
+                    CommonDefaults.appFingerprintenable = true
+                }
+                CommonDefaults.appLockPassword = confirmNewPassword.text ?? ""
+                CommonDefaults.passwordAuthenticationAttemps = 0
+                if !isChangePin {
+                    CommonDefaults.appLockenable = true
+                    CommonDefaults.appLockPasswordDate = Date()
+                }
             }
-            FlyDefaults.appLockenable = true
-            FlyDefaults.appLockPassword = confirmNewPassword.text ?? ""
-            FlyDefaults.appLockPasswordDate = Date()
-            FlyDefaults.passwordAuthenticationAttemps = 0
             self.showToastWithMessage(message: SuccessMessage.PINsetsuccessfully)
             self.navigationController?.popViewController(animated: true)
+            if !isChangePin {
+                self.privateChatDelegate?.onPasswordSet()
+            } else {
+                self.privateChatDelegate?.pinChanged()
+            }
         }
     }
     
@@ -105,7 +122,7 @@ class AppLockPasswordViewController: UIViewController, UITextFieldDelegate {
             self.showToastWithMessage(message: ErrorMessage.passwordShouldbeSame)
             return false
         }
-        else if enterNewPassword.text == FlyDefaults.appLockPassword {
+        else if enterNewPassword.text == CommonDefaults.appLockPassword {
             self.showToastWithMessage(message: ErrorMessage.oldPINnewPINsholdnotSame)
             return false
         }

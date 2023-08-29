@@ -70,17 +70,19 @@ extension RootViewController : CallManagerDelegate {
         
         
         DispatchQueue.main.async { [weak self] in
-            if userId == FlyDefaults.myJid && (callStatus != .RECONNECTING && callStatus != .RECONNECTED) {
+            if userId == AppUtils.getMyJid() && (callStatus != .RECONNECTING && callStatus != .RECONNECTED) {
                 return
             }
             
             switch callStatus {
             case .ATTENDED:
 
-                if (FlyDefaults.appLockenable || FlyDefaults.appFingerprintenable) {
-                    let secondsDifference = Calendar.current.dateComponents([.minute, .second], from: FlyDefaults.appBackgroundTime, to: Date())
+                if (CommonDefaults.appLockenable || CommonDefaults.appFingerprintenable) {
+                    let secondsDifference = Calendar.current.dateComponents([.minute, .second], from: CommonDefaults.appBackgroundTime, to: Date())
                     if secondsDifference.second ?? 0 > 32 || secondsDifference.minute ?? 0 > 0 {
-                        FlyDefaults.showAppLock = true
+                        CommonDefaults.showAppLock = true
+                        CommonDefaults.appLockOnPrivateChat = false
+                        CommonDefaults.privateChatOnChatScreen = false
                     }
                 }
 
@@ -172,7 +174,7 @@ extension RootViewController {
             iceServerList.append(iceServer)
             let iceServer1 = RTCIceServer.init(urlStrings: ["stun:stun.l.google.com:19302"], username: "", credential: "")
             iceServerList.append(iceServer1)
-            try? CallSDK.Builder.setUserId(id: FlyDefaults.myJid)
+            try? CallSDK.Builder.setUserId(id: AppUtils.getMyJid())
                 .setDomainBaseUrl(baseUrl: "https://api-beta.mirrorfly.com/api/v1/")
                 .setSignalSeverUrl(url: "https://signal-beta.mirrorfly.com/")
                 .setJanusSeverUrl(url: "wss://janus.mirrorfly.com")
@@ -182,7 +184,7 @@ extension RootViewController {
                 .setCallViewController(viewController: callViewController!)
                 .buildAndInitialize()
         }
-        CallManager.setMyInfo(name: FlyDefaults.myName, imageUrl: FlyDefaults.myImageUrl)
+        CallManager.setMyInfo(name: ContactManager.getMyProfile().name, imageUrl: ContactManager.getMyProfile().image)
         if let callViewController = callViewController {
             CallManager.setCallViewController(callViewController)
         }

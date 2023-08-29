@@ -72,9 +72,8 @@ class ShareKitBaseViewController: UIViewController {
         ChatManager.logoutApi { [weak self] isSuccess, flyError, flyData in
             guard let self else { return }
             if isSuccess {
-                FlyDefaults.appLockPassword = ""
-                FlyDefaults.appLockenable = false
-                FlyDefaults.hideLastSeen = false
+                CommonDefaults.appLockPassword = ""
+                CommonDefaults.appLockenable = false
                 self.stopLoading()
                 Utility.saveInPreference(key: isProfileSaved, value: false)
                 Utility.saveInPreference(key: isLoggedIn, value: false)

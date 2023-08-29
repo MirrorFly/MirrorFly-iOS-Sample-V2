@@ -23,11 +23,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         BackupManager.shared.backupDelegate = self
-        if FlyDefaults.appLockenable || FlyDefaults.appFingerprintenable {
-            FlyDefaults.showAppLock = true
+        if CommonDefaults.appLockenable || CommonDefaults.appFingerprintenable {
+            CommonDefaults.showAppLock = true
         }
 
-        if FlyDefaults.isBlockedByAdmin {
+        if ContactManager.isBlockedByAdmin() {
             navigateToBlockedScreen()
         } else if Utility.getBoolFromPreference(key: isProfileSaved) {
             let navigationController : UINavigationController
@@ -48,7 +48,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             }
             self.window?.rootViewController = navigationController
             self.window?.makeKeyAndVisible()
-        }else if Utility.getBoolFromPreference(key: isLoggedIn) && FlyDefaults.myMobileNumber != "" {
+        }else if Utility.getBoolFromPreference(key: isLoggedIn) && ContactManager.getMyProfile().mobileNumber != "" {
             let storyboard = UIStoryboard(name: "Profile", bundle: nil)
             let initialViewController = storyboard.instantiateViewController(withIdentifier: "ProfileViewController") as! ProfileViewController
             self.window?.rootViewController =  UINavigationController(rootViewController: initialViewController)
@@ -76,8 +76,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     @available(iOS 13.0, *)
     func sceneDidDisconnect(_ scene: UIScene) {
-        if FlyDefaults.appLockenable || FlyDefaults.appFingerprintenable {
-            FlyDefaults.showAppLock = true
+        if CommonDefaults.appLockenable || CommonDefaults.appFingerprintenable {
+            CommonDefaults.showAppLock = true
         }
         // Called as the scene is being released by the system.
         // This occurs shortly after the scene enters the background, or when its session is discarded.
@@ -87,14 +87,18 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     @available(iOS 13.0, *)
     func sceneDidBecomeActive(_ scene: UIScene) {
-        print("#scene sceneDidBecomeActive \(FlyDefaults.isLoggedIn)")
-        if FlyDefaults.isBlockedByAdmin {
+//        print("#scene sceneDidBecomeActive \(FlyDefaults.isLoggedIn)")
+        if ContactManager.isBlockedByAdmin() {
             navigateToBlockedScreen()
             return
         }
         let current = UIApplication.shared.keyWindow?.getTopViewController()
-        if (current is AuthenticationPINViewController || current is FingerPrintPINViewController) {
-            if let vc = current as? FingerPrintPINViewController {
+        if (current is AuthenticationPINViewController || current is FingerPrintPINViewController || current is PrivateChatAuthenticationPINViewController || current is PrivateChatFingerPrintPINViewController) {
+            if let vc = current as? FingerPrintPINViewController  {
+                if vc.isSystemCancel {
+                    vc.authenticationWithTouchID()
+                }
+            } else if let vc = current as? PrivateChatFingerPrintPINViewController  {
                 if vc.isSystemCancel {
                     vc.authenticationWithTouchID()
                 }
@@ -106,7 +110,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         setupRemoteConfig()
         ForceUpdateChecker(listener: self).checkIsNeedUpdate()
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name(didEnterBackground), object: nil)
-        if FlyDefaults.isBackupCompleted {
+        if CommonDefaults.isBackupCompleted {
             iCloudmanager().checkAutoBackupSchedule()
         } else {
             iCloudmanager().uploadBackupFile(fileUrl: BackupManager.shared.getBackupFilePath()?.absoluteString ?? emptyString())
@@ -127,13 +131,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneWillEnterForeground(_ scene: UIScene) {
         NetworkReachability.shared.startMonitoring()
 
-        if (FlyDefaults.appLockenable || FlyDefaults.appFingerprintenable) {
-            let secondsDifference = Calendar.current.dateComponents([.minute, .second], from: FlyDefaults.appBackgroundTime, to: Date())
+        if (CommonDefaults.appLockenable || CommonDefaults.appFingerprintenable) {
+            let secondsDifference = Calendar.current.dateComponents([.minute, .second], from: CommonDefaults.appBackgroundTime, to: Date())
             if secondsDifference.second ?? 0 > 32 || secondsDifference.minute ?? 0 > 0 {
-                FlyDefaults.showAppLock = true
+                CommonDefaults.showAppLock = true
+                CommonDefaults.appLockOnPrivateChat = false
+                CommonDefaults.privateChatOnChatScreen = false
             }
         }
-        print("#scene sceneWillEnterForeground \(FlyDefaults.isLoggedIn)")
+//        print("#scene sceneWillEnterForeground \(FlyDefaults.isLoggedIn)")
         // Called as the scene transitions from the background to the foreground.
         // Use this method to undo the changes made on entering the background.
     }
@@ -141,10 +147,24 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     @available(iOS 13.0, *)
     func sceneDidEnterBackground(_ scene: UIScene) {
         print("#scene sceneDidEnterBackground")
-        FlyDefaults.appBackgroundTime = Date()
+        CommonDefaults.appBackgroundTime = Date()
         postNotificationdidEnterBackground = NotificationCenter.default
         postNotificationdidEnterBackground?.post(name: Notification.Name(didEnterBackground), object: nil)
 
+        if CommonDefaults.isInPrivateChat {
+            if CommonDefaults.appLockOnPrivateChat || CommonDefaults.privateChatOnChatScreen {
+                CommonDefaults.showPrivateLockRecent = false
+            } else {
+                CommonDefaults.showPrivateLockRecent = true
+            }
+            if let controller = UIApplication.shared.keyWindow?.getTopViewController() {
+                if controller.isKind(of: UIAlertController.self) || controller.isKind(of: UIActivityViewController.self) || controller.isKind(of: GroupInfoOptionsViewController.self) {
+                    controller.dismiss(animated: false)
+                }
+            }
+        } else {
+            CommonDefaults.showPrivateLockRecent = false
+        }
         // Called as the scene transitions from the foreground to the background.
         // Use this method to save data, release shared resources, and store enough scene-specific state information
         // to restore the scene back to its current state.
@@ -160,7 +180,6 @@ extension SceneDelegate {
         Utility.saveInPreference(key: isLoggedIn, value: false)
         ChatManager.disconnect()
         ChatManager.shared.resetFlyDefaults()
-        FlyDefaults.isBlockedByAdmin = false
         if CallManager.isOngoingCall() {
             CallManager.disconnectCall()
         }

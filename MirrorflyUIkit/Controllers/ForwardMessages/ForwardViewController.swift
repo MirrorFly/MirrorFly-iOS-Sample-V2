@@ -61,6 +61,9 @@ class ForwardViewController: UIViewController {
            print("value \(isFirstPageLoaded)")
        }
    }
+
+    var hidePrivateChatUsers: Bool = false
+    var isFromPrivateChat: Bool = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -191,7 +194,7 @@ class ForwardViewController: UIViewController {
     }
     
     func isParticipantExist(index: Int) -> (doesExist : Bool, message : String) {
-        return GroupManager.shared.isParticiapntExistingIn(groupJid:  getRecentChat[index].jid, participantJid: FlyDefaults.myJid)
+        return GroupManager.shared.isParticiapntExistingIn(groupJid:  getRecentChat[index].jid, participantJid: AppUtils.getMyJid())
     }
     
     func getLastMesssage() -> [ChatMessage]? {
@@ -285,6 +288,8 @@ class ForwardViewController: UIViewController {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                     self?.navigationController?.modalPresentationStyle = .fullScreen
                     guard let viewController = vc else { return }
+                    viewController.isFromForward = true
+                    viewController.isFromPrivateChat = self?.isFromPrivateChat ?? false
                     self?.navigationController?.pushViewController(viewController, animated: true)
                     self?.stopLoading()
                 }
@@ -765,6 +770,21 @@ extension ForwardViewController : UITableViewDelegate, UITableViewDataSource {
             sendButton?.isEnabled = selectedMessages.count == 0 ? false : true
             sendButton?.alpha = selectedMessages.count == 0 ? 0.4 : 1.0
         }
+    }
+
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        if segmentSelectedIndex == 1 {
+            let recentChatDetails = isSearchEnabled == true ? getRecentChat.filter({$0.profileType == .groupChat && $0.isBlockedByAdmin == false })[indexPath.row] : getAllRecentChat.filter({$0.profileType == .groupChat && $0.isBlockedByAdmin == false})[indexPath.row]
+            if recentChatDetails.isPrivateChat && hidePrivateChatUsers {
+                return 0
+            }
+        } else if segmentSelectedIndex == 2 {
+            let recentChatDetails = isSearchEnabled == true ? getRecentChat[indexPath.row] : getAllRecentChat[indexPath.row]
+            if recentChatDetails.isPrivateChat && hidePrivateChatUsers {
+                return 0
+            }
+        }
+        return UITableView.automaticDimension
     }
 }
 
@@ -1533,7 +1553,7 @@ extension ForwardViewController {
         if ChatManager.shared.isBusyStatusEnabled() && ContactManager.shared.getUserProfileDetails(for: jid)?.profileChatType == .singleChat {
             let alertController = UIAlertController.init(title: "Disable busy Status. Do you want to continue?" , message: "", preferredStyle: .alert)
             let forwardAction = UIAlertAction(title: "Yes", style: .default) {_ in
-                ChatManager.shared.enableDisableBusyStatus(!FlyDefaults.isUserBusyStatusEnabled)
+                ChatManager.shared.enableDisableBusyStatus(!ChatManager.shared.isBusyStatusEnabled())
                 completion(true)
             }
             let cancelAction = UIAlertAction(title: "No", style: .cancel) { [weak controller] (action) in

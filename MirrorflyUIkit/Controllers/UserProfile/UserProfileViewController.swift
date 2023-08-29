@@ -80,7 +80,7 @@ class UserProfileViewController : UIViewController {
         profileImage?.layer.borderWidth = 0.5
         profileImage?.layer.borderColor = Color.groupIconBackgroundGray?.cgColor
         profileImage?.clipsToBounds = true
-        try? ContactManager.shared.getUserProfile(for: FlyDefaults.myJid, fetchFromServer: false, saveAsFriend: false, completionHandler: { isSuccess, error, flyData in
+        try? ContactManager.shared.getUserProfile(for: AppUtils.getMyJid(), fetchFromServer: false, saveAsFriend: false, completionHandler: { isSuccess, error, flyData in
             var data  = flyData
             if(isSuccess) {
                 if let pd = data.getData() as? ProfileDetails {
@@ -134,9 +134,9 @@ class UserProfileViewController : UIViewController {
     func setImage(imageURL: String,completionHandler:  @escaping (Bool?)-> Void) {
        //let apiService = ApiService()
         profileImage?.sd_imageIndicator = SDWebImageActivityIndicator.white
-        let urlString = "\(FlyDefaults.baseURL)\(media)/\(imageURL)?mf=\(FlyDefaults.authtoken)"
+        let urlString = ChatManager.getImageUrl(imageName: imageURL)
         let url = URL(string: urlString)
-        if url != URL(string: FlyDefaults.myProfileImageUrl) {
+        if url != URL(string: ContactManager.getMyProfile().image) {
             let placeholder = UIImage(named: "ic_profile_placeholder")
 
             profileImage?.sd_setImage(with: url, placeholderImage: placeholder, options: [.continueInBackground,.decodeFirstFrameOnly,.highPriority,.scaleDownLargeImages], progress: nil){ (image, responseError, isFromCache, imageUrl) in
@@ -176,7 +176,7 @@ class UserProfileViewController : UIViewController {
     }
     
     func checkToEnableButton(name : String){
-        enableSaveButton(enable: !(name.trim().lowercased() == FlyDefaults.myName.lowercased()))
+        enableSaveButton(enable: !(name.trim().lowercased() == ContactManager.getMyProfile().name.lowercased()))
     }
 }
 
@@ -185,11 +185,11 @@ class UserProfileViewController : UIViewController {
 extension UserProfileViewController {
    
     func getProfile() {
-        print( FlyDefaults.myXmppUsername)
+        print(ChatManager.getXMPPDetails().XMPPUsername)
         
-        if(FlyDefaults.isProfileUpdated) {
+        if(CommonDefaults.isProfileUpdated) {
             do {
-                let JID = FlyDefaults.myXmppUsername + "@" + FlyDefaults.xmppDomain
+                let JID = ChatManager.getXMPPDetails().XMPPUsername + "@" + ChatManager.getXMPPDetails().XMPPDomain
                 
                 try ContactManager.shared.getUserProfile(for:  JID, fetchFromServer: true, saveAsFriend: true) { [weak self] isSuccess, flyError, flyData in
                     var data  = flyData
@@ -232,7 +232,7 @@ extension UserProfileViewController {
     // MARK: Update Profile
     func updateMyProfile(isRemovedProfileImage: Bool) {
         if NetworkReachability.shared.isConnected {
-            let JID = FlyDefaults.myXmppUsername + "@" + FlyDefaults.xmppDomain
+            let JID = ChatManager.getXMPPDetails().XMPPUsername + "@" + ChatManager.getXMPPDetails().XMPPDomain
             startLoading(withText: pleaseWait)
             var myProfile = FlyProfile(jid: JID)
             guard let email = emailTextField?.text else {
@@ -256,7 +256,7 @@ extension UserProfileViewController {
             myProfile.status = status
             if(isImagePicked) {
                 myProfile.image = profileImageLocalPath
-                FlyDefaults.myProfileImageUrl = profileImageLocalPath
+//                FlyDefaults.myProfileImageUrl = profileImageLocalPath
                 if profileImageLocalPath.isEmpty && profileDetails?.image != "" {
                     myProfile.image = profileDetails?.image ?? ""
                     isImagePicked = false
@@ -270,6 +270,7 @@ extension UserProfileViewController {
                     if isRemovedProfileImage == false {
                         AppAlert.shared.showToast(message: profileUpdateSuccess.localized)
                     }
+                    self?.profileImage?.sd_setImage(with: URL(string: myProfile.image))
                     print("getProfile() updateMyProfile")
                     self?.getProfile()
                     Utility.saveInPreference(key: isProfileSaved, value: true)
@@ -323,7 +324,7 @@ extension UserProfileViewController {
         guard let email = emailTextField?.text else {return}
         guard let mobileNumber = mobileNumberLabel?.text else {return}
         
-        if userName.trim().lowercased() == FlyDefaults.myName.lowercased() {
+        if userName.trim().lowercased() == ContactManager.getMyProfile().name.lowercased() {
             return
         }
         
@@ -358,7 +359,7 @@ extension UserProfileViewController {
 extension UserProfileViewController: UITextFieldDelegate {
     
     @objc func textFieldDidChange(_ textField: UITextField) {
-        if(FlyDefaults.isProfileUpdated) {
+        if(CommonDefaults.isProfileUpdated) {
             if(nameTextField?.text?.trimmingCharacters(in: .whitespacesAndNewlines) != profileDetails?.nickName || statusLabel?.text != profileDetails?.status) {
                 saveButton?.setTitle(save.localized, for: .normal)
             }
@@ -631,7 +632,7 @@ extension UserProfileViewController: UIImagePickerControllerDelegate,UINavigatio
 extension UserProfileViewController: StatusDelegate {
     func userSelectedStatus(selectedStatus: String) {
         statusLabel?.text = selectedStatus
-        if(FlyDefaults.isProfileUpdated) {
+        if(CommonDefaults.isProfileUpdated) {
             if(nameTextField?.text != profileDetails?.nickName || emailTextField?.text != profileDetails?.email || statusLabel?.text != profileDetails?.status) {
                 saveButton?.setTitle(save.localized, for: .normal)
             }
@@ -663,7 +664,7 @@ extension UserProfileViewController: CropperViewControllerDelegate {
             let str = AppUtils.shared.getRandomString(length: 15)
             let fileName = str ?? ""
             profileImageLocalPath = AppUtils.shared.saveInDirectory(with: profileImage?.image?.jpegData(compressionQuality: 1.0), fileName: fileName + jpg) ?? ""
-            FlyDefaults.myProfileImageUrl = profileImageLocalPath
+//            FlyDefaults.myProfileImageUrl = profileImageLocalPath
             print("localPath--\( profileImageLocalPath)")
             DispatchQueue.main.async { [weak self] in
                 self?.updateMyProfile(isRemovedProfileImage: false)
@@ -777,7 +778,7 @@ extension UserProfileViewController : ProfileEventsDelegate {
     }
     
     func userProfileFetched(for jid: String, profileDetails: MirrorFlySDK.ProfileDetails?) {
-        if profileDetails?.jid == FlyDefaults.myJid {
+        if profileDetails?.jid == AppUtils.getMyJid() {
             executeOnMainThread {
                 self.updateChanges(profileDetails: profileDetails)
             }
@@ -809,7 +810,7 @@ extension UserProfileViewController : ProfileEventsDelegate {
     }
     
     func userUpdatedTheirProfile(for jid: String, profileDetails: MirrorFlySDK.ProfileDetails) {
-        if profileDetails.jid == FlyDefaults.myJid {
+        if profileDetails.jid == AppUtils.getMyJid() {
             executeOnMainThread {
                 self.updateChanges(profileDetails: profileDetails)
             }
