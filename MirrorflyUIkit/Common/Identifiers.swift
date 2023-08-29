@@ -31,6 +31,7 @@ enum Identifiers {
     static let contactCell = "ContactCell"
     static let contactViewController = "ContactViewController"
     static let dmaReasonVC = "DMAReasonVC"
+    static let privateChatPopupViewController = "PrivateChatPopupViewController"
     
     //MARK: - Chat
     static let chatTextView =  "ChatTextView"
@@ -134,6 +135,7 @@ enum Identifiers {
     static let messageInfoViewController = "MessageInfoViewController"
     static let groupInfoOptionsViewController = "GroupInfoOptionsViewController"
     static let groupInfoOptionsTableViewCell = "GroupInfoOptionsTableViewCell"
+    static let privateChatCell = "PrivateChatCell"
     
     //MARK: ChatSettings
     static let chatSettingsTableViewCell = "ChatSettingsTableViewCell"

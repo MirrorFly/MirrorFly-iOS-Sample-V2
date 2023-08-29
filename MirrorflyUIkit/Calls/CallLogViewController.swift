@@ -91,14 +91,7 @@ class CallLogViewController: UIViewController {
         
         NotificationCenter.default.addObserver(self, selector: #selector(networkChange(_:)),
                                                name: Notification.Name(NetStatus.networkNotificationObserver), object: nil)
-
-        if !isSearchEnabled {
-            callLogArray = CallLogManager.getAllCallLogs()
-            allCallLogArray = callLogArray
-            noCallLogView.isHidden = !callLogArray.isEmpty
-            deleteAllBtn.isHidden = callLogArray.isEmpty
-            self.updateButtons()
-        }
+        NotificationCenter.default.addObserver(self, selector: #selector(self.methodOfReceivedPrivateChatNotification(notification:)), name: Notification.Name("PrivateChatAlertView"), object: nil)
         
         if let lastPageNumber = Int(Utility.getStringFromPreference(key: "clLastPageNumber")), let logsTotalPages = Int(Utility.getStringFromPreference(key: "clLastTotalPages")), let logsTotalRecords = Int(Utility.getStringFromPreference(key: "clLastTotalRecords"))  {
             
@@ -149,6 +142,10 @@ class CallLogViewController: UIViewController {
         }
         callLogTableView.tableFooterView = UIView()
         callLogTableView.reloadData()
+    }
+
+    @objc func methodOfReceivedPrivateChatNotification(notification: Notification) {
+        MainTabBarController.privateChatTabBarDelegate?.moveToRecentInTabBar()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -337,7 +334,7 @@ extension CallLogViewController : UITableViewDataSource, UITableViewDelegate {
             memberCell?.groupView.isHidden = true
             memberCell?.userImageView.isHidden = false
             var jidString = String()
-            if callLog.fromUserId == FlyDefaults.myJid {
+            if callLog.fromUserId == AppUtils.getMyJid() {
                 jidString = callLog.toUserId
             } else {
                 jidString = callLog.fromUserId
@@ -375,7 +372,7 @@ extension CallLogViewController : UITableViewDataSource, UITableViewDelegate {
             memberCell?.userImageView.isHidden = true
             var userList = callLog.userList
             userList.removeAll { jid in
-                jid == FlyDefaults.myJid
+                jid == AppUtils.getMyJid()
             }
             if callLog.groupId?.count ?? 0 > 0 {
                 memberCell?.contactNamelabel.attributedText =  getAttributedUserName(name: callLog.displayName, searchText: (callLogSearchBar.text ?? "").trim())
@@ -557,7 +554,7 @@ extension CallLogViewController : UITableViewDataSource, UITableViewDelegate {
 
         if callLog.callMode == .ONE_TO_ONE {
             var jidString = String()
-            if callLog.fromUserId == FlyDefaults.myJid {
+            if callLog.fromUserId == AppUtils.getMyJid() {
                 jidString = callLog.toUserId
             } else {
                 jidString = callLog.fromUserId
@@ -609,7 +606,7 @@ extension CallLogViewController : UITableViewDataSource, UITableViewDelegate {
         }
         if callLog.callMode == .ONE_TO_ONE {
             var jidString = String()
-            if callLog.fromUserId == FlyDefaults.myJid {
+            if callLog.fromUserId == AppUtils.getMyJid() {
                 jidString = callLog.toUserId
             }else{
                 jidString = callLog.fromUserId
@@ -762,10 +759,10 @@ extension CallLogViewController : UITableViewDataSource, UITableViewDelegate {
             return
         }
         if getSelectedLogs().isEmpty {
-            if seletedCallLog.callMode == .ONE_TO_ONE && (seletedCallLog.groupId?.isEmpty ?? true) && ContactManager.shared.getUserProfileDetails(for: (seletedCallLog.fromUserId == FlyDefaults.myJid) ? seletedCallLog.toUserId :  seletedCallLog.fromUserId) != nil{
+            if seletedCallLog.callMode == .ONE_TO_ONE && (seletedCallLog.groupId?.isEmpty ?? true) && ContactManager.shared.getUserProfileDetails(for: (seletedCallLog.fromUserId == AppUtils.getMyJid()) ? seletedCallLog.toUserId :  seletedCallLog.fromUserId) != nil{
                 let vc = UIStoryboard.init(name: Storyboards.chat, bundle: Bundle.main).instantiateViewController(withIdentifier: Identifiers.chatViewParentController) as? ChatViewParentController
                 var jidString = String()
-                if seletedCallLog.fromUserId == FlyDefaults.myJid {
+                if seletedCallLog.fromUserId == AppUtils.getMyJid() {
                     jidString = seletedCallLog.toUserId
                 } else {
                     jidString = seletedCallLog.fromUserId
@@ -774,7 +771,7 @@ extension CallLogViewController : UITableViewDataSource, UITableViewDelegate {
                 vc?.getProfileDetails = profileDetails
                 let color = getColor(userName: ChatManager.getRechtChat(jid: jidString)?.profileName ?? "")
                 vc?.contactColor = color
-
+                vc?.isFromContactScreen = true
                 vc?.isStarredMessagePage = false
                 navigationController?.modalPresentationStyle = .overFullScreen
                 navigationController?.pushViewController(vc!, animated: true)
@@ -906,7 +903,7 @@ extension CallLogViewController {
 
         VOIPManager.sharedInstance.refreshToken { isSuccess in
             if isSuccess{
-                FlyCallUtils.sharedInstance.setConfigUserDefaults(FlyDefaults.authtoken, withKey: "token")
+                FlyCallUtils.sharedInstance.setConfigUserDefaults(ChatManager.getAppConfigDetails().baseURL, withKey: "token")
                 onCompletion(true)
             }else{
                 onCompletion(false)

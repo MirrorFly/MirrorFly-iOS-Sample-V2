@@ -36,7 +36,7 @@ public class iCloudmanager {
     
     public init() {
         backgroundQueue = DispatchQueue.init(label: "iCloudBackgroundQueue")
-        initialiseQuery(filename: "Backup_\(FlyDefaults.myXmppUsername).txt")
+        initialiseQuery(filename: "Backup_\(ChatManager.getXMPPDetails().XMPPUsername).txt")
         addNotificationObservers()
        // BackupManager.shared.backupDelegate = self
     }
@@ -104,8 +104,8 @@ public class iCloudmanager {
                             try FileManager.default.createDirectory(at: containerURL, withIntermediateDirectories: true, attributes: nil)
                         }
                         
-                        backupCloudFileURL = backupCloudFileURL.appendingPathComponent("Backup_\(FlyDefaults.myXmppUsername).txt")
-                        FlyDefaults.isBackupCompleted = false
+                        backupCloudFileURL = backupCloudFileURL.appendingPathComponent("Backup_\(ChatManager.getXMPPDetails().XMPPUsername).txt")
+                        CommonDefaults.isBackupCompleted = false
                             let data = try Data(contentsOf: backupUrl)
                             try data.write(to: backupCloudFileURL)
 //                        if FileManager.default.fileExists(atPath: backupCloudFileURL.path) {
@@ -144,7 +144,7 @@ public class iCloudmanager {
         guard let containerURL = FileManager.default.url(forUbiquityContainerIdentifier: ICLOUD_CONTAINER_ID) else {
             return
         }
-        let backupCloudFileURL = containerURL.appendingPathComponent("Documents").appendingPathComponent("Backup_\(FlyDefaults.myXmppUsername).txt")
+        let backupCloudFileURL = containerURL.appendingPathComponent("Documents").appendingPathComponent("Backup_\(ChatManager.getXMPPDetails().XMPPUsername).txt")
         if FileManager.default.fileExists(atPath: backupCloudFileURL.path) {
             do {
                 try FileManager.default.removeItem(at: backupCloudFileURL)
@@ -163,7 +163,7 @@ public class iCloudmanager {
             backgroundQueue.async { [weak self] in
                 guard let backupCloudFileURL = FileManager.default.url(forUbiquityContainerIdentifier: ICLOUD_CONTAINER_ID) else { return }
                 var containerURL = backupCloudFileURL.appendingPathComponent("Documents")
-                containerURL = containerURL.appendingPathComponent("Backup_\(FlyDefaults.myXmppUsername).txt")
+                containerURL = containerURL.appendingPathComponent("Backup_\(ChatManager.getXMPPDetails().XMPPUsername).txt")
                 do {
                     self?.query.operationQueue?.addOperation({
                         self?.query.start()
@@ -205,7 +205,7 @@ public class iCloudmanager {
     public func getLocalBackupUrl() -> URL? {
         var documentDirectoryUrl = FlyUtils.getGroupContainerIDPath()
         documentDirectoryUrl = documentDirectoryUrl?.appendingPathComponent("iCloudBackup")
-        return documentDirectoryUrl?.appendingPathComponent("Backup_\(FlyDefaults.myXmppUsername).txt")
+        return documentDirectoryUrl?.appendingPathComponent("Backup_\(ChatManager.getXMPPDetails().XMPPUsername).txt")
     }
     
     public func deleteLoaclBackup() {
@@ -220,7 +220,7 @@ public class iCloudmanager {
     
     public func getiCloudUrl() -> URL? {
         var backupCloudFileURL = FileManager.default.url(forUbiquityContainerIdentifier: ICLOUD_CONTAINER_ID)
-        backupCloudFileURL = backupCloudFileURL?.appendingPathComponent("Documents").appendingPathComponent("Backup_\(FlyDefaults.myXmppUsername).txt")
+        backupCloudFileURL = backupCloudFileURL?.appendingPathComponent("Documents").appendingPathComponent("Backup_\(ChatManager.getXMPPDetails().XMPPUsername).txt")
         return backupCloudFileURL
     }
     
@@ -315,7 +315,7 @@ public class iCloudmanager {
         for item in query.results {
             guard let item = item as? NSMetadataItem else { continue }
             guard let fileItemURL = item.value(forAttribute: NSMetadataItemURLKey) as? URL else { continue }
-            if fileItemURL.lastPathComponent.contains("Backup_\(FlyDefaults.myXmppUsername).txt") {
+            if fileItemURL.lastPathComponent.contains("Backup_\(ChatManager.getXMPPDetails().XMPPUsername).txt") {
                 fileItem = item
                 fileURL = fileItemURL
             }
@@ -324,7 +324,7 @@ public class iCloudmanager {
         let fileValues = try? fileURL?.resourceValues(forKeys: [URLResourceKey.ubiquitousItemIsUploadingKey, URLResourceKey.ubiquitousItemIsDownloadingKey, URLResourceKey.ubiquitousItemUploadingErrorKey])
         if let fileUploadProgress = fileItem?.value(forAttribute: NSMetadataUbiquitousItemPercentUploadedKey) as? Double {
             self.getFileSize(fileURL: fileURL!)
-            FlyDefaults.isBackupCompleted = false
+            CommonDefaults.isBackupCompleted = false
             iCloudDelegate?.fileUploadProgressDidReceive(completed: fileUploadProgress, completedSize: calculateProgressSize(percent: fileUploadProgress), totalSize: fileSizeCalculation(bytes: fileSize))
         }
         if let fileDownloadProgress = fileItem?.value(forAttribute: NSMetadataUbiquitousItemPercentDownloadedKey) as? Double {
@@ -336,7 +336,7 @@ public class iCloudmanager {
         }
         
         if let fileUploaded = fileItem?.value(forAttribute: NSMetadataUbiquitousItemIsUploadedKey) as? Bool, fileUploaded == true, fileValues?.ubiquitousItemIsUploading == false {
-                FlyDefaults.isBackupCompleted = true
+            CommonDefaults.isBackupCompleted = true
                 iCloudDelegate?.fileUploadDidFinish()
                 checkLastBackupDetails()
         }

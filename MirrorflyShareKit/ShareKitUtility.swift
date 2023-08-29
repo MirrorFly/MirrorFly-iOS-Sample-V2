@@ -64,7 +64,7 @@ class ShareKitUtility {
     public func getMentionTextContent(message: String, uiLabel: UILabel? = nil, isMessageSentByMe: Bool, mentionedUsers: [String], searchedText: String? = "") -> NSMutableAttributedString {
         let attributedString = NSMutableAttributedString(string: message)
         for user in mentionedUsers {
-            let JID = user + "@" + FlyDefaults.xmppDomain
+            let JID = user + "@" + ChatManager.getXMPPDetails().XMPPDomain
             let myJID = try? FlyUtils.getMyJid()
             if let profileDetail = ContactManager.shared.getUserProfileDetails(for: JID) {
                 let userName = "@\(FlyUtils.getGroupUserName(profile: profileDetail))"

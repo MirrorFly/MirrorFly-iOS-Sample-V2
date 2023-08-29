@@ -66,7 +66,7 @@ class ChatUtils {
         var replyMessage = message.trim()
 
         for user in mentionedUsersIds {
-            let JID = user + "@" + FlyDefaults.xmppDomain
+            guard let JID = try? FlyUtils.getJid(from: user) else { return message }
             let myJID = try? FlyUtils.getMyJid()
             if let profileDetail = ContactManager.shared.getUserProfileDetails(for: JID) {
                 let userName = "@`\(FlyUtils.getGroupUserName(profile: profileDetail)) `"
@@ -81,7 +81,7 @@ class ChatUtils {
         var replyMessage = message.trim()
 
         for user in mentionedUsersIds {
-            let JID = user + "@" + FlyDefaults.xmppDomain
+            guard let JID = try? FlyUtils.getJid(from: user) else { return message }
             let myJID = try? FlyUtils.getMyJid()
             if let profileDetail = ContactManager.shared.getUserProfileDetails(for: JID) {
                 let userName = "@\(FlyUtils.getGroupUserName(profile: profileDetail))"
@@ -95,7 +95,7 @@ class ChatUtils {
     static func getMentionTextContent(message: String, uiLabel: UILabel? = nil, isMessageSentByMe: Bool, mentionedUsers: [String], searchedText: String? = "") -> NSMutableAttributedString {
         var attributedString = NSMutableAttributedString(string: message)
         for user in mentionedUsers {
-            let JID = user + "@" + FlyDefaults.xmppDomain
+            let JID = user + "@" + ChatManager.getXMPPDetails().XMPPDomain
             let myJID = try? FlyUtils.getMyJid()
             if let profileDetail = ContactManager.shared.getUserProfileDetails(for: JID) {
                 let userName = "@`\(FlyUtils.getGroupUserName(profile: profileDetail))` "
@@ -336,7 +336,7 @@ class ChatUtils {
     }
     
     static func getUserImaeUrl(imageUrl : String) -> URL? {
-        let urlString = FlyDefaults.baseURL + "media/" + imageUrl + "?mf=" + FlyDefaults.authtoken
+        let urlString = ChatManager.getImageUrl(imageName: imageUrl)
         print("ContactInfoViewController setProfile \(urlString)")
         return URL(string: urlString)
     }

@@ -129,7 +129,7 @@ extension GroupInfoOptionsViewController: UITableViewDelegate, UITableViewDataSo
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if userJid != FlyDefaults.myJid {
+        if userJid != AppUtils.getMyJid() {
             if indexPath.row == 0 {
                 self.delegate?.navigateToChat(userJid: userJid)
                 dismiss(animated: true, completion: nil)

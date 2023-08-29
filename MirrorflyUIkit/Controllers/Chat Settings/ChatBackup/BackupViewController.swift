@@ -52,9 +52,9 @@ class BackupViewController: UIViewController {
         self.navigationController?.isNavigationBarHidden = true
         initialSetup(isAutoBackup: Utility.getAutoBackupIsOn())
         setupiCloud()
-        if FlyDefaults.isBackupInProgress {
+        if BackupManager.isBackupInProgress() {
             presentProgressController()
-        } else if !FlyDefaults.isBackupCompleted {
+        } else if !CommonDefaults.isBackupCompleted {
             progressView.isHidden = false
             cancelButton.isHidden = false
             uploadProgressLabel.isHidden = false
@@ -99,8 +99,8 @@ class BackupViewController: UIViewController {
         setupSwitchUI(uiSwitch: autoBackupSwitch)
        // setupSwitchUI(uiSwitch: autoBackupOverSwitch)
         backupButton.titleLabel?.font = AppFont.Medium.size(14)
-        backupButton.alpha = FlyDefaults.isBackupInProgress ? 0.5 : 1
-        backupButton.isUserInteractionEnabled = FlyDefaults.isBackupInProgress ? false : true
+        backupButton.alpha = BackupManager.isBackupInProgress() ? 0.5 : 1
+        backupButton.isUserInteractionEnabled = BackupManager.isBackupInProgress() ? false : true
     }
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)

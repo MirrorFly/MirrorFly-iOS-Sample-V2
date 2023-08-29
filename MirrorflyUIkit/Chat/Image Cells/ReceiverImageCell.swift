@@ -344,7 +344,7 @@ class ReceiverImageCell: BaseTableViewCell {
         
     //MARK: - Populating the Incoming Cell with the translated message
         
-        if (message!.isMessageTranslated && FlyDefaults.isTranlationEnabled) {
+        if (message!.isMessageTranslated && CommonDefaults.isTranlationEnabled) {
             translatedTextLabel?.isHidden = false
             guard let chatMessage = message else {return self }
             print(chatMessage.mediaChatMessage?.mediaCaptionText)

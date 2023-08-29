@@ -83,6 +83,7 @@ let  thisWillMuteAllNotificationsAlertsForIncomingMessages = "This will mute all
 //MARK: EmptyTable Handler
 let noResultFound = "No results found"
 let noNewMessage = "No new Messages"
+let noPrivateMessage = "No Private chats"
 
 //MARK: RecentChat HeaderSection Title
 let chatTitle = "Chats"
@@ -147,6 +148,7 @@ let deleteGroupMessage = "Group deleted successfully"
 
 //Finger Print Set
 let biometricAuthentication = "You need to set pin first in order to enable bio metric authentication"
+let pinAuthentication = "You need to enable PIN Lock first in order to enable bio metric authentication"
 
 /// Contact access permission
 let contactAccessTitle = "Allow Contact Access"
@@ -288,6 +290,7 @@ let youWantToLogout = "Are you sure you want to logout?"
 let email = "Email"
 let mobileNumber = "Mobile Number"
 let status = "Status"
+let unarchiveForPrivateLock = "This chat is Archived. To lock this chat Unarchive it."
 
 // MARK: notification name
 let foregroundNotification = "foregroundNotification"

@@ -24,9 +24,16 @@ class ContactInfoViewController: ViewController {
     var delegate: RefreshProfileInfo?
     
     var availableFeatures = ChatManager.getAvailableFeatures()
+
+    var isFromContactInfo: Bool = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        if ChatManager.isPrivateChat(jid: contactJid) && isFromContactInfo {
+            showLockScreen()
+        }
+
         setConfiguration()
         setUpUI()
         setUpStatusBar()
@@ -41,6 +48,8 @@ class ContactInfoViewController: ViewController {
         ChatManager.shared.adminBlockDelegate = self
         ChatManager.shared.connectionDelegate = self
         ChatManager.shared.availableFeaturesDelegate = self
+        NotificationCenter.default.addObserver(self, selector: #selector(willEnterForeground),
+                                                       name: NSNotification.Name(didBecomeActive), object: nil)
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -53,6 +62,7 @@ class ContactInfoViewController: ViewController {
     }
     
     override func viewWillAppear(_ animated: Bool) {
+        handleBackgroundAndForground()
         availableFeatures = ChatManager.getAvailableFeatures()
         self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
     }
@@ -61,10 +71,36 @@ class ContactInfoViewController: ViewController {
         super.viewDidDisappear(animated)
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name(FlyConstants.contactSyncState), object: nil)
     }
+
+    override func willCometoForeground() {
+        self.view.removeLaunchSubview()
+    }
+
+    @objc func willEnterForeground() {
+        self.view.removeLaunchSubview()
+    }
+
+    override func didMoveToBackground() {
+        if ChatManager.isPrivateChat(jid: contactJid) {
+            self.view.addLaunchSubview()
+        }
+    }
     
     private func setConfiguration(){
         if contactJid.isNotEmpty {
             profileDetails = contactInfoViewModel.getContactInfo(jid: contactJid)
+        }
+    }
+
+    func showLockScreen() {
+        if CommonDefaults.appFingerprintenable {
+            let vc = PrivateChatFingerPrintPINViewController(nibName: "PrivateChatFingerPrintPINViewController", bundle: nil)
+            vc.isFromContactInfo = isFromContactInfo
+            self.navigationController?.pushViewController(vc, animated: false)
+        } else {
+            let vc = PrivateChatAuthenticationPINViewController(nibName:"PrivateChatAuthenticationPINViewController", bundle: nil)
+            vc.isFromContactInfo = isFromContactInfo
+            self.navigationController?.pushViewController(vc, animated: false)
         }
     }
     
@@ -118,6 +154,8 @@ class ContactInfoViewController: ViewController {
         contactInfoTableView?.dataSource = self
         
         contactInfoTableView?.register(UINib(nibName: Identifiers.contactInfoCell , bundle: .main), forCellReuseIdentifier: Identifiers.contactInfoCell)
+
+        contactInfoTableView?.register(UINib(nibName: Identifiers.privateChatCell , bundle: .main), forCellReuseIdentifier: Identifiers.privateChatCell)
         
         contactInfoTableView?.register(UINib(nibName: Identifiers.viewAllMediaCell , bundle: .main), forCellReuseIdentifier: Identifiers.viewAllMediaCell)
         
@@ -192,7 +230,7 @@ class ContactInfoViewController: ViewController {
 
 extension ContactInfoViewController : UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if section == 2 {
+        if section == 3 {
             return 3
         } else {
             return 1
@@ -218,7 +256,7 @@ extension ContactInfoViewController : UITableViewDelegate, UITableViewDataSource
                 cell.onlineStatus?.text = ""
             }else{
                 let imageUrl = profileDetails?.image
-                let urlString = FlyDefaults.baseURL + "media/" + (imageUrl ?? emptyString()) + "?mf=" + FlyDefaults.authtoken
+                let urlString = ChatManager.getImageUrl(imageName: imageUrl ?? emptyString())
                 var url = URL(string: urlString)
                 placeholder = ChatUtils.getPlaceholder(name: name, userColor: ChatUtils.getColorForUser(userName: name), userImage: cell.userImage ?? UIImageView(), isRounded: false)
                 cell.userImage?.sd_imageIndicator = SDWebImageActivityIndicator.grayLarge
@@ -237,7 +275,21 @@ extension ContactInfoViewController : UITableViewDelegate, UITableViewDataSource
             cell.muteSwitch?.setOn(profileDetails?.isMuted ?? false, animated: true)
             cell.muteSwitch?.isEnabled = ChatManager.shared.isUserUnArchived(jid: profileDetails?.jid ?? "")
             return cell
-          } else if indexPath.section == 2 {
+        } else if indexPath.section == 2 {
+            let cell = (tableView.dequeueReusableCell(withIdentifier: Identifiers.privateChatCell, for: indexPath) as? PrivateChatCell)!
+
+            if let recent = ChatManager.getRechtChat(jid: profileDetails?.jid ?? "") {
+                if recent.isChatArchived {
+                    cell.chatLabel.textColor = .gray
+                } else {
+                    cell.chatLabel.textColor = .label
+                }
+            }
+
+            let tap = UITapGestureRecognizer(target: self, action: #selector(self.didTapPrivateChat(_:)))
+            cell.addGestureRecognizer(tap)
+            return cell
+        } else if indexPath.section == 3 {
             let cell = (tableView.dequeueReusableCell(withIdentifier: Identifiers.contactInfoCell, for: indexPath) as? ContactInfoCell)!
             
             cell.titleLabel?.text = contactInfoTitle[indexPath.row]
@@ -259,7 +311,7 @@ extension ContactInfoViewController : UITableViewDelegate, UITableViewDataSource
             }
             
             return cell
-        } else if indexPath.section == 3 {
+        } else if indexPath.section == 4 {
             if availableFeatures.isViewAllMediasEnabled {
                 let cell = (tableView.dequeueReusableCell(withIdentifier: Identifiers.viewAllMediaCell, for: indexPath) as? ViewAllMediaCell)!
                 cell.nextImage.isHidden = false
@@ -280,7 +332,7 @@ extension ContactInfoViewController : UITableViewDelegate, UITableViewDataSource
                 return cell
             }
             
-        } else if indexPath.section == 4 {
+        } else if indexPath.section == 5 {
             let cell = (tableView.dequeueReusableCell(withIdentifier: Identifiers.viewAllMediaCell, for: indexPath) as? ViewAllMediaCell)!
             cell.nextImage.isHidden = true
             cell.titleLabel.text = report
@@ -299,13 +351,13 @@ extension ContactInfoViewController : UITableViewDelegate, UITableViewDataSource
         if (profileDetails?.contactType != .deleted){
             
             if (!(availableFeatures.isViewAllMediasEnabled) && !(availableFeatures.isReportEnabled)){
-                return 3
-            }
-            else if((availableFeatures.isViewAllMediasEnabled) && !(availableFeatures.isReportEnabled)) || (!(availableFeatures.isViewAllMediasEnabled) && (availableFeatures.isReportEnabled)) {
                 return 4
             }
-            else{
+            else if((availableFeatures.isViewAllMediasEnabled) && !(availableFeatures.isReportEnabled)) || (!(availableFeatures.isViewAllMediasEnabled) && (availableFeatures.isReportEnabled)) {
                 return 5
+            }
+            else{
+                return 6
             }
             
         }else{
@@ -314,6 +366,11 @@ extension ContactInfoViewController : UITableViewDelegate, UITableViewDataSource
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        if indexPath.section == 2 {
+            if ChatManager.getRechtChat(jid: profileDetails?.jid ?? "") == nil {
+                return 0
+            }
+        }
         return UITableView.automaticDimension
     }
 }
@@ -448,6 +505,27 @@ extension ContactInfoViewController {
             let viewAllMediaVC = storyboard.instantiateViewController(withIdentifier: Identifiers.viewAllMediaVC) as! ViewAllMediaController
             viewAllMediaVC.jid = jid
             self.navigationController?.pushViewController(viewAllMediaVC, animated: true)
+        }
+    }
+
+    @objc func didTapPrivateChat(_ sender: UITapGestureRecognizer) {
+        if let jid = profileDetails?.jid {
+            if let recent = ChatManager.getRechtChat(jid: jid) {
+                if recent.isChatArchived {
+                    AppAlert.shared.showAlert(view: self, title: nil, message: unarchiveForPrivateLock, buttonOneTitle: "Unarchive", buttonTwoTitle: okButton)
+                    AppAlert.shared.onAlertAction = { [weak self] (result)  ->
+                        Void in
+                        if result == 0 {
+                            ChatManager.shared.updateArchiveUnArchiveChats(toUser: jid, archiveStatus: false)
+                            self?.refreshData()
+                        }
+                    }
+                } else {
+                    let vc = PrivateChatEnableController(nibName: "PrivateChatEnableController", bundle: nil)
+                    vc.chatJid = jid
+                    self.navigationController?.pushViewController(vc, animated: true)
+                }
+            }
         }
     }
     

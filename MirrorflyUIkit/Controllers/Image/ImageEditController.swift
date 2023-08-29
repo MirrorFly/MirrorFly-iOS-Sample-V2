@@ -83,7 +83,7 @@ class ImageEditController: UIViewController {
         backgroundQueue.async { [weak self] in
             _ = self?.getAssetsImageInfo(assets: self!.selectedAssets)
         }
-        searchGroupMembers = groupMembers.filter({$0.profileDetail?.isBlockedByAdmin == false || $0.memberJid != FlyDefaults.myJid}).sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() })
+        searchGroupMembers = groupMembers.filter({$0.profileDetail?.isBlockedByAdmin == false || $0.memberJid != AppUtils.getMyJid()}).sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() })
         setupUI()
     }
     
@@ -290,7 +290,7 @@ class ImageEditController: UIViewController {
             mentionView.isHidden = !isMention
             mentionSearch = mentionRanges.compactMap({$0.0}).joined(separator: "")
             if mentionSearch.isNotEmpty {
-                let sortedMembers = groupMembers.filter({$0.profileDetail?.isBlockedByAdmin == false || $0.memberJid != FlyDefaults.myJid}).sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() })
+                let sortedMembers = groupMembers.filter({$0.profileDetail?.isBlockedByAdmin == false || $0.memberJid != AppUtils.getMyJid()}).sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() })
                 let getGroupMembers = sortedMembers.filter{ $0.displayName.lowercased().contains(mentionSearch.lowercased())}
                 searchGroupMembers = getGroupMembers
                 mentionTableView.reloadData()
@@ -881,7 +881,7 @@ extension ImageEditController : UITextViewDelegate {
     
     func setGroupmention(range: NSRange) {
         resetGroupMention()
-        searchGroupMembers = groupMembers.sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() }).filter({$0.memberJid != FlyDefaults.myJid || $0.profileDetail?.isBlockedByAdmin == false})
+        searchGroupMembers = groupMembers.sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() }).filter({$0.memberJid != AppUtils.getMyJid() || $0.profileDetail?.isBlockedByAdmin == false})
         mentionTableView.reloadData()
         isMention = true
         mentionRange = range
@@ -1236,7 +1236,7 @@ extension ImageEditController {
     func getGroupMember() {
         if getProfileDetails.profileChatType == .groupChat {
             groupMembers = [GroupParticipantDetail]()
-            groupMembers =  GroupManager.shared.getGroupMemebersFromLocal(groupJid: getProfileDetails.jid).participantDetailArray.filter({$0.memberJid != FlyDefaults.myJid})
+            groupMembers =  GroupManager.shared.getGroupMemebersFromLocal(groupJid: getProfileDetails.jid).participantDetailArray.filter({$0.memberJid != AppUtils.getMyJid()})
             print("getGrouMember \(groupMembers.count)")
             searchGroupMembers = mentionArrayFilter().sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() })
             mentionTableView.reloadData()
@@ -1336,11 +1336,11 @@ extension ImageEditController {
 //    }
     
     func mentionArrayFilter() -> [GroupParticipantDetail] {
-        groupMembers.filter({ $0.memberJid != FlyDefaults.myJid && $0.profileDetail?.isBlockedByAdmin == false })
+        groupMembers.filter({ $0.memberJid != AppUtils.getMyJid() && $0.profileDetail?.isBlockedByAdmin == false })
     }
     
     func mentionArraySearchFilter() -> [GroupParticipantDetail] {
-        groupMembers.filter({ $0.displayName.lowercased().contains(mentionSearch.lowercased()) && $0.memberJid != FlyDefaults.myJid && $0.profileDetail?.isBlockedByAdmin == false })
+        groupMembers.filter({ $0.displayName.lowercased().contains(mentionSearch.lowercased()) && $0.memberJid != AppUtils.getMyJid() && $0.profileDetail?.isBlockedByAdmin == false })
     }
     
 }

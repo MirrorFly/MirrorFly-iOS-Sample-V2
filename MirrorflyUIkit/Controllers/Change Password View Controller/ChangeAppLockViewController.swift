@@ -89,11 +89,11 @@ class ChangeAppLockViewController: UIViewController, UITextFieldDelegate {
         if changePassword() == false {
             return
         }
-        if enterOldPassword.text == FlyDefaults.appLockPassword &&  enterNewPassword.text == confirmNewPassword.text{
-            FlyDefaults.appLockPassword = confirmNewPassword.text ?? ""
-            FlyDefaults.appLockPasswordDate = Date()
+        if enterOldPassword.text == CommonDefaults.appLockPassword &&  enterNewPassword.text == confirmNewPassword.text{
+            CommonDefaults.appLockPassword = confirmNewPassword.text ?? ""
+            CommonDefaults.appLockPasswordDate = Date()
             print(confirmNewPassword.text ?? "")
-            FlyDefaults.appFingerprintenable = false
+            CommonDefaults.appFingerprintenable = false
             self.showToastWithMessage(message: SuccessMessage.pinChangedSuccessfully)
         }
         self.navigationController?.popViewController(animated: true)
@@ -152,7 +152,7 @@ class ChangeAppLockViewController: UIViewController, UITextFieldDelegate {
             self.showToastWithMessage(message: ErrorMessage.enterValidPIN)
             return false
         }
-        if enterOldPassword.text != FlyDefaults.appLockPassword{
+        if enterOldPassword.text != CommonDefaults.appLockPassword{
             self.showToastWithMessage(message: ErrorMessage.invalidOLDPIN)
             return false
         }

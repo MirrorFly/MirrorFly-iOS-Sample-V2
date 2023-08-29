@@ -12,10 +12,12 @@ import MirrorFlySDK
 
 let BASE_URL =  "https://api-preprod-sandbox.mirrorfly.com/api/v1/"
 let CONTAINER_ID = "group.com.mirrorfly.qa"
-let LICENSE_KEY = "XXXXXXXXXXXXXXX"
+let LICENSE_KEY = "xxxxxxxxxxxxxxxxx"
 let IS_LIVE = false
 let APP_NAME = "UiKit"
 let ENABLE_CONTACT_SYNC = false
+
+let isHideNotificationContent = false
 
 class NotificationService: UNNotificationServiceExtension {
     
@@ -31,9 +33,9 @@ class NotificationService: UNNotificationServiceExtension {
         ChatManager.setAppGroupContainerId(id: CONTAINER_ID)
         print("#push-api withContentHandler received")
         if payloadType == "media_call" {
-            NotificationExtensionSupport.shared.didReceiveNotificationRequest(request.content.mutableCopy() as? UNMutableNotificationContent, appName: FlyDefaults.appName, onCompletion: { [self] bestAttemptContent in
-                if FlyDefaults.hideNotificationContent{
-                    bestAttemptContent?.title = FlyDefaults.appName
+            NotificationExtensionSupport.shared.didReceiveNotificationRequest(request.content.mutableCopy() as? UNMutableNotificationContent, appName: APP_NAME, onCompletion: { [self] bestAttemptContent in
+                if isHideNotificationContent {
+                    bestAttemptContent?.title = APP_NAME
                 } else {
                     if let userInfo = bestAttemptContent?.userInfo["message_id"] {
                         bestAttemptContent?.title = encryptDecryptData(key: userInfo as? String ?? "", data: bestAttemptContent?.title ?? "", encrypt: false)
@@ -51,18 +53,26 @@ class NotificationService: UNNotificationServiceExtension {
         } else {
             /// Handle Push messages
             ChatSDK.Builder.initializeDelegate()
-            NotificationMessageSupport.shared.didReceiveNotificationRequest(request.content.mutableCopy() as? UNMutableNotificationContent, onCompletion: { [self] bestAttemptContents in
+            NotificationMessageSupport.shared.didReceiveNotificationRequest(request.content.mutableCopy() as? UNMutableNotificationContent, appName: APP_NAME ,onCompletion: { [self] bestAttemptContents in
+            let userId = (request.content.userInfo["group_id"] as? String ?? "").isEmpty ? request.content.userInfo["from_user"] as? String ?? "" : request.content.userInfo["group_id"] as? String ?? ""
+            self.checkForDeliveredNotification(userId, isGroup: !((request.content.userInfo["group_id"] as? String ?? "").isEmpty)) { notification in
+                if let notify = notification {
+                    //for list in notification {
+                        self.removeNotification(notify)
+                //}
+                }
+            }
                 FlyLog.DLog(param1: "#notification request ID", param2: "\(request.identifier)")
                 let center = UNUserNotificationCenter.current()
                 let (messageCount, chatCount) = ChatManager.getUnreadMessageAndChatCountForUnmutedUsers()
-                if FlyDefaults.hideNotificationContent{
+                if isHideNotificationContent {
                     var titleContent = emptyString()
                     if chatCount == 1{
                         titleContent = "\(messageCount) \(messageCount == 1 ? "message" : "messages")"
                     } else {
                         titleContent = "\(messageCount) messages from \(chatCount) chats"
                     }
-                    bestAttemptContents?.title = FlyDefaults.appName + " (\(titleContent))"
+                    bestAttemptContents?.title = APP_NAME + " (\(titleContent))"
                     bestAttemptContents?.body = "New Message"
                 } else {
                     if let userInfo = bestAttemptContents?.userInfo["message_id"] {
@@ -72,7 +82,7 @@ class NotificationService: UNNotificationServiceExtension {
                 }
                 var canVibrate = true
                 let isMuted = ContactManager.shared.getUserProfileDetails(for: bestAttemptContents?.userInfo["from_user"] as? String ?? "")?.isMuted ?? false
-                if !isMuted || !(FlyDefaults.isArchivedChatEnabled && ChatManager.getRechtChat(jid: bestAttemptContents?.userInfo["from_user"] as? String ?? "")?.isChatArchived ?? false){
+                if !isMuted || !(ChatManager.isArchivedSettingsEnabled() && ChatManager.getRechtChat(jid: bestAttemptContents?.userInfo["from_user"] as? String ?? "")?.isChatArchived ?? false){
                     bestAttemptContents?.badge = messageCount as? NSNumber
                 }
 
@@ -80,50 +90,90 @@ class NotificationService: UNNotificationServiceExtension {
                 let messageId = (self.bestAttemptContent?.userInfo["message_id"] as? String ?? "").components(separatedBy: ",").last ?? ""
 
                 self.bestAttemptContent = bestAttemptContents
+                guard let myJid = try? FlyUtils.getMyJid() else {
+                    return
+                }
 
-                if ChatManager.getMessageOfId(messageId: messageId)?.senderUserJid == FlyDefaults.myJid && (chatType == "chat" || chatType == "normal") {
+                if ChatManager.getMessageOfId(messageId: messageId)?.senderUserJid == myJid && (chatType == "chat" || chatType == "normal") {
                     if !FlyUtils.isValidGroupJid(groupJid: ChatManager.getMessageOfId(messageId: messageId)?.chatUserJid) {
                         self.bestAttemptContent?.title = "You"
                     }
                     canVibrate = false
                     self.bestAttemptContent?.sound = .none
-                } else if ChatManager.getMessageOfId(messageId: messageId)?.senderUserJid != FlyDefaults.myJid {
-                    if isMuted || (FlyDefaults.isArchivedChatEnabled && ChatManager.getRechtChat(jid: bestAttemptContents?.userInfo["from_user"] as? String ?? "")?.isChatArchived ?? false) {
+                } else if ChatManager.getMessageOfId(messageId: messageId)?.senderUserJid != myJid {
+                    if isMuted || (ChatManager.isArchivedSettingsEnabled() && ChatManager.getRechtChat(jid: bestAttemptContents?.userInfo["from_user"] as? String ?? "")?.isChatArchived ?? false) {
                         self.bestAttemptContent?.sound = .none
                         canVibrate = false
-                    } else if !(FlyDefaults.selectedNotificationSoundName[NotificationSoundKeys.name.rawValue]?.contains("Default") ?? false) && !(FlyDefaults.selectedNotificationSoundName[NotificationSoundKeys.name.rawValue]?.contains("None") ?? false) && FlyDefaults.notificationSoundEnable  {
-                        self.bestAttemptContent?.sound = UNNotificationSound(named: UNNotificationSoundName((FlyDefaults.selectedNotificationSoundName[NotificationSoundKeys.file.rawValue] ?? "") + "." + (FlyDefaults.selectedNotificationSoundName[NotificationSoundKeys.extensions.rawValue] ?? "")))
-                    } else if FlyDefaults.selectedNotificationSoundName[NotificationSoundKeys.name.rawValue]?.contains("Default") ?? false && FlyDefaults.notificationSoundEnable {
+                    } else if !(CommonDefaults.selectedNotificationSoundName[NotificationSoundKeys.name.rawValue]?.contains("Default") ?? false) && !(CommonDefaults.selectedNotificationSoundName[NotificationSoundKeys.name.rawValue]?.contains("None") ?? false) && CommonDefaults.notificationSoundEnable  {
+                        self.bestAttemptContent?.sound = UNNotificationSound(named: UNNotificationSoundName((CommonDefaults.selectedNotificationSoundName[NotificationSoundKeys.file.rawValue] ?? "") + "." + (CommonDefaults.selectedNotificationSoundName[NotificationSoundKeys.extensions.rawValue] ?? "")))
+                    } else if CommonDefaults.selectedNotificationSoundName[NotificationSoundKeys.name.rawValue]?.contains("Default") ?? false && CommonDefaults.notificationSoundEnable {
                         self.bestAttemptContent?.sound = .default
-                    } else if FlyDefaults.notificationSoundEnable == false || FlyDefaults.selectedNotificationSoundName[NotificationSoundKeys.name.rawValue]?.contains("None") ?? false {
-                        self.bestAttemptContent?.sound = FlyDefaults.vibrationEnable ? UNNotificationSound(named: UNNotificationSoundName(rawValue: "1-second-of-silence.mp3"))  : nil
+                    } else if CommonDefaults.notificationSoundEnable == false || CommonDefaults.selectedNotificationSoundName[NotificationSoundKeys.name.rawValue]?.contains("None") ?? false {
+                        self.bestAttemptContent?.sound = CommonDefaults.vibrationEnable ? UNNotificationSound(named: UNNotificationSoundName(rawValue: "1-second-of-silence.mp3"))  : nil
                     }
-                } else if self.bestAttemptContent?.userInfo["sent_from"] as? String ?? "" == FlyDefaults.myJid && self.bestAttemptContent?.userInfo["group_id"] != nil {
+                } else if self.bestAttemptContent?.userInfo["sent_from"] as? String ?? "" == myJid && self.bestAttemptContent?.userInfo["group_id"] != nil {
                     self.bestAttemptContent?.sound = nil
                     canVibrate = false
-                } else if self.bestAttemptContent?.userInfo["sent_from"] as? String ?? "" != FlyDefaults.myJid && self.bestAttemptContent?.userInfo["group_id"] != nil {
-                    if !(FlyDefaults.selectedNotificationSoundName[NotificationSoundKeys.name.rawValue]?.contains("Default") ?? false) && !(FlyDefaults.selectedNotificationSoundName[NotificationSoundKeys.name.rawValue]?.contains("None") ?? false) && FlyDefaults.notificationSoundEnable  {
-                        self.bestAttemptContent?.sound = UNNotificationSound(named: UNNotificationSoundName((FlyDefaults.selectedNotificationSoundName[NotificationSoundKeys.file.rawValue] ?? "") + "." + (FlyDefaults.selectedNotificationSoundName[NotificationSoundKeys.extensions.rawValue] ?? "")))
-                    } else if FlyDefaults.selectedNotificationSoundName[NotificationSoundKeys.name.rawValue]?.contains("Default") ?? false && FlyDefaults.notificationSoundEnable {
+                } else if self.bestAttemptContent?.userInfo["sent_from"] as? String ?? "" != myJid && self.bestAttemptContent?.userInfo["group_id"] != nil {
+                    if !(CommonDefaults.selectedNotificationSoundName[NotificationSoundKeys.name.rawValue]?.contains("Default") ?? false) && !(CommonDefaults.selectedNotificationSoundName[NotificationSoundKeys.name.rawValue]?.contains("None") ?? false) && CommonDefaults.notificationSoundEnable  {
+                        self.bestAttemptContent?.sound = UNNotificationSound(named: UNNotificationSoundName((CommonDefaults.selectedNotificationSoundName[NotificationSoundKeys.file.rawValue] ?? "") + "." + (CommonDefaults.selectedNotificationSoundName[NotificationSoundKeys.extensions.rawValue] ?? "")))
+                    } else if CommonDefaults.selectedNotificationSoundName[NotificationSoundKeys.name.rawValue]?.contains("Default") ?? false && CommonDefaults.notificationSoundEnable {
                         self.bestAttemptContent?.sound = .default
-                    } else if FlyDefaults.notificationSoundEnable == false || FlyDefaults.selectedNotificationSoundName[NotificationSoundKeys.name.rawValue]?.contains("None") ?? false {
-                        self.bestAttemptContent?.sound = FlyDefaults.vibrationEnable ? UNNotificationSound(named: UNNotificationSoundName(rawValue: "1-second-of-silence.mp3"))  : nil
+                    } else if CommonDefaults.notificationSoundEnable == false || CommonDefaults.selectedNotificationSoundName[NotificationSoundKeys.name.rawValue]?.contains("None") ?? false {
+                        self.bestAttemptContent?.sound = CommonDefaults.vibrationEnable ? UNNotificationSound(named: UNNotificationSoundName(rawValue: "1-second-of-silence.mp3"))  : nil
                     }
                 }
                 if let message = ChatManager.getMessageOfId(messageId: messageId), !message.mentionedUsersIds.isEmpty {
                     self.bestAttemptContent?.body = convertMentionUser(message: message.messageTextContent, mentionedUsersIds: message.mentionedUsersIds)
                 }
-                
+
+                let groupId = self.bestAttemptContent?.userInfo["group_id"] as? String ?? ""
+                if let chat = ChatManager.getRechtChat(jid: groupId.isEmpty ? self.bestAttemptContent?.userInfo["from_user"] as? String ?? "" : groupId) {
+                    if chat.isPrivateChat {
+                        self.bestAttemptContent?.title = APP_NAME
+                        let (messageCount, _) = ChatManager.getUnreadPrivateChatMessageAndChatCount()
+                        self.bestAttemptContent?.body = "\(messageCount) new message"
+                    }
+                }
+
                 contentHandler(self.bestAttemptContent!)
-                FlyDefaults.lastNotificationId = request.identifier
+
+                //Commented for private flydefaults
+                //FlyDefaults.lastNotificationId = request.identifier
             })
         }
     }
+
+
+    func checkForDeliveredNotification(_ ID: String, isGroup: Bool, completionHandler: @escaping (UNNotification?) -> Void) {
+        var foundNotification: UNNotification?
+        UNUserNotificationCenter.current().getDeliveredNotifications { notifications in
+            for notification in notifications {
+
+                if isGroup {
+                    if notification.request.content.userInfo["group_id"] as? String == ID && ChatManager.isPrivateChat(jid: ID) {
+                        foundNotification = notification
+                    }
+                } else {
+                    if notification.request.content.userInfo["from_user"] as? String == ID && ChatManager.isPrivateChat(jid: ID) {
+                        foundNotification = notification
+                    }
+                }
+            }
+            completionHandler(foundNotification)
+        }
+    }
+
+
+    func removeNotification(_ notification: UNNotification) {
+        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [notification.request.identifier])
+    }
+
     func convertMentionUser(message: String, mentionedUsersIds: [String]) -> String {
         var replyMessage = message
 
         for user in mentionedUsersIds {
-            let JID = user + "@" + FlyDefaults.xmppDomain
+            let JID = user + "@" + ChatManager.getXMPPDetails().XMPPDomain
             let myJID = try? FlyUtils.getMyJid()
             if let profileDetail = ContactManager.shared.getUserProfileDetails(for: JID) {
                 let userName = "@\(FlyUtils.getGroupUserName(profile: profileDetail))"

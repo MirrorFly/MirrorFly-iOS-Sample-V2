@@ -81,14 +81,14 @@ class AuthenticationPINViewController: BaseViewController, UITextFieldDelegate {
     }
 
     func showAlerts() {
-        if FlyDefaults.showAppLock {
-            if FlyDefaults.passwordAuthenticationAttemps > 5 {
+        if CommonDefaults.showAppLock {
+            if CommonDefaults.passwordAuthenticationAttemps > 5 {
                 showfailedAttempsActionAlert()
-            } else if daysBetween(start: FlyDefaults.appLockPasswordDate, end: Date()) > 31-5 && daysBetween(start: FlyDefaults.appLockPasswordDate, end: Date()) < 31 {
-                if FlyDefaults.pinChangeAlertShownDate != Date().xmppDateString {
+            } else if daysBetween(start: CommonDefaults.appLockPasswordDate, end: Date()) > 31-5 && daysBetween(start: CommonDefaults.appLockPasswordDate, end: Date()) < 31 {
+                if CommonDefaults.pinChangeAlertShownDate != Date().xmppDateString {
                     showChangePinAlert()
                 }
-            } else if daysBetween(start: FlyDefaults.appLockPasswordDate, end: Date()) >= 31 {
+            } else if daysBetween(start: CommonDefaults.appLockPasswordDate, end: Date()) >= 31 {
                 showPinActionAlert()
             }
         }
@@ -153,7 +153,7 @@ class AuthenticationPINViewController: BaseViewController, UITextFieldDelegate {
     }
 
     func showChangePinAlert() {
-        FlyDefaults.pinChangeAlertShownDate = Date().xmppDateString
+        CommonDefaults.pinChangeAlertShownDate = Date().xmppDateString
 
         let values : [String] = ["Change PIN", "OK"]
         var actions = [(String, UIAlertAction.Style)]()
@@ -161,7 +161,7 @@ class AuthenticationPINViewController: BaseViewController, UITextFieldDelegate {
             actions.append((title, UIAlertAction.Style.default))
         }
 
-        AppActionSheet.shared.showActionSeet(title : "", message: "Your PIN will be expired in \(31 - daysBetween(start: FlyDefaults.appLockPasswordDate, end: Date())) day(s)", showCancel: false, actions: actions, style: .alert, sheetCallBack: { [weak self] didCancelTap, tappedTitle in
+        AppActionSheet.shared.showActionSeet(title : "", message: "Your PIN will be expired in \(31 - daysBetween(start: CommonDefaults.appLockPasswordDate, end: Date())) day(s)", showCancel: false, actions: actions, style: .alert, sheetCallBack: { [weak self] didCancelTap, tappedTitle in
             if !didCancelTap {
                 switch tappedTitle {
                 case "Change PIN":
@@ -253,7 +253,7 @@ class AuthenticationPINViewController: BaseViewController, UITextFieldDelegate {
         txtSixth.delegate = self
         verifyOTPViewModel =  VerifyOTPViewModel()
         otpViewModel = OTPViewModel()
-        phoneNumber = FlyDefaults.myMobileNumber
+        phoneNumber = ContactManager.getMyProfile().mobileNumber
         
         self.collectionview.register(UINib(nibName:Identifiers.authenticationPINCollectionViewCell, bundle: .main), forCellWithReuseIdentifier:Identifiers.authenticationPINCollectionViewCell)
         
@@ -450,84 +450,95 @@ class AuthenticationPINViewController: BaseViewController, UITextFieldDelegate {
     
     //PIN VALIDATION
     func validateAppPIN() {
-        if pinInput != FlyDefaults.appLockPassword  {
-            if FlyDefaults.passwordAuthenticationAttemps > 4 {
+        if pinInput != CommonDefaults.appLockPassword  {
+            if CommonDefaults.passwordAuthenticationAttemps > 4 {
                 showfailedAttempsActionAlert()
             }
         }
         
-        if pinInput == FlyDefaults.appLockPassword  {
-            if isResetByFailedAttempts {
-                if FlyDefaults.showAppLock {
+        if pinInput == CommonDefaults.appLockPassword  {
+            if isResetByFailedAttempts && !CommonDefaults.privateChatOnChatScreen {
+                if CommonDefaults.showAppLock {
                     self.popToRootView()
                 } else {
                     self.popToView()
                 }
-                FlyDefaults.showAppLock = false
-                FlyDefaults.faceOrFingerAuthenticationFails = false
+                CommonDefaults.showAppLock = false
+                CommonDefaults.faceOrFingerAuthenticationFails = false
             } else if isDisablePin {
-                FlyDefaults.appLockenable = false
-                FlyDefaults.appFingerprintenable = false
-                if FlyDefaults.showAppLock {
+                CommonDefaults.appLockenable = false
+                CommonDefaults.appFingerprintenable = false
+                if CommonDefaults.showAppLock {
                     self.popToRootView()
                 } else {
                     self.popToView()
                 }
-                FlyDefaults.showAppLock = false
-                FlyDefaults.faceOrFingerAuthenticationFails = false
+                CommonDefaults.showAppLock = false
+                CommonDefaults.faceOrFingerAuthenticationFails = false
             } else {
                 if login == true {
-                    FlyDefaults.appLockenable = true
+                    CommonDefaults.appLockenable = true
                 }
                 else if logout == true{
-                    FlyDefaults.appLockenable = false
+                    CommonDefaults.appLockenable = false
                     requestLogout()
                 }
-                else if FlyDefaults.appLockenable == true {
+                else if CommonDefaults.appLockenable == true {
                     if  disableBothPIN == true {
-                        FlyDefaults.appLockenable = false
-                        FlyDefaults.appFingerprintenable = false
+                        CommonDefaults.appLockenable = false
+                        CommonDefaults.appFingerprintenable = false
                     }
                     else if fingerPrintEnable == true{
-                        FlyDefaults.appFingerprintenable = true
-                        FlyDefaults.appLockenable = true
+                        CommonDefaults.appFingerprintenable = true
+                        CommonDefaults.appLockenable = true
                     }
                 }
 
-                if FlyDefaults.appFingerprintenable == true && FlyDefaults.appLockenable == true {
+                if CommonDefaults.appFingerprintenable == true && CommonDefaults.appLockenable == true {
                     if fingerPrintLogin == true {
-                        FlyDefaults.appFingerprintenable = true
-                        FlyDefaults.appLockenable = true
+                        CommonDefaults.appFingerprintenable = true
+                        CommonDefaults.appLockenable = true
                     }
                     else if fingerPrintLogout == true  {
-                        FlyDefaults.appFingerprintenable = false
+                        CommonDefaults.appFingerprintenable = false
                     }
                 }
-                if fingerPrintLogin || noFingerprintAdded{
-                    if noFingerprintAdded == true{
-                        FlyDefaults.appFingerprintenable = false
-                    }
-                    if FlyDefaults.showAppLock {
-                        self.popToRootView()
+                if CommonDefaults.privateChatOnChatScreen {
+                    if CommonDefaults.appFingerprintenable {
+                        if let viewControllers: [UIViewController] = self.navigationController?.viewControllers as? [UIViewController] {
+                            self.navigationController?.popToViewController(viewControllers[viewControllers.count - 3], animated: false)
+                        }
                     } else {
-                        self.popToView()
+                        self.navigationController?.popViewController(animated: false)
                     }
-                    FlyDefaults.showAppLock = false
-                    FlyDefaults.faceOrFingerAuthenticationFails = false
+                    CommonDefaults.privateChatOnChatScreen = false
                 } else {
-
-                    if FlyDefaults.showAppLock {
-                        self.popToRootView()
+                    if fingerPrintLogin || noFingerprintAdded{
+                        if noFingerprintAdded == true{
+                            CommonDefaults.appFingerprintenable = false
+                        }
+                        if CommonDefaults.showAppLock {
+                            self.popToRootView()
+                        } else {
+                            self.popToView()
+                        }
+                        CommonDefaults.showAppLock = false
+                        CommonDefaults.faceOrFingerAuthenticationFails = false
                     } else {
-                        self.popToView()
+                        
+                        if CommonDefaults.showAppLock {
+                            self.popToRootView()
+                        } else {
+                            self.popToView()
+                        }
+                        CommonDefaults.showAppLock = false
+                        CommonDefaults.faceOrFingerAuthenticationFails = false
                     }
-                    FlyDefaults.showAppLock = false
-                    FlyDefaults.faceOrFingerAuthenticationFails = false
                 }
             }
         }
         else {
-            FlyDefaults.passwordAuthenticationAttemps+=1
+            CommonDefaults.passwordAuthenticationAttemps+=1
             AppAlert.shared.showToast(message: ErrorMessage.validateAppLock)
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
@@ -538,7 +549,7 @@ class AuthenticationPINViewController: BaseViewController, UITextFieldDelegate {
     
     func popToRootView() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
-            FlyDefaults.passwordAuthenticationAttemps = 0
+            CommonDefaults.passwordAuthenticationAttemps = 0
             self?.navigationController?.popToRootViewController(animated: false)
             self?.dismiss(animated: false)
             self?.presentingViewController?.dismiss(animated: false)
@@ -547,7 +558,7 @@ class AuthenticationPINViewController: BaseViewController, UITextFieldDelegate {
     
     func popToView() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
-            FlyDefaults.passwordAuthenticationAttemps = 0
+            CommonDefaults.passwordAuthenticationAttemps = 0
             self?.navigationController?.popViewController(animated: true)
             self?.dismiss(animated: false)
         }
@@ -558,7 +569,7 @@ class AuthenticationPINViewController: BaseViewController, UITextFieldDelegate {
     }
 
     func forgotPassword() {
-        phoneNumber = "+"+FlyDefaults.myMobileNumber
+        phoneNumber = "+" + ContactManager.getMyProfile().mobileNumber
         if NetworkReachability.shared.isConnected {
             startLoading(withText: pleaseWait)
             //Request SMS
@@ -636,7 +647,9 @@ extension AuthenticationPINViewController: UICollectionViewDelegate,UICollection
                 cell.passwordImage.image = UIImage(named: ImageConstant.otpPin)
             }
             if (pinInput.count == 4 && indexPath.item == 3){
-                validateAppPIN()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
+                    self?.validateAppPIN()
+                }
             }
             
             return cell
@@ -658,7 +671,7 @@ extension AuthenticationPINViewController: UICollectionViewDelegate,UICollection
             print(array[indexPath.row])
             if indexPath.row != 11 && indexPath.row != 9{
                 let text = array[indexPath.row]
-                if (pinInput.count <= 4) {
+                if (pinInput.count < 4) {
                     pinInput.append(text)
                 }
                 print("pinInput",pinInput)

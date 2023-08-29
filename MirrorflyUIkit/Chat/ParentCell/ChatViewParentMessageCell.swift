@@ -178,9 +178,9 @@ class ChatViewParentMessageCell: BaseTableViewCell {
 
         // Forward view elements and its data
         bubbleImageLeadingCons?.constant = (isShowForwardView == true) ? 10 : 0
-        stackViewTimeStampTopCons?.constant = FlyDefaults.isTranlationEnabled && message?.isMessageTranslated ?? false ? 5 : -2
+        stackViewTimeStampTopCons?.constant = CommonDefaults.isTranlationEnabled && message?.isMessageTranslated ?? false ? 5 : -2
        // stackViewTimeStampTopCons?.constant = message!.isMessageTranslated ? 5 : 0
-        stackViewTranslateTrailingCons?.constant = FlyDefaults.isTranlationEnabled && message!.isMessageTranslated ? 0 : 20
+        stackViewTranslateTrailingCons?.constant = CommonDefaults.isTranlationEnabled && message!.isMessageTranslated ? 0 : 20
         
         if selectedForwardMessage?.filter({$0.chatMessage.messageId == message?.messageId}).first?.isSelected == true {
             forwardImageView?.image = UIImage(named: "forwardSelected")
@@ -557,7 +557,7 @@ class ChatViewParentMessageCell: BaseTableViewCell {
         
         //MARK: - Populating the Incoming Cell with the translated message
         
-        if (message!.isMessageTranslated && FlyDefaults.isTranlationEnabled) {
+        if (message!.isMessageTranslated && CommonDefaults.isTranlationEnabled) {
             guard let chatMessage = message,let messageLabeltemp = messageLabel, let translatedTextLabeltemp = translatedTextLabel else {return self }
 
             messageLabel?.attributedText = processTextMessage(message: chatMessage.messageTextContent , uiLabel: messageLabeltemp, fromChat: fromChat, isMessageSearch: isMessageSearch, searchText: searchText, isMessageSentByMe: message?.isMessageSentByMe ?? false, mentionedUsers: message?.mentionedUsersIds ?? [], profileDetails: profileDetails)

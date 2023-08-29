@@ -75,6 +75,7 @@ class GroupInfoViewController: UIViewController {
     }
     
     override func viewWillAppear(_ animated: Bool) {
+        handleBackgroundAndForground()
         self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         isGroupInfoUpdated = false
         refreshData()
@@ -82,7 +83,8 @@ class GroupInfoViewController: UIViewController {
         if groupInfoViewModel.isBlockedByAdmin(groupJid: groupID) {
             navigateOnGroupBlock()
         }
-        
+        NotificationCenter.default.addObserver(self, selector: #selector(willEnterForeground),
+                                                       name: NSNotification.Name(didBecomeActive), object: nil)
         availableFeatures = ChatManager.getAvailableFeatures()
     }
     
@@ -100,6 +102,20 @@ class GroupInfoViewController: UIViewController {
         ContactManager.shared.profileDelegate = nil
         ChatManager.shared.adminBlockDelegate = nil
         ChatManager.shared.availableFeaturesDelegate = nil
+    }
+
+    override func willCometoForeground() {
+        self.view.removeLaunchSubview()
+    }
+
+    @objc func willEnterForeground() {
+        self.view.removeLaunchSubview()
+    }
+    
+    override func didMoveToBackground() {
+        if ChatManager.isPrivateChat(jid: groupID) {
+            self.view.addLaunchSubview()
+        }
     }
     
     private func setUpUI() {
@@ -119,6 +135,7 @@ class GroupInfoViewController: UIViewController {
         tableView?.register(UINib(nibName: Identifiers.groupMembersTableViewCell, bundle: .main),
                             forCellReuseIdentifier: Identifiers.groupMembersTableViewCell)
         tableView?.register(UINib(nibName: Identifiers.viewAllMediaCell , bundle: .main), forCellReuseIdentifier: Identifiers.viewAllMediaCell)
+        tableView?.register(UINib(nibName: Identifiers.privateChatCell , bundle: .main), forCellReuseIdentifier: Identifiers.privateChatCell)
     }
     
     private func setupConfiguration() {
@@ -177,6 +194,27 @@ class GroupInfoViewController: UIViewController {
         }
         showActionSheet()
     }
+
+    @objc func didTapPrivateChat(_ sender: UITapGestureRecognizer) {
+        if let jid = profileDetails?.jid {
+            if let recent = ChatManager.getRechtChat(jid: jid) {
+                if recent.isChatArchived {
+                    AppAlert.shared.showAlert(view: self, title: nil, message: unarchiveForPrivateLock, buttonOneTitle: "Unarchive", buttonTwoTitle: okButton)
+                    AppAlert.shared.onAlertAction = { [weak self] (result)  ->
+                        Void in
+                        if result == 0 {
+                            ChatManager.shared.updateArchiveUnArchiveChats(toUser: jid, archiveStatus: false)
+                            self?.refreshData()
+                        }
+                    }
+                } else {
+                    let vc = PrivateChatEnableController(nibName: "PrivateChatEnableController", bundle: nil)
+                    vc.chatJid = jid
+                    self.navigationController?.pushViewController(vc, animated: true)
+                }
+            }
+        }
+    }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == Identifiers.viewUserImageController {
@@ -189,12 +227,13 @@ class GroupInfoViewController: UIViewController {
     
     func getGroupMembers() {
       //  groupMembers = [GroupParticipantDetail]()
-        let getGroupMembers = GroupManager.shared.getGroupMemebersFromLocal(groupJid: groupID).participantDetailArray.filter({$0.memberJid != FlyDefaults.myJid})
+        let myJid = try? FlyUtils.getMyJid()
+        let getGroupMembers = GroupManager.shared.getGroupMemebersFromLocal(groupJid: groupID).participantDetailArray.filter({$0.memberJid != myJid})
         //if groupMembers != getGroupMembers {
             groupMembers = getGroupMembers
-            let myJid = GroupManager.shared.getGroupMemebersFromLocal(groupJid: groupID).participantDetailArray.filter({$0.memberJid == FlyDefaults.myJid})
+            let myMember = GroupManager.shared.getGroupMemebersFromLocal(groupJid: groupID).participantDetailArray.filter({$0.memberJid == myJid})
             groupMembers = groupMembers.sorted(by: { $0.profileDetail?.name.lowercased() ?? "" < $1.profileDetail?.name.lowercased() ?? "" })
-            groupMembers.insert(contentsOf: myJid, at: 0)
+            groupMembers.append(contentsOf: myMember)
 
         //}
         if groupMembers != getGroupMembers {
@@ -208,13 +247,13 @@ class GroupInfoViewController: UIViewController {
     
     func checkMemberExist() {
         let isExistMember = self.groupInfoViewModel.isParticiapntExistingIn(groupJid: groupID,
-                                                                            participantJid: FlyDefaults.myJid)
+                                                                            participantJid: AppUtils.getMyJid())
         self.isExistMember = isExistMember.doesExist
     }
     
     func isAdminMemberGroup() {
-        
-        let isAdminMember = self.groupInfoViewModel.isGroupAdminMember(participantJid: FlyDefaults.myJid,
+        let myJid = try? FlyUtils.getMyJid()
+        let isAdminMember = self.groupInfoViewModel.isGroupAdminMember(participantJid: AppUtils.getMyJid(),
                                                                        groupJid: groupID)
         
         self.isAdminMember = isAdminMember.isAdmin
@@ -235,7 +274,7 @@ class GroupInfoViewController: UIViewController {
                 var data  = flyData
                 if isSuccess {
                     print(data.getMessage() as! String)
-                    FlyDefaults.myProfileImageUrl = ""
+//                    FlyDefaults.myProfileImageUrl = ""
                 } else {
                     print(data.getMessage() as! String)
                 }
@@ -273,26 +312,26 @@ extension GroupInfoViewController: UITableViewDelegate, UITableViewDataSource {
     
     func numberOfSections(in tableView: UITableView) -> Int {
         if ((availableFeatures.isViewAllMediasEnabled) && (availableFeatures.isReportEnabled) && (availableFeatures.isDeleteChatEnabled)){
-            return 7
+            return 8
         }else if (!(availableFeatures.isViewAllMediasEnabled) && !(availableFeatures.isReportEnabled) && (!(availableFeatures.isDeleteChatEnabled) && isExistMember == false)){
-            return 4
-        }else if (!(availableFeatures.isViewAllMediasEnabled) && !(availableFeatures.isReportEnabled) && (!(availableFeatures.isDeleteChatEnabled) && isExistMember == true)){
             return 5
+        }else if (!(availableFeatures.isViewAllMediasEnabled) && !(availableFeatures.isReportEnabled) && (!(availableFeatures.isDeleteChatEnabled) && isExistMember == true)){
+            return 6
         }
         else if((availableFeatures.isViewAllMediasEnabled) && !(availableFeatures.isReportEnabled) && (!(availableFeatures.isDeleteChatEnabled) && isExistMember == false)) || (!(availableFeatures.isViewAllMediasEnabled) && (!(availableFeatures.isDeleteChatEnabled) && isExistMember == false) && (availableFeatures.isReportEnabled)) || (!(availableFeatures.isViewAllMediasEnabled) && !(availableFeatures.isReportEnabled) && (availableFeatures.isDeleteChatEnabled)) {
-            return 5
-        }else if((availableFeatures.isViewAllMediasEnabled) && !(availableFeatures.isReportEnabled) && (!(availableFeatures.isDeleteChatEnabled) && isExistMember == true)) || (!(availableFeatures.isViewAllMediasEnabled) && (!(availableFeatures.isDeleteChatEnabled) && isExistMember == true) && (availableFeatures.isReportEnabled)) {
             return 6
+        }else if((availableFeatures.isViewAllMediasEnabled) && !(availableFeatures.isReportEnabled) && (!(availableFeatures.isDeleteChatEnabled) && isExistMember == true)) || (!(availableFeatures.isViewAllMediasEnabled) && (!(availableFeatures.isDeleteChatEnabled) && isExistMember == true) && (availableFeatures.isReportEnabled)) {
+            return 7
         }
         else if(!(availableFeatures.isViewAllMediasEnabled) && (availableFeatures.isReportEnabled) && (availableFeatures.isDeleteChatEnabled)) || ((availableFeatures.isViewAllMediasEnabled) && !(availableFeatures.isReportEnabled) && (availableFeatures.isDeleteChatEnabled)) || ((availableFeatures.isViewAllMediasEnabled) && (availableFeatures.isReportEnabled) && (!(availableFeatures.isDeleteChatEnabled) && isExistMember == false)) {
-            return 6
-        }else {
             return 7
+        }else {
+            return 8
         }
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if section == 3 {
+        if section == 4 {
             return groupMembers.count
         } else {
             return 1
@@ -301,7 +340,7 @@ extension GroupInfoViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         
-        if indexPath.section == 2 {
+        if indexPath.section == 3 {
             if isExistMember == false {
                 return 0
             } else if isAdminMember == false {
@@ -357,6 +396,18 @@ extension GroupInfoViewController: UITableViewDelegate, UITableViewDataSource {
             cell.muteSwitch?.isEnabled = ChatManager.shared.isUserUnArchived(jid: profileDetails?.jid ?? "")
             return cell
         } else if indexPath.section == 2 {
+            let cell = (tableView.dequeueReusableCell(withIdentifier: Identifiers.privateChatCell, for: indexPath) as? PrivateChatCell)!
+            if let recent = ChatManager.getRechtChat(jid: profileDetails?.jid ?? "") {
+                if recent.isChatArchived {
+                    cell.chatLabel.textColor = .gray
+                } else {
+                    cell.chatLabel.textColor = .label
+                }
+            }
+            let tap = UITapGestureRecognizer(target: self, action: #selector(self.didTapPrivateChat(_:)))
+            cell.addGestureRecognizer(tap)
+            return cell
+        } else if indexPath.section == 3 {
             let cell = (tableView.dequeueReusableCell(withIdentifier: Identifiers.groupOptionsTableViewCell, for: indexPath) as? GroupOptionsTableViewCell)!
             cell.optionImageview.image = UIImage(named: "add_user")
             cell.optionLabel.textColor = Color.userNameTextColor
@@ -365,12 +416,12 @@ extension GroupInfoViewController: UITableViewDelegate, UITableViewDataSource {
             tableView.endUpdates()
             return cell
             
-        } else if indexPath.section == 3 {
+        } else if indexPath.section == 4 {
             let groupMembers = groupMembers[indexPath.row]
             let cell = (tableView.dequeueReusableCell(withIdentifier: Identifiers.groupMembersTableViewCell, for: indexPath) as? GroupMembersTableViewCell)!
             cell.getGroupInfo(groupInfo: groupMembers)
             return cell
-        } else if indexPath.section == 4 {
+        } else if indexPath.section == 5 {
             if availableFeatures.isViewAllMediasEnabled {
                 let cell = (tableView.dequeueReusableCell(withIdentifier: Identifiers.viewAllMediaCell, for: indexPath) as? ViewAllMediaCell)!
                 return cell
@@ -393,7 +444,7 @@ extension GroupInfoViewController: UITableViewDelegate, UITableViewDataSource {
                 }
                 return cell
             }
-        } else if indexPath.section == 5 {
+        } else if indexPath.section == 6 {
             if availableFeatures.isViewAllMediasEnabled && availableFeatures.isReportEnabled {
                 let cell = (tableView.dequeueReusableCell(withIdentifier: Identifiers.groupOptionsTableViewCell, for: indexPath) as? GroupOptionsTableViewCell)!
                 cell.optionImageview.image = UIImage(named: ImageConstant.ic_group_report)
@@ -413,7 +464,7 @@ extension GroupInfoViewController: UITableViewDelegate, UITableViewDataSource {
                 }
                 return cell
             }
-        } else if indexPath.section == 6 {
+        } else if indexPath.section == 7 {
             let cell = (tableView.dequeueReusableCell(withIdentifier: Identifiers.groupOptionsTableViewCell, for: indexPath) as? GroupOptionsTableViewCell)!
             if isExistMember == true {
                 cell.optionImageview.image = UIImage(named: "leave_group")
@@ -430,7 +481,7 @@ extension GroupInfoViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if indexPath.section == 2 {
+        if indexPath.section == 3 {
             if self.isAdminMember == true {
                 let contactPermissionStatus = CNContactStore.authorizationStatus(for: CNEntityType.contacts)
                 if contactPermissionStatus == .denied {
@@ -439,7 +490,7 @@ extension GroupInfoViewController: UITableViewDelegate, UITableViewDataSource {
                                                   message: contactAccessMessage,
                                                   settingstitle: settings,
                                                   cancelTitle: cancelUppercase)
-                    FlyDefaults.isContactPermissionSkipped = false
+                    ContactSyncManager.updateContactPermission(isSkipped: false)
                 } else {
                     let storyboard = UIStoryboard.init(name: Storyboards.main, bundle: nil)
                     let controller = storyboard.instantiateViewController(withIdentifier: Identifiers.addParticipants) as! AddParticipantsViewController
@@ -451,9 +502,9 @@ extension GroupInfoViewController: UITableViewDelegate, UITableViewDataSource {
             } else {
                 AppAlert.shared.showToast(message: adminAccess)
             }
-        } else if indexPath.section == 3 {
+        } else if indexPath.section == 4 {
             let groupMembers = groupMembers[indexPath.row]
-            if groupMembers.memberJid != FlyDefaults.myJid {
+            if groupMembers.memberJid != AppUtils.getMyJid() {
                 let storyboard = UIStoryboard.init(name: Storyboards.chat, bundle: nil)
                 optionsController = storyboard.instantiateViewController(withIdentifier: Identifiers.groupInfoOptionsViewController) as! GroupInfoOptionsViewController
                 if let optionsController = optionsController {
@@ -468,7 +519,7 @@ extension GroupInfoViewController: UITableViewDelegate, UITableViewDataSource {
                     self.present(optionsController, animated: true, completion: nil)
                 }
             }
-        } else if indexPath.section == 4 {
+        } else if indexPath.section == 5 {
             if availableFeatures.isViewAllMediasEnabled {
                 let storyboard = UIStoryboard.init(name: Storyboards.chat, bundle: nil)
                 let viewAllMediaVC = storyboard.instantiateViewController(withIdentifier: Identifiers.viewAllMediaVC) as! ViewAllMediaController
@@ -526,7 +577,7 @@ extension GroupInfoViewController: UITableViewDelegate, UITableViewDataSource {
                     }
                 }
             }
-        } else if indexPath.section == 5 {
+        } else if indexPath.section == 6 {
             if availableFeatures.isViewAllMediasEnabled && availableFeatures.isReportEnabled {
                 showReportOptions()
             }else {
@@ -579,7 +630,7 @@ extension GroupInfoViewController: UITableViewDelegate, UITableViewDataSource {
                     }
                 }
             }
-        } else if indexPath.section == 6 {
+        } else if indexPath.section == 7 {
             if isExistMember == true {
                 AppAlert.shared.showAlert(view: self,
                                           title: exitGroup,
@@ -639,7 +690,7 @@ extension GroupInfoViewController: ContactImageCellDelegate {
             return
         }
         startLoading(withText: pleaseWait)
-        groupInfoViewModel.leaveFromGroup(groupID: groupID,userJid: FlyDefaults.myJid) {
+        groupInfoViewModel.leaveFromGroup(groupID: groupID,userJid: AppUtils.getMyJid()) {
             [weak self] success in
             self?.stopLoading()
             if success {
@@ -758,6 +809,7 @@ extension GroupInfoViewController: GroupInfoOptionsDelegate {
         controller.contactJid = userJid
         controller.isFromGroupInfo = true
         controller.groupId = groupID
+        controller.isFromContactInfo = true
         self.navigationController?.pushViewController(controller, animated: true)
     }
     
@@ -767,6 +819,7 @@ extension GroupInfoViewController: GroupInfoOptionsDelegate {
             let controller = storyboard.instantiateViewController(withIdentifier: Identifiers.chatViewParentController) as! ChatViewParentController
             controller.getProfileDetails = profile.profileDetail
             controller.isFromGroupInfo = true
+            controller.groupIdForPrivateChat = groupID
             let color = getColor(userName: profile.profileDetail?.name ?? "")
             controller.contactColor = color
             groupInfoDelegate?.didComefromGroupInfo()

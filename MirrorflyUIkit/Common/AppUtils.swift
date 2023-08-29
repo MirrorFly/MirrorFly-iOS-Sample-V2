@@ -156,6 +156,32 @@ class AppUtils: NSObject {
         let errorMessage = split.isEmpty ? description : split[0]
         return errorMessage
     }
+    
+    class func getMyJid() -> String {
+        guard let myJid = try? FlyUtils.getMyJid() else {
+            AppUtils.shared.forceLogout()
+            return emptyString()
+        }
+        return myJid
+    }
+    
+    func forceLogout() {
+        ChatManager.logoutApi() {isSuccess,error,data in
+            
+        }
+        var controller : OTPViewController?
+        if #available(iOS 13.0, *) {
+            controller = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(identifier: "OTPViewController")
+        } else {
+            
+            controller = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "OTPViewController") as? OTPViewController
+        }
+        let window = UIApplication.shared.windows.filter {$0.isKeyWindow}.first
+        if let navigationController = window?.rootViewController  as? UINavigationController, let otpViewController = controller {
+            navigationController.popToRootViewController(animated: false)
+            navigationController.pushViewController(otpViewController, animated: false)
+        }
+    }
 }
 
 public struct Units {
@@ -281,7 +307,7 @@ func checkFileType(urlExtension: String, typeImageView: UIImageView!) {
 func getPhoneNumberToUpdate(phoneNumber : String) -> String {
     
     if phoneNumber.isEmpty {
-        return FlyDefaults.myMobileNumber
+        return ContactManager.getMyProfile().mobileNumber
     }
     
     var tempMobileNumber = phoneNumber
@@ -299,7 +325,7 @@ private func getIsBlockedByMe(jid: String) -> Bool {
 
 extension UIImageView {
     func loadFlyImage(imageURL: String, name: String, chatType: ChatType = .singleChat, uniqueId: String = "", contactType : ContactType = .unknown,jid: String, isBlockedByAdmin: Bool = false, validateBlock: Bool = true){
-        let urlString = FlyDefaults.baseURL + "media/" + imageURL + "?mf=" + FlyDefaults.authtoken
+        let urlString = ChatManager.getImageUrl(imageName: imageURL)
         var url = URL(string: urlString)
         var placeholder : UIImage?
         if validateBlock {
@@ -307,15 +333,17 @@ extension UIImageView {
             case .groupChat:
                 placeholder = UIImage(named: "smallGroupPlaceHolder")
             default:
-                if uniqueId == FlyDefaults.myJid || contactType == .deleted || getIsBlockedByMe(jid: jid) || isBlockedByAdmin || (IS_LIVE && ENABLE_CONTACT_SYNC && ContactManager.shared.getUserProfileDetails(for: jid)?.isItSavedContact == false) {
+                if uniqueId == AppUtils.getMyJid() || contactType == .deleted || getIsBlockedByMe(jid: jid) || isBlockedByAdmin || (IS_LIVE && ENABLE_CONTACT_SYNC && ContactManager.shared.getUserProfileDetails(for: jid)?.isItSavedContact == false) {
                     placeholder = UIImage(named: "ic_profile_placeholder")
                     url = URL(string: "")
                 } else {
                     let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
-                    let ipimage = IPImage(text: trimmedName, radius: Double(self.frame.size.height), font: UIFont.font32px_appBold(),
-                                          textColor: nil, color: getColor(userName: name))
-                    placeholder = ipimage.generateInitialImage()
-                    self.backgroundColor = ChatUtils.getColorForUser(userName: name)
+//                    executeOnMainThread {
+                        let ipimage = IPImage(text: trimmedName, radius: Double(self.frame.size.height), font: UIFont.font32px_appBold(),
+                                              textColor: nil, color: getColor(userName: name))
+                        placeholder = ipimage.generateInitialImage()
+                        self.backgroundColor = ChatUtils.getColorForUser(userName: name)
+//                    }
                 }
             }
         } else {
@@ -323,7 +351,7 @@ extension UIImageView {
             case .groupChat:
                 placeholder = UIImage(named: "smallGroupPlaceHolder")
             default:
-                if uniqueId == FlyDefaults.myJid || getIsBlockedByMe(jid: jid) || isBlockedByAdmin || (IS_LIVE && ENABLE_CONTACT_SYNC && ContactManager.shared.getUserProfileDetails(for: jid)?.isItSavedContact == false) {
+                if uniqueId == AppUtils.getMyJid() || getIsBlockedByMe(jid: jid) || isBlockedByAdmin || (IS_LIVE && ENABLE_CONTACT_SYNC && ContactManager.shared.getUserProfileDetails(for: jid)?.isItSavedContact == false) {
                     placeholder = UIImage(named: "ic_profile_placeholder")
                     url = URL(string: "")
                 } else {
@@ -342,8 +370,7 @@ extension UIImageView {
         if isBlockedByAdmin {
             url = URL(string: "")
         }
-        
-        self.sd_setImage(with: url, placeholderImage: placeholder, options: [.continueInBackground,.decodeFirstFrameOnly,.highPriority,.scaleDownLargeImages], progress: nil){ (image, responseError, isFromCache, imageUrl) in
+        self.sd_setImage(with: url, placeholderImage: placeholder, options: [.continueInBackground,.decodeFirstFrameOnly,.lowPriority], progress: nil){ (image, responseError, isFromCache, imageUrl) in
             if let error =  responseError as? NSError{
                 if let errorCode = error.userInfo[SDWebImageErrorDownloadStatusCodeKey] as? Int {
                     if errorCode == 401{
