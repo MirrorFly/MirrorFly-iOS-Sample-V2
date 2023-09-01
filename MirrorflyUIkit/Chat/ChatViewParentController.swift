@@ -321,6 +321,9 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
     override func viewDidLoad() {
         super.viewDidLoad()
         checkifStarredMessages()
+        if ChatManager.isPrivateChat(jid: getProfileDetails.jid ?? "") && (isFromContactScreen || pushNotificationSelected) {
+            self.view.addLaunchSubview()
+        }
         if isFromContactScreen || isFromForward || isFromGroupInfo {
             if ChatManager.isPrivateChat(jid: getProfileDetails.jid) {
                 //if recent.isPrivateChat {
@@ -494,10 +497,23 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
            // if recent.isPrivateChat {
                 CommonDefaults.appLockOnPrivateChat = false
                 CommonDefaults.privateChatOnChatScreen = true
+            if !CommonDefaults.permissionAlertShown {
                 self.view.addLaunchSubview()
+            }
             //}
         }
         removeUnreadMessageLabelFromChat()
+    }
+    
+    @objc func enteredBackGround() {
+        if ChatManager.isPrivateChat(jid: getProfileDetails.jid ?? "") {
+            self.view.addLaunchSubview()
+        }
+    }
+    @objc func permissionAlertNotification(notification: Notification) {
+        if let status = notification.object as? Bool {
+            CommonDefaults.permissionAlertShown = status
+        }
     }
     
     @objc override func willCometoForeground() {
@@ -765,6 +781,8 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(willEnterForeground),
                                                        name: NSNotification.Name(didBecomeActive), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(enteredBackGround), name: UIScene.didEnterBackgroundNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(permissionAlertNotification), name: Notification.Name(FlyConstants.callPermissionAlertShown), object: nil)
         if !isStarredMessagePage {
             let unsentMessage = FlyMessenger.getUnsentMessageOf(id: getProfileDetails.jid)
             if !unsentMessage.mentionSearch.isEmpty {
@@ -784,6 +802,7 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
         if isFromSearchSelect || isFromNotificationSelect {
             if let recent = ChatManager.getRechtChat(jid: getProfileDetails.jid) {
                 if recent.isPrivateChat && !CommonDefaults.isInPrivateChat {
+                    self.view.addLaunchSubview()
                     showLockScreen()
                     isFromNotificationSelect = false
                 }
@@ -801,7 +820,9 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
     }
 
     @objc func willEnterForeground() {
-        self.view.removeLaunchSubview()
+        if !pushNotificationSelected {
+            self.view.removeLaunchSubview()
+        }
     }
     
     private func presentPreviewScreen() {
@@ -893,6 +914,7 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
             }
         }
         ChatManager.shared.availableFeaturesDelegate = nil
+        self.view.removeLaunchSubview()
     }
     
     @IBAction func cancelButtonTapped(_ sender: UIButton) {
@@ -1176,6 +1198,7 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
         super.viewDidDisappear(animated)
         if !isStarredMessagePage {
             NotificationCenter.default.removeObserver(self, name: NSNotification.Name(FlyConstants.contactSyncState), object: nil)
+            NotificationCenter.default.removeObserver(self, name: Notification.Name(FlyConstants.callPermissionAlertShown), object: nil)
             ChatManager.setOnGoingChatUser(jid: "")
             toolTipController.isMenuVisible = false
             if let messageText = messageTextView, let message = messageText.text {
@@ -3102,6 +3125,7 @@ extension ChatViewParentController {
      */
     func checkCameraPermissionAccess(sourceType: UIImagePickerController.SourceType) {
         let authorizationStatus =  AVCaptureDevice.authorizationStatus(for: .video)
+        CommonDefaults.permissionAlertShown = false
         switch authorizationStatus {
         case .denied:
             presentCameraSettings()
@@ -3112,7 +3136,9 @@ extension ChatViewParentController {
             checkPhotosPermissionForCamera()
             break
         case .notDetermined:
+            CommonDefaults.permissionAlertShown = true
             AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
+                CommonDefaults.permissionAlertShown = false
                 if granted {
                     print("Granted access to ")
                     self?.checkPhotosPermissionForCamera()
@@ -9074,6 +9100,11 @@ extension ChatViewParentController {
             if indexPath.row > 0 {
                 if !unreadMessagesIdOnMessageReceived.contains(messageId) {
                     unreadMessagesIdOnMessageReceived.append(messageId)
+                    handleUnreadMessageWhileScrolling()
+                    setUnreadCountInUnreadView()
+                } else {
+                    unreadMessagesIdOnMessageReceived = unreadMessagesIdOnMessageReceived.filter({$0 != messageId})
+                    setUnreadCountInUnreadView()
                 }
             }
         }

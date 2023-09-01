@@ -49,7 +49,7 @@
 		<string>SF-UI-Display-Heavy.otf</string>
 	</array>
 	<key>googleApiKey</key>
-	<string>xxxxxxxxxxxxxxxxxxxx</string>
+	<string>AIzaSyDnjPEs86MRsnFfW1sVPKvMWjqQRnSa7Ts</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>comgooglemaps</string>
@@ -157,6 +157,6 @@
 	<key>UIUserInterfaceStyle</key>
 	<string>Light</string>
 	<key>googleApiKey_Translation</key>
-	<string>xxxxxxxxxxxxxxxxxxxx</string>
+	<string>AIzaSyCdwzAZR6tx8KB-2dMn0KzSI1V0LpsYdH0</string>
 </dict>
 </plist>
