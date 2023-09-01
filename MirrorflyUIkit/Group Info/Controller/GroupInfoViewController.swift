@@ -62,7 +62,8 @@ class GroupInfoViewController: UIViewController {
     var availableFeatures = ChatManager.getAvailableFeatures()
     
     var optionsController : GroupInfoOptionsViewController?
-    
+    var lockScreenShown: Bool = false
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setUpUI()
@@ -85,7 +86,9 @@ class GroupInfoViewController: UIViewController {
         }
         NotificationCenter.default.addObserver(self, selector: #selector(willEnterForeground),
                                                        name: NSNotification.Name(didBecomeActive), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(permissionAlertNotification), name: Notification.Name(FlyConstants.callPermissionAlertShown), object: nil)
         availableFeatures = ChatManager.getAvailableFeatures()
+        lockScreenShown = false
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -103,6 +106,11 @@ class GroupInfoViewController: UIViewController {
         ChatManager.shared.adminBlockDelegate = nil
         ChatManager.shared.availableFeaturesDelegate = nil
     }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        NotificationCenter.default.removeObserver(self, name: Notification.Name(FlyConstants.callPermissionAlertShown), object: nil)
+    }
 
     override func willCometoForeground() {
         self.view.removeLaunchSubview()
@@ -114,7 +122,18 @@ class GroupInfoViewController: UIViewController {
     
     override func didMoveToBackground() {
         if ChatManager.isPrivateChat(jid: groupID) {
-            self.view.addLaunchSubview()
+            if !CommonDefaults.permissionAlertShown {
+                self.view.addLaunchSubview()
+            }
+            if lockScreenShown == false {
+                lockScreenShown = true
+            }
+        }
+    }
+    
+    @objc func permissionAlertNotification(notification: Notification) {
+        if let status = notification.object as? Bool {
+            CommonDefaults.permissionAlertShown = status
         }
     }
     

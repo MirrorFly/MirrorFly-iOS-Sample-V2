@@ -9,6 +9,7 @@ import Foundation
 import Photos
 import UIKit
 import CloudKit
+import MirrorFlySDK
 
 enum Permission : String, CaseIterable {
     case camera = "camera"
@@ -52,7 +53,9 @@ class AppPermissions {
     */
     
     func checkGalleryPermission(galleryPermissionCallBack : @escaping GalleryPermissionCallBack) {
+        CommonDefaults.permissionAlertShown = true
         PHPhotoLibrary.requestAuthorization { status in
+            CommonDefaults.permissionAlertShown = false
             switch status {
             case .authorized:
                 galleryPermissionCallBack(.authorized)
@@ -84,6 +87,7 @@ class AppPermissions {
     }
     
     func checkMicroPhonePermission(recordPermission : @escaping RecordPermissionCallBack) {
+        CommonDefaults.permissionAlertShown = false
         switch AVAudioSession.sharedInstance().recordPermission {
         case AVAudioSession.RecordPermission.granted:
             recordPermission(.granted)
@@ -92,7 +96,9 @@ class AppPermissions {
             recordPermission(.denied)
             break
         case AVAudioSession.RecordPermission.undetermined:
+            CommonDefaults.permissionAlertShown = true
             AVAudioSession.sharedInstance().requestRecordPermission({ granted in
+                CommonDefaults.permissionAlertShown = false
                 if granted {
                     recordPermission(.granted)
                 } else {

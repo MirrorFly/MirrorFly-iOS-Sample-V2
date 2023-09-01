@@ -309,6 +309,8 @@ class RecentChatViewController: UIViewController, UIGestureRecognizerDelegate {
         NotificationCenter.default.addObserver(self, selector: #selector(willEnterForeground),
                                                name: NSNotification.Name(didBecomeActive), object: nil)
         navigationController?.setNavigationBarHidden(true, animated: animated)
+        NotificationCenter.default.addObserver(self, selector: #selector(enteredBackGround), name: UIScene.didEnterBackgroundNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(permissionAlertNotification), name: Notification.Name(FlyConstants.callPermissionAlertShown), object: nil)
         //CommonDefaults.isInPrivateChat = showPrivateChat ? true : false
         getAllChatTags()
         getRecentChatList()
@@ -351,9 +353,11 @@ class RecentChatViewController: UIViewController, UIGestureRecognizerDelegate {
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name(FlyConstants.contactSyncState), object: nil)
         NotificationCenter.default.removeObserver(self, name: Notification.Name("PrivateChatAlertView"), object: nil)
         NotificationCenter.default.removeObserver(self, name: Notification.Name("PrivateRecentChatAuthenticated"), object: nil)
+        NotificationCenter.default.removeObserver(self, name: Notification.Name(FlyConstants.callPermissionAlertShown), object: nil)
     }
 
     @objc func willEnterForeground() {
+        setUpPullForPrivateChat()
         self.view.removeLaunchSubview()
     }
 
@@ -361,6 +365,7 @@ class RecentChatViewController: UIViewController, UIGestureRecognizerDelegate {
         self.view.removeLaunchSubview()
         getRecentChatList()
         //setUpPullForPrivateChat()
+        setUpPullForPrivateChat()
         if !ENABLE_CONTACT_SYNC && isSearchEnabled{
             resetDataAndFetchUsersList()
         }
@@ -388,13 +393,27 @@ class RecentChatViewController: UIViewController, UIGestureRecognizerDelegate {
         if (current is RecentChatViewController) {
             CommonDefaults.appLockOnPrivateChat = showPrivateChat ? true : false
             CommonDefaults.privateChatOnChatScreen = false
-            //self.recentChatTableView?.tableHeaderView = nil
+            if self.recentChatTableView?.contentInset.top ?? 0 >= 0 {
+                self.recentChatTableView?.tableHeaderView = nil
+            }
             if showPrivateChat {
-                self.view.addLaunchSubview()
+                if !CommonDefaults.permissionAlertShown {
+                    self.view.addLaunchSubview()
+                }
             }
         }
     }
 
+    @objc func enteredBackGround() {
+        if showPrivateChat {
+            self.view.addLaunchSubview()
+        }
+    }
+    @objc func permissionAlertNotification(notification: Notification) {
+        if let status = notification.object as? Bool {
+            CommonDefaults.permissionAlertShown = status
+        }
+    }
 
 
     @objc func methodOfReceivedNotification(notification: Notification) {
@@ -1974,10 +1993,17 @@ extension RecentChatViewController {
                 print("setProfile \(isImageEmpty)")
                 if isImageEmpty {
                     userImage?.backgroundColor = Color.groupIconBackgroundGray
-                    userImage?.contentMode = .center
+                    userImage?.contentMode = .scaleAspectFit
+                    userImage?.image = placeHolder
                 } else {
-                    userImage?.contentMode = .scaleAspectFill
-                    userImage?.sd_setImage(with: url, placeholderImage: placeHolder)
+                    self.userImage?.contentMode = .scaleAspectFit
+                    userImage?.sd_setImage(with: url, placeholderImage: placeHolder) {_,responseError,_,_ in
+                        if responseError != nil {
+                            self.userImage?.contentMode = .scaleAspectFit
+                        } else {
+                            self.userImage?.contentMode = .scaleAspectFill
+                        }
+                    }
                 }
                 userImage?.sd_setImage(with: url, placeholderImage: placeHolder)
                 videoCallView.isHidden = true
@@ -2004,7 +2030,7 @@ extension RecentChatViewController {
             }
             
             let tap = UITapGestureRecognizer(target: self, action: #selector(self.openContainerImage(sender:)))
-            if userImage?.image == placeHolder || profile.isDeletedUser || getisBlockedMe(jid: profile.jid) || profile.isBlockedByAdmin || profile.isItSavedContact == false {
+            if userImage?.image == placeHolder || profile.isDeletedUser || getisBlockedMe(jid: profile.jid) || profile.isBlockedByAdmin {
                 userImage?.tag = 0
             } else {
                 userImage?.tag = 1

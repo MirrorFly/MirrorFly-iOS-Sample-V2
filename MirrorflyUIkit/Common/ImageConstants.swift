@@ -67,7 +67,7 @@ enum ImageConstant{
     static let ic_rcdocument = "document"
     
     // group
-    static let ic_group_placeholder = "groupPlaceholder"
+    static let ic_group_placeholder = "ic_groupPlaceHolder"
     static let ic_group_small_placeholder = "smallGroupPlaceHolder"
     static let ic_remove = "remove"
     static let ic_group_report = "reportGroup"

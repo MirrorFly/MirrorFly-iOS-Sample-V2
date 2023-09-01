@@ -76,11 +76,14 @@ class PrivateChatFingerPrintPINViewController: UIViewController {
     func authenticationWithTouchID() {
         let context = LAContext()
         var error: NSError?
+        CommonDefaults.permissionAlertShown = false
         if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
             let reason = "Identify yourself!"
             self.isSystemCancel = false
+            CommonDefaults.permissionAlertShown = true
             context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) {
                 [weak self] success, authenticationError in
+                CommonDefaults.permissionAlertShown = false
                 DispatchQueue.main.async {
                     if success {
                         if self?.isFromPrivateChat ?? false {
@@ -135,6 +138,7 @@ class PrivateChatFingerPrintPINViewController: UIViewController {
             //FlyDefaults.faceOrFingerAuthenticationFails = true
             navigateToAuthentication()
         case LAError.biometryLockout.rawValue:
+            isSystemCancel = true
             showAlert()
             break
         case LAError.systemCancel.rawValue:

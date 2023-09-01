@@ -20,21 +20,15 @@ import FirebaseRemoteConfig
 import AVFoundation
 import MirrorFlySDK
 
-let BASE_URL = "https://api-preprod-sandbox.mirrorfly.com/api/v1/"
-let LICENSE_KEY = "xxxxxxxxxxxxxxxxxx"
-let XMPP_DOMAIN = "xmpp-preprod-sandbox.mirrorfly.com"
-let XMPP_PORT = 5222
-let SOCKETIO_SERVER_HOST = "https://signal-preprod-sandbox.mirrorfly.com"
-let JANUS_URL = "wss://janus.mirrorfly.com"
+let LICENSE_KEY = "xxxxxxxxxxxxxxxxx"
 let CONTAINER_ID = "group.com.mirrorfly.qa"
 let ENABLE_CONTACT_SYNC = false
 let ENABLE_CHAT_HISTORY = false
 let IS_LIVE = false
-let WEB_LOGIN_URL = "https://webchat-preprod-sandbox.mirrorfly.com/"
+let WEB_LOGIN_URL = "https://webchat-uikit-qa.contus.us/"
 let IS_MOBILE_NUMBER_LOGIN = false
 let APP_NAME = "UiKitQa"
 let ICLOUD_CONTAINER_ID = "iCloud.com.mirrorfly.qa"
-
 
 let isMigrationDone = "isMigrationDone"
 let isHideNotificationContent = false
@@ -606,6 +600,8 @@ extension AppDelegate : LocalNotificationDelegate {
         if (current is RestoreViewController || current is BackupProgressViewController) {
             return
         }
+        updateUnreadCount()
+
         if (ChatManager.onGoingChatUserJid == chatMessage.senderUserJid && groupId == "") || (ChatManager.onGoingChatUserJid == groupId  && groupId != "") {
             
             if !CallManager.isOngoingCall() {
@@ -686,6 +682,13 @@ extension AppDelegate : LocalNotificationDelegate {
             executeOnMainThread {
                 self.showCustomNotificationView(title: title , message: message, chatMessage: chatMessage)
             }
+        }
+    }
+    
+    func updateUnreadCount() {
+        if Utility.getBoolFromPreference(key: isLoggedIn) {
+            let (_, chatCount) = ChatManager.getUnreadMessageAndChatCountForUnmutedUsers()
+            NotificationCenter.default.post(name: NSNotification.Name("updateMessageUnreadCount"), object: chatCount)
         }
     }
 }

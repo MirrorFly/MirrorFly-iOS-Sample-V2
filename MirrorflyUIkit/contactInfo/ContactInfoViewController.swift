@@ -26,12 +26,14 @@ class ContactInfoViewController: ViewController {
     var availableFeatures = ChatManager.getAvailableFeatures()
 
     var isFromContactInfo: Bool = false
+    var lockScreenShown: Bool = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
         if ChatManager.isPrivateChat(jid: contactJid) && isFromContactInfo {
             showLockScreen()
+            self.view.addLaunchSubview()
         }
 
         setConfiguration()
@@ -40,6 +42,8 @@ class ContactInfoViewController: ViewController {
         getLastSeen()
         networkMonitor()
         NotificationCenter.default.addObserver(self, selector: #selector(self.contactSyncCompleted(notification:)), name: NSNotification.Name(FlyConstants.contactSyncState), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(enteredBackGround), name: UIScene.didEnterBackgroundNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(permissionAlertNotification), name: Notification.Name(FlyConstants.callPermissionAlertShown), object: nil)
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -59,21 +63,30 @@ class ContactInfoViewController: ViewController {
         ChatManager.shared.connectionDelegate = nil
         ChatManager.shared.availableFeaturesDelegate = nil
         delegate = nil
+        self.view.removeLaunchSubview()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         handleBackgroundAndForground()
         availableFeatures = ChatManager.getAvailableFeatures()
         self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
+        lockScreenShown = false
     }
     
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name(FlyConstants.contactSyncState), object: nil)
+        NotificationCenter.default.removeObserver(self, name: Notification.Name(FlyConstants.callPermissionAlertShown), object: nil)
     }
 
     override func willCometoForeground() {
         self.view.removeLaunchSubview()
+        if lockScreenShown == false {
+            if ChatManager.isPrivateChat(jid: contactJid) {
+                showLockScreen()
+                lockScreenShown = true
+            }
+        }
     }
 
     @objc func willEnterForeground() {
@@ -82,7 +95,21 @@ class ContactInfoViewController: ViewController {
 
     override func didMoveToBackground() {
         if ChatManager.isPrivateChat(jid: contactJid) {
+            if !CommonDefaults.permissionAlertShown {
+                self.view.addLaunchSubview()
+            }
+        }
+    }
+    
+    @objc func enteredBackGround() {
+        if ChatManager.isPrivateChat(jid: contactJid) {
             self.view.addLaunchSubview()
+        }
+    }
+    
+    @objc func permissionAlertNotification(notification: Notification) {
+        if let status = notification.object as? Bool {
+            CommonDefaults.permissionAlertShown = status
         }
     }
     

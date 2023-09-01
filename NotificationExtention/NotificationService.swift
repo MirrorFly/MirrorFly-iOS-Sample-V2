@@ -10,12 +10,10 @@ import AVFoundation
 import AudioToolbox
 import MirrorFlySDK
 
-let BASE_URL =  "https://api-preprod-sandbox.mirrorfly.com/api/v1/"
+let LICENSE_KEY = "xxxxxxxxxxxxxxxxxxx"
 let CONTAINER_ID = "group.com.mirrorfly.qa"
-let LICENSE_KEY = "xxxxxxxxxxxxxxxxx"
 let IS_LIVE = false
-let APP_NAME = "UiKit"
-let ENABLE_CONTACT_SYNC = false
+let APP_NAME = "UiKitQa"
 
 let isHideNotificationContent = false
 
@@ -31,6 +29,8 @@ class NotificationService: UNNotificationServiceExtension {
         bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
         let payloadType = bestAttemptContent?.userInfo["type"] as? String
         ChatManager.setAppGroupContainerId(id: CONTAINER_ID)
+        ChatManager.initializeSDK(licenseKey: LICENSE_KEY) { isSuccess, error, data in
+        }
         print("#push-api withContentHandler received")
         if payloadType == "media_call" {
             NotificationExtensionSupport.shared.didReceiveNotificationRequest(request.content.mutableCopy() as? UNMutableNotificationContent, appName: APP_NAME, onCompletion: { [self] bestAttemptContent in

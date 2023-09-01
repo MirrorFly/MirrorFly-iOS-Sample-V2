@@ -60,6 +60,13 @@ class ContactSyncController: UIViewController {
         }.disposed(by: disposeBag)
     }
     
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        self.navigationController?.viewControllers.removeAll(where: { viewControllers in
+            !viewControllers.isKind(of: MainTabBarController.self)
+        })
+    }
+    
     @objc func networkChange(_ notification: NSNotification) {
         DispatchQueue.main.async { [weak self] in
             let isNetworkAvailable = notification.userInfo?[NetStatus.isNetworkAvailable] as? Bool ?? false
@@ -108,7 +115,7 @@ class ContactSyncController: UIViewController {
                         self?.moveToDashboard()
                     }else{
                         Utility.saveInPreference(key: isLoginContactSyncDone, value: false)
-                        self?.progressInfoLabel.text = "Internet not available"
+                        self?.progressInfoLabel.text = "Contact sync failed"
                         self?.syncImage.stopRotating()
                         AppAlert.shared.showToast(message: "Contact sync failure \(flyError?.localizedDescription)")
                     }
@@ -131,9 +138,6 @@ class ContactSyncController: UIViewController {
             let storyboard = UIStoryboard.init(name: Storyboards.main, bundle: nil)
             let mainTabBarController = storyboard.instantiateViewController(withIdentifier: Identifiers.mainTabBarController) as! MainTabBarController
             self?.navigationController?.pushViewController(mainTabBarController, animated: true)
-            self?.navigationController?.viewControllers.removeAll(where: { viewControllers in
-                !viewControllers.isKind(of: MainTabBarController.self)
-            })
         }
     }
     
