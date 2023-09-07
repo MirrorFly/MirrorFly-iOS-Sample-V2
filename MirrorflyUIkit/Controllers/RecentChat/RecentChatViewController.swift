@@ -324,7 +324,7 @@ class RecentChatViewController: UIViewController, UIGestureRecognizerDelegate {
         ChatManager.shared.availableFeaturesDelegate = self
         availableFeatures = ChatManager.getAvailableFeatures()
         searchBar?.isHidden = !(availableFeatures.isRecentChatSearchEnabled) ? true : false
-        if !CommonDefaults.showAppLock {
+        if !CommonDefaults.showAppLock || ChatManager.isPrivateChat(jid: pushChatId ?? "") {
             openChat(jid: pushChatId ?? "")
         }
     }
@@ -370,7 +370,7 @@ class RecentChatViewController: UIViewController, UIGestureRecognizerDelegate {
             resetDataAndFetchUsersList()
         }
         if !CommonDefaults.showAppLock {
-            if showPrivateChat && CommonDefaults.appLockOnPrivateChat && !CommonDefaults.showPrivateLockRecent{
+            if showPrivateChat && CommonDefaults.appLockOnPrivateChat && !CommonDefaults.showPrivateLockRecent && !pushNotificationSelected {
                 showLockScreen()
                 CommonDefaults.appLockOnPrivateChat = false
             } else if showPrivateChat && CommonDefaults.appLockOnPrivateChat && !pushNotificationSelected && !CommonDefaults.privateChatOnChatScreen {
@@ -380,6 +380,11 @@ class RecentChatViewController: UIViewController, UIGestureRecognizerDelegate {
                 if (current is RecentChatViewController) {
                     openChat(jid: pushChatId ?? "")
                 }
+            }
+        } else {
+            let current = UIApplication.shared.keyWindow?.getTopViewController()
+            if (current is RecentChatViewController) {
+                openChat(jid: pushChatId ?? "")
             }
         }
 //        else if showPrivateChat && CommonDefaults.appLockOnPrivateChat && !pushNotificationSelected && !CommonDefaults.privateChatOnChatScreen && CommonDefaults.showPrivateLockChat {

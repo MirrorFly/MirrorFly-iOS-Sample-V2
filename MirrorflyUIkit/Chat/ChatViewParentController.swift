@@ -321,10 +321,7 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
     override func viewDidLoad() {
         super.viewDidLoad()
         checkifStarredMessages()
-        if ChatManager.isPrivateChat(jid: getProfileDetails.jid ?? "") && (isFromContactScreen || pushNotificationSelected) {
-            self.view.addLaunchSubview()
-        }
-        if isFromContactScreen || isFromForward || isFromGroupInfo {
+        if isFromContactScreen || isFromForward || isFromGroupInfo || pushNotificationSelected {
             if ChatManager.isPrivateChat(jid: getProfileDetails.jid) {
                 //if recent.isPrivateChat {
                     if let group = groupIdForPrivateChat {
@@ -336,7 +333,10 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
                     } else if isFromForward && isFromPrivateChat {
                         
                     } else {
-                        showLockScreen()
+                        if lockScreenShown == false {
+                            showLockScreen()
+                            lockScreenShown = true
+                        }
                     }
                 //}
             }
@@ -681,6 +681,9 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        if ChatManager.isPrivateChat(jid: getProfileDetails.jid ?? "") && (isFromContactScreen || pushNotificationSelected || isFromGroupInfo || isFromForward) {
+            self.view.addLaunchSubview()
+        }
         if isStarredMessagePage == true {
             showOrHideUnreadMessageView(hide: true)
             headerView.isHidden = true
@@ -814,7 +817,10 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
 //            } else {
 //
 //            }
-            showLockScreen()
+            if lockScreenShown == false {
+                showLockScreen()
+                lockScreenShown = true
+            }
         }
         lockScreenShown = false
     }
@@ -914,6 +920,10 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
             }
         }
         ChatManager.shared.availableFeaturesDelegate = nil
+        isFromContactScreen = false
+        isFromGroupInfo = false
+        isFromForward = false
+        pushNotificationSelected = false
         self.view.removeLaunchSubview()
     }
     

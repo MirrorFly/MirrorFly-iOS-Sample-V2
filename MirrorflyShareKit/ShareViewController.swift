@@ -18,13 +18,6 @@ class ShareViewController: ShareKitBaseViewController {
         registerforDeviceLockNotification()
         checkForLogin()
     }
-
-    private let displayStatusChangedCallback: CFNotificationCallback = { _, cfObserver, cfName, _, _ in
-        guard let lockState = cfName?.rawValue as String? else {return}
-        if (lockState == "com.apple.springboard.lockcomplete") {
-            ShareViewController().handleDisplayStatus()
-        }
-    }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -34,18 +27,15 @@ class ShareViewController: ShareKitBaseViewController {
 //Check User Login
 extension ShareViewController {
 
-    func handleDisplayStatus() {
-        if (CommonDefaults.appLockenable || CommonDefaults.appFingerprintenable) {
-            CommonDefaults.showAppLock = true
-        }
-        exit(0)
-    }
-
     @objc func handleBackgroundStatus() {
-        if (CommonDefaults.appLockenable || CommonDefaults.appFingerprintenable) {
-            CommonDefaults.showAppLock = true
+        if let controller = self.navigationController?.topViewController {
+            if !(controller is FingerPrintPINViewController) {
+                if (CommonDefaults.appLockenable || CommonDefaults.appFingerprintenable) {
+                    CommonDefaults.showAppLock = true
+                }
+                exit(0)
+            }
         }
-        exit(0)
     }
     
     private func checkForLogin() {
@@ -99,15 +89,8 @@ extension ShareViewController {
 
 extension ShareViewController {
     func registerforDeviceLockNotification() {
-        //Screen lock notifications
-        CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(),     //center
-            Unmanaged.passUnretained(self).toOpaque(),     // observer
-            displayStatusChangedCallback,     // callback
-            "com.apple.springboard.lockcomplete" as CFString,     // event name
-            nil,     // object
-            .deliverImmediately)
-
         NotificationCenter.default.addObserver(self, selector: #selector(handleBackgroundStatus), name: UIApplication.didEnterBackgroundNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleBackgroundStatus), name: UIApplication.willResignActiveNotification, object: nil)
 
     }
 }

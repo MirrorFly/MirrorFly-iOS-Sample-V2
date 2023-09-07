@@ -55,6 +55,14 @@ class MainTabBarController: UITabBarController{
 
     func navigateToAuthentication() {
 
+        if pushNotificationSelected {
+            if let pushId = pushChatId {
+                if ChatManager.isPrivateChat(jid: pushId) {
+                    return
+                }
+            }
+        }
+
         if (CommonDefaults.appLockenable || CommonDefaults.appFingerprintenable) {
             let secondsDifference = Calendar.current.dateComponents([.minute, .second], from: CommonDefaults.appBackgroundTime, to: Date())
             if secondsDifference.second ?? 0 > 32 || secondsDifference.minute ?? 0 > 0 {

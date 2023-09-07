@@ -457,6 +457,7 @@ class AuthenticationPINViewController: BaseViewController, UITextFieldDelegate {
         }
         
         if pinInput == CommonDefaults.appLockPassword  {
+            CommonDefaults.appBackgroundTime = Date()
             if isResetByFailedAttempts && !CommonDefaults.privateChatOnChatScreen {
                 if CommonDefaults.showAppLock {
                     self.popToRootView()

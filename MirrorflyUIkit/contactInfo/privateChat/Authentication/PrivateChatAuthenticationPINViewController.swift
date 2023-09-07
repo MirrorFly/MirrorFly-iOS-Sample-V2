@@ -473,6 +473,7 @@ class PrivateChatAuthenticationPINViewController: BaseViewController, UITextFiel
         }
         
         if pinInput == CommonDefaults.appLockPassword  {
+            CommonDefaults.appBackgroundTime = Date()
             if isResetByFailedAttempts && !isFromPrivateRecentChat && !isFromPrivateChat && !isFromContactScreen && !isFromForward && !isFromContactInfo && !isFromGroupInfo {
                 if CommonDefaults.showAppLock {
                     self.popToRootView()
