@@ -13,11 +13,11 @@ import Social
 import CoreServices
 import Contacts
 
-
+let BASE_URL =  "https://api-preprod-sandbox.mirrorfly.com/api/v1/"
 let CONTAINER_ID = "group.com.mirrorfly.qa"
-let LICENSE_KEY = "xxxxxxxxxxxxxxxxx"
+let LICENSE_KEY = "xxxxxxxxxxxxxxxx"
 let IS_LIVE = false
-let APP_NAME = "UiKitQa"
+let APP_NAME = "UiKit"
 let ENABLE_CONTACT_SYNC = false
 
 protocol ShareKitDelegate {
@@ -52,6 +52,8 @@ class ShareKitViewModel {
     
     private func initialize() {
         ChatManager.setAppGroupContainerId(id: CONTAINER_ID)
+        ChatManager.initializeSDK(licenseKey: LICENSE_KEY) { isSuccess, error, data in
+        }
         NetworkReachability.shared.startMonitoring()
     }
     
