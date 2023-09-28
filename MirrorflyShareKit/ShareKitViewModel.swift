@@ -16,7 +16,7 @@ import Contacts
 let CONTAINER_ID = "xxxxxxxxx"
 let LICENSE_KEY = "xxxxxxxxx"
 let IS_LIVE = false
-let APP_NAME = "UiKitQa"
+let APP_NAME = "UiKit"
 let ENABLE_CONTACT_SYNC = false
 
 protocol ShareKitDelegate {

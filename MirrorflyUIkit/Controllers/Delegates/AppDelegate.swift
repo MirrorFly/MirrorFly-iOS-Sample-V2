@@ -27,7 +27,7 @@ let ENABLE_CHAT_HISTORY = false
 let IS_LIVE = false
 let WEB_LOGIN_URL = "https://webchat-preprod-sandbox.mirrorfly.com/"
 let IS_MOBILE_NUMBER_LOGIN = false
-let APP_NAME = "UiKitQa"
+let APP_NAME = "UiKit"
 let ICLOUD_CONTAINER_ID = "iCloud.com.mirrorfly.qa"
 
 let isMigrationDone = "isMigrationDone"

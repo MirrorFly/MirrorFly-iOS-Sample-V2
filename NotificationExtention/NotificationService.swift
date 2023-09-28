@@ -13,7 +13,7 @@ import MirrorFlySDK
 let LICENSE_KEY = "xxxxxxxxx"
 let CONTAINER_ID = "xxxxxxxxx"
 let IS_LIVE = false
-let APP_NAME = "UiKitQa"
+let APP_NAME = "UiKit"
 
 
 let isHideNotificationContent = false
