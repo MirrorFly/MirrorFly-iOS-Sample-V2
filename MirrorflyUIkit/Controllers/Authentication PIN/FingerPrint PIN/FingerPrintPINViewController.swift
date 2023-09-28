@@ -111,6 +111,7 @@ class FingerPrintPINViewController: UIViewController {
             //FlyDefaults.faceOrFingerAuthenticationFails = true
             navigateToAuthentication()
         case LAError.biometryLockout.rawValue:
+            isSystemCancel = true
             showAlert()
             break
         case LAError.systemCancel.rawValue:

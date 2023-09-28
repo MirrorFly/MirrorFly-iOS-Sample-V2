@@ -19,6 +19,7 @@ enum ChatSettingList: String, CaseIterable {
     case UserBusyStatus = "User Busy Status"
     case autodownload = "Auto Download"
     case chatBackup = "ChatBackup"
+    case exportCallLog = "Export call log"
     case clearAllConversation = "Clear All Conversation"
 
 }
@@ -33,6 +34,8 @@ class ChatSettingsViewController: UIViewController {
     var clearBadgeCountDelegate : ClearAllChatsDelegate?
     var availableFeatures = ChatManager.getAvailableFeatures()
 
+    //Need to make false for releases
+    var showExportCallLog = true
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -172,12 +175,21 @@ extension ChatSettingsViewController : UITableViewDelegate,UITableViewDataSource
                 cell.formaImageView.addGestureRecognizer(formaImageViewTap)
                 cell.setCell(isArchive: false)
                 return cell
+            case .exportCallLog:
+                let cell : ChatBackupTableViewCell = tableView.dequeueReusableCell(withIdentifier: Identifiers.chatBackupTableViewCell, for: indexPath) as! ChatBackupTableViewCell
+                cell.titleLabel.text = "Export call log"
+                return cell
             }
             return UITableViewCell()
     }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return UITableView.automaticDimension
+        switch self.chatSettingsArray[indexPath.row] {
+        case .exportCallLog:
+            return showExportCallLog ? UITableView.automaticDimension : 0
+        default:
+            return UITableView.automaticDimension
+        }
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -256,6 +268,11 @@ extension ChatSettingsViewController : UITableViewDelegate,UITableViewDataSource
 
         case .UserBusyStatus:
             ChatManager.shared.enableDisableBusyStatus(!ChatManager.shared.isBusyStatusEnabled())
+        case .exportCallLog:
+            if let logFileUrl = try? FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false).appendingPathComponent(FlyLogWriter.sharedInstance.logStatusFileName) {
+                let vc = UIActivityViewController(activityItems: [logFileUrl], applicationActivities: [])
+                self.present(vc, animated: true)
+            }
         }
         if !isInternetConnected && chatSettingsArray[indexPath.row] != .UserBusyStatus {
             AppAlert.shared.showToast(message: ErrorMessage.noInternet)

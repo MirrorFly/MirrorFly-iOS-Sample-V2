@@ -14,12 +14,12 @@ import MirrorFlySDK
 
 class ChatUtils {
     
-    static func setSenderBubbleBackground(imageView : UIImageView?)   {
+    static func setSenderBubbleBackground(imageView : UIView?)   {
         imageView?.backgroundColor = Color.senderBubbleColor
         imageView?.roundCorners(corners: [.topLeft,.bottomLeft,.topRight], radius: 8)
     }
     
-    static func setReceiverBubbleBackground(imageView : UIImageView?) {
+    static func setReceiverBubbleBackground(imageView : UIView?) {
         imageView?.backgroundColor = Color.receiverBubbleColor
         imageView?.roundCorners(corners: [.topLeft,.bottomRight,.topRight], radius: 8)
     }

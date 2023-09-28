@@ -17,7 +17,7 @@ protocol LocationDelegate : NSObjectProtocol {
     func didSendPressed(latitude: Double, longitude: Double,jid: String?)
 }
  
-class LocationViewController: UIViewController, GMSMapViewDelegate, CLLocationManagerDelegate {
+class LocationViewController: BaseViewController, GMSMapViewDelegate, CLLocationManagerDelegate {
     
     @IBOutlet weak var googleMapView: GMSMapView!
     @IBOutlet weak var bottomView: UIView!

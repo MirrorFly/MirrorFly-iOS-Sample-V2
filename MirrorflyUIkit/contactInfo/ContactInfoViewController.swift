@@ -9,7 +9,7 @@ import UIKit
 import MirrorFlySDK
 import SDWebImage
 
-class ContactInfoViewController: ViewController {
+class ContactInfoViewController: BaseViewController {
     
     @IBOutlet weak var contactInfoTableView: UITableView?
     
@@ -100,13 +100,13 @@ class ContactInfoViewController: ViewController {
             }
         }
     }
-    
+
     @objc func enteredBackGround() {
         if ChatManager.isPrivateChat(jid: contactJid) {
             self.view.addLaunchSubview()
         }
     }
-    
+
     @objc func permissionAlertNotification(notification: Notification) {
         if let status = notification.object as? Bool {
             CommonDefaults.permissionAlertShown = status
@@ -531,6 +531,7 @@ extension ContactInfoViewController {
             let storyboard = UIStoryboard.init(name: Storyboards.chat, bundle: nil)
             let viewAllMediaVC = storyboard.instantiateViewController(withIdentifier: Identifiers.viewAllMediaVC) as! ViewAllMediaController
             viewAllMediaVC.jid = jid
+            viewAllMediaVC.getProfileDetails = getProfileDetails
             self.navigationController?.pushViewController(viewAllMediaVC, animated: true)
         }
     }
@@ -550,6 +551,8 @@ extension ContactInfoViewController {
                 } else {
                     let vc = PrivateChatEnableController(nibName: "PrivateChatEnableController", bundle: nil)
                     vc.chatJid = jid
+                    vc.getProfileDetails = getProfileDetails
+                    vc.fetchMessageListQuery = fetchMessageListQuery
                     self.navigationController?.pushViewController(vc, animated: true)
                 }
             }

@@ -136,6 +136,7 @@ enum Identifiers {
     static let groupInfoOptionsViewController = "GroupInfoOptionsViewController"
     static let groupInfoOptionsTableViewCell = "GroupInfoOptionsTableViewCell"
     static let privateChatCell = "PrivateChatCell"
+    static let shareCallLinkViewController = "ShareCallLinkViewController"
     
     //MARK: ChatSettings
     static let chatSettingsTableViewCell = "ChatSettingsTableViewCell"
@@ -183,4 +184,5 @@ enum Storyboards {
     static let chat = "Chat"
     static let profile = "Profile"
     static let backupRestore = "BackupRestore"
+    static let call = "Call"
 }

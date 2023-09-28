@@ -10,12 +10,11 @@ import AVFoundation
 import AudioToolbox
 import MirrorFlySDK
 
-let BASE_URL =  "https://api-preprod-sandbox.mirrorfly.com/api/v1/"
-let CONTAINER_ID = "group.com.mirrorfly.qa"
-let LICENSE_KEY = "xxxxxxxxxxxxxxxx"
+let LICENSE_KEY = "xxxxxxxxx"
+let CONTAINER_ID = "xxxxxxxxx"
 let IS_LIVE = false
-let APP_NAME = "UiKit"
-let ENABLE_CONTACT_SYNC = false
+let APP_NAME = "UiKitQa"
+
 
 let isHideNotificationContent = false
 

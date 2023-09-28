@@ -25,7 +25,7 @@ class ChatViewParentMessageCell: BaseTableViewCell {
     
     //Outgoing And Incoming cell -  Basic view and its elements
     @IBOutlet weak var baseView: UIView?
-    @IBOutlet weak var bubbleImageView: UIImageView?
+    @IBOutlet weak var bubbleBGView: UIView?
     
     @IBOutlet weak var replyUserLabelWidthCons: NSLayoutConstraint?
     @IBOutlet weak var locationOutgoingView: UIView!
@@ -166,6 +166,11 @@ class ChatViewParentMessageCell: BaseTableViewCell {
     }
     
     func getCellFor(_ message: ChatMessage?, at indexPath: IndexPath?,isShowForwardView: Bool?, fromChat: Bool = false, isMessageSearch: Bool = false, searchText: String = "", profileDetails: ProfileDetails) -> ChatViewParentMessageCell? {
+        if let replyMessage = message?.isReplyMessage {
+            replyView?.isHidden = !replyMessage
+        } else {
+            replyView?.isHidden = true
+        }
         currentIndexPath = nil
         currentIndexPath = indexPath
         replyViewHeightCons?.isActive = true
@@ -227,7 +232,6 @@ class ChatViewParentMessageCell: BaseTableViewCell {
         // Reply view elements and its data
        let isReplyMessage = message?.isReplyMessage ?? false
        if isReplyMessage {
-            replyView?.isHidden = false
            let replyMessage = FlyMessenger.getMessageOfId(messageId: message?.replyParentChatMessage?.messageId ?? "")
            if message?.replyParentChatMessage?.isMessageRecalled == true || message?.replyParentChatMessage?.isMessageDeleted == true || replyMessage == nil {
                replyTextLabel?.text = "Original message not available"
@@ -446,15 +450,14 @@ class ChatViewParentMessageCell: BaseTableViewCell {
             replyMessageIconHeightCons?.isActive = false
             replyTextWithImageTrailingCons?.isActive = false
             replyTextLabelTrailingCons?.isActive = true
-            replyView?.isHidden = true
         }
         
         //Bubble View
         if (message!.isMessageSentByMe) {
-            ChatUtils.setSenderBubbleBackground(imageView: bubbleImageView)
+            ChatUtils.setSenderBubbleBackground(imageView: bubbleBGView)
         }
         else {
-            ChatUtils.setReceiverBubbleBackground(imageView: bubbleImageView)
+            ChatUtils.setReceiverBubbleBackground(imageView: bubbleBGView)
             if message?.messageChatType == .groupChat {
                 if let nameLabel = groupMsgSenderName {
                     nameLabel.text = ChatUtils.getGroupSenderName(messsage: message)
@@ -513,7 +516,7 @@ class ChatViewParentMessageCell: BaseTableViewCell {
         self.isAccessibilityElement = true
         self.accessibilityLabel = message?.messageId
         favouriteImageView?.accessibilityLabel = message?.messageId
-        bubbleImageView?.isAccessibilityElement =  true
+        bubbleBGView?.isAccessibilityElement =  true
         
         switch  message?.messageType {
         case .text:
@@ -583,27 +586,22 @@ class ChatViewParentMessageCell: BaseTableViewCell {
                         }
                         
                     } else if text.isURL {
+                        
                         let textRange = (tempName as NSString).range(of: text)
+                        
                         if(sender.didTapAttributedTextInLabel(label: textUILabel, inRange: textRange)) {
-                            print("didTapTextLabel isURL \(text)")
+                            
                             if text.contains(WEB_LOGIN_URL) {
                                 
-                                let callID = self.getCallLinkID(callLink: text)
-                                
-                                if callID.components(separatedBy: "-").count == 3 {
+                                if !CallManager.isOngoingCall() && !CallManager.isAlreadyOnAnotherCall() {
                                     
-                                    if !CallManager.isOngoingCall() {
-                                        
-                                        linkDelegate?.pushToJoinCallView(callLink: text)
-                                    }else {
-                                        linkDelegate?.showAlreadyInCallAlert(callLink: text)
-                                    }
+                                    linkDelegate?.pushToJoinCallView(callLink: text)
                                 }else {
-                                    AppUtils.shared.openURLInBrowser(urlString: text)
+                                    linkDelegate?.showAlreadyInCallAlert(callLink: text)
                                 }
-                                
                             }else {
                                 AppUtils.shared.openURLInBrowser(urlString: text)
+                                
                             }
                             break
                         }
@@ -616,46 +614,33 @@ class ChatViewParentMessageCell: BaseTableViewCell {
     
 
     func processTextMessage(message : String, uiLabel : UILabel, fromChat: Bool = false, isMessageSearch: Bool = false, searchText: String = "", isMessageSentByMe: Bool, mentionedUsers: [String], profileDetails: ProfileDetails) -> NSMutableAttributedString? {
-
+        
         uiLabel.isUserInteractionEnabled = true
         var attributedString : NSMutableAttributedString?
         if !message.isEmpty {
             attributedString = NSMutableAttributedString(string: message)
-
-            let linkTypes: NSTextCheckingResult.CheckingType = .link
-
-            let linkDetector = try? NSDataDetector(types: linkTypes.rawValue)
-
-            if let detect = linkDetector {
-                let matches = detect.matches(in: message, options: .reportCompletion, range: NSMakeRange(0, message.count))
+            
+            let linkDetector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
+            
+            if let detector = linkDetector {
+                let matches = detector.matches(in: message, options: .reportCompletion, range: NSRange(location: 0, length : message.utf16.count))
                 for match in matches {
-                    if let urlString = match.url?.absoluteString.lowercased() {
-                        let range = (message.lowercased() as NSString).range(of: urlString )
-                        attributedString?.addAttributes([NSAttributedString.Key.foregroundColor: UIColor.systemBlue], range: range)
-                        attributedString?.addAttribute(.underlineStyle,
-                                                       value: NSUnderlineStyle.single.rawValue,
-                                                       range: range)
-                        if urlString.contains(WEB_LOGIN_URL) {
-                            
-                            let callID = self.getCallLinkID(callLink: urlString)
-                            
-                            if callID.components(separatedBy: "-").count == 3 {
-                                
-                                if(isMessageSentByMe) {
-                                    linkView?.isHidden = false
-                                }else {
-                                    receiverLinkView?.isHidden = false
-                                }
-                            }
+                    attributedString?.addAttributes([NSAttributedString.Key.foregroundColor: UIColor.systemBlue], range: match.range)
+                    attributedString?.addAttribute(.underlineStyle,
+                                                   value: NSUnderlineStyle.single.rawValue,
+                                                   range: match.range)
+                    if message.contains(WEB_LOGIN_URL) {
+                        if(isMessageSentByMe) {
+                            linkView?.isHidden = false
+                        }else {
+                            receiverLinkView?.isHidden = false
                         }
                     }
-                   
                 }
-                
             }
             
             let numTypes: NSTextCheckingResult.CheckingType = .phoneNumber
-
+            
             let phoneNumberDetector = try? NSDataDetector(types: numTypes.rawValue)
             
             if let phoneNumberDetector = phoneNumberDetector {
@@ -667,7 +652,7 @@ class ChatViewParentMessageCell: BaseTableViewCell {
                         attributedString?.addAttribute(.underlineStyle,
                                                        value: NSUnderlineStyle.single.rawValue,
                                                        range: range)
-
+                        
                     }
                 }
             }
@@ -691,7 +676,7 @@ class ChatViewParentMessageCell: BaseTableViewCell {
     
     func getCallLinkID(callLink: String) -> String {
         
-        return callLink.components(separatedBy: "/").last ?? ""
+        return (callLink.components(separatedBy: "/").last ?? "")
     }
 }
 

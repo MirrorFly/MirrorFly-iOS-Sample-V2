@@ -7,7 +7,7 @@ import UIKit
 import MirrorFlySDK
 import AVKit
 
-class ImagePreview: UIViewController  {
+class ImagePreview: BaseViewController  {
     
     @IBOutlet weak var imageList: UICollectionView!
     @IBOutlet weak var videoPlayButton: UIButton?
@@ -243,32 +243,34 @@ extension ImagePreview : RefreshMessagesDelegate {
     }
 }
 
-extension ImagePreview : MessageEventsDelegate {
-    func onMessageReceived(message: MirrorFlySDK.ChatMessage, chatJid: String) {
-        
+extension ImagePreview  {
+    // override func derived from base view controller
+    override func onMessageReceived(message: MirrorFlySDK.ChatMessage, chatJid: String) {
+        super.onMessageReceived(message: message, chatJid: chatJid)
     }
     
-    func onMessageStatusUpdated(messageId: String, chatJid: String, status: MirrorFlySDK.MessageStatus) {
-        
+    override func onMessageStatusUpdated(messageId: String, chatJid: String, status: MirrorFlySDK.MessageStatus) {
+        super.onMessageStatusUpdated(messageId: messageId, chatJid: chatJid, status: status)
     }
     
-    func onMediaStatusUpdated(message: MirrorFlySDK.ChatMessage) {
-        
+    override func onMediaStatusUpdated(message: MirrorFlySDK.ChatMessage) {
+        super.onMediaStatusUpdated(message: message)
     }
     
-    func onMediaStatusFailed(error: String, messageId: String, errorCode: Int) {
-        
+    override func onMediaStatusFailed(error: String, messageId: String, errorCode: Int) {
+        super.onMediaStatusFailed(error: error, messageId: messageId, errorCode: errorCode)
     }
     
-    func onMediaProgressChanged(message: MirrorFlySDK.ChatMessage, progressPercentage: Float) {
-        
+    override func onMediaProgressChanged(message: MirrorFlySDK.ChatMessage, progressPercentage: Float) {
+        super.onMediaProgressChanged(message: message, progressPercentage: progressPercentage)
     }
     
-    func onMessagesClearedOrDeleted(messageIds: Array<String>) {
-        
+    override func onMessagesClearedOrDeleted(messageIds: Array<String>) {
+        super.onMessagesClearedOrDeleted(messageIds: messageIds)
     }
     
-    func onMessagesDeletedforEveryone(messageIds: Array<String>) {
+    override func onMessagesDeletedforEveryone(messageIds: Array<String>) {
+        super.onMessagesDeletedforEveryone(messageIds: messageIds)
         messageIds.forEach { messageId in
             if imageAray[currentIndexPath.row].messageId == messageId {
                 imageAray.remove(at: currentIndexPath.row)
@@ -277,22 +279,24 @@ extension ImagePreview : MessageEventsDelegate {
         }
     }
     
-    func showOrUpdateOrCancelNotification() {
-        
+    override func showOrUpdateOrCancelNotification() {
+        super.showOrUpdateOrCancelNotification()
     }
     
-    func onMessagesCleared(toJid: String, deleteType: String?) {
-        
+    override func onMessagesCleared(toJid: String, deleteType: String?) {
+        super.onMessagesCleared(toJid: toJid, deleteType: deleteType)
     }
     
-    func setOrUpdateFavourite(messageId: String, favourite: Bool, removeAllFavourite: Bool) {
-        
+    override func setOrUpdateFavourite(messageId: String, favourite: Bool, removeAllFavourite: Bool) {
+        super.setOrUpdateFavourite(messageId: messageId, favourite: favourite, removeAllFavourite: removeAllFavourite)
     }
     
-    func onMessageTranslated(message: MirrorFlySDK.ChatMessage, jid: String) {
-        
+    override func onMessageTranslated(message: MirrorFlySDK.ChatMessage, jid: String) {
+        super.onMessageTranslated(message: message, jid: jid)
     }
-    func clearAllConversationForSyncedDevice() {}
+    override func clearAllConversationForSyncedDevice() {
+        super.clearAllConversationForSyncedDevice()
+    }
 }
 
 extension ImagePreview : AvailableFeaturesDelegate {

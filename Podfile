@@ -29,18 +29,15 @@ def uikit_pods
   pod 'RxCocoa', '6.5.0'
   pod 'SwiftLinkPreview'
   pod 'lottie-ios'
+  pod 'BottomSheet', :git => 'https://github.com/joomcode/BottomSheet'
   
-  #submodule dependency pods
-
-  pod 'MirrorFlySDK', '5.11.7'
+  pod 'MirrorFlySDK', '5.12.0'
 
 end
 
 def notification_pods
 
-  #submodule dependency pods
-
-  pod 'MirrorFlySDK', '5.11.7'
+  pod 'MirrorFlySDK', '5.12.0'
 
 end
 
@@ -55,7 +52,6 @@ end
 target 'UikitQaShareKit' do
   uikit_pods
 end
-
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|

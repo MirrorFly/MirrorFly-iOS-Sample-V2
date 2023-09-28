@@ -21,6 +21,12 @@ class CountryPickerViewController: UIViewController {
         configureDefaults()
         self.title = selectCountry
         searchBar.placeholder = search
+        setupAutomation()
+    }
+    
+    // MARK: Automation Setup
+    func setupAutomation() {
+        searchBar.setAutomationIdentifier(label: countrySearchString, id: countrySearchAM)
     }
     
     override func viewWillAppear(_ animated: Bool) {

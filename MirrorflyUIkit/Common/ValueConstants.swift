@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import MirrorFlySDK
 
 let valueZero = 0
 let chatTextMinimumLines = 0
@@ -27,3 +28,8 @@ let maximumMobileNumber = 15
 let chatHeader = 55
 let percentage = 100.0
 
+
+//Chat Constants
+
+var chatMessages: [[ChatMessage]] = [[ChatMessage]]()
+var getAllMessages : [ChatMessage]  = []

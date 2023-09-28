@@ -27,4 +27,10 @@ extension UIButton {
         self.backgroundColor = backGroundColor
         self.layer.borderWidth = borderWidth
     }
+    
+    //To set automation identifier
+    func setAutomationIdentifier(label: String = "", id: String) {
+        self.accessibilityLabel = label.isEmpty ? titleLabel?.text : label
+        self.accessibilityIdentifier = id
+    }
 }

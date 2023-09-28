@@ -9,7 +9,7 @@ import SDWebImage
 import Contacts
 import RxSwift
 
-class ContactViewController: UIViewController {
+class ContactViewController: BaseViewController {
     @IBOutlet weak var profilePopupContainer: UIView!
     @IBOutlet weak var profilePopup: UIView!
     @IBOutlet weak var userName: UILabel!
@@ -23,6 +23,7 @@ class ContactViewController: UIViewController {
     @IBOutlet weak var serachFieldTopMargin: NSLayoutConstraint!
     @IBOutlet weak var titleLable: UILabel!
     @IBOutlet weak var headerView: UIView?
+    @IBOutlet weak var serachFieldHeight: NSLayoutConstraint!
     
     var allContacts =  [ProfileDetails]()
     var contacts = [ProfileDetails]() {
@@ -108,7 +109,9 @@ class ContactViewController: UIViewController {
         if isInvite{
             callUsers.append(contentsOf: CallManager.getCallUsersList() ?? [])
         }
-        if isInvite || !groupJid.isEmpty{
+        if CallManager.getCallMode() == .MEET && isInvite {
+            self.title = "Meet Link"
+        }else if isInvite || !groupJid.isEmpty{
             if isInvite{
                 self.title = "Add participants"
             }else{
@@ -156,7 +159,12 @@ class ContactViewController: UIViewController {
         if hideNavigationbar {
             CallManager.onCallStatusDelegate = self
             headerVIewHeight.constant = 0
-            topBarViewHeight.constant = 48
+            if callLink.isNotEmpty && CallManager.getCallMode() == .MEET{
+                topBarViewHeight.constant = 0
+                bottomBtnHeight.constant = 0
+            }else{
+                topBarViewHeight.constant = 48
+            }
             serachFieldTopMargin.constant = 0
         }else{
             headerVIewHeight.constant = 50
@@ -221,7 +229,9 @@ class ContactViewController: UIViewController {
     func configureDefaults() {
         contactViewModel =  ContactViewModel()
         searchTxt.delegate = self
-        self.contactList.addSubview(self.refreshControl)
+        if CallManager.getCallMode() != .MEET{
+            self.contactList.addSubview(self.refreshControl)
+        }
         permissionDialogShowedOnViewDidLoad = true
         if ENABLE_CONTACT_SYNC && groupJid.isEmpty{
             showContactPermissionAlert()
@@ -233,6 +243,10 @@ class ContactViewController: UIViewController {
     }
     
     @objc func handleRefresh(_ refreshControl: UIRefreshControl) {
+        if callLink.isNotEmpty && CallManager.getCallMode() == .MEET{
+            refreshControl.endRefreshing()
+            return
+        }
         if NetworkReachability.shared.isConnected {
             if groupJid.isEmpty{
                 showContactPermissionAlert()
@@ -279,6 +293,9 @@ class ContactViewController: UIViewController {
     }
     
     func getCotactFromLocal(fromServer: Bool) {
+        if callLink.isNotEmpty && CallManager.getCallMode() == .MEET{
+            return
+        }
         if ENABLE_CONTACT_SYNC && CNContactStore.authorizationStatus(for: CNEntityType.contacts) == .denied && groupJid.isEmpty{
             contacts.removeAll()
             allContacts.removeAll()
@@ -390,13 +407,13 @@ class ContactViewController: UIViewController {
         self.view.endEditing(true)
     }
     
-    @objc private func keyboardWillShow(notification: NSNotification) {
+    @objc internal override func keyboardWillShow(notification: NSNotification) {
         if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
             contactList.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: keyboardSize.height + contactList.rowHeight, right: 0)
         }
     }
     
-    @objc private func keyboardWillHide(notification: NSNotification) {
+    @objc internal override func keyboardWillHide(notification: NSNotification) {
         contactList.contentInset = .zero
     }
     
@@ -764,7 +781,11 @@ extension ContactViewController :  UITableViewDelegate, UITableViewDataSource {
         let titleLable = UILabel.init(frame: CGRect(x: 20, y: 5, width: tableView.frame.size.width - 40, height: 30))
         titleLable.textColor = Color.color_181818
         titleLable.font = UIFont.font14px_appSemibold()
-        titleLable.text = "Call Link"
+        if CallManager.getCallMode() == .MEET {
+            titleLable.text = "Meet Link"
+        }else{
+            titleLable.text = "Call Link"
+        }
         headerView.addSubview(titleLable)
         
         let profileImg = UIImageView.init(frame: CGRect(x: 20, y: CGRectGetMaxY(titleLable.frame) + 5, width: 50, height: 50))
@@ -1237,7 +1258,7 @@ extension ContactViewController {
 extension ContactViewController : UIScrollViewDelegate {
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        if !groupJid.isEmpty || ENABLE_CONTACT_SYNC{
+        if (!groupJid.isEmpty || ENABLE_CONTACT_SYNC) || callLink.isNotEmpty && CallManager.getCallMode() == .MEET{
             return
         }
         let position  = scrollView.contentOffset.y
@@ -1256,6 +1277,9 @@ extension ContactViewController : UIScrollViewDelegate {
     
     public func getUsersList(pageNo : Int = 1, pageSize : Int =  40, searchTerm : String){
         print("#fetch request \(pageNo) \(pageSize) \(searchTerm) ")
+        if callLink.isNotEmpty && CallManager.getCallMode() == .MEET{
+            return
+        }
         if pageNo == 1 {
             contactList.tableFooterView = createTableFooterView()
         }
@@ -1350,6 +1374,9 @@ extension ContactViewController : UIScrollViewDelegate {
         allContacts.removeAll()
         contacts.removeAll()
         contactList.reloadData()
+        if callLink.isNotEmpty && CallManager.getCallMode() == .MEET{
+            return
+        }
         getUsersList(pageNo: 1, pageSize: 20, searchTerm: searchTerm)
     }
     
