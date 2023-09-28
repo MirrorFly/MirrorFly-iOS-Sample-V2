@@ -24,9 +24,6 @@ import LocalAuthentication
 }
 
 extension RootViewController : CallManagerDelegate {
-    func onLocalVideoTrackAdded(userId: String) {
-
-    }
 
     func onRemoteVideoTrackAdded(userId: String, track: RTCVideoTrack) {
         callViewController?.onRemoteVideoTrackAdded(userId: userId, track: track)
@@ -55,10 +52,6 @@ extension RootViewController : CallManagerDelegate {
             self?.callViewController?.getDisplayName(IncomingUser: IncomingUser)
         }
         
-    }
-    
-    func sendCallMessage( groupCallDetails : GroupCallDetails , users: [String], invitedUsers: [String]) {
-        callViewController?.sendCallMessage(groupCallDetails: groupCallDetails, users: users, invitedUsers: invitedUsers)
     }
     
     func socketConnectionEstablished() {

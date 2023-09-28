@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21679"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -444,9 +444,9 @@
             <connections>
                 <outlet property="baseView" destination="OSJ-rp-psc" id="Lvc-1u-KNI"/>
                 <outlet property="baseViewTopConstraint" destination="3NR-aJ-S8x" id="Y6R-rx-i7U"/>
+                <outlet property="bubbleBGView" destination="Koq-uS-k0W" id="sFd-Mp-7rr"/>
                 <outlet property="bubbleImageBottomCons" destination="KGB-xL-bGD" id="Qri-ZK-ESn"/>
                 <outlet property="bubbleImageLeadingCons" destination="bmD-9q-48f" id="AY0-Lw-DpS"/>
-                <outlet property="bubbleImageView" destination="Koq-uS-k0W" id="sFd-Mp-7rr"/>
                 <outlet property="contactName" destination="pUW-hQ-gFh" id="LQd-8c-jM1"/>
                 <outlet property="favouriteImageView" destination="h2B-W6-7wR" id="vgs-JM-cr0"/>
                 <outlet property="forwardButton" destination="vLd-1a-ZMr" id="xd6-L9-SxI"/>
@@ -487,7 +487,7 @@
         <image name="Receiver" width="10" height="10"/>
         <image name="foward" width="24" height="24"/>
         <image name="ic_contactIcon" width="69" height="69"/>
-        <image name="ic_favouriteStarGray" width="16" height="16"/>
+        <image name="ic_favouriteStarGray" width="100" height="100"/>
         <image name="ic_seen" width="8" height="8"/>
         <image name="test-image.jpg" width="269" height="187"/>
         <namedColor name="PrimaryTextColor">

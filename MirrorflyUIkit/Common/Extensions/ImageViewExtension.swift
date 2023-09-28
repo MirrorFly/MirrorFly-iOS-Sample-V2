@@ -84,4 +84,10 @@ extension UIImage {
         UIGraphicsEndImageContext();
         return newImage
     }
+    
+    //To set automation identifier
+    func setAutomationIdentifier(label: String, id: String) {
+        self.accessibilityLabel = label
+        self.accessibilityIdentifier = id
+    }
 }

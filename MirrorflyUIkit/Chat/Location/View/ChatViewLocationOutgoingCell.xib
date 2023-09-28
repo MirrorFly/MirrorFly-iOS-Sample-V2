@@ -3,7 +3,7 @@
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21678"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21679"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -403,9 +403,9 @@
             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
             <connections>
                 <outlet property="baseView" destination="0Hz-YJ-dHP" id="QOd-eB-ghg"/>
+                <outlet property="bubbleBGView" destination="Fyj-zQ-pjf" id="8de-LO-ZFI"/>
                 <outlet property="bubbleImageBottomCons" destination="76l-bj-VHX" id="os2-eT-xll"/>
                 <outlet property="bubbleImageTopCons" destination="Wlg-MA-PaJ" id="8cE-uk-LxH"/>
-                <outlet property="bubbleImageView" destination="Fyj-zQ-pjf" id="8de-LO-ZFI"/>
                 <outlet property="chatLocationMapView" destination="j6I-gl-J5T" id="NDz-03-afX"/>
                 <outlet property="favouriteImageView" destination="1ty-K0-gto" id="cJe-sN-eNW"/>
                 <outlet property="forwardButton" destination="705-QH-8Iy" id="Akl-rp-3DE"/>

@@ -503,8 +503,10 @@ extension ViewAllMediaController : QLPreviewControllerDataSource {
 }
 
 // Message event delegate
-extension ViewAllMediaController : MessageEventsDelegate {
-    func onMessageReceived(message: ChatMessage, chatJid: String) {
+extension ViewAllMediaController  {
+    // override func derived from base view controller
+    override func onMessageReceived(message: ChatMessage, chatJid: String) {
+        super.onMessageReceived(message: message, chatJid: chatJid)
         print("View All media : onMessageReceived  \(message.chatUserJid)")
         if chatJid == jid {
             viewModel.whileReceivingNewMessage(chatMessage: message) { [weak self] linkModel in
@@ -530,11 +532,12 @@ extension ViewAllMediaController : MessageEventsDelegate {
         }
     }
     
-    func onMessageStatusUpdated(messageId: String, chatJid: String, status: MessageStatus) {
-        
+    override func onMessageStatusUpdated(messageId: String, chatJid: String, status: MessageStatus) {
+        super.onMessageStatusUpdated(messageId: messageId, chatJid: chatJid, status: status)
     }
     
-    func onMediaStatusUpdated(message: ChatMessage) {
+    override func onMediaStatusUpdated(message: ChatMessage) {
+        super.onMediaStatusUpdated(message: message)
         if jid == message.chatUserJid {
             if message.messageType == .document {
                 if docChatMessages.count > 0 {
@@ -569,41 +572,46 @@ extension ViewAllMediaController : MessageEventsDelegate {
         
     }
     
-    func onMediaStatusFailed(error: String, messageId: String, errorCode: Int) {
-        
+    override func onMediaStatusFailed(error: String, messageId: String, errorCode: Int) {
+        super.onMediaStatusFailed(error: error, messageId: messageId, errorCode: errorCode)
     }
     
-    func onMediaProgressChanged(message: ChatMessage, progressPercentage: Float) {
-        
+    override func onMediaProgressChanged(message: ChatMessage, progressPercentage: Float) {
+        super.onMediaProgressChanged(message: message, progressPercentage: progressPercentage)
     }
     
-    func onMessagesClearedOrDeleted(messageIds: Array<String>) {
+    override func onMessagesClearedOrDeleted(messageIds: Array<String>) {
+        super.onMessagesClearedOrDeleted(messageIds: messageIds)
         handleMessageClearedOrDelete(messageIds: messageIds)
     }
     
-    func onMessagesDeletedforEveryone(messageIds: Array<String>) {
+    override func onMessagesDeletedforEveryone(messageIds: Array<String>) {
+        super.onMessagesDeletedforEveryone(messageIds: messageIds)
         handleMessageClearedOrDelete(messageIds: messageIds)
     }
     
-    func showOrUpdateOrCancelNotification() {
-        
+    override func showOrUpdateOrCancelNotification() {
+        super.showOrUpdateOrCancelNotification()
     }
     
-    func onMessagesCleared(toJid: String, deleteType: String?) {
+    override func onMessagesCleared(toJid: String, deleteType: String?) {
+        super.onMessagesCleared(toJid: toJid, deleteType: deleteType)
         if toJid == jid {
            clearMessage()
         }
     }
     
-    func setOrUpdateFavourite(messageId: String, favourite: Bool, removeAllFavourite: Bool) {
-        
+    override func setOrUpdateFavourite(messageId: String, favourite: Bool, removeAllFavourite: Bool) {
+        super.setOrUpdateFavourite(messageId: messageId, favourite: favourite, removeAllFavourite: removeAllFavourite)
     }
     
-    func onMessageTranslated(message: ChatMessage, jid: String) {
-        
+    override func onMessageTranslated(message: ChatMessage, jid: String) {
+        super.onMessageTranslated(message: message, jid: jid)
     }
     
-    func clearAllConversationForSyncedDevice() {}
+    override func clearAllConversationForSyncedDevice() {
+        super.clearAllConversationForSyncedDevice()
+    }
     
     
 }

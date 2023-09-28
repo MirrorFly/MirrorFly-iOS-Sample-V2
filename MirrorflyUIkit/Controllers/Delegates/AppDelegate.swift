@@ -20,22 +20,15 @@ import FirebaseRemoteConfig
 import AVFoundation
 import MirrorFlySDK
 
-let BASE_URL = "https://api-preprod-sandbox.mirrorfly.com/api/v1/"
-let LICENSE_KEY = "xxxxxxxxxxxxxxxx"
-let XMPP_DOMAIN = "xmpp-preprod-sandbox.mirrorfly.com"
-let XMPP_PORT = 5222
-let SOCKETIO_SERVER_HOST = "https://signal-preprod-sandbox.mirrorfly.com"
-let JANUS_URL = "wss://janus.mirrorfly.com"
-let CONTAINER_ID = "group.com.mirrorfly.qa"
+let LICENSE_KEY = "xxxxxxxxx"
+let CONTAINER_ID = "xxxxxxxxx"
 let ENABLE_CONTACT_SYNC = false
 let ENABLE_CHAT_HISTORY = false
 let IS_LIVE = false
 let WEB_LOGIN_URL = "https://webchat-preprod-sandbox.mirrorfly.com/"
 let IS_MOBILE_NUMBER_LOGIN = false
-let APP_NAME = "UiKitQa"
+let APP_NAME = "UiKit"
 let ICLOUD_CONTAINER_ID = "iCloud.com.mirrorfly.qa"
-
-
 
 let isMigrationDone = "isMigrationDone"
 let isHideNotificationContent = false
@@ -611,7 +604,6 @@ extension AppDelegate : LocalNotificationDelegate {
             return
         }
         updateUnreadCount()
-
         if (ChatManager.onGoingChatUserJid == chatMessage.senderUserJid && groupId == "") || (ChatManager.onGoingChatUserJid == groupId  && groupId != "") {
             
             if !CallManager.isOngoingCall() {
@@ -874,7 +866,7 @@ extension AppDelegate {
                 let url = URL(fileURLWithPath: path)
 
                 do {
-                    try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.soloAmbient, options: AVAudioSession.CategoryOptions.mixWithOthers)
+                    try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playback, options: AVAudioSession.CategoryOptions.duckOthers)
                     try AVAudioSession.sharedInstance().setActive(true)
                     player = try AVAudioPlayer(contentsOf: url)
                     player?.play()

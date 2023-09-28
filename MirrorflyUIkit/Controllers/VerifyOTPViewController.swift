@@ -40,6 +40,7 @@ class VerifyOTPViewController: UIViewController
         setUpStatusBar()
         configureDefaults()
         handleBackgroundAndForground()
+        setupAutomation()
     }
     
     override func viewDidDisappear(_ animated: Bool) {
@@ -48,6 +49,20 @@ class VerifyOTPViewController: UIViewController
         NotificationCenter.default.removeObserver(self)
         IQKeyboardManager.shared.enable = true
     }
+    
+    // MARK: Automation Setup
+    func setupAutomation() {
+        txtFirst.setAutomationIdentifier(label: otp1TextString, id: otp1TextAM)
+        txtSecond.setAutomationIdentifier(label: otp2TextString, id: otp2TextAM)
+        txtThird.setAutomationIdentifier(label: otp3TextString, id: otp3TextAM)
+        txtForth.setAutomationIdentifier(label: otp4TextString, id: otp4TextAM)
+        txtFifth.setAutomationIdentifier(label: otp5TextString, id: otp5TextAM)
+        txtSixth.setAutomationIdentifier(label: otp6TextString, id: otp6TextAM)
+        changeNumber.setAutomationIdentifier(id: changeNumberBtnAM)
+        verifyotp.setAutomationIdentifier(id: verifyOtpBtnAM)
+        resendOtp.setAutomationIdentifier(id: resendOtpBtnAM)
+    }
+    
     
     // MARK:- Functions
     func setupUI() {

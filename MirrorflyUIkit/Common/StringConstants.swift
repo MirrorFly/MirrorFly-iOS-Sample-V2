@@ -478,3 +478,38 @@ public struct TermsAndConditionsUrl {
     public static let termsAndConditions = "https://www.mirrorfly.com/terms-and-conditions.php"
     public static let privacyPolicy = "https://www.mirrorfly.com/privacy-policy.php"
 }
+
+
+// MARK: Automation Constants
+
+// MARK: Login Ids
+
+let numTextAM = "Login_Number_TextField"
+let otp1TextAM = "Login_OtpOne_TextField"
+let otp2TextAM = "Login_OtpTwo_TextField"
+let otp3TextAM = "Login_OtpThree_TextField"
+let otp4TextAM = "Login_OtpFour_TextField"
+let otp5TextAM = "Login_OtpFive_TextField"
+let otp6TextAM = "Login_OtpSix_TextField"
+let countrySearchAM = "Login_Search_TextField"
+
+
+let getOtpBtnAM = "Login_GetOtp_Button"
+let verifyOtpBtnAM = "Login_VerifyOtp_Button"
+let resendOtpBtnAM = "Login_ResendOtp_Button"
+let changeNumberBtnAM = "Login_ChangeNumber_Button"
+let countryPickerBtnAM = "Login_CountryPicker_Button"
+
+// MARK: Login Strings
+
+let numTextString = "PhoneNumberTextField"
+let otp1TextString = "OtpOneTextField"
+let otp2TextString = "OtpTwoTextField"
+let otp3TextString = "OtpThreeTextField"
+let otp4TextString = "OtpFourTextField"
+let otp5TextString = "OtpFiveTextField"
+let otp6TextString = "OtpSixTextField"
+
+let countrySearchString = "CountrySearchTextField"
+
+let countryPickerString = "CountryPicker"

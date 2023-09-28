@@ -16,7 +16,7 @@ protocol PrivateChatDelegate {
     func pinChanged()
 }
 
-class PrivateChatEnableController: UIViewController {
+class PrivateChatEnableController: BaseViewController {
 
     @IBOutlet weak var lockChatView: UIView! {
         didSet {
@@ -108,16 +108,22 @@ class PrivateChatEnableController: UIViewController {
             if CommonDefaults.appLockPassword == "" {
                 let vc = AppLockPasswordViewController(nibName:Identifiers.appLockPasswordViewController, bundle: nil)
                 vc.isFromPrivateChat = true
+                vc.getProfileDetails = getProfileDetails
+                vc.fetchMessageListQuery = fetchMessageListQuery
                 vc.privateChatDelegate = self
                 self.navigationController?.pushViewController(vc, animated: true)
             } else {
                 if CommonDefaults.appFingerprintenable {
                     let vc = PrivateChatFingerPrintPINViewController(nibName: "PrivateChatFingerPrintPINViewController", bundle: nil)
                     vc.isFromPrivateChat = true
+                    vc.getProfileDetails = getProfileDetails
+                    vc.fetchMessageListQuery = fetchMessageListQuery
                     vc.privateChatDelegate = self
                     self.navigationController?.pushViewController(vc, animated: false)
                 } else {
                     let vc = PrivateChatAuthenticationPINViewController(nibName:"PrivateChatAuthenticationPINViewController", bundle: nil)
+                    vc.getProfileDetails = getProfileDetails
+                    vc.fetchMessageListQuery = fetchMessageListQuery
                     vc.isFromPrivateChat = true
                     vc.privateChatDelegate = self
                     self.navigationController?.pushViewController(vc, animated: true)
@@ -126,11 +132,15 @@ class PrivateChatEnableController: UIViewController {
         } else {
             if CommonDefaults.appFingerprintenable {
                 let vc = PrivateChatFingerPrintPINViewController(nibName: "PrivateChatFingerPrintPINViewController", bundle: nil)
+                vc.getProfileDetails = getProfileDetails
+                vc.fetchMessageListQuery = fetchMessageListQuery
                 vc.isFromPrivateChat = true
                 vc.privateChatDelegate = self
                 self.navigationController?.pushViewController(vc, animated: false)
             } else {
                 let vc = PrivateChatAuthenticationPINViewController(nibName:"PrivateChatAuthenticationPINViewController", bundle: nil)
+                vc.getProfileDetails = getProfileDetails
+                vc.fetchMessageListQuery = fetchMessageListQuery
                 vc.isFromPrivateChat = true
                 vc.privateChatDelegate = self
                 self.navigationController?.pushViewController(vc, animated: true)

@@ -24,7 +24,7 @@ protocol GroupInfoDelegate {
     func didComefromGroupInfo()
 }
 
-class GroupInfoViewController: UIViewController {
+class GroupInfoViewController: BaseViewController {
     
     // MARK: Properties
     
@@ -39,7 +39,6 @@ class GroupInfoViewController: UIViewController {
     var currentGroupName = ""
     var groupMembers = [GroupParticipantDetail]()
     let contactInfoViewModel = ContactInfoViewModel()
-    var getProfileDetails: ProfileDetails!
     
     let imagePickerController = UIImagePickerController()
     var isImagePicked: Bool = false
@@ -63,7 +62,7 @@ class GroupInfoViewController: UIViewController {
     
     var optionsController : GroupInfoOptionsViewController?
     var lockScreenShown: Bool = false
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setUpUI()
@@ -106,7 +105,7 @@ class GroupInfoViewController: UIViewController {
         ChatManager.shared.adminBlockDelegate = nil
         ChatManager.shared.availableFeaturesDelegate = nil
     }
-    
+
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         NotificationCenter.default.removeObserver(self, name: Notification.Name(FlyConstants.callPermissionAlertShown), object: nil)
@@ -130,12 +129,12 @@ class GroupInfoViewController: UIViewController {
             }
         }
     }
-    
+
     @objc func permissionAlertNotification(notification: Notification) {
-        if let status = notification.object as? Bool {
-            CommonDefaults.permissionAlertShown = status
+            if let status = notification.object as? Bool {
+                CommonDefaults.permissionAlertShown = status
+            }
         }
-    }
     
     private func setUpUI() {
         setUpStatusBar()

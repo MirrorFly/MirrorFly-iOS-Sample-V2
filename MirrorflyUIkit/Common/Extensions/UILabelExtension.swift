@@ -70,5 +70,11 @@ extension UILabel {
         // MARK: - Assign string that you've modified to current attributed Text
         attributedText = attributedString
     }
+    
+    //To set automation identifier
+    func setAutomationIdentifier(id: String) {
+        self.accessibilityLabel = self.text
+        self.accessibilityIdentifier = id
+    }
 
 }

@@ -22,7 +22,8 @@ class OTPViewController: UIViewController {
     public var countryArray = [Country]()
     @IBOutlet weak var termsAndConditionLabel: UILabel!
     @IBOutlet weak var privacyPolicyLabel: UILabel!
-   public  var otpViewModel : OTPViewModel!
+    @IBOutlet weak var countryPickerButton: UIButton!
+    public  var otpViewModel : OTPViewModel!
     let chatmanager = ChatManager.shared
     var countryRegion = ""
     
@@ -35,6 +36,14 @@ class OTPViewController: UIViewController {
         privacyPolicyLabel.textColor = UIColor(named: "buttonColor")
         setupUI()
         configureDefaults()
+        setupAutomation()
+    }
+    
+    // MARK: Automation Setup
+    func setupAutomation() {
+        countryPickerButton.setAutomationIdentifier(label: countryPickerString, id: countryPickerBtnAM)
+        mobileNumber.setAutomationIdentifier(label: numTextString, id: numTextAM)
+        getOtpBtn.setAutomationIdentifier(id: getOtpBtnAM)
     }
     
     // MARK:- Functions

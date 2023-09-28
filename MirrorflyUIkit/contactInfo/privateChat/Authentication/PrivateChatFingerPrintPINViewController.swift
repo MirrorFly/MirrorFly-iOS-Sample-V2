@@ -9,7 +9,7 @@ import UIKit
 import LocalAuthentication
 import MirrorFlySDK
 
-class PrivateChatFingerPrintPINViewController: UIViewController {
+class PrivateChatFingerPrintPINViewController: BaseViewController {
 
     var isSystemCancel = false
     var isFromPrivateRecentChat: Bool = false

@@ -125,6 +125,8 @@ extension String{
             } else {
                 return NSPredicate(format: "SELF MATCHES %@", AppRegex.urlFormat).evaluate(with: self)
             }
+        }else if self.contains(WEB_LOGIN_URL){
+            return true
         }
         return false
     }
