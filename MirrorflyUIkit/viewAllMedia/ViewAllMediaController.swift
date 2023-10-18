@@ -437,7 +437,9 @@ extension ViewAllMediaController : UITableViewDelegate, UITableViewDataSource {
             cell.urlLabel.text = linkModel.linkMessage.link
             
             cell.linkImage.sd_setImage(with: URL(string: linkModel.image))
-            
+            cell.meetLinkImageView.isHidden = linkModel.linkMessage.chatMessage.messageType != .meet
+            cell.meetLinkImageView.image = UIImage(named: "meet")?.withRenderingMode(.alwaysTemplate)
+
             cell.linkIcon.isHidden = !linkModel.image.isEmpty
             let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapUrl(sender:)))
             tapGestureRecognizer.accessibilityHint = linkModel.linkMessage.link

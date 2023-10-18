@@ -35,7 +35,7 @@ class ChatSettingsViewController: UIViewController {
     var availableFeatures = ChatManager.getAvailableFeatures()
 
     //Need to make false for releases
-    var showExportCallLog = true
+    var showExportCallLog = false
 
     override func viewDidLoad() {
         super.viewDidLoad()

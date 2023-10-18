@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="a6v-qf-Ud1">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="a6v-qf-Ud1">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21679"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -40,7 +40,7 @@
                                 <rect key="frame" x="0.0" y="15" width="393" height="44"/>
                                 <color key="backgroundColor" name="NavigationColor"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="44" id="lWZ-Ed-nFD"/>
+                                    <constraint firstAttribute="height" constant="30" id="lWZ-Ed-nFD"/>
                                 </constraints>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tYR-ZY-lng">
@@ -438,16 +438,16 @@
                                 </constraints>
                             </view>
                             <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BX6-b4-TQW">
-                                <rect key="frame" x="0.0" y="618" width="393" height="200"/>
+                                <rect key="frame" x="0.0" y="818" width="393" height="0.0"/>
                                 <subviews>
                                     <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="c5o-qz-r0o">
-                                        <rect key="frame" x="0.0" y="0.0" width="393" height="200"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="393" height="0.0"/>
                                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                     </tableView>
                                 </subviews>
                                 <color key="backgroundColor" name="progress_green"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="200" id="2gV-y7-A28"/>
+                                    <constraint firstAttribute="height" id="2gV-y7-A28"/>
                                     <constraint firstAttribute="bottom" secondItem="c5o-qz-r0o" secondAttribute="bottom" id="7KV-5b-tg6"/>
                                     <constraint firstAttribute="trailing" secondItem="c5o-qz-r0o" secondAttribute="trailing" id="YiY-5h-eiP"/>
                                     <constraint firstItem="c5o-qz-r0o" firstAttribute="leading" secondItem="BX6-b4-TQW" secondAttribute="leading" id="dvZ-65-l46"/>
@@ -484,7 +484,7 @@
                             <constraint firstItem="o1q-Mw-BVQ" firstAttribute="leading" secondItem="tYR-ZY-lng" secondAttribute="leading" id="bk2-rY-pwb"/>
                             <constraint firstItem="t8I-hg-Oof" firstAttribute="bottom" secondItem="1Rn-uK-goY" secondAttribute="bottom" id="bkQ-1w-zEO"/>
                             <constraint firstItem="sAz-2n-OhK" firstAttribute="trailing" secondItem="t8I-hg-Oof" secondAttribute="trailing" id="bkr-9H-XDP"/>
-                            <constraint firstItem="t8I-hg-Oof" firstAttribute="top" secondItem="GL1-9R-WMd" secondAttribute="top" constant="44" id="f8h-dk-8p0"/>
+                            <constraint firstItem="t8I-hg-Oof" firstAttribute="top" secondItem="GL1-9R-WMd" secondAttribute="top" constant="30" id="f8h-dk-8p0"/>
                             <constraint firstItem="GL1-9R-WMd" firstAttribute="leading" secondItem="t8I-hg-Oof" secondAttribute="leading" id="fae-RU-jhM"/>
                             <constraint firstItem="HdH-nz-NUv" firstAttribute="bottom" secondItem="tYR-ZY-lng" secondAttribute="bottom" id="keG-j0-AtU"/>
                             <constraint firstItem="RJu-Nd-zCH" firstAttribute="leading" secondItem="t8I-hg-Oof" secondAttribute="leading" id="lWi-gx-moh"/>
@@ -1065,11 +1065,11 @@
             <objects>
                 <viewController id="Pto-9t-rvq" customClass="ChatContactViewController" customModule="Mirrorfly" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="cU1-ry-Y4x">
-                        <rect key="frame" x="0.0" y="0.0" width="393" height="783"/>
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="842"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="pXI-Lh-PO1">
-                                <rect key="frame" x="0.0" y="59" width="393" height="724"/>
+                                <rect key="frame" x="0.0" y="0.0" width="393" height="842"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" distribution="fillProportionally" translatesAutoresizingMaskIntoConstraints="NO" id="Okn-2y-Fhl">
                                         <rect key="frame" x="0.0" y="0.0" width="393" height="50"/>
@@ -1150,7 +1150,7 @@
                                         </constraints>
                                     </stackView>
                                     <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" indicatorStyle="white" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="40" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="Ry3-Py-Z1i">
-                                        <rect key="frame" x="0.0" y="130" width="393" height="594"/>
+                                        <rect key="frame" x="0.0" y="130" width="393" height="712"/>
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <color key="sectionIndexBackgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <color key="sectionIndexTrackingBackgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

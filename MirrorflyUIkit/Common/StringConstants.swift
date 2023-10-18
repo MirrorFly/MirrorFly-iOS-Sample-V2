@@ -264,6 +264,12 @@ let thereIsNoConversation = "There is no conversation"
 let setBusyStatusDescription = "Set busy status as the Auto response to the message recieved from the individuals"
 let editBusyStatus = "Edit Busy Status Message"
 
+let generateMeetLink = "Generate Meeting Link"
+let generateMeetLinkDesc = "Anyone with Mirror Fly can use this link to join this call.Only share it with people you trust"
+
+let scheduledGenerateMeetLink = "Instant Meet"
+let scheduledGenerateMeetLinkDesc = "Copy the link or click to join the meeting"
+
 //MARK: Group
 let groupNameRequired = "Please provide group name"
 let groupNameCharLimit = 25

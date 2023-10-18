@@ -341,6 +341,16 @@ class ReceiverDocumentsTableViewCell: BaseTableViewCell {
                 mapView?.isHidden = true
                 replyTypeImageView?.isHidden = true
                 replyImageWidthCons?.isActive = false
+            } else if replyMessage?.meetChatMessage != nil {
+                replyTypeIconWidthCons?.constant = 12
+                replyTypeIconImageView?.image = UIImage(named: (message?.isMessageSentByMe ?? false) ? "video_link" : "video_link")
+                replyTypeLabel?.text = DateFormatterUtility.shared.getSchduleMeetingDate(date: replyMessage?.meetChatMessage?.scheduledDateTime ?? 0)
+                replyTypeIconImageView?.isHidden = false
+                replyStackViewTrailingCons?.constant = 50
+                mapView?.isHidden = true
+                replyTypeImageView?.image = UIImage(named: "app_icon")
+                replyTypeImageView?.contentMode = .center
+                replyTypeImageView?.isHidden = false
             }
         } else {
             replyView?.isHidden = true

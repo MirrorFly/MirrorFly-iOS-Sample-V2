@@ -65,6 +65,7 @@ enum ImageConstant{
     static let ic_rccontact = "contact"
     static let ic_rcimage = "imageGallery"
     static let ic_rcdocument = "document"
+    static let ic_rcmeet = "meet"
     
     // group
     static let ic_group_placeholder = "ic_groupPlaceHolder"

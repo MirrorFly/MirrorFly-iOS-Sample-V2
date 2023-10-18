@@ -181,6 +181,10 @@ class ChatTextView: UIView, UITextViewDelegate {
                 messageTypeLabel?.text = !(replyMessage?.isEmpty ?? false) ? message.mediaChatMessage?.mediaCaptionText : message.messageType.rawValue.capitalized
                 messageTypeWidthCons?.constant = 12
                 spacierView?.isHidden = false
+            case .meet:
+                messageTypeLabel?.text = DateFormatterUtility.shared.getSchduleMeetingDate(date: message.meetChatMessage?.scheduledDateTime ?? 0)
+                messageTypeWidthCons?.constant = 0
+                spacierView?.isHidden = true
             default:
                 messageTypeLabel?.text = message.messageType.rawValue.capitalized
                 messageTypeWidthCons?.constant = 12
@@ -203,6 +207,8 @@ class ChatTextView: UIView, UITextViewDelegate {
                 messageTypeImage?.image = UIImage(named: "senderContact")
             case .location:
                 messageTypeImage?.image = UIImage(named: "map")
+            case .meet:
+                messageTypeImage?.image = UIImage(named: "meet")
             case .document:
                 checkFileType(url: message.mediaChatMessage?.mediaLocalStoragePath ?? "", typeImageView: messageTypeImage)
             default:

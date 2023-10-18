@@ -29,7 +29,8 @@ class ShareCallLinkViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        meetLink.text = link ?? emptyString()
+        loadLink()
+        //meetLink.text = link ?? emptyString()
         copyImage.isUserInteractionEnabled = true
         let tap = UITapGestureRecognizer(target: self, action: #selector(copyToClipBoard))
         copyImage.addGestureRecognizer(tap)
@@ -38,7 +39,48 @@ class ShareCallLinkViewController: UIViewController {
         shareStack.isHidden = true
         preferredContentSize =  CGSize(width: UIScreen.main.bounds.width, height: 260)
     }
-    
+
+    override func viewWillAppear(_ animated: Bool) {
+        NotificationCenter.default.addObserver(self, selector: #selector(networkChange(_:)),name:Notification.Name(NetStatus.networkNotificationObserver),object: nil)
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        NotificationCenter.default.removeObserver(self, name: Notification.Name(NetStatus.networkNotificationObserver), object: nil)
+    }
+
+    @objc func networkChange(_ notification: NSNotification) {
+        if link == nil {
+            loadLink()
+        }
+    }
+
+    func loadLink() {
+        joinBtn.backgroundColor = UIColor.init(hex: "A8A8A8")
+        joinBtn.isUserInteractionEnabled = false
+        copyImage.isHidden = true
+        if NetStatus.shared.isConnected{
+            CallManager.createMeetLink { isSuccess, error, result in
+                var data = result
+                if isSuccess {
+                    executeOnMainThread { [self] in
+                        link = "\(WEB_LOGIN_URL)\(data.getData() as? String ?? emptyString())"
+                        meetLink.text = link ?? emptyString()
+                        copyImage.isHidden = false
+                        joinBtn.backgroundColor = Color.color_3276E2
+                        joinBtn.isUserInteractionEnabled = true
+                    }
+                }else{
+                    executeOnMainThread {[self] in
+                        AppAlert.shared.showToast(message: data.getMessage() as? String ?? emptyString())
+                    }
+                }
+            }
+        }else{
+            executeOnMainThread {
+                AppAlert.shared.showToast(message: ErrorMessage.noInternet)
+            }
+        }
+    }
 
     
     @IBAction func joinMeeting(_ sender: Any) {

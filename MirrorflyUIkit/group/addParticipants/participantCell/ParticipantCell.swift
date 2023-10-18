@@ -167,6 +167,8 @@ class ParticipantCell: UITableViewCell {
                 receiverMessageTypeImageView?.image = UIImage(named: ImageConstant.ic_rcvideo)
             case .document:
                 receiverMessageTypeImageView?.image = UIImage(named: ImageConstant.ic_rcdocument)
+            case .meet:
+                receiverMessageTypeImageView?.image = UIImage(named: ImageConstant.ic_rcmeet)
             default:
                 receiverMessageTypeView?.isHidden = true
             }

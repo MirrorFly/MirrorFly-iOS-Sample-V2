@@ -98,7 +98,10 @@ class ChatViewParentMessageCell: BaseTableViewCell {
     
     @IBOutlet weak var linkView: UIView?
     @IBOutlet weak var receiverLinkView: UIView?
-    
+
+    //Scheduled meeting
+    @IBOutlet weak var scheduledMeetingTimeLabel: UILabel?
+
     var refreshDelegate: RefreshBubbleImageViewDelegate? = nil
     var selectedForwardMessage: [SelectedMessages]? = []
     var isDeleteSelected: Bool = false
@@ -232,6 +235,7 @@ class ChatViewParentMessageCell: BaseTableViewCell {
         // Reply view elements and its data
        let isReplyMessage = message?.isReplyMessage ?? false
        if isReplyMessage {
+           replyTextLabelTrailingCons?.constant = 10
            let replyMessage = FlyMessenger.getMessageOfId(messageId: message?.replyParentChatMessage?.messageId ?? "")
            if message?.replyParentChatMessage?.isMessageRecalled == true || message?.replyParentChatMessage?.isMessageDeleted == true || replyMessage == nil {
                replyTextLabel?.text = "Original message not available"
@@ -422,6 +426,21 @@ class ChatViewParentMessageCell: BaseTableViewCell {
                replyTextLabelTrailingCons?.isActive = true
                replyVIewWithMediaCons?.isActive = false
                replyViewWithoutMediaCons?.isActive = true
+           }else if replyMessage?.meetChatMessage != nil {
+               replyTextLabel?.text = DateFormatterUtility.shared.getSchduleMeetingDate(date: replyMessage?.meetChatMessage?.scheduledDateTime ?? 0)
+               messageTypeIcon?.image = UIImage(named: (message?.isMessageSentByMe ?? false) ? "video_link" : "video_link")
+               mediaImageView?.contentMode = .center
+               mediaImageView?.isHidden = false
+               mediaImageView?.image = UIImage(named: "app_icon")
+               mediaImageViewWidthCons?.constant = 50
+               messageIconView?.isHidden = false
+               replyMessageIconWidthCons?.constant = 12
+               replyMessageIconHeightCons?.isActive = true
+               replyTextWithImageTrailingCons?.isActive = false
+               replyTextLabelTrailingCons?.isActive = true
+               replyTextLabelTrailingCons?.constant = 50
+               replyVIewWithMediaCons?.isActive = false
+               replyViewWithoutMediaCons?.isActive = true
            } else {
                mediaImageView?.isHidden = true
                messageIconView?.isHidden = true
@@ -438,7 +457,7 @@ class ChatViewParentMessageCell: BaseTableViewCell {
             replyUserLabel?.text = you.localized
         }
         else {
-            let name =   getUserName(jid: replyMessage?.senderUserJid ?? "", name: replyMessage?.senderUserName ?? "", nickName: replyMessage?.senderNickName ?? "", contactType: (replyMessage?.isDeletedUser ?? false) ? .deleted : (replyMessage?.isSavedContact ?? false) ? .live : .unknown)
+            let name =   getUserName(jid: replyMessage?.chatUserJid ?? "", name: replyMessage?.senderUserName ?? "", nickName: replyMessage?.senderNickName ?? "", contactType: (replyMessage?.isDeletedUser ?? false) ? .deleted : (replyMessage?.isSavedContact ?? false) ? .live : .unknown)
             replyUserLabel?.text = name
         }
            
@@ -519,11 +538,14 @@ class ChatViewParentMessageCell: BaseTableViewCell {
         bubbleBGView?.isAccessibilityElement =  true
         
         switch  message?.messageType {
-        case .text:
+        case .text, .meet:
             if let label = messageLabel {
-                messageLabel?.attributedText = processTextMessage(message: message?.messageTextContent ?? "", uiLabel: label, fromChat: fromChat, isMessageSearch: isMessageSearch, searchText: searchText, isMessageSentByMe: message?.isMessageSentByMe ?? false, mentionedUsers: message?.mentionedUsersIds ?? [], profileDetails: profileDetails)
+                messageLabel?.attributedText = processTextMessage(message: message?.messageType == .text ? message?.messageTextContent ?? "" : message?.meetChatMessage?.link ?? "", uiLabel: label, fromChat: fromChat, isMessageSearch: isMessageSearch, searchText: searchText, isMessageSentByMe: message?.isMessageSentByMe ?? false, mentionedUsers: message?.mentionedUsersIds ?? [], profileDetails: profileDetails)
                 print("message label width = \(messageLabel?.frame.size.width)")
 
+            }
+            if let meetTimeLabel = scheduledMeetingTimeLabel {
+                scheduledMeetingTimeLabel?.text = DateFormatterUtility.shared.getSchduleMeetingDate(date: message?.meetChatMessage?.scheduledDateTime ?? 0)
             }
         case .location:
             
@@ -611,7 +633,6 @@ class ChatViewParentMessageCell: BaseTableViewCell {
         }
         
     }
-    
 
     func processTextMessage(message : String, uiLabel : UILabel, fromChat: Bool = false, isMessageSearch: Bool = false, searchText: String = "", isMessageSentByMe: Bool, mentionedUsers: [String], profileDetails: ProfileDetails) -> NSMutableAttributedString? {
         
@@ -665,6 +686,11 @@ class ChatViewParentMessageCell: BaseTableViewCell {
                     attributedString = ChatUtils.getMentionTextContent(message: message, uiLabel: uiLabel, isMessageSentByMe: isMessageSentByMe, mentionedUsers: mentionedUsers, searchedText: searchText)
                 } else {
                     attributedString = NSMutableAttributedString(string: ChatUtils.convertMentionUser(message: message, mentionedUsersIds: mentionedUsers).replacingOccurrences(of: "`", with: ""))
+                }
+            } else {
+                if fromChat && isMessageSearch {
+                    let range = (message.lowercased() as NSString).range(of: searchText.lowercased())
+                    attributedString?.addAttribute(NSAttributedString.Key.backgroundColor, value: Color.highlightColor, range: range)
                 }
             }
         } else {

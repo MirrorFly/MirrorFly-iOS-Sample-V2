@@ -19,7 +19,7 @@
 	</array>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string></string>
+		<string>group.com.mirrorfly.qa</string>
 	</array>
 </dict>
 </plist>

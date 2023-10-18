@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21679"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -113,6 +113,13 @@
                                             <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="2cj-os-qWP">
                                                 <rect key="frame" x="8" y="5" width="272" height="15"/>
                                                 <subviews>
+                                                    <imageView hidden="YES" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="meet" translatesAutoresizingMaskIntoConstraints="NO" id="qnc-fp-Rla">
+                                                        <rect key="frame" x="-25" y="0.0" width="25" height="15"/>
+                                                        <color key="tintColor" name="color_7889B3"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="width" constant="25" id="hzC-dd-FlC"/>
+                                                        </constraints>
+                                                    </imageView>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1Mv-YS-LLa">
                                                         <rect key="frame" x="0.0" y="0.0" width="247" height="15"/>
                                                         <fontDescription key="fontDescription" name="SFUIDisplay-Regular" family="SF UI Display" pointSize="12"/>
@@ -183,6 +190,7 @@
                 <outlet property="domainLabel" destination="Crh-ns-EAt" id="b9d-hr-PRz"/>
                 <outlet property="linkIcon" destination="5dh-no-Ivx" id="BZB-4O-Xak"/>
                 <outlet property="linkImage" destination="FeX-Y6-5EF" id="cSF-7f-wS2"/>
+                <outlet property="meetLinkImageView" destination="qnc-fp-Rla" id="24G-VT-Pmo"/>
                 <outlet property="nextIcon" destination="o2C-7o-uCm" id="O65-aG-9a0"/>
                 <outlet property="outerView" destination="Qam-DU-pjM" id="5kJ-89-r8d"/>
                 <outlet property="titleLabel" destination="769-Vd-Bme" id="sZY-PC-WL0"/>
@@ -196,6 +204,7 @@
     <resources>
         <image name="link" width="26.333333969116211" height="11.333333015441895"/>
         <image name="link_next_arrow" width="6" height="10"/>
+        <image name="meet" width="12.5" height="13.5"/>
         <image name="webLoginFireFox" width="50.333332061767578" height="52"/>
         <namedColor name="color_111111">
             <color red="0.066666666666666666" green="0.066666666666666666" blue="0.066666666666666666" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

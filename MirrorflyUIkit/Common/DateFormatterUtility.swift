@@ -323,6 +323,18 @@ class DateFormatterUtility: NSObject {
         dateFormatter.dateFormat = "dd/MM/yy"
         return  dateFormatter.string(from: dateVar)
     }
+
+    func getSchduleMeetingDate(date: Int) -> String {
+        let date = NSDate(timeIntervalSince1970: TimeInterval(date/1000))
+        let formatter = DateFormatter()
+        formatter.dateFormat = "h:mm a"
+        formatter.amSymbol = "am"
+        formatter.pmSymbol = "pm"
+        let hour = formatter.string(from: date as Date)
+        formatter.dateFormat = "MMM dd, yyyy"
+        let day = formatter.string(from: date as Date)
+        return "\(day) \(hour)"
+    }
     
 }
 
@@ -335,6 +347,12 @@ extension Double {
 extension Date {
     func isTodayDate() -> Bool {
         return NSCalendar.current.isDateInToday(self)
+    }
+
+    func getDateString(format: String) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = format
+        return formatter.string(from: self)
     }
 }
 

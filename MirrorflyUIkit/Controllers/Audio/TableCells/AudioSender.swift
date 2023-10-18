@@ -291,6 +291,16 @@ class AudioSender: BaseTableViewCell, AVAudioPlayerDelegate {
                    messageTypeIconView?.isHidden = false
                    replyWithMediaCons?.isActive = false
                    replyWithoutMediaCons?.isActive = true
+               } else if replyMessage?.meetChatMessage != nil {
+                   messageTypeIcon?.image = UIImage(named: (message?.isMessageSentByMe ?? false) ? "video_link" : "video_link")
+                   userTextLabel?.text = DateFormatterUtility.shared.getSchduleMeetingDate(date: replyMessage?.meetChatMessage?.scheduledDateTime ?? 0)
+                   replyWithMediaCons?.isActive = true
+                   replyWithoutMediaCons?.isActive = false
+                   mediaImageView?.isHidden = false
+                   mediaImageView?.image = UIImage(named: "app_icon")
+                   mediaImageView?.contentMode = .center
+                   replyWithMediaCons?.isActive = true
+                   replyWithoutMediaCons?.isActive = false
                } else {
                    replyWithMediaCons?.isActive = false
                    replyWithoutMediaCons?.isActive = true

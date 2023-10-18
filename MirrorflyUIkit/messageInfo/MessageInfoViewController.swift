@@ -94,6 +94,8 @@ class MessageInfoViewController: BaseViewController {
         messageInfoTableView.register(UINib(nibName: Identifiers.chatViewTextOutgoingCell , bundle: .main), forCellReuseIdentifier: Identifiers.chatViewTextOutgoingCell)
         messageInfoTableView.register(UINib(nibName: Identifiers.chatViewLocationOutgoingCell , bundle: .main), forCellReuseIdentifier: Identifiers.chatViewLocationOutgoingCell)
         messageInfoTableView.register(UINib(nibName: Identifiers.chatViewContactOutgoingCell , bundle: .main), forCellReuseIdentifier: Identifiers.chatViewContactOutgoingCell)
+        messageInfoTableView.register(UINib(nibName: Identifiers.scheduledMeetingSenderCell,
+                                                 bundle: .main), forCellReuseIdentifier: Identifiers.scheduledMeetingSenderCell)
         messageInfoTableView.register(UINib(nibName: Identifiers.audioSender , bundle: .main), forCellReuseIdentifier: Identifiers.audioSender)
         messageInfoTableView.register(UINib(nibName: Identifiers.imageSender , bundle: .main), forCellReuseIdentifier: Identifiers.imageSender)
         messageInfoTableView.register(UINib(nibName: Identifiers.videoOutgoingCell , bundle: .main), forCellReuseIdentifier: Identifiers.videoOutgoingCell)
@@ -156,8 +158,10 @@ extension MessageInfoViewController : UITableViewDelegate, UITableViewDataSource
         if section == 0 {
             if let message = chatMessage {
                 switch(message.messageType) {
-                case .text:
-                    cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.chatViewTextOutgoingCell, for: indexPath) as? ChatViewParentMessageCell
+                case .text, .meet:
+
+                    cell = tableView.dequeueReusableCell(withIdentifier: message.messageType == .text ? Identifiers.chatViewTextOutgoingCell : Identifiers.scheduledMeetingSenderCell, for: indexPath) as? ChatViewParentMessageCell
+                    //cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.chatViewTextOutgoingCell, for: indexPath) as? ChatViewParentMessageCell
                     cell.starredMessageView?.isHidden = true
                     cell = cell?.getCellFor(message, at: indexPath, isShowForwardView: false, profileDetails: profileDetails)
                     cell.selectionStyle = .none

@@ -31,13 +31,13 @@ def uikit_pods
   pod 'lottie-ios'
   pod 'BottomSheet', :git => 'https://github.com/joomcode/BottomSheet'
   
-  pod 'MirrorFlySDK', '5.12.0'
+  pod 'MirrorFlySDK', '5.13.0'
 
 end
 
 def notification_pods
 
-  pod 'MirrorFlySDK', '5.12.0'
+  pod 'MirrorFlySDK', '5.13.0'
 
 end
 
@@ -53,6 +53,7 @@ target 'UikitQaShareKit' do
   uikit_pods
 end
 
+
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     target.build_configurations.each do |config|
@@ -62,15 +63,19 @@ post_install do |installer|
       config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
       config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'YES'
       shell_script_path = "Pods/Target Support Files/#{target.name}/#{target.name}-frameworks.sh"
-          if File::exist?(shell_script_path)
-            shell_script_input_lines = File.readlines(shell_script_path)
-            shell_script_output_lines = shell_script_input_lines.map { |line| line.sub("source=\"$(readlink \"${source}\")\"", "source=\"$(readlink -f \"${source}\")\"") }
-            File.open(shell_script_path, 'w') do |f|
-              shell_script_output_lines.each do |line|
-                f.write line
-              end
-            end
+      xcconfig_path = config.base_configuration_reference.real_path
+      xcconfig = File.read(xcconfig_path)
+      xcconfig_mod = xcconfig.gsub(/DT_TOOLCHAIN_DIR/, "TOOLCHAIN_DIR")
+      File.open(xcconfig_path, "w") { |file| file << xcconfig_mod }
+      if File::exist?(shell_script_path)
+        shell_script_input_lines = File.readlines(shell_script_path)
+        shell_script_output_lines = shell_script_input_lines.map { |line| line.sub("source=\"$(readlink \"${source}\")\"", "source=\"$(readlink -f \"${source}\")\"") }
+        File.open(shell_script_path, 'w') do |f|
+          shell_script_output_lines.each do |line|
+            f.write line
           end
+        end
+      end
     end
   end
 end

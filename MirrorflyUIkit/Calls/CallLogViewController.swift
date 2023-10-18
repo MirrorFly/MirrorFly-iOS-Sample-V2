@@ -307,9 +307,10 @@ class CallLogViewController: UIViewController {
     
     
     func showShareLinkSheet(link : String){
+        self.view.endEditing(true)
         let storyboard = UIStoryboard.init(name: Storyboards.call, bundle: nil)
         if let bottomSheet = storyboard.instantiateViewController(withIdentifier: Identifiers.shareCallLinkViewController) as? ShareCallLinkViewController{
-            bottomSheet.link = "\(WEB_LOGIN_URL)\(link)"
+            //bottomSheet.link = "\(WEB_LOGIN_URL)\(link)"
             bottomSheet.callLinkDelegate = self
             presentBottomSheetInsideNavigationController(viewController: bottomSheet,configuration: BottomSheetConfiguration(
                 cornerRadius: 16,
@@ -1290,18 +1291,7 @@ extension CallLogViewController: refreshCallLogDelegate, CallLinkDelegate {
     @objc func callLinkViewTapped(sender: UIButton) {
         
         if NetStatus.shared.isConnected{
-            CallManager.createMeetLink { isSuccess, error, result in
-                var data = result
-                if isSuccess {
-                    executeOnMainThread { [self] in
-                        self.showShareLinkSheet(link: data.getData() as? String ?? emptyString())
-                    }
-                }else{
-                    executeOnMainThread {[self] in
-                        AppAlert.shared.showToast(message: data.getMessage() as? String ?? emptyString())
-                    }
-                }
-            }
+            self.showShareLinkSheet(link: emptyString())
         }else{
             executeOnMainThread {
                 AppAlert.shared.showToast(message: ErrorMessage.noInternet)

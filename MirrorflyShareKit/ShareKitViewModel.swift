@@ -13,8 +13,9 @@ import Social
 import CoreServices
 import Contacts
 
-let CONTAINER_ID = "xxxxxxxxx"
-let LICENSE_KEY = "xxxxxxxxx"
+let BASE_URL =  "https://api-preprod-sandbox.mirrorfly.com/api/v1/"
+let CONTAINER_ID = "group.com.mirrorfly.qa"
+let LICENSE_KEY = "xxxxxxxxxxxxxxxx"
 let IS_LIVE = false
 let APP_NAME = "UiKit"
 let ENABLE_CONTACT_SYNC = false

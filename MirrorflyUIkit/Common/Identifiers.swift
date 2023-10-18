@@ -158,6 +158,9 @@ enum Identifiers {
     /// MARK: DeleteMessage Cells
     static let deleteEveryOneCell = "DeleteForEveryOneViewCell"
     static let deleteEveryOneReceiverCell = "DeleteForEveryOneReceiverCell"
+
+    static let scheduledMeetingReceiverCell = "ScheduledMeetingReceiverCell"
+    static let scheduledMeetingSenderCell = "ScheduledMeetingSenderCell"
     
     // MARK: Message Info
     static let messageInfoDivider = "MessageInfoDivider"
