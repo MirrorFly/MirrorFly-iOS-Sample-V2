@@ -190,9 +190,11 @@ class MainTabBarController: UITabBarController{
     }
     
     @objc func updateMessageUnreadCount(notification: NSNotification) {
-        if let count = notification.object as? Int {
-            if let item : UITabBarItem = chatTabBars?.items?[0] {
-                item.badgeValue = (count == 0) ? nil : "\(count)"
+        executeOnMainThread {
+            if let count = notification.object as? Int {
+                if let item : UITabBarItem = self.chatTabBars?.items?[0] {
+                    item.badgeValue = (count == 0) ? nil : "\(count)"
+                }
             }
         }
     }

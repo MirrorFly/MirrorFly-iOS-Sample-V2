@@ -134,6 +134,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         if (CommonDefaults.appLockenable || CommonDefaults.appFingerprintenable) {
             let secondsDifference = Calendar.current.dateComponents([.minute, .second], from: CommonDefaults.appBackgroundTime, to: Date())
             if secondsDifference.second ?? 0 > 32 || secondsDifference.minute ?? 0 > 0 {
+                if let vc = UIApplication.shared.keyWindow?.getTopViewController() {
+                    if vc is InstantScheduledMeetingViewController {
+                        vc.dismiss(animated: false)
+                    }
+                }
                 CommonDefaults.showAppLock = true
                 CommonDefaults.appLockOnPrivateChat = false
                 CommonDefaults.privateChatOnChatScreen = false

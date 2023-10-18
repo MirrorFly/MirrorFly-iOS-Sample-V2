@@ -12,6 +12,7 @@ import PulsingHalo
 import AVKit
 import RxSwift
 import MirrorFlySDK
+import BottomSheet
 
 enum CallMode : String{
     case Incoming
@@ -381,6 +382,13 @@ class CallViewController: UIViewController ,AVPictureInPictureControllerDelegate
     
     @objc func callViewTapGestureAction(_ tapGesture: UITapGestureRecognizer?) {
 
+        if let topController = UIApplication.shared.keyWindow?.rootViewController {
+            if let presentedViewController = topController.presentedViewController {
+                if presentedViewController is BottomSheetNavigationController {
+                    presentedViewController.dismiss(animated: false)
+                }
+            }
+        }
         overlayShown = false
         ContactManager.shared.profileDelegate = self
         callViewOverlay.removeFromSuperview()
@@ -563,6 +571,7 @@ class CallViewController: UIViewController ,AVPictureInPictureControllerDelegate
         if CallManager.getCallType() == .Video{
             outgoingCallView?.imageHeight.constant = 0
         }
+        validateAndUpdateRoutingIcon()
         checkCameraPermission(sourceType: .camera)
     }
     
@@ -1403,7 +1412,7 @@ extension CallViewController : CallViewControllerDelegate {
         isAudioMuted = CallManager.isAudioMuted()
         isBackCamera = members.last?.isOnBackCamera ?? false
         isVideoMuted = CallManager.isVideoMuted()
-        AudioManager.shared().getCurrentAudioInput()
+       // AudioManager.shared().getCurrentAudioInput()
     }
     
     func onSwitchCamera() {
@@ -1850,6 +1859,8 @@ extension CallViewController : CallManagerDelegate {
                 FlyLogWriter.sharedInstance.writeText("#call UI .CONNECTED => \(userId) \(self?.members.count)")
 
             case .DISCONNECTED:
+                self?.outgoingCallView?.speakerButton.setImage(UIImage(named: "IconSpeakerOff" ), for: .normal)
+                self?.validateAndUpdateRoutingIcon()
                 if userId.isEmpty {
                     self?.dismissWithDelay()
                 }else {

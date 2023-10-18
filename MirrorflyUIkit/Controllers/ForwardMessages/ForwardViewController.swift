@@ -486,6 +486,10 @@ extension ForwardViewController : UITableViewDelegate, UITableViewDataSource {
                 } else {
                     if recentChatDetails.lastMessageType == .text || recentChatDetails.lastMessageType == .notification {
                         cell.statusUILabel?.text = recentChatDetails.lastMessageContent
+                    } else if recentChatDetails.lastMessageType == .meet {
+                        cell.receiverMessageTypeView?.isHidden = false
+                        let message = getMessages(messageId: recentChatDetails.lastMessageId)
+                        cell.statusUILabel?.text = "Scheduled on " + (((message.meetChatMessage?.scheduledDateTime != 0) ? DateFormatterUtility.shared.getSchduleMeetingDate(date: message.meetChatMessage?.scheduledDateTime ?? 0) : recentChatDetails.lastMessageType?.rawValue.capitalized) ?? "")
                     } else  {
                         cell.receiverMessageTypeView?.isHidden = false
                         cell.statusUILabel?.text = recentChatDetails.lastMessageContent + (recentChatDetails.lastMessageType?.rawValue ?? "")
@@ -522,6 +526,10 @@ extension ForwardViewController : UITableViewDelegate, UITableViewDataSource {
                 } else {
                     if recentChatDetails.lastMessageType == .text || recentChatDetails.lastMessageType == .notification {
                         cell.statusUILabel?.text = recentChatDetails.lastMessageContent
+                    } else if recentChatDetails.lastMessageType == .meet {
+                        cell.receiverMessageTypeView?.isHidden = false
+                        let message = getMessages(messageId: recentChatDetails.lastMessageId)
+                        cell.statusUILabel?.text = "Scheduled on " + (((message.meetChatMessage?.scheduledDateTime != 0) ? DateFormatterUtility.shared.getSchduleMeetingDate(date: message.meetChatMessage?.scheduledDateTime ?? 0) : recentChatDetails.lastMessageType?.rawValue.capitalized) ?? "")
                     } else  {
                         cell.receiverMessageTypeView?.isHidden = false
                         cell.statusUILabel?.text = recentChatDetails.lastMessageContent + (recentChatDetails.lastMessageType?.rawValue ?? "")

@@ -23,7 +23,8 @@ class LinkCell: UITableViewCell {
     @IBOutlet weak var urlStackView: UIStackView!
     @IBOutlet weak var bottomView: UIView!
     
-    
+    @IBOutlet weak var meetLinkImageView: UIImageView!
+
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code

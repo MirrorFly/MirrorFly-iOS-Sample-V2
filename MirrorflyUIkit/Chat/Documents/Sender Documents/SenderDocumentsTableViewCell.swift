@@ -286,6 +286,16 @@ class SenderDocumentsTableViewCell: BaseTableViewCell {
                 replyTypeIconImageView?.isHidden = false
                 replyTypeImageView?.isHidden = true
                 mediaMapView?.isHidden = true
+            } else if replyMessage?.meetChatMessage != nil {
+                replyMessageIconWidth?.constant = 12
+                replyTypeIconImageView?.image = UIImage(named: (message?.isMessageSentByMe ?? false) ? "video_link" : "video_link")
+                replyTypeLabel?.text = DateFormatterUtility.shared.getSchduleMeetingDate(date: replyMessage?.meetChatMessage?.scheduledDateTime ?? 0)
+                replyTypeImageView?.isHidden = false
+                replyMediaImageWidthCons?.constant = 50
+                mediaMapView?.isHidden = true
+                replyTypeImageView?.image = UIImage(named: "app_icon")
+                replyTypeImageView?.contentMode = .center
+                replyTypeImageView?.isHidden = false
             }
             }
         } else {

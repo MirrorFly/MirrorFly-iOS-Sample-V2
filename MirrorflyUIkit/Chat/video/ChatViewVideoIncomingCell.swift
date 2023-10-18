@@ -316,6 +316,15 @@ class ChatViewVideoIncomingCell: BaseTableViewCell {
                    mediaImageView?.isHidden = true
                    replyWithoutMediaCOns?.isActive = true
                    replyWithMediaCons?.isActive = false
+               } else if replyMessage?.meetChatMessage != nil {
+                   replyTextLabel?.text = DateFormatterUtility.shared.getSchduleMeetingDate(date: replyMessage?.meetChatMessage?.scheduledDateTime ?? 0)
+                   messageTypeIcon?.image = UIImage(named: (message?.isMessageSentByMe ?? false) ? "video_link" : "video_link")
+                   messageIconView?.isHidden = false
+                   replyWithoutMediaCOns?.isActive = false
+                   replyWithMediaCons?.isActive = true
+                   mediaImageView?.image = UIImage(named: "app_icon")
+                   mediaImageView?.isHidden = false
+                   mediaImageView?.contentMode = .center
                } else {
                    mediaImageView?.isHidden = true
                    replyWithoutMediaCOns?.isActive = true
@@ -327,7 +336,7 @@ class ChatViewVideoIncomingCell: BaseTableViewCell {
             replyUserLabel?.text = you.localized
         }
         else {
-            replyUserLabel?.text = getUserName(jid: replyMessage?.senderUserJid ?? "" ,name: replyMessage?.senderUserName ?? "",
+            replyUserLabel?.text = getUserName(jid: replyMessage?.chatUserJid ?? "" ,name: replyMessage?.senderUserName ?? "",
                                                nickName: replyMessage?.senderNickName ?? "", contactType: (replyMessage?.isDeletedUser ?? false) ? .deleted : (replyMessage?.isSavedContact ?? false) ? .live : .unknown)
         }
            ChatUtils.setDeletedReplyMessage(chatMessage: replyMessage, messageIconView: messageIconView, messageTypeIcon: messageTypeIcon, replyTextLabel: replyTextLabel, mediaImageView: mediaImageView, mediaImageViewWidthCons: nil, replyMessageIconWidthCons: nil, replyMessageIconHeightCons: nil)
@@ -357,7 +366,15 @@ class ChatViewVideoIncomingCell: BaseTableViewCell {
                     caption.text = ChatUtils.convertMentionUser(message: captionTxt, mentionedUsersIds: mentionedUsersIds).replacingOccurrences(of: "`", with: "")
                 }
             } else {
-                caption.text = captionTxt
+                var attributedString : NSMutableAttributedString?
+                if fromChat && isMessageSearch {
+                    attributedString = NSMutableAttributedString(string: captionTxt)
+                    let range = (captionTxt.lowercased() as NSString).range(of: searchText.lowercased())
+                    attributedString?.addAttribute(NSAttributedString.Key.backgroundColor, value: Color.highlightColor, range: range)
+                    caption.attributedText = attributedString
+                } else {
+                    caption.text = captionTxt
+                }
             }
             timeOverlay.isHidden = true
             reecivedTime.isHidden = true

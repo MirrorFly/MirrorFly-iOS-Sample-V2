@@ -32,6 +32,7 @@ import QuickLook
 import RxSwift
 import UniformTypeIdentifiers
 import KMPlaceholderTextView
+import BottomSheet
 
 
 public protocol ShareReloadDelegate {
@@ -133,6 +134,16 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
         }
     }
     @IBOutlet weak var messageSearchViewBottomConstraint: NSLayoutConstraint!
+
+    var scheduleMeetBtn : UIView = {
+        let view = UIView()
+        view.isUserInteractionEnabled = true
+        view.backgroundColor = Color.color_3276E2 ?? .blue
+        return view
+    }()
+    let scheduleMeetButtonCons = 56
+    var scheduleMeetBtnYPosition = CGFloat()
+    var keyboardShown = false
 
     // Forward Local Variable
     var isShowForwardView: Bool = false
@@ -307,7 +318,10 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
     var isFromContactScreen = false
     var isFromForward = false
     var isFromPrivateChat = false
-        
+
+    var bottomSheet: InstantScheduledMeetingViewController? = InstantScheduledMeetingViewController()
+    var bottomSheetOpened = false
+
     @IBOutlet weak var mentionBaseView: UIView!
     @IBOutlet weak var mentionBottom: NSLayoutConstraint!
     @IBOutlet weak var mentionTableView: UITableView!
@@ -348,16 +362,25 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
             }
             self.containerBottomConstraint.constant = newHeight//
             self.messageSearchViewBottomConstraint.constant = newHeight
+            let bottomPadding = (UIApplication.shared.windows.first?.safeAreaInsets.bottom ?? 0) + 40
+            if self.scheduleMeetBtn.center.y > self.view.frame.height - newHeight - (chatTextView?.frame.height ?? 0) - bottomPadding {
+                self.scheduleMeetBtn.center.y = self.view.frame.height - newHeight - (chatTextView?.frame.height ?? 0) - bottomPadding
+            }
         }
+        keyboardShown = true
         unreadMessageViewBottomConstraint.constant = 400
     }
     
     @objc internal override func keyboardWillHide(notification: NSNotification) {
         //chatTableView.contentInset = .zero
         //self.tableViewBottomConstraint.constant = CGFloat(chatBottomConstant)
+        keyboardShown = false
         self.containerBottomConstraint.constant = 0.0
         self.unreadMessageViewBottomConstraint.constant = 100
         self.messageSearchViewBottomConstraint.constant = 0
+        if self.scheduleMeetBtn.center.y < self.view.frame.height - self.containerBottomConstraint.constant - 30 {
+            self.scheduleMeetBtn.center.y = scheduleMeetBtnYPosition
+        }
     }
     
     func checkGalleryPermission() {
@@ -568,7 +591,9 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
             values = values?.reversed()
             chatMessages.insert(values ?? [], at: 0)
             DispatchQueue.main.async { [weak self] in
-                self?.chatTableView?.reloadData()
+                UIView.performWithoutAnimation {
+                    self?.chatTableView?.reloadData()
+                }
             }
         }
     }
@@ -678,10 +703,12 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        bottomSheet = InstantScheduledMeetingViewController()
         if ChatManager.isPrivateChat(jid: getProfileDetails.jid ?? "") && (isFromContactScreen || pushNotificationSelected || isFromGroupInfo || isFromForward) {
             self.view.addLaunchSubview()
         }
         if isStarredMessagePage == true {
+            scheduleMeetBtn.isHidden = true
             showOrHideUnreadMessageView(hide: true)
             headerView.isHidden = true
             chatTextViewXib?.cannotSendMessageView?.isHidden =  true
@@ -703,8 +730,11 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
             }
             navigationController?.navigationBar.isHidden = true
             emptyMessageView?.isHidden = getStarredMessageList().count == 0 ? false : true
-            chatTableView.reloadData()
+            UIView.performWithoutAnimation {
+                chatTableView.reloadData()
+            }
         } else {
+            setupMeetLinkView()
             emptyMessageView?.isHidden = true
             chatTableView?.separatorStyle = .none
             chatTableView?.separatorColor = .none
@@ -720,7 +750,9 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
                 self.markMessagessAsRead()
             }
             headerView.isHidden = false
-            chatTableView.reloadData()
+            UIView.performWithoutAnimation {
+                chatTableView.reloadData()
+            }
             navigationController?.setNavigationBarHidden(false, animated: animated)
             setUpHeaderView()
             self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
@@ -867,6 +899,7 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        dismissScheduleMeetPopup()
         navigationView?.isHidden = true
         if !isStarredMessagePage {
             selectedMessageId = ""
@@ -931,11 +964,14 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
         }
         forwardBottomView?.isHidden = true
         selectedMessages?.removeAll()
-        chatTableView.reloadData()
-       
+        UIView.performWithoutAnimation {
+            chatTableView.reloadData()
+        }
+
     }
 
     func showLockScreen() {
+        dismissScheduleMeetPopup()
         if CommonDefaults.appFingerprintenable {
             let vc = PrivateChatFingerPrintPINViewController(nibName: "PrivateChatFingerPrintPINViewController", bundle: nil)
             vc.isFromSearchSelect = isFromSearchSelect
@@ -954,7 +990,15 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
             self.navigationController?.pushViewController(vc, animated: false)
         }
     }
-    
+
+    func dismissScheduleMeetPopup() {
+        if let vc = UIApplication.shared.keyWindow?.getTopViewController() {
+            if vc is InstantScheduledMeetingViewController {
+                vc.dismiss(animated: false)
+            }
+        }
+    }
+
     func showDeletePicker() {
         executeOnMainThread {  [weak self] in
             let isMessageSentByMe = self?.selectedMessages?.filter({$0.chatMessage.isMessageSentByMe == false}).count
@@ -1001,6 +1045,9 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
             if message.chatMessage.messageType == .text {
                     let localPath = message.chatMessage.messageTextContent
                     activityItems.append(localPath)
+            } else if message.chatMessage.messageType == .meet {
+                let localPath = message.chatMessage.meetChatMessage?.link ?? ""
+                activityItems.append(localPath)
             } else {
                 switch message.chatMessage.mediaChatMessage?.messageType {
                 case .audio:
@@ -1182,7 +1229,9 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
     
     private func showForwardBottomView() {
         if isStarredMessagePage {
-            chatTableView.reloadData()
+            UIView.performWithoutAnimation {
+                chatTableView.reloadData()
+            }
         } else {
             getInitialMessages()
         }
@@ -1194,7 +1243,9 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
             self?.isShowForwardView = false
             self?.showHideForwardView()
             if self?.isStarredMessagePage == true {
-                self?.chatTableView?.reloadData()
+                UIView.performWithoutAnimation {
+                    self?.chatTableView?.reloadData()
+                }
             } else {
                 self?.getInitialMessages()
             }
@@ -1364,7 +1415,9 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
            starredItemAction()
            showHideMutiSelectionView()
         DispatchQueue.main.async { [weak self] in
-            self?.chatTableView.reloadData()
+            UIView.performWithoutAnimation {
+                self?.chatTableView.reloadData()
+            }
         }
     }
 
@@ -1383,7 +1436,7 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
         
         // Share media message
         if message.messageType != .contact && message.messageType != .location {
-        if selectedChatMessage?.isMessageRecalled == false && (selectedChatMessage?.mediaChatMessage?.mediaUploadStatus == .uploaded || selectedChatMessage?.mediaChatMessage?.mediaDownloadStatus == .downloaded || message.messageType == .text && message.messageTextContent.isURL) {
+            if selectedChatMessage?.isMessageRecalled == false && (selectedChatMessage?.mediaChatMessage?.mediaUploadStatus == .uploaded || selectedChatMessage?.mediaChatMessage?.mediaDownloadStatus == .downloaded || selectedChatMessage?.messageType == .meet || message.messageType == .text && message.messageTextContent.isURL) {
                 menusList.append(ContextMenuItemWithImage(title: MessageActions.share.rawValue, image: UIImage(named: "ic_sharemedia") ?? UIImage()))
 
         }
@@ -1391,7 +1444,7 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
 
         
 
-        if (selectedChatMessage?.messageType == .text || ((selectedChatMessage?.messageType == .image || selectedChatMessage?.messageType == .video) && !(selectedChatMessage?.mediaChatMessage?.mediaCaptionText.isEmpty ?? false))) && selectedChatMessage?.isMessageRecalled == false {
+        if (selectedChatMessage?.messageType == .text || ((selectedChatMessage?.messageType == .image || selectedChatMessage?.messageType == .video || selectedChatMessage?.messageType == .meet) && !(selectedChatMessage?.mediaChatMessage?.mediaCaptionText.isEmpty ?? false))) && selectedChatMessage?.isMessageRecalled == false {
             menusList.append(ContextMenuItemWithImage(title: MessageActions.copy.rawValue, image: UIImage(named: "ic_copy") ?? UIImage()))
         }
         var flag : Bool = false
@@ -1485,6 +1538,8 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
 
 extension ChatViewParentController: ContextMenuDelegate {
     func contextMenuDidSelect(_ contextMenu: ContextMenu, cell: ContextMenuCell, targetedView: UIView, didSelect item: ContextMenuItem, forRowAt index: Int) -> Bool {
+        self.dismissScheduleMeetPopup()
+        self.view.isUserInteractionEnabled = true
         switch item.title {
         case MessageActions.copy.rawValue:
             self.copyItemAction()
@@ -1497,7 +1552,9 @@ extension ChatViewParentController: ContextMenuDelegate {
             self.multipleSelectionTitle = shareTitle
             self.currentIndexPath = contextMenuIndexPath
             self.refreshBubbleImageView(indexPath: contextMenuIndexPath, isSelected: true, title: shareTitle )
-            self.chatTableView.reloadData()
+            UIView.performWithoutAnimation {
+                self.chatTableView.reloadData()
+            }
         case MessageActions.delete.rawValue:
             self.isShowForwardView = true
             self.stopAudioPlayer()
@@ -1507,7 +1564,9 @@ extension ChatViewParentController: ContextMenuDelegate {
             self.currentIndexPath = contextMenuIndexPath
             self.multipleSelectionTitle = deleteTitle
             self.refreshBubbleImageView(indexPath: contextMenuIndexPath, isSelected: true, title: deleteTitle)
-            self.chatTableView.reloadData()
+            UIView.performWithoutAnimation {
+                self.chatTableView.reloadData()
+            }
         case MessageActions.reply.rawValue:
             self.replyMessage(indexPath: self.previousIndexPath, isMessageDeleted: false, isKeyBoardEnabled: true, isSwipe: true)
         case MessageActions.report.rawValue:
@@ -1525,7 +1584,9 @@ extension ChatViewParentController: ContextMenuDelegate {
             self.currentIndexPath = contextMenuIndexPath
             self.multipleSelectionTitle = forwardTitle
             self.refreshBubbleImageView(indexPath: contextMenuIndexPath, isSelected: true, title: forwardTitle)
-            self.chatTableView.reloadData()
+            UIView.performWithoutAnimation {
+                self.chatTableView.reloadData()
+            }
         case MessageActions.star.rawValue:
             isShareMediaSelected = false
             selectedStarItem()
@@ -1580,7 +1641,9 @@ extension ChatViewParentController {
 //                chatTableView?.endUpdates()
 //                let indexPath = IndexPath(row: 0, section: 0)
 //                chatTableView?.scrollToRow(at: indexPath, at: .top, animated: true)
+            UIView.performWithoutAnimation {
                 chatTableView.reloadData()
+            }
                 messageTextView?.text = ""
             }
         }
@@ -1621,7 +1684,9 @@ extension ChatViewParentController {
         chatMessages.removeAll()
         chatMessages = values
         executeOnMainThread { [weak self] in
-            self?.chatTableView?.reloadData()
+            UIView.performWithoutAnimation {
+                self?.chatTableView?.reloadData()
+            }
             print("#loss groupOldMessages reload done \(chatMessages.count)")
         }
     }
@@ -1645,7 +1710,9 @@ extension ChatViewParentController {
         chatMessages.append(contentsOf: values)
         print("#scrui #top after \(chatMessages.count) \(chatMessages.reduce(0) { $0 + $1.count })")
         executeOnMainThread { [weak self] in
-            self?.chatTableView?.reloadData()
+            UIView.performWithoutAnimation {
+                self?.chatTableView?.reloadData()
+            }
             completion?()
         }
     }
@@ -1666,7 +1733,9 @@ extension ChatViewParentController {
             //https://stackoverflow.com/questions/68560400/insert-rows-into-tableview-onto-without-changing-scroll-position
             let distanceFromOffset = (self.chatTableView.contentSize.height)-(self.chatTableView.contentOffset.y)
             print("#offset before => \(self.chatTableView.contentSize.height) \(self.chatTableView.contentOffset.y)")
-            self.chatTableView.reloadData()
+            UIView.performWithoutAnimation {
+                self.chatTableView.reloadData()
+            }
             print("#loss groupLatestMessages reload done \(chatMessages.count)")
             let offset = self.chatTableView.contentSize.height - distanceFromOffset
             self.chatTableView.layoutIfNeeded()
@@ -1704,7 +1773,9 @@ extension ChatViewParentController {
 //            chatMessages.enumerated().forEach { (index, value) in
 //                if index == 0 {
 //                    chatMessages[index] = value.sorted(by: { $0.messageSentTime > $1.messageSentTime })
-                    chatTableView.reloadData()
+            UIView.performWithoutAnimation {
+                chatTableView.reloadData()
+            }
 //                }
 //            }
 //
@@ -1738,10 +1809,13 @@ extension ChatViewParentController {
     }
     
     @objc func goToInfoScreen(sender: Any){
-        if getProfileDetails.profileChatType == .singleChat {
-            performSegue(withIdentifier: Identifiers.contactInfoViewController, sender: nil)
-        } else if getProfileDetails.profileChatType == .groupChat {
-            performSegue(withIdentifier: Identifiers.groupInfoViewController, sender: nil)
+        bottomSheet = nil
+        if !bottomSheetOpened {
+            if getProfileDetails.profileChatType == .singleChat {
+                performSegue(withIdentifier: Identifiers.contactInfoViewController, sender: nil)
+            } else if getProfileDetails.profileChatType == .groupChat {
+                performSegue(withIdentifier: Identifiers.groupInfoViewController, sender: nil)
+            }
         }
     }
     
@@ -1764,11 +1838,15 @@ extension ChatViewParentController {
                     }
                 }
             }else if getProfileDetails.contactType == .deleted || getProfileDetails.isBlockedByAdmin || getisBlockedMe() || (IS_LIVE && ENABLE_CONTACT_SYNC && getProfileDetails.isItSavedContact == false) {
-                
                 placeholder = UIImage(named: "ic_profile_placeholder") ?? UIImage()
                 url = URL(string: "")
             } else {
                 placeholder = getPlaceholder(name: getUserName(jid : getProfileDetails.jid ,name: getProfileDetails.name, nickName: getProfileDetails.nickName, contactType: getProfileDetails.contactType), color: contactColor)
+            }
+            if getProfileDetails.contactType == .deleted || getProfileDetails.isBlockedByAdmin || getisBlockedMe() {
+                scheduleMeetBtn.isHidden = true
+            } else {
+                scheduleMeetBtn.isHidden = false
             }
             userImage.sd_setImage(with: url, placeholderImage: placeholder)
         }
@@ -1885,7 +1963,9 @@ extension ChatViewParentController {
         currentIndexPath = previousIndexPath
         multipleSelectionTitle = forwardTitle
         refreshBubbleImageView(indexPath: previousIndexPath, isSelected: true, title: forwardTitle)
-        chatTableView.reloadData()
+        UIView.performWithoutAnimation {
+            chatTableView.reloadData()
+        }
     }
     
     @objc func deleteItemAction() {
@@ -1895,7 +1975,9 @@ extension ChatViewParentController {
         currentIndexPath = previousIndexPath
         multipleSelectionTitle = deleteTitle
         refreshBubbleImageView(indexPath: currentIndexPath, isSelected: true, title: deleteTitle)
-        chatTableView.reloadData()
+        UIView.performWithoutAnimation {
+            chatTableView.reloadData()
+        }
     }
     
     @objc func starredItemAction() {
@@ -1924,6 +2006,8 @@ extension ChatViewParentController {
                 } else {
                     board.string = getMessage?.mediaChatMessage?.mediaCaptionText
                 }
+            } else if getMessage?.messageType == .meet {
+                board.string = getMessage?.meetChatMessage?.link
             }
             AppAlert.shared.showToast(message: "1 \(copyAlert.localized)")
         }
@@ -2049,7 +2133,9 @@ extension ChatViewParentController {
                                         self?.currentIndexPath = indexPath
                                         self?.multipleSelectionTitle = forwardTitle
                                         self?.refreshBubbleImageView(indexPath: indexPath, isSelected: true, title: forwardTitle)
-                                        self?.chatTableView.reloadData()
+                                        UIView.performWithoutAnimation {
+                                            self?.chatTableView.reloadData()
+                                        }
                                     }
                                 }
                             }
@@ -2105,7 +2191,9 @@ extension ChatViewParentController {
                                     self?.currentIndexPath = indexPath
                                     self?.multipleSelectionTitle = deleteTitle
                                     self?.refreshBubbleImageView(indexPath: indexPath, isSelected: true, title: deleteTitle)
-                                    self?.chatTableView.reloadData()
+                                    UIView.performWithoutAnimation {
+                                        self?.chatTableView.reloadData()
+                                    }
                                 }
                             }
                         }
@@ -2265,6 +2353,10 @@ extension ChatViewParentController {
                                          bundle: .main), forCellReuseIdentifier: Identifiers.deleteEveryOneCell)
             chatTableView.register(UINib(nibName: Identifiers.deleteEveryOneReceiverCell,
                                          bundle: .main), forCellReuseIdentifier: Identifiers.deleteEveryOneReceiverCell)
+            chatTableView.register(UINib(nibName: Identifiers.scheduledMeetingSenderCell,
+                                         bundle: .main), forCellReuseIdentifier: Identifiers.scheduledMeetingSenderCell)
+            chatTableView.register(UINib(nibName: Identifiers.scheduledMeetingReceiverCell,
+                                         bundle: .main), forCellReuseIdentifier: Identifiers.scheduledMeetingReceiverCell)
         }
         
         func loadBottomView() {
@@ -2299,6 +2391,7 @@ extension ChatViewParentController {
             ChatManager.getUserLastSeen(for: self.getProfileDetails?.jid ?? "") { isSuccess, flyError, flyData in
                 var data  = flyData
                 if isSuccess {
+                    self.lastSeenLabel.isHidden = false
                     guard let lastSeenTime = data.getData() as? String else {
                         return
                     }
@@ -2829,7 +2922,9 @@ extension ChatViewParentController {
                             AppAlert.shared.showAlert(view: self!, title: "" , message: message, buttonTitle: "OK")
                         }
                         executeOnMainThread {
-                            self?.chatTableView.reloadData()
+                            UIView.performWithoutAnimation {
+                                self?.chatTableView.reloadData()
+                            }
                         }
                     })
                 }
@@ -2949,7 +3044,10 @@ extension ChatViewParentController: AVAudioRecorderDelegate, AVAudioPlayerDelega
 //MARK: - Actions
 extension ChatViewParentController {
     @IBAction func onBackButton(_ sender: Any) {
+        bottomSheet = nil
+        if !bottomSheetOpened {
             navigate()
+        }
     }
 
     private func navigate() {
@@ -3355,7 +3453,7 @@ extension ChatViewParentController {
         view.endEditing(true)
         resetUnreadMessages()
             let mediaParams = FileMessageParams(fileUrl: mediaData.fileURL, fileName: mediaData.fileName,  caption : mediaData.caption, fileSize: mediaData.fileSize, duration: mediaData.duration, thumbImage: mediaData.base64Thumbnail, fileKey: mediaData.fileKey)
-        FlyMessenger.sendFileMessage(messageParams: FileMessage(toId: getProfileDetails.jid, messageType: .image, fileMessage : mediaParams, replyMessageId : replyMessageId)) { [weak self] isSuccess, error, sendMessage in
+        FlyMessenger.sendFileMessage(messageParams: FileMessage(toId: getProfileDetails.jid, messageType: .image, fileMessage : mediaParams, replyMessageId : replyMessageId, mentionedUsersIds: mentionedUsersIds)) { [weak self] isSuccess, error, sendMessage in
                 if let chatMessage = sendMessage {
                     self?.setLastMessage(messageId: chatMessage.messageId)
                     chatMessage.mediaChatMessage?.mediaThumbImage =  mediaData.base64Thumbnail
@@ -3386,8 +3484,10 @@ extension ChatViewParentController {
                 return
             }
                 executeOnMainThread {
-                    self?.chatTableView.reloadData()
-                    
+                    UIView.performWithoutAnimation {
+                        self?.chatTableView.reloadData()
+                    }
+
                 }
                
                 completionHandler(sendMessage!)
@@ -3406,8 +3506,10 @@ extension ChatViewParentController {
             executeOnMainThread { [weak self] in
                 self?.chatTableView?.scrollToRow(at: indexPath, at: .top, animated: true)
             }
-            chatTableView.reloadData()
-            
+            UIView.performWithoutAnimation {
+                chatTableView.reloadData()
+            }
+
             if let cell = chatTableView.cellForRow(at: indexPath) as? SenderImageCell {
                 if NetworkReachability.shared.isConnected {
                     cell.setImageCell(message)
@@ -3470,7 +3572,9 @@ extension ChatViewParentController {
         textToolBarView?.isHidden = false
         forwardBottomView?.isHidden = true
         selectedMessages?.removeAll()
-        chatTableView.reloadData()
+        UIView.performWithoutAnimation {
+            chatTableView.reloadData()
+        }
         dismissKeyboard()
         showHideTextToolBarView()
     }
@@ -3696,6 +3800,7 @@ extension ChatViewParentController {
 //MARK - segue
 extension ChatViewParentController {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        bottomSheet = nil
         if segue.identifier == Identifiers.chatScreenToLocation {
             let locationView = segue.destination as! LocationViewController
             if toViewLocation {
@@ -3976,9 +4081,9 @@ extension ChatViewParentController : UITableViewDataSource ,UITableViewDelegate,
             }
             
             switch(message?.messageType) {
-            case .text:
+            case .text, .meet:
                 if(message?.isMessageSentByMe == true) {
-                    cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.chatViewTextOutgoingCell, for: indexPath) as? ChatViewParentMessageCell
+                    cell = tableView.dequeueReusableCell(withIdentifier: message?.messageType == .text ? Identifiers.chatViewTextOutgoingCell : Identifiers.scheduledMeetingSenderCell, for: indexPath) as? ChatViewParentMessageCell
                     if !isStarredMessagePage && !(isStarredSearchEnabled ?? false) {
                         cell.transform = CGAffineTransform(rotationAngle: -.pi)
                     }
@@ -3997,7 +4102,7 @@ extension ChatViewParentController : UITableViewDataSource ,UITableViewDelegate,
                     cell.replyView?.addGestureRecognizer(textReplyTap)
                 }
                 else {
-                    cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.chatViewTextIncomingCell, for: indexPath) as? ChatViewParentMessageCell
+                    cell = tableView.dequeueReusableCell(withIdentifier: message?.messageType == .text ? Identifiers.chatViewTextIncomingCell : Identifiers.scheduledMeetingReceiverCell, for: indexPath) as? ChatViewParentMessageCell
                     if !isStarredMessagePage && !(isStarredSearchEnabled ?? false) {
                         cell?.transform = CGAffineTransform(rotationAngle: -.pi)
                     }
@@ -4038,7 +4143,7 @@ extension ChatViewParentController : UITableViewDataSource ,UITableViewDelegate,
                     }
                 }
                 
-                if isShareMediaSelected == true && message?.messageTextContent.isURL == false {
+                if isShareMediaSelected == true && message?.messageTextContent.isURL == false && message?.messageType != .meet {
                     cell.forwardButton?.isHidden = true
                     cell.forwardView?.isHidden = true
                 }
@@ -4704,6 +4809,8 @@ extension ChatViewParentController {
     }
     
     @objc func replyMessage(indexPath: IndexPath,isMessageDeleted: Bool,isKeyBoardEnabled: Bool,isSwipe: Bool) {
+        dismissScheduleMeetPopup()
+        self.view.isUserInteractionEnabled = true
         if isStarredMessagePage || getProfileDetails.isBlocked || getProfileDetails.isBlockedByAdmin {
             return
         }
@@ -5508,12 +5615,20 @@ extension ChatViewParentController  {
                 if toJid == getProfileDetails.jid {
                     getInitialMessages()
                     executeOnMainThread { [weak self] in
-                        self?.chatTableView.reloadData()
+                        UIView.performWithoutAnimation {
+                            UIView.performWithoutAnimation {
+                                self?.chatTableView.reloadData()
+                            }
+                        }
                     }
                     resetUnreadMessages()
                 }
             } else {
-                chatTableView.reloadData()
+                UIView.performWithoutAnimation {
+                    UIView.performWithoutAnimation {
+                        chatTableView.reloadData()
+                    }
+                }
             }
         }
     }
@@ -5522,7 +5637,11 @@ extension ChatViewParentController  {
         executeOnMainThread { [weak self] in
             if self?.isStarredMessagePage ?? false {
                 self?.showHideEmptyView()
-                self?.chatTableView.reloadData()
+                UIView.performWithoutAnimation {
+                    UIView.performWithoutAnimation {
+                        self?.chatTableView.reloadData()
+                    }
+                }
             }else{
                 if let indexPath = chatMessages.indexPath(where: {$0.messageId == messageId}) {
                     chatMessages[indexPath.section][indexPath.row].isMessageStarred = favourite
@@ -5536,7 +5655,11 @@ extension ChatViewParentController  {
     override func clearAllConversationForSyncedDevice() {
         getInitialMessages()
         executeOnMainThread { [weak self] in
-            self?.chatTableView.reloadData()
+            UIView.performWithoutAnimation {
+                UIView.performWithoutAnimation {
+                    self?.chatTableView.reloadData()
+                }
+            }
         }
         resetUnreadMessages()
     }
@@ -5815,6 +5938,9 @@ extension ChatViewParentController : ProfileEventsDelegate {
         if !isStarredMessagePage {
             checkUserBlocked()
             setProfile()
+            if jid == getProfileDetails.jid {
+                scheduleMeetBtn.isHidden = true
+            }
         }
     }
     
@@ -5822,6 +5948,9 @@ extension ChatViewParentController : ProfileEventsDelegate {
         if !isStarredMessagePage {
             checkUserBlocked()
             setProfile()
+            if jid == getProfileDetails.jid {
+                scheduleMeetBtn.isHidden = false
+            }
         }
     }
     
@@ -5850,7 +5979,11 @@ extension ChatViewParentController : ProfileEventsDelegate {
             }
             messageDelegate?.whileUpdatingTheirProfile(for: jid, profileDetails: profileDetails)
         } else {
-            chatTableView.reloadData()
+            UIView.performWithoutAnimation {
+                UIView.performWithoutAnimation {
+                    chatTableView.reloadData()
+                }
+            }
         }
     }
     
@@ -5859,7 +5992,11 @@ extension ChatViewParentController : ProfileEventsDelegate {
             getLastSeen()
             setProfile(jid: jid)
         } else {
-            chatTableView.reloadData()
+            UIView.performWithoutAnimation {
+                UIView.performWithoutAnimation {
+                    chatTableView.reloadData()
+                }
+            }
         }
     }
     
@@ -5868,7 +6005,11 @@ extension ChatViewParentController : ProfileEventsDelegate {
             getLastSeen()
             setProfile(jid: jid)
         } else {
-            chatTableView.reloadData()
+            UIView.performWithoutAnimation {
+                UIView.performWithoutAnimation {
+                    chatTableView.reloadData()
+                }
+            }
         }
     }
     
@@ -6062,8 +6203,10 @@ extension ChatViewParentController {
                 return
             }
             executeOnMainThread {
-                self?.chatTableView.reloadData()
-                
+                UIView.performWithoutAnimation {
+                    self?.chatTableView.reloadData()
+                }
+
             }
                 completionHandler(message!)
             }
@@ -6921,6 +7064,7 @@ extension ChatViewParentController {
                 print("ChatViewParentController Group isExist \(result.doesExist) \(result.message)")
                 chatTextViewXib?.cannotSendMessageView?.isHidden = result.doesExist ? true : false
                 disableForBlocking(disable: result.doesExist ? false : true)
+                scheduleMeetBtn.isHidden = !result.doesExist
                 groupMembers = GroupManager.shared.getGroupMemebersFromLocal(groupJid: getProfileDetails.jid).participantDetailArray.sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() })
                 if mentionSearch.isEmpty {
                     searchGroupMembers = mentionArrayFilter().sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() })
@@ -7101,10 +7245,14 @@ extension ChatViewParentController : SendSelectecUserDelegate {
                 if jids.filter({$0 == self?.getProfileDetails.jid}).count > 0 {
                     self?.getInitialMessages()
                 } else {
-                    self?.chatTableView?.reloadData()
+                    UIView.performWithoutAnimation {
+                        self?.chatTableView?.reloadData()
+                    }
                 }
             } else {
-                self?.chatTableView?.reloadData()
+                UIView.performWithoutAnimation {
+                    self?.chatTableView?.reloadData()
+                }
             }
         }
         messageTextView?.resignFirstResponder()
@@ -7915,6 +8063,7 @@ extension ChatViewParentController {
         if isBlocked {
             view.endEditing(true)
         }
+        scheduleMeetBtn.isHidden = isBlocked
     }
     
     func checkUserBlocked()  {
@@ -7926,6 +8075,7 @@ extension ChatViewParentController {
                 menuButton.isEnabled = true
                 chatTextViewXib?.cannotSendMessageView?.isHidden = isBlocked ? false : true
                 if isBlocked {
+                    scheduleMeetBtn.isHidden = true
                     showUserIsBlocked()
                     resetReplyView(resignFirstResponder: true)
                 }
@@ -8130,7 +8280,9 @@ extension ChatViewParentController {
                             self?.resetReplyView(resignFirstResponder: true)
                             self?.showOrHideUnreadMessageView(hide: true)
                             chatMessages.removeAll()
-                            self?.chatTableView.reloadData()
+                            UIView.performWithoutAnimation {
+                                self?.chatTableView.reloadData()
+                            }
                             AppAlert.shared.onAlertAction = nil
                         }
                     }
@@ -8854,7 +9006,9 @@ extension ChatViewParentController {
                         self?.selectedMessages?.removeAll()
                         self?.isShowForwardView = false
                         self?.showHideForwardView()
-                        self?.chatTableView.reloadData()
+                        UIView.performWithoutAnimation {
+                            self?.chatTableView.reloadData()
+                        }
                         self?.showHideEmptyView()
                     }
                 }else {
@@ -8932,7 +9086,9 @@ extension ChatViewParentController: UIEditMenuInteractionDelegate {
 extension ChatViewParentController : RefreshChatDelegate {
     func refresh() {
         executeOnMainThread { [weak self] in
-            self?.chatTableView.reloadData()
+            UIView.performWithoutAnimation {
+                self?.chatTableView.reloadData()
+            }
         }
     }
 }
@@ -8979,7 +9135,7 @@ extension ChatViewParentController : AvailableFeaturesDelegate {
                 navigationController?.popViewController(animated: true)
             }
         }
-        
+
         let tabCount =  MainTabBarController.tabBarDelegagte?.currentTabCount()
         
         if (!(availableFeatures.isGroupCallEnabled || availableFeatures.isOneToOneCallEnabled) && tabCount == 5) {
@@ -9002,7 +9158,9 @@ extension ChatViewParentController : AvailableFeaturesDelegate {
         }
         forwardBottomView?.isHidden = true
         selectedMessages?.removeAll()
-        chatTableView.reloadData()
+        UIView.performWithoutAnimation {
+            chatTableView.reloadData()
+        }
     }
 }
 
@@ -9013,6 +9171,14 @@ extension ChatViewParentController {
         checkMemberOfGroup()
         chatTextViewXib?.audioButton.isHidden = !(availableFeatures.isAudioAttachmentEnabled) ? true : false
         attachmentButton.isHidden = (!(availableFeatures.isAttachmentEnabled) || (!(availableFeatures.isImageAttachmentEnabled) && !(availableFeatures.isVideoAttachmentEnabled) && !(availableFeatures.isAudioAttachmentEnabled) && !(availableFeatures.isLocationAttachmentEnabled) && !(availableFeatures.isContactAttachmentEnabled) && !(availableFeatures.isDocumentAttachmentEnabled))) ? true : false
+
+        if (!availableFeatures.isOneToOneCallEnabled || !availableFeatures.isGroupCallEnabled) {
+            scheduleMeetBtn.removeFromSuperview()
+        }
+        if (availableFeatures.isOneToOneCallEnabled || availableFeatures.isGroupCallEnabled) {
+            self.view.addSubview(scheduleMeetBtn)
+            self.view.bringSubviewToFront(scheduleMeetBtn)
+        }
         
         if self.presentedViewController as? UIAlertController != nil && !(availableFeatures.isAttachmentEnabled){
             self.dismiss()
@@ -9082,7 +9248,9 @@ extension ChatViewParentController {
             chatMessages[indexPath.section].remove(at: indexPath.row)
             //chatTableView.deleteRows(at: [indexPath], with: .none)
             // deleteUnreadNotificationFromDB()
-            chatTableView.reloadData()
+            UIView.performWithoutAnimation {
+                chatTableView.reloadData()
+            }
         }
     }
     
@@ -9232,7 +9400,9 @@ extension ChatViewParentController: UISearchBarDelegate {
         if isStarredMessagePage {
             if searchText.trim().count > 0 {
                 if searchText.trim().isEmpty {
-                    chatTableView?.reloadData()
+                    UIView.performWithoutAnimation {
+                        chatTableView?.reloadData()
+                    }
                     isStarredSearchEnabled = false
                 } else {
                     isStarredSearchEnabled = true
@@ -9253,10 +9423,14 @@ extension ChatViewParentController: UISearchBarDelegate {
                     })
                 }
                 chatTableView.scrollsToTop = true
-                chatTableView.reloadData()
+                UIView.performWithoutAnimation {
+                    chatTableView.reloadData()
+                }
             } else {
                 isStarredSearchEnabled = false
-                chatTableView?.reloadData()
+                UIView.performWithoutAnimation {
+                    chatTableView?.reloadData()
+                }
             }
             showHideEmptyView()
             
@@ -9283,7 +9457,9 @@ extension ChatViewParentController: UISearchBarDelegate {
         searchBar?.setShowsCancelButton(false, animated: true)
         searchBar?.text = ""
         starredSearchMessages?.removeAll()
-        chatTableView?.reloadData()
+        UIView.performWithoutAnimation {
+            chatTableView?.reloadData()
+        }
         chatTableView?.tableFooterView = nil
     }
     
@@ -9325,8 +9501,9 @@ extension ChatViewParentController: UISearchBarDelegate {
                 resizeMessageTextView()
                 replyView.isHidden = false
             }
-            
-            chatTableView.reloadData()
+            UIView.performWithoutAnimation {
+                chatTableView.reloadData()
+            }
         }
         showHideEmptyView()
     }
@@ -9334,7 +9511,9 @@ extension ChatViewParentController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
         if searchBar.text?.trim().count ?? 0 <= 1 {
             isStarredSearchEnabled = false
-            chatTableView.reloadData()
+            UIView.performWithoutAnimation {
+                chatTableView.reloadData()
+            }
         }
         return true
     }
@@ -9355,20 +9534,24 @@ extension ChatViewParentController: UISearchBarDelegate {
                     messages.enumerated().forEach({ (row,message) in
                         if (message.messageTextContent.localizedCaseInsensitiveContains(searchText) || message.mediaChatMessage?.mediaCaptionText.localizedCaseInsensitiveContains(searchText) ?? false ||
                             (message.mediaChatMessage?.messageType == .document && message.mediaChatMessage?.mediaFileName.localizedCaseInsensitiveContains(searchText) ?? false) ||
-                            message.contactChatMessage?.contactName.localizedCaseInsensitiveContains(searchText) ?? false || message.replyParentChatMessage?.messageTextContent.localizedCaseInsensitiveContains(searchText) ?? false) && !message.isMessageRecalled && message.messageType != .notification {
+                            message.contactChatMessage?.contactName.localizedCaseInsensitiveContains(searchText) ?? false || message.replyParentChatMessage?.messageTextContent.localizedCaseInsensitiveContains(searchText) ?? false || (message.messageType == .meet && message.meetChatMessage?.link.localizedCaseInsensitiveContains(searchText) ?? false)) && !message.isMessageRecalled && message.messageType != .notification {
                             foundedIndex.append(IndexPath(row: row, section: section))
                         }
                     })
                 })
                 if foundedIndex.count > 0 {
                     foundedSearchResult = true
-                    chatTableView.reloadData()
+                    UIView.performWithoutAnimation {
+                        chatTableView.reloadData()
+                    }
                     print("Scrolling Index2: \(0)")
                     isSearchButtonTapped = false
                     scrollMessageToIndex(foundedIndex: foundedIndex, messageIndex: currentHighlightedIndex ?? 0)
                 } else {
                     foundedSearchResult = false
-                    chatTableView.reloadData()
+                    UIView.performWithoutAnimation {
+                        chatTableView.reloadData()
+                    }
                     if searchUp {
                         self.searchUp()
                     } else {
@@ -9753,4 +9936,212 @@ extension ChatViewParentController: LinkDelegate {
     }
     
     
+}
+
+//MARK: - Schedule Meeting
+
+extension ChatViewParentController: SendMeetLinkMessage {
+
+    func userDeleted(userId: String, profile: MirrorFlySDK.ProfileDetails) {
+        self.view.isUserInteractionEnabled = true
+        userDeletedTheirProfile(for: userId, profileDetails: profile)
+    }
+    
+    func isBlocked(userId: String, isBlocked: Bool) {
+        self.view.isUserInteractionEnabled = true
+        checkUserForBlocking(jid: userId, isBlocked: isBlocked)
+        if userId == getProfileDetails.jid && getProfileDetails.profileChatType == .groupChat {
+            checkMemberOfGroup()
+            getGroupMember()
+        }
+    }
+    
+    func ondismissed() {
+        self.view.isUserInteractionEnabled = true
+        if !isStarredMessagePage {
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [self] in
+                GroupManager.shared.groupDelegate = self
+                ChatManager.shared.adminBlockDelegate = self
+                chatManager.connectionDelegate = self
+                chatManager.typingStatusDelegate = self
+                ChatManager.setOnGoingChatUser(jid: getProfileDetails.jid)
+                recorder.appAudioRecorderDelegate = self
+                ChatManager.shared.availableFeaturesDelegate = self
+                ContactManager.shared.profileDelegate = self
+            }
+
+            checkUserBlockedByAdmin()
+            checkUserBlocked()
+            setProfile()
+            checkMemberOfGroup()
+        }
+    }
+
+    func sendMeetMessage(link: String, time: Int) {
+        self.resetMessageTextView()
+        self.view.isUserInteractionEnabled = true
+        if !NetworkReachability.shared.isConnected {
+            executeOnMainThread {
+                AppAlert.shared.showToast(message: ErrorMessage.noInternet)
+            }
+        }
+        FlyMessenger.sendMeetMessage(messageParams: MeetMessage(toId:  self.getProfileDetails.jid ?? emptyString(), title: "", link: link, scheduledDateTime: time, replyMessageId: self.replyMessageId)) { [weak self] isSuccess, error, message in
+            guard let self else {return}
+            if isSuccess {
+                if chatMessages.count == 0 {
+                    if let message = message {
+                        self.setLastMessage(messageId: message.messageId)
+                        self.addNewGroupedMessage(messages: [message])
+                    }
+                } else {
+                    if let message = message {
+                        self.setLastMessage(messageId: message.messageId)
+                        if let firstMessageInSection = chatMessages[0].first {
+
+                            var timeStamp = 0.0
+                            if firstMessageInSection.messageChatType == .singleChat {
+                                timeStamp =  firstMessageInSection.messageSentTime
+                            } else {
+                                timeStamp = DateFormatterUtility.shared.getGroupMilliSeconds(milliSeconds: firstMessageInSection.messageSentTime)
+                            }
+                            if String().fetchMessageDateHeader(for: timeStamp) == "TODAY" {
+                                chatMessages[0].insert(message, at: 0)
+                                self.chatTableView?.insertRows(at: [IndexPath.init(row: 0, section: 0)], with: .right)
+                                let indexPath = IndexPath(row: 0, section: 0)
+                                self.chatTableView?.scrollToRow(at: indexPath, at: .top, animated: true)
+                                self.chatTableView.reloadDataWithoutScroll()
+                                self.scrollToTableViewBottom()
+                            } else {
+                                let (indexPa, shouldPaginate) = self.checkReplyMessageAvailability(replyMessageId: message.messageId)
+                                if let scrollToRow = indexPa {
+                                    self.scrollLogic(indexPath: scrollToRow)
+                                } else if shouldPaginate{
+                                    self.fetchMessageListParams.messageId = emptyString()
+                                    self.queryInitialMessage(shouldScrollToMessage: true)
+                                }
+                            }
+                        }
+                        self.messageTextView?.text = ""
+                        self.replyMessageId = ""
+                        self.tableViewBottomConstraint?.constant = CGFloat(chatBottomConstant)
+                        self.handleSendButton()
+                        if self.replyJid == self.getProfileDetails.jid {
+                            self.replyMessageObj = nil
+                            self.isReplyViewOpen = false
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+    @objc func scheduleMeetingTap(_ sender: UITapGestureRecognizer) {
+        callLinkViewTapped()
+    }
+
+    func setupMeetLinkView() {
+        let frame = CGRect(x: (Int(view.bounds.maxX) - 68), y:  (Int(view.bounds.maxY) - 160), width: scheduleMeetButtonCons, height: scheduleMeetButtonCons)
+        scheduleMeetBtn.frame = frame
+        scheduleMeetBtnYPosition = frame.center.y
+        let imageView = UIImageView(frame: CGRect(x: 16, y: 16, width: 24, height: 24))
+        imageView.image = UIImage(named: "meetChat")
+        imageView.contentMode = .scaleAspectFit
+        scheduleMeetBtn.addSubview(imageView)
+        scheduleMeetBtn.cornerRadius(radius: scheduleMeetBtn.frame.height/2, width: 0.5, color: .clear)
+        let tap = UITapGestureRecognizer(target: self, action: #selector(scheduleMeetingTap))
+        scheduleMeetBtn.addGestureRecognizer(tap)
+        self.view.addSubview(scheduleMeetBtn)
+        self.view.bringSubviewToFront(scheduleMeetBtn)
+        self.scheduleMeetBtn.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(dragAndDrop)))
+
+        if (!ChatManager.getAvailableFeatures().isOneToOneCallEnabled || !ChatManager.getAvailableFeatures().isGroupCallEnabled || getProfileDetails.contactType == .deleted || getBlocked()) {
+            scheduleMeetBtn.isHidden = true
+        }
+    }
+
+    @objc func dragAndDrop(gesture: UIPanGestureRecognizer){
+
+        let window = UIApplication.shared.windows.first
+        let bottomPadding = (window?.safeAreaInsets.bottom ?? 0) + 30
+        let topPadding = (window?.safeAreaInsets.top ?? 0) + 30
+
+        var location = gesture.location(in: self.view)
+
+        if self.containerBottomConstraint.constant > 0 {
+            if location.y < (topPadding < CGFloat(scheduleMeetButtonCons) ? CGFloat(scheduleMeetButtonCons) : topPadding) {
+                location = CGPoint(x: location.x, y: (topPadding < CGFloat(scheduleMeetButtonCons) ? CGFloat(scheduleMeetButtonCons) : topPadding))
+            } else if (self.view.frame.height - (self.containerBottomConstraint.constant + bottomPadding)) < location.y {
+                location = CGPoint(x: location.x, y: self.view.frame.height - (self.containerBottomConstraint.constant + bottomPadding))
+            }
+        } else {
+            if location.y < (topPadding < CGFloat(scheduleMeetButtonCons) ? CGFloat(scheduleMeetButtonCons) : topPadding) {
+                location = CGPoint(x: location.x, y: (topPadding < CGFloat(scheduleMeetButtonCons) ? CGFloat(scheduleMeetButtonCons) : topPadding))
+            } else if (self.view.frame.height - bottomPadding) < location.y {
+                location = CGPoint(x: location.x, y: self.view.frame.height - bottomPadding)
+            }
+        }
+        let draggedView = gesture.view
+        draggedView?.center = location
+
+        scheduleMeetBtnYPosition = location.y
+
+        if gesture.state == .ended {
+            if self.scheduleMeetBtn.frame.midX >= self.view.layer.frame.width / 2 {
+                UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseIn, animations: {
+                    self.scheduleMeetBtn.center.x = self.view.layer.frame.width - 40
+                }, completion: nil)
+            }else{
+                UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseIn, animations: {
+                    self.scheduleMeetBtn.center.x = 40
+                }, completion: nil)
+            }
+        }
+    }
+
+    func callLinkViewTapped() {
+        if NetworkReachability.shared.isConnected{
+            if bottomSheet != nil {
+                bottomSheet = InstantScheduledMeetingViewController()
+            }
+            self.showShareLinkSheet(link: emptyString())
+        }else{
+            executeOnMainThread {
+                AppAlert.shared.showToast(message: ErrorMessage.noInternet)
+            }
+        }
+    }
+
+    func showShareLinkSheet(link : String){
+        checkUserBusyStatusEnabled(self) { [self] status in
+            if status {
+                if let sheet = bottomSheet {
+                    self.bottomSheetOpened = true
+                    self.view.endEditing(false)
+                    self.view.isUserInteractionEnabled = false
+                    resetAudioRecording(isCancel: true)
+                    sheet.callLinkDelegate = self
+                    sheet.meetMessageDelegate = self
+                    sheet.getProfileDetails = self.getProfileDetails
+                    let delay = keyboardShown ? 0.8 : 0
+                    DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                        presentBottomSheetInsideNavigationController(viewController: sheet,configuration: BottomSheetConfiguration(
+                            cornerRadius: 16,
+                            pullBarConfiguration: .hidden,
+                            shadowConfiguration: .default
+                        ),canBeDismissed: {
+                            true
+                        },dismissCompletion: {
+                            self.view.isUserInteractionEnabled = true
+                            self.bottomSheetOpened = false
+                        })
+                        self.view.isUserInteractionEnabled = true
+                        self.bottomSheetOpened = false
+                    }
+                }
+            }
+        }
+    }
+
 }

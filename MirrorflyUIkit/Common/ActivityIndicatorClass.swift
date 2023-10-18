@@ -12,11 +12,15 @@ extension UIViewController {
     static let activityIndicator: UIActivityIndicatorView = UIActivityIndicatorView()
 
     func startLoading(withText: String) {
-        UIViewController.showUniversalLoadingView(true, loadingText: withText)
+        executeOnMainThread {
+            UIViewController.showUniversalLoadingView(true, loadingText: withText)
+        }
     }
 
     func stopLoading() {
-        UIViewController.showUniversalLoadingView(false)
+        executeOnMainThread {
+            UIViewController.showUniversalLoadingView(false)
+        }
       }
     
     

@@ -20,15 +20,21 @@ import FirebaseRemoteConfig
 import AVFoundation
 import MirrorFlySDK
 
-let LICENSE_KEY = "xxxxxxxxx"
-let CONTAINER_ID = "xxxxxxxxx"
+let BASE_URL = "https://api-preprod-sandbox.mirrorfly.com/api/v1/"
+let LICENSE_KEY = "xxxxxxxxxxxxxxxx"
+let XMPP_DOMAIN = "xmpp-preprod-sandbox.mirrorfly.com"
+let XMPP_PORT = 5222
+let SOCKETIO_SERVER_HOST = "https://signal-preprod-sandbox.mirrorfly.com"
+let JANUS_URL = "wss://janus.mirrorfly.com"
+let CONTAINER_ID = "group.com.mirrorfly.qa"
 let ENABLE_CONTACT_SYNC = false
 let ENABLE_CHAT_HISTORY = false
 let IS_LIVE = false
 let WEB_LOGIN_URL = "https://webchat-preprod-sandbox.mirrorfly.com/"
 let IS_MOBILE_NUMBER_LOGIN = false
-let APP_NAME = "UiKit"
+let APP_NAME = "UiKitQa"
 let ICLOUD_CONTAINER_ID = "iCloud.com.mirrorfly.qa"
+
 
 let isMigrationDone = "isMigrationDone"
 let isHideNotificationContent = false
@@ -221,6 +227,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
     func applicationProtectedDataWillBecomeUnavailable(_ application: UIApplication) {
         if (CommonDefaults.appLockenable || CommonDefaults.appFingerprintenable) {
             CommonDefaults.showAppLock = true
+            if let vc = UIApplication.shared.keyWindow?.getTopViewController() {
+                if vc is InstantScheduledMeetingViewController {
+                    vc.dismiss(animated: false)
+                }
+            }
         }
     }
 
@@ -671,6 +682,10 @@ extension AppDelegate : LocalNotificationDelegate {
             
             if !chatMessage.mentionedUsersIds.isEmpty {
                 message = ChatUtils.getMentionTextContent(message: message, isMessageSentByMe: chatMessage.isMessageSentByMe, mentionedUsers: chatMessage.mentionedUsersIds).string
+            }
+
+            if chatMessage.messageType == .meet {
+                message = "Meet scheduled on " + ((chatMessage.meetChatMessage?.scheduledDateTime != 0) ? DateFormatterUtility.shared.getSchduleMeetingDate(date: chatMessage.meetChatMessage?.scheduledDateTime ?? 0) : chatMessage.messageType.rawValue.capitalized)
             }
 
             if let chat = ChatManager.getRechtChat(jid: groupId.isEmpty ? jid : groupId) {

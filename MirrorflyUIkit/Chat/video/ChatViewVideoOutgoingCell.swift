@@ -315,6 +315,17 @@ class ChatViewVideoOutgoingCell: BaseTableViewCell {
                    replyWithMediaCOns?.isActive = false
                    mediaMessageImageView?.isHidden = true
                    mediaLocationMapView?.isHidden = true
+               } else if replyMessage?.meetChatMessage != nil {
+                   replyTextLabel?.text = DateFormatterUtility.shared.getSchduleMeetingDate(date: replyMessage?.meetChatMessage?.scheduledDateTime ?? 0)
+                   messageTypeIcon?.image = UIImage(named: (message?.isMessageSentByMe ?? false) ? "video_link" : "video_link")
+                   messageTypeIconView?.isHidden = false
+                   replyWithoutMediaCons?.isActive = false
+                   replyWithMediaCOns?.isActive = true
+                   mediaMessageImageView?.isHidden = false
+                   mediaLocationMapView?.isHidden = true
+                   mediaMessageImageView?.image = UIImage(named: "app_icon")
+                   mediaMessageImageView?.isHidden = false
+                   mediaMessageImageView?.contentMode = .center
                } else {
                    replyWithoutMediaCons?.isActive = true
                    replyWithMediaCOns?.isActive = false
@@ -354,7 +365,15 @@ class ChatViewVideoOutgoingCell: BaseTableViewCell {
                     captionLabel.text = ChatUtils.convertMentionUser(message: captionTxt, mentionedUsersIds: mentionedUsersIds).replacingOccurrences(of: "`", with: "")
                 }
             } else {
-                captionLabel.text = captionTxt
+                var attributedString : NSMutableAttributedString?
+                if fromChat && isMessageSearch {
+                    attributedString = NSMutableAttributedString(string: captionTxt)
+                    let range = (captionTxt.lowercased() as NSString).range(of: searchText.lowercased())
+                    attributedString?.addAttribute(NSAttributedString.Key.backgroundColor, value: Color.highlightColor, range: range)
+                    captionLabel.attributedText = attributedString
+                } else {
+                    captionLabel.text = captionTxt
+                }
             }
             //ChatUtils.highlight(uilabel: captionLabel, message: captionTxt, searchText: searchText, isMessageSearch: isMessageSearch, isSystemBlue: isStarredMessagePage == true && isMessageSearch ? true : false)
             captionHolder.roundCorners(corners: [.bottomLeft], radius: 5.0)

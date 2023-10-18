@@ -262,6 +262,8 @@ class RecentChatTableViewCell: UITableViewCell {
                 receiverMessageTypeImageView?.image = UIImage(named: ImageConstant.ic_rcvideo)
             case .document:
                 receiverMessageTypeImageView?.image = UIImage(named: ImageConstant.ic_rcdocument)
+            case .meet:
+                receiverMessageTypeImageView?.image = UIImage(named: ImageConstant.ic_rcmeet)
             default:
                 receiverMessageTypeView?.isHidden = true
             }
@@ -328,6 +330,19 @@ class RecentChatTableViewCell: UITableViewCell {
            // userMessageLabel?.text = (chatMessage?.mediaChatMessage?.mediaCaptionText.trim().isNotEmpty ?? false) ? chatMessage?.mediaChatMessage?.mediaCaptionText : recentChatMessage.lastMessageType?.rawValue.capitalized
         case .document:
             userMessageLabel?.text = "Document"
+        case .meet:
+            let mentionedUsersIds = chatMessage?.mentionedUsersIds ?? []
+            if !mentionedUsersIds.isEmpty, (chatMessage?.meetChatMessage?.scheduledDateTime != 0) {
+                let message = DateFormatterUtility.shared.getSchduleMeetingDate(date: chatMessage?.meetChatMessage?.scheduledDateTime ?? 0)
+                let isMessageSentByMe = chatMessage?.isMessageSentByMe ?? false
+                if recentChatMessage.profileType == .groupChat {
+                    userMessageLabel?.attributedText = ChatUtils.getMentionTextContent(message: message, uiLabel: userMessageLabel, isMessageSentByMe: isMessageSentByMe, mentionedUsers: mentionedUsersIds)
+                } else {
+                    userMessageLabel?.text = ChatUtils.convertMentionUser(message: message, mentionedUsersIds: mentionedUsersIds).replacingOccurrences(of: "`", with: "")
+                }
+            } else {
+                userMessageLabel?.text = "Scheduled on " + (((chatMessage?.meetChatMessage?.scheduledDateTime != 0) ? DateFormatterUtility.shared.getSchduleMeetingDate(date: chatMessage?.meetChatMessage?.scheduledDateTime ?? 0) : recentChatMessage.lastMessageType?.rawValue.capitalized) ?? "")
+            }
         default:
             break
         }

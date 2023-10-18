@@ -9,6 +9,7 @@ import Foundation
 import UIKit
 import MirrorFlySDK
 import LocalAuthentication
+import BottomSheet
 
 @objc class RootViewController : NSObject {
     public static var sharedInstance = RootViewController()
@@ -81,7 +82,7 @@ extension RootViewController : CallManagerDelegate {
 
                 if let topController = UIApplication.shared.keyWindow?.rootViewController {
                     if let presentedViewController = topController.presentedViewController {
-                        if presentedViewController.isKind(of: UIAlertController.self) {
+                        if presentedViewController.isKind(of: UIAlertController.self) || presentedViewController is BottomSheetNavigationController {
                             presentedViewController.dismiss(animated: false)
                         }
                     }
