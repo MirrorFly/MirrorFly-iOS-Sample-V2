@@ -304,7 +304,7 @@ extension InstantScheduledMeetingViewController : GroupEventsDelegate {
 
     }
 
-    func didRemoveMemberFromAdmin(groupJid: String, removedAdminMemberJid: String, removedByMemberJid: String) {
+    func didRevokedAdminAccess(groupJid: String, revokedAdminMemberJid: String, revokedByMemberJid: String) {
 
     }
 

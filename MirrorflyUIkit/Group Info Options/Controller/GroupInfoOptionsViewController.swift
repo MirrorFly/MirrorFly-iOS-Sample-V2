@@ -17,8 +17,9 @@ class GroupInfoOptions {
     }
 }
 
-protocol GroupInfoOptionsDelegate: class {
+protocol GroupInfoOptionsDelegate: AnyObject {
     func makeGroupAdmin(groupID: String, userJid: String, userName: String)
+    func removeGroupAdmin(groupID: String, userJid: String, userName: String)
     func removeParticipant(groupID: String, removeGroupMemberJid: String, userName: String)
     func navigateToUserProfile(userJid: String)
     func navigateToChat(userJid: String)
