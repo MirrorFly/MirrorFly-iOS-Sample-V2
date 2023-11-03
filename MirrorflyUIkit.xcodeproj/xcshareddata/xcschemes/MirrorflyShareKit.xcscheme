@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1320"
+   LastUpgradeVersion = "1500"
+   wasCreatedForAppExtension = "YES"
    version = "2.0">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -14,9 +15,23 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "CEC08B6227E23B9F005E48C5"
-               BuildableName = "MirrorflyNotificationExtention.appex"
-               BlueprintName = "MirrorflyNotificationExtention"
+               BlueprintIdentifier = "CEE7C59C299F6505002F22FA"
+               BuildableName = "MirrorflyShareKit.appex"
+               BlueprintName = "MirrorflyShareKit"
+               ReferencedContainer = "container:MirrorflyUIkit.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "CEC08A9C27E23B0D005E48C5"
+               BuildableName = "Mirrorfly.app"
+               BlueprintName = "Mirrorfly"
                ReferencedContainer = "container:MirrorflyUIkit.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -26,9 +41,8 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
-      shouldUseLaunchSchemeArgsEnv = "YES">
-      <Testables>
-      </Testables>
+      shouldUseLaunchSchemeArgsEnv = "YES"
+      shouldAutocreateTestPlan = "YES">
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"
@@ -42,6 +56,16 @@
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES"
       launchAutomaticallySubstyle = "2">
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "CEC08A9C27E23B0D005E48C5"
+            BuildableName = "Mirrorfly.app"
+            BlueprintName = "Mirrorfly"
+            ReferencedContainer = "container:MirrorflyUIkit.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -51,15 +75,16 @@
       debugDocumentVersioning = "YES"
       askForAppToLaunch = "Yes"
       launchAutomaticallySubstyle = "2">
-      <MacroExpansion>
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "CEC08B6227E23B9F005E48C5"
-            BuildableName = "MirrorflyNotificationExtention.appex"
-            BlueprintName = "MirrorflyNotificationExtention"
+            BlueprintIdentifier = "CEC08A9C27E23B0D005E48C5"
+            BuildableName = "Mirrorfly.app"
+            BlueprintName = "Mirrorfly"
             ReferencedContainer = "container:MirrorflyUIkit.xcodeproj">
          </BuildableReference>
-      </MacroExpansion>
+      </BuildableProductRunnable>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">
