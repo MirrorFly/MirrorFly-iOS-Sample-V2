@@ -99,16 +99,10 @@ class GroupCreationViewModel : NSObject {
     }
     
     func addNewParticipantToGroup(groupID: String,
-                                  completionHandler: @escaping (Bool) -> Void) {
+                                  completionHandler: @escaping FlyCompletionHandler) {
         
         let contactList = getParticiapntsJID()
         
-        try! GroupManager.shared.addParticipantToGroup(groupId: groupID,                                                                   newUserJidList: contactList) { isSuccess, error, data in
-            
-            if isSuccess {
-                print("SUCCESSSS")
-            }
-            completionHandler(isSuccess)
-        }
+        try! GroupManager.shared.addParticipantToGroup(groupId: groupID, newUserJidList: contactList, completionHandler: completionHandler)
     }
 }

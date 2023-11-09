@@ -753,6 +753,10 @@ extension GroupInfoViewController: AddParticipantsDelegate {
 }
 
 extension GroupInfoViewController: GroupInfoOptionsDelegate {
+    func removeGroupAdmin(groupID: String, userJid: String, userName: String) {
+        
+    }
+    
     
     func makeGroupAdmin(groupID: String, userJid: String, userName: String) {
         
@@ -804,12 +808,16 @@ extension GroupInfoViewController: GroupInfoOptionsDelegate {
         AppAlert.shared.onAlertAction = { [weak self] (result) -> Void in
             let isBlocked = self?.groupInfoViewModel.isBlockedByAdmin(groupJid: self?.groupID ?? "") ?? false
             if result == 0 && !isBlocked {
-                self?.groupInfoViewModel.removeParticipantFromGroup(groupID: groupID, removeGroupMemberJid: removeGroupMemberJid) { [weak self] success in
+                self?.groupInfoViewModel.removeParticipantFromGroup(groupID: groupID, removeGroupMemberJid: removeGroupMemberJid) { [weak self] success,FlyError,data  in
                     if self?.isAdminMember == true {
                         if success {
                             self?.getGroupMembers()
                             self?.refreshData()
                             AppAlert.shared.showToast(message: removeUserStatus)
+                        } else {
+                            self?.getGroupMembers()
+                            self?.refreshData()
+                            AppAlert.shared.showToast(message: FlyError?.description ?? "")
                         }
                     } else {
                         self?.getGroupMembers()
@@ -965,8 +973,8 @@ extension GroupInfoViewController : GroupEventsDelegate {
         tableView.reloadSections(IndexSet(integer: 3), with: .none)
     }
     
-    func didRemoveMemberFromAdmin(groupJid: String, removedAdminMemberJid: String, removedByMemberJid: String) {
-        if let row = self.groupMembers.firstIndex(where: {$0.memberJid == removedAdminMemberJid}) {
+    func didRevokedAdminAccess(groupJid: String, revokedAdminMemberJid: String, revokedByMemberJid: String) {
+        if let row = self.groupMembers.firstIndex(where: {$0.memberJid == revokedAdminMemberJid}) {
             groupMembers[row].isAdminMember = false
         }
         tableView.reloadSections(IndexSet(integer: 3), with: .none)

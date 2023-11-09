@@ -31,13 +31,13 @@ def uikit_pods
   pod 'lottie-ios'
   pod 'BottomSheet', :git => 'https://github.com/joomcode/BottomSheet'
   
-  pod 'MirrorFlySDK', '5.13.0'
+  pod 'MirrorFlySDK', '5.13.3'
 
 end
 
 def notification_pods
 
-  pod 'MirrorFlySDK', '5.13.0'
+  pod 'MirrorFlySDK', '5.13.3'
 
 end
 
@@ -52,7 +52,6 @@ end
 target 'UikitQaShareKit' do
   uikit_pods
 end
-
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|

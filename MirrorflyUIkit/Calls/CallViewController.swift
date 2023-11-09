@@ -1693,7 +1693,7 @@ extension CallViewController : CallManagerDelegate {
         
     }
     
-    func getDisplayName(IncomingUser :[String]) {
+    func getDisplayName(IncomingUser :[String], incomingUserName: String) {
         var userString = [String]()
         if isHideNotificationContent {
             userString.append(APP_NAME)
@@ -1712,7 +1712,7 @@ extension CallViewController : CallManagerDelegate {
                     }
                 }else {
                     let pd = ContactManager.shared.saveTempContact(userId: JID)
-                    userString.append(pd?.name ?? "User")
+                    userString.append(incomingUserName == emptyString() ? incomingUserName : pd?.name ?? "User")
                 }
             }
             print("#names \(userString)")

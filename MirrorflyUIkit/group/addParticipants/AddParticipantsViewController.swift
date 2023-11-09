@@ -151,12 +151,17 @@ class AddParticipantsViewController: UIViewController {
                 AppAlert.shared.showToast(message: "Please select minimum one Participant")
                 return
             }
-            groupCreationViewModel.addNewParticipantToGroup(groupID: groupID) { [weak self] success in
+            groupCreationViewModel.addNewParticipantToGroup(groupID: groupID) { [weak self] success,error,data  in
                 if success {
                     self?.groupCreationViewModel.initializeGroupCreationData()
                     self?.navigationController?.popViewController(animated: true)
                     self?.delegate?.updatedAddParticipants()
                     AppAlert.shared.showToast(message: "Members added successfully")
+                } else {
+                    self?.groupCreationViewModel.initializeGroupCreationData()
+                    self?.navigationController?.popViewController(animated: true)
+                    self?.delegate?.updatedAddParticipants()
+                    AppAlert.shared.showToast(message: error?.errorDescription ?? "")
                 }
             }
             
