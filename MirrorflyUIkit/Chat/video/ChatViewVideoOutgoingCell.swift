@@ -54,7 +54,7 @@ class ChatViewVideoOutgoingCell: BaseTableViewCell {
     @IBOutlet weak var bubbleImageView: UIImageView?
     @IBOutlet weak var retryButton: UIButton?
     @IBOutlet weak var replyView: UIView?
-    @IBOutlet weak var mediaLocationMapView: GMSMapView?
+    @IBOutlet weak var mediaLocationMapView: UIView?
     @IBOutlet weak var replyWithoutMediaCons: NSLayoutConstraint?
     @IBOutlet weak var replyWithMediaCOns: NSLayoutConstraint?
     
@@ -71,7 +71,6 @@ class ChatViewVideoOutgoingCell: BaseTableViewCell {
     var message : ChatMessage?
     var refreshDelegate: RefreshBubbleImageViewDelegate? = nil
     var selectedForwardMessage: [SelectedMessages]? = []
-    var sendMediaMessages: [ChatMessage]? = []
     var imageGeasture: UITapGestureRecognizer!
     
     //MARK: StarredMessage local variable
@@ -100,6 +99,9 @@ class ChatViewVideoOutgoingCell: BaseTableViewCell {
         newProgressBar = ProgressBar(frame: CGRect(x: 0, y: 0, width: progressLoader.frame.width, height: progressLoader.frame.height))
         newProgressBar.primaryColor = .white
         newProgressBar.bgColor = .clear
+        progressLoader.addSubview(newProgressBar)
+        progressLoader.isHidden = false
+        newProgressBar.isHidden = false
         imageGeasture = UITapGestureRecognizer()
         imageContainer?.addGestureRecognizer(imageGeasture)
     }
@@ -235,7 +237,7 @@ class ChatViewVideoOutgoingCell: BaseTableViewCell {
                        messageTypeIconView?.isHidden = false
                        ChatUtils.setIconForAudio(imageView: messageTypeIcon, chatMessage: message)
                        let duration = Int(replyMessage?.mediaChatMessage?.mediaDuration ?? 0)
-                       replyTextLabel?.text = !(replyMessage?.mediaChatMessage?.mediaCaptionText.isEmpty ?? false) ? replyMessage?.mediaChatMessage?.mediaCaptionText : replyMessage?.mediaChatMessage?.messageType.rawValue.capitalized.appending(" (\(duration.msToSeconds.minuteSecondMS))")
+                       replyTextLabel?.text = !(replyMessage?.mediaChatMessage?.mediaCaptionText.isEmpty ?? false) ? replyMessage?.mediaChatMessage?.mediaCaptionText : replyMessage?.mediaChatMessage?.messageType.rawValue.capitalized.appending(" (\(FlyUtils.secondsToDurationInString(seconds: Double(duration / 1000))))")
                        replyWithoutMediaCons?.isActive = true
                        replyWithMediaCOns?.isActive = false
                        mediaMessageImageView?.isHidden = true
@@ -294,15 +296,21 @@ class ChatViewVideoOutgoingCell: BaseTableViewCell {
                    }
                    mediaMessageImageView?.isHidden = true
                    mediaLocationMapView?.isHidden = false
-                   mediaLocationMapView?.camera = GMSCameraPosition.camera(withLatitude: latitude, longitude: longitude, zoom: 16.0, bearing: 360.0, viewingAngle: 15.0)
                    
-                   DispatchQueue.main.async
-                   { [self] in
-                       // 2. Perform UI Operations.
-                       let position = CLLocationCoordinate2DMake(latitude,longitude)
-                       let marker = GMSMarker(position: position)
-                       marker.map = mediaLocationMapView
+                   AppUtils.shared.fetchStaticMapImage(latitude: latitude, longitude: longitude, zoomLevel: "16", size: CGSize(width: mediaLocationMapView?.bounds.width ?? 250, height: mediaLocationMapView?.bounds.height ?? 250)) { [self] mapImage in
+                       let mapImageView = UIImageView(frame: CGRect(x: 0, y: 0, width: mediaLocationMapView?.bounds.width ?? 250, height: mediaLocationMapView?.bounds.height ?? 250))
+                       mapImageView.image = mapImage
+                       mediaLocationMapView?.addSubview(mapImageView)
                    }
+//                   mediaLocationMapView?.camera = GMSCameraPosition.camera(withLatitude: latitude, longitude: longitude, zoom: 16.0, bearing: 360.0, viewingAngle: 15.0)
+//                   
+//                   DispatchQueue.main.async
+//                   { [self] in
+//                       // 2. Perform UI Operations.
+//                       let position = CLLocationCoordinate2DMake(latitude,longitude)
+//                       let marker = GMSMarker(position: position)
+//                       marker.map = mediaLocationMapView
+//                   }
                    messageTypeIconView?.isHidden = false
                    replyWithoutMediaCons?.isActive = false
                    replyWithMediaCOns?.isActive = true
@@ -315,6 +323,17 @@ class ChatViewVideoOutgoingCell: BaseTableViewCell {
                    replyWithMediaCOns?.isActive = false
                    mediaMessageImageView?.isHidden = true
                    mediaLocationMapView?.isHidden = true
+               } else if replyMessage?.meetChatMessage != nil {
+                   replyTextLabel?.text = DateFormatterUtility.shared.getSchduleMeetingDate(date: replyMessage?.meetChatMessage?.scheduledDateTime ?? 0)
+                   messageTypeIcon?.image = UIImage(named: (message?.isMessageSentByMe ?? false) ? "video_link" : "video_link")
+                   messageTypeIconView?.isHidden = false
+                   replyWithoutMediaCons?.isActive = false
+                   replyWithMediaCOns?.isActive = true
+                   mediaMessageImageView?.isHidden = false
+                   mediaLocationMapView?.isHidden = true
+                   mediaMessageImageView?.image = UIImage(named: "app_icon")
+                   mediaMessageImageView?.isHidden = false
+                   mediaMessageImageView?.contentMode = .center
                } else {
                    replyWithoutMediaCons?.isActive = true
                    replyWithMediaCOns?.isActive = false
@@ -342,7 +361,7 @@ class ChatViewVideoOutgoingCell: BaseTableViewCell {
             timeOverlay?.isHidden = false
             msgStatus.isHidden = false
         }else {
-            let captionTxt = message?.mediaChatMessage?.mediaCaptionText ?? ""
+            let captionTxt = (message?.mediaChatMessage?.mediaCaptionEditedText.isEmpty ?? true) ? message?.mediaChatMessage?.mediaCaptionText ?? "" : message?.mediaChatMessage?.mediaCaptionEditedText ?? ""
             captionHolder.isHidden = false
             let mentionedUsersIds = message?.mentionedUsersIds ?? []
             let isMessageSentByMe = message?.isMessageSentByMe ?? false
@@ -354,7 +373,15 @@ class ChatViewVideoOutgoingCell: BaseTableViewCell {
                     captionLabel.text = ChatUtils.convertMentionUser(message: captionTxt, mentionedUsersIds: mentionedUsersIds).replacingOccurrences(of: "`", with: "")
                 }
             } else {
-                captionLabel.text = captionTxt
+                var attributedString : NSMutableAttributedString?
+                if fromChat && isMessageSearch {
+                    attributedString = NSMutableAttributedString(string: captionTxt)
+                    let range = (captionTxt.lowercased() as NSString).range(of: searchText.lowercased())
+                    attributedString?.addAttribute(NSAttributedString.Key.backgroundColor, value: Color.highlightColor, range: range)
+                    captionLabel.attributedText = attributedString
+                } else {
+                    captionLabel.text = captionTxt
+                }
             }
             //ChatUtils.highlight(uilabel: captionLabel, message: captionTxt, searchText: searchText, isMessageSearch: isMessageSearch, isSystemBlue: isStarredMessagePage == true && isMessageSearch ? true : false)
             captionHolder.roundCorners(corners: [.bottomLeft], radius: 5.0)
@@ -366,7 +393,7 @@ class ChatViewVideoOutgoingCell: BaseTableViewCell {
         }
         
         if let duration = message?.mediaChatMessage?.mediaDuration {
-            videoTimeLabel.text = Int(duration).msToSeconds.minuteSecondMS
+            videoTimeLabel.text =  FlyUtils.secondsToDurationInString(seconds: Double(duration / 1000))
         } else {
             videoTimeLabel.text = ""
         }
@@ -417,7 +444,7 @@ class ChatViewVideoOutgoingCell: BaseTableViewCell {
         }
         let time = DateFormatterUtility.shared.convertMillisecondsToTime(milliSeconds: timeStamp).getTimeFormat()
         self.sentTime.text = time.uppercased()
-        self.captionLabelTime.text = time.uppercased()
+        self.captionLabelTime.text = (message?.mediaChatMessage?.mediaCaptionEditedText.isEmpty ?? true) ? time.uppercased() : "Edited \(time.uppercased())"
         return self
     }
     
@@ -442,30 +469,34 @@ class ChatViewVideoOutgoingCell: BaseTableViewCell {
         downloadView?.isHidden = true
         downloadButton?.isHidden = true
         downloadLabel?.isHidden = true
+        print("#verify__ mediaStatus \(message?.mediaChatMessage?.mediaUploadStatus) +++ \(message?.mediaChatMessage?.mediaProgressStatus )")
         switch message?.mediaChatMessage?.mediaUploadStatus {
         case .not_uploaded:
             playButton.isHidden = true
-            newProgressBar.removeFromSuperview()
             progressView?.isHidden = true
             retryButton?.isHidden = false
             uploadView?.isHidden = false
             downloadView?.isHidden = true
             downloadButton?.isHidden = true
             downloadLabel?.isHidden = true
+            progressLoader.isHidden = true
+            newProgressBar.isHidden = true
         case .failed:
             playButton.isHidden = true
-            newProgressBar.removeFromSuperview()
             progressView?.isHidden = true
             retryButton?.isHidden = false
             uploadView?.isHidden = false
             downloadView?.isHidden = true
             downloadButton?.isHidden = true
             downloadLabel?.isHidden = true
+            progressLoader.isHidden = true
+            newProgressBar.isHidden = true
         case .uploading:
-            let progrss = message?.mediaChatMessage?.mediaProgressStatus ?? 0
-            print("Video Upload mediaStatus \(message?.mediaChatMessage?.mediaUploadStatus)")
-            print("video Upload mediaStatus \(progrss)")
-            progressLoader.addSubview(newProgressBar)
+            progressLoader.isHidden = false
+            if progressLoader.subviews.isEmpty{
+                progressLoader.addSubview(newProgressBar)
+            }
+            newProgressBar.isHidden = false
             progressView.isHidden = false
             uploadView.isHidden = true
             playButton.isHidden = true
@@ -473,14 +504,9 @@ class ChatViewVideoOutgoingCell: BaseTableViewCell {
             downloadView?.isHidden = true
             downloadButton?.isHidden = true
             downloadLabel?.isHidden = true
-            newProgressBar.setProg(per: CGFloat(progrss))
-//            if progrss == 100 || progrss == 0 {
-//                progressLoader.transition(to: .indeterminate)
-//            } else {
-//                progressLoader?.transition(to: .determinate(percentage: CGFloat(progrss/100)))
-//            }
+            newProgressBar.setProg(per: CGFloat(message?.mediaChatMessage?.mediaProgressStatus ?? 0))
+
         case .uploaded:
-//            progressLoader.transition(to: .indeterminate)
             progressView.isHidden = true
             uploadView.isHidden = true
             playButton.isHidden = false
@@ -488,19 +514,15 @@ class ChatViewVideoOutgoingCell: BaseTableViewCell {
             downloadView?.isHidden = true
             downloadButton?.isHidden = true
             downloadLabel?.isHidden = true
-            if(message?.messageStatus == .sent) {
-                playButton.isHidden = true
-                uploadView.isHidden = false
-                retryButton?.isHidden = false
-                progressView.isHidden = true
-            }
+            progressLoader.isHidden = true
+            newProgressBar.isHidden = true
        case .not_available:
             downloadButton?.setTitle("", for: .normal)
             downloadView?.isHidden = false
             downloadButton?.isHidden = false
             downloadLabel?.isHidden = false
             if let fileSize = message?.mediaChatMessage?.mediaFileSize{
-                downloadLabel?.text = "\(Units(bytes: Int64(fileSize)).getReadableUnit())"
+                downloadLabel?.text = "\(ByteCountFormatter.string(fromByteCount: Int64(fileSize), countStyle: .file))"
             }else {
                 downloadLabel?.text = ""
             }
@@ -508,6 +530,8 @@ class ChatViewVideoOutgoingCell: BaseTableViewCell {
             uploadView.isHidden = true
             retryButton?.isHidden = true
             progressView.isHidden = true
+            progressLoader.isHidden = true
+            newProgressBar.isHidden = true
             break
         default:
             progressView.isHidden = true
@@ -517,6 +541,8 @@ class ChatViewVideoOutgoingCell: BaseTableViewCell {
             downloadView?.isHidden = true
             downloadButton?.isHidden = true
             downloadLabel?.isHidden = true
+            progressLoader.isHidden = true
+            newProgressBar.isHidden = true
         }
     }
     
@@ -528,7 +554,7 @@ class ChatViewVideoOutgoingCell: BaseTableViewCell {
         switch message?.mediaChatMessage?.mediaDownloadStatus {
         case .not_downloaded:
             playButton.isHidden = true
-            newProgressBar.removeFromSuperview()
+            newProgressBar.isHidden = true
             progressView?.isHidden = true
             downloadButton?.isHidden = false
             downloadView?.isHidden = false
@@ -540,7 +566,7 @@ class ChatViewVideoOutgoingCell: BaseTableViewCell {
             }
         case .failed:
             playButton.isHidden = true
-            newProgressBar.removeFromSuperview()
+            newProgressBar.isHidden = true
             progressView?.isHidden = true
             downloadButton?.isHidden = false
             downloadView?.isHidden = false
@@ -551,10 +577,11 @@ class ChatViewVideoOutgoingCell: BaseTableViewCell {
                 downloadLabel?.text = ""
             }
         case .downloading:
-            let progrss = message?.mediaChatMessage?.mediaProgressStatus ?? 0
-            print("Video Upload mediaStatus \(message?.mediaChatMessage?.mediaUploadStatus)")
-            print("video Upload mediaStatus \(progrss)")
-            progressLoader.addSubview(newProgressBar)
+            progressLoader.isHidden = false
+            if progressLoader.subviews.isEmpty{
+                progressLoader.addSubview(newProgressBar)
+            }
+            newProgressBar.isHidden = false
             progressView.isHidden = false
             uploadView.isHidden = true
             playButton.isHidden = true
@@ -562,14 +589,8 @@ class ChatViewVideoOutgoingCell: BaseTableViewCell {
             downloadButton?.isHidden = true
             downloadView?.isHidden = true
             downloadLabel?.isHidden = true
-            newProgressBar.setProg(per: CGFloat(progrss))
-//            if progrss == 100 || progrss == 0 {
-//                progressLoader.transition(to: .indeterminate)
-//            } else {
-//                progressLoader?.transition(to: .determinate(percentage: CGFloat(progrss/100)))
-//            }
+            newProgressBar.setProg(per: CGFloat(message?.mediaChatMessage?.mediaProgressStatus ?? 0))
         case .downloaded:
-//            progressLoader.transition(to: .indeterminate)
             progressView.isHidden = true
             uploadView.isHidden = true
             playButton.isHidden = false
@@ -583,6 +604,8 @@ class ChatViewVideoOutgoingCell: BaseTableViewCell {
                 downloadView?.isHidden = false
                 progressView.isHidden = true
             }
+            progressLoader.isHidden = true
+            newProgressBar.isHidden = true
         default:
             progressView.isHidden = true
             playButton.isHidden = true
@@ -593,6 +616,8 @@ class ChatViewVideoOutgoingCell: BaseTableViewCell {
             }else {
                 downloadLabel?.text = ""
             }
+            progressLoader.isHidden = true
+            newProgressBar.isHidden = true
         }
     }
     

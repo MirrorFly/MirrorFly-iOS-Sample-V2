@@ -8,7 +8,7 @@
 import UIKit
 import MirrorFlySDK
 
-class AppLockPasswordViewController: UIViewController, UITextFieldDelegate {
+class AppLockPasswordViewController: BaseViewController, UITextFieldDelegate {
     
     var appLockPassword : String?
     

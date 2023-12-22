@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21225" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="22154" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21207"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22130"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -127,6 +127,7 @@
                             <constraint firstAttribute="bottom" secondItem="oGK-Zy-pw8" secondAttribute="bottom" id="bHg-h6-sZL"/>
                             <constraint firstItem="oGK-Zy-pw8" firstAttribute="top" secondItem="Qw7-Pv-FcQ" secondAttribute="top" id="bVR-6u-739"/>
                             <constraint firstAttribute="trailing" secondItem="oGK-Zy-pw8" secondAttribute="trailing" id="c7T-bS-qXh"/>
+                            <constraint firstAttribute="width" secondItem="Qw7-Pv-FcQ" secondAttribute="height" multiplier="1:1" id="hrX-K2-cSw"/>
                             <constraint firstItem="oGK-Zy-pw8" firstAttribute="centerX" secondItem="Qw7-Pv-FcQ" secondAttribute="centerX" id="lkA-0J-dMy"/>
                             <constraint firstAttribute="height" constant="20" id="s91-8X-YJl"/>
                         </constraints>
@@ -233,7 +234,7 @@
                                             <constraint firstAttribute="width" constant="50" id="hfV-xr-VfB"/>
                                         </constraints>
                                     </imageView>
-                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3tD-Q0-cwy" customClass="GMSMapView">
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3tD-Q0-cwy">
                                         <rect key="frame" x="325" y="0.0" width="50" height="50"/>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                     </view>
@@ -452,7 +453,6 @@
                     <constraint firstItem="fBG-fF-kV2" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="3" id="dZ1-bT-9vZ"/>
                     <constraint firstItem="Qal-ID-wat" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="dhl-LJ-TF4"/>
                     <constraint firstItem="OGP-sw-2MX" firstAttribute="trailing" secondItem="PG4-yF-XuJ" secondAttribute="trailing" id="eZc-sZ-pcV"/>
-                    <constraint firstItem="Qw7-Pv-FcQ" firstAttribute="width" secondItem="Qw7-Pv-FcQ" secondAttribute="height" multiplier="1:1" id="hrX-K2-cSw"/>
                     <constraint firstItem="q18-4n-ULS" firstAttribute="leading" secondItem="qPu-i7-Ar1" secondAttribute="trailing" constant="23" id="jNr-TD-mIv"/>
                     <constraint firstItem="5nj-GH-MYU" firstAttribute="trailing" secondItem="PG4-yF-XuJ" secondAttribute="trailing" id="mri-lu-Ud9"/>
                     <constraint firstItem="5nj-GH-MYU" firstAttribute="top" secondItem="PG4-yF-XuJ" secondAttribute="top" id="tGs-KX-ewv"/>

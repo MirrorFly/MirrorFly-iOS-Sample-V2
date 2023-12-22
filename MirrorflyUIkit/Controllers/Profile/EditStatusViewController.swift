@@ -254,12 +254,25 @@ extension EditStatusViewController {
                     AppAlert.shared.showToast(message: busyEmptyStatus.localized)
                 }
             } else {
-//                FlyDatabaseController.shared.userBusyStatusManager.saveStatus(busyStatus: BusyStatus(statusText: busyStatusTextView.text))
-                ChatManager.shared.setMyBusyStatus(busyStatusTextView.text)
-                hideNewStatusView()
-                defaultStatus = busyStatusTextView.text
-                busyStatusArray = getBusyStatus()
-                scrolltoRow()
+                if NetworkReachability.shared.isConnected {
+                    self.hideNewStatusView()
+                    self.defaultStatus = self.busyStatusTextView.text
+                    self.busyStatusArray = self.getBusyStatus()
+                    self.scrolltoRow()
+                    //                FlyDatabaseController.shared.userBusyStatusManager.saveStatus(busyStatus: BusyStatus(statusText: busyStatusTextView.text))
+                    startLoading(withText: "", color: .clear)
+                    ChatManager.shared.setMyBusyStatus(busyStatusTextView.text) {isSuccess,error,data in
+                        executeOnMainThread { [weak self] in
+                            guard let self else {return}
+                            self.stopLoading()
+                            self.busyStatusArray = self.getBusyStatus()
+                            self.editStatusTableView.reloadData()
+                            
+                        }
+                    }
+                } else {
+                    AppAlert.shared.showToast(message: ErrorMessage.noInternet)
+                }
                 //navigationController?.popViewController(animated: true)
             }
         } else {
@@ -428,16 +441,22 @@ extension EditStatusViewController {
             editStatusTableView.reloadData()
         } else {
             if isUserBusyStatus {
-
-                let indexRow = sender.tag
-                for i in 0..<busyStatusArray.count {
-                    busyStatusArray[i].isCurrentStatus = false
+                if NetworkReachability.shared.isConnected {
+                    let indexRow = sender.tag
+                    busyStatusTextView.text =   busyStatusArray[indexRow].status
+                    for i in 0 ..< busyStatusArray.count {
+                        busyStatusArray[i].isCurrentStatus = false
+                    }
+                    busyStatusArray[indexRow].isCurrentStatus = true
+                    ChatManager.shared.setMyBusyStatus(busyStatusTextView.text) {isSuccess,error,data in
+                        executeOnMainThread { [weak self] in
+                            guard let self else {return}
+                            self.editStatusTableView.reloadData()
+                        }
+                    }
+                } else {
+                    AppAlert.shared.showToast(message: ErrorMessage.noInternet)
                 }
-                busyStatusArray[indexRow].isCurrentStatus = true
-                editStatusTableView.reloadData()
-                busyStatusTextView.text =   busyStatusArray[indexRow].status
-
-                ChatManager.shared.setMyBusyStatus(busyStatusTextView.text)
             } else {
                 if NetworkReachability.shared.isConnected {
                     let indexRow = sender.tag

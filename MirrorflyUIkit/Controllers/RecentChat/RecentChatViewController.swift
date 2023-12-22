@@ -408,12 +408,12 @@ class RecentChatViewController: UIViewController, UIGestureRecognizerDelegate {
             }
         }
     }
-
     @objc func enteredBackGround() {
         if showPrivateChat {
             self.view.addLaunchSubview()
         }
     }
+
     @objc func permissionAlertNotification(notification: Notification) {
         if let status = notification.object as? Bool {
             CommonDefaults.permissionAlertShown = status
@@ -723,7 +723,7 @@ class RecentChatViewController: UIViewController, UIGestureRecognizerDelegate {
 
     @IBAction func headerArchiveBackAction(_ sender: UIButton) {
         hideArchiveHeader()
-        //recentChatTableView?.reloadData()
+        recentChatTableView?.reloadData()
         emptyMessageView?.isHidden = true
         showOnlyPrivateChatAvailableView(isShow: false)
         getAllChatTags()
@@ -1326,7 +1326,8 @@ extension RecentChatViewController : UITableViewDataSource ,UITableViewDelegate 
                             let chatMessage = getMessages(messageId: recentChat.lastMessageId)
                             let getGroupSenderName = ChatUtils.getGroupSenderName(messsage: chatMessage)
                             cell.setRecentChatMessage(recentChatMessage: recentChat, color: color, chatMessage: chatMessage, senderName: getGroupSenderName, fromArchive: showArchivedChat, forSearch: true)
-                            cell.setLastContentTextColor(searchText: searchBar?.text ?? "", recentChat: recentChat, caption: chatMessage.mediaChatMessage?.mediaCaptionText ?? "", searchMessage: chatMessage)
+                            let caption = chatMessage.messageType == .meet ? chatMessage.meetChatMessage?.link ?? "" : ((chatMessage.mediaChatMessage?.mediaCaptionEditedText.isEmpty ?? true) ? (chatMessage.mediaChatMessage?.mediaCaptionText ?? "") : chatMessage.mediaChatMessage?.mediaCaptionEditedText ?? "")
+                            cell.setLastContentTextColor(searchText: searchBar?.text ?? "", recentChat: recentChat, caption: caption, searchMessage: chatMessage)
                             cell.profileImageButton?.isHidden = true
                             cell.setChatTimeTextColor(lastMessageTime: recentChat.lastMessageTime, unreadCount: recentChat.unreadMessageCount)
                             cell.countLabel?.isHidden = true
@@ -1998,7 +1999,7 @@ extension RecentChatViewController {
                 print("setProfile \(isImageEmpty)")
                 if isImageEmpty {
                     userImage?.backgroundColor = Color.groupIconBackgroundGray
-                    userImage?.contentMode = .scaleAspectFit
+                    self.userImage?.contentMode = .scaleAspectFit
                     userImage?.image = placeHolder
                 } else {
                     self.userImage?.contentMode = .scaleAspectFit
@@ -2010,7 +2011,6 @@ extension RecentChatViewController {
                         }
                     }
                 }
-                userImage?.sd_setImage(with: url, placeholderImage: placeHolder)
                 videoCallView.isHidden = true
                 audioCallView.isHidden = true
                 messageView.isHidden = false
@@ -2241,6 +2241,7 @@ extension RecentChatViewController : ConnectionEventDelegate {
     
     func onConnected() {
         if !Utility.getBoolFromPreference(key: "oneTimeSync") {
+            print("contactSyncRequest=====>2")
             ContactSyncManager.shared.syncContacts(){ isSuccess,_,_ in
                 if isSuccess {
                     print("oneTimeSync", isSuccess)
@@ -2512,7 +2513,7 @@ extension RecentChatViewController : GroupCreationDelegate {
 }
 
 extension RecentChatViewController : GroupEventsDelegate {
-    func didRemoveMemberFromAdmin(groupJid: String, removedAdminMemberJid: String, removedByMemberJid: String) {
+    func didRevokedAdminAccess(groupJid: String, revokedAdminMemberJid: String, revokedByMemberJid: String) {
         DispatchQueue.main.async { [weak self] in
             self?.updateGroupInRecentChat(groupJid: groupJid)
         }

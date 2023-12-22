@@ -9,10 +9,11 @@ import Foundation
 import UIKit
 import MirrorFlySDK
 import LocalAuthentication
+import BottomSheet
 
 @objc class RootViewController : NSObject {
     public static var sharedInstance = RootViewController()
-    var callViewController : CallViewController?
+    var callViewController : CallUIViewController?
     
     override init() {
         super.init()
@@ -24,9 +25,6 @@ import LocalAuthentication
 }
 
 extension RootViewController : CallManagerDelegate {
-    func onLocalVideoTrackAdded(userId: String) {
-
-    }
 
     func onRemoteVideoTrackAdded(userId: String, track: RTCVideoTrack) {
         callViewController?.onRemoteVideoTrackAdded(userId: userId, track: track)
@@ -50,15 +48,11 @@ extension RootViewController : CallManagerDelegate {
         
     }
     
-    func getDisplayName(IncomingUser :[String]) {
+    func getDisplayName(IncomingUser :[String], incomingUserName: String) {
         DispatchQueue.main.async { [weak self] in
-            self?.callViewController?.getDisplayName(IncomingUser: IncomingUser)
+            self?.callViewController?.getDisplayName(IncomingUser: IncomingUser, incomingUserName: incomingUserName)
         }
         
-    }
-    
-    func sendCallMessage( groupCallDetails : GroupCallDetails , users: [String], invitedUsers: [String]) {
-        callViewController?.sendCallMessage(groupCallDetails: groupCallDetails, users: users, invitedUsers: invitedUsers)
     }
     
     func socketConnectionEstablished() {
@@ -70,9 +64,6 @@ extension RootViewController : CallManagerDelegate {
         
         
         DispatchQueue.main.async { [weak self] in
-            if userId == AppUtils.getMyJid() && (callStatus != .RECONNECTING && callStatus != .RECONNECTED) {
-                return
-            }
             
             switch callStatus {
             case .ATTENDED:
@@ -88,14 +79,14 @@ extension RootViewController : CallManagerDelegate {
 
                 if let topController = UIApplication.shared.keyWindow?.rootViewController {
                     if let presentedViewController = topController.presentedViewController {
-                        if presentedViewController.isKind(of: UIAlertController.self) {
+                        if presentedViewController.isKind(of: UIAlertController.self) || presentedViewController is BottomSheetNavigationController {
                             presentedViewController.dismiss(animated: false)
                         }
                     }
                 }
                 let window = UIApplication.shared.windows.filter {$0.isKeyWindow}.first
                 if  let navigationController = window?.rootViewController as? UINavigationController {
-                    if CallManager.getCallDirection() == .Incoming &&  (navigationController.presentedViewController?.isKind(of: CallViewController.self) == false || navigationController.presentedViewController == nil){
+                    if CallManager.getCallDirection() == .Incoming &&  (navigationController.presentedViewController?.isKind(of: CallUIViewController.self) == false || navigationController.presentedViewController == nil){
                         if let callController = self?.callViewController {
                             callController.modalPresentationStyle = .overFullScreen
                             let navigationStack = UINavigationController(rootViewController: callController)
@@ -162,7 +153,7 @@ extension RootViewController {
     
     public func initCallSDK(){
         if callViewController == nil {
-            callViewController = UIStoryboard(name: "Call", bundle: nil).instantiateViewController(withIdentifier: "CallViewController") as? CallViewController
+            callViewController = UIStoryboard(name: "Call", bundle: nil).instantiateViewController(withIdentifier: "CallUIViewController") as? CallUIViewController
         }
         
         do {

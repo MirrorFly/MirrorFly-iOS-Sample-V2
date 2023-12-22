@@ -44,6 +44,7 @@ struct ShareData {
     var thumbImage: UIImage?
     var isFromFile: Bool?
     var invalidType: InvalidType?
+    var image: UIImage?
 }
 
 struct ContactDetails {

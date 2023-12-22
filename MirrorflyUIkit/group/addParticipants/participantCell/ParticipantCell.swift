@@ -147,7 +147,7 @@ class ParticipantCell: UITableViewCell {
         receiverMessageTypeView?.isHidden = false
         
             switch recentChat.lastMessageType {
-            case .text:
+            case .text, .autoText:
                 receiverMessageTypeView?.isHidden = true
             case .contact:
                 receiverMessageTypeImageView?.image = UIImage(named: ImageConstant.ic_rccontact)
@@ -167,6 +167,8 @@ class ParticipantCell: UITableViewCell {
                 receiverMessageTypeImageView?.image = UIImage(named: ImageConstant.ic_rcvideo)
             case .document:
                 receiverMessageTypeImageView?.image = UIImage(named: ImageConstant.ic_rcdocument)
+            case .meet:
+                receiverMessageTypeImageView?.image = UIImage(named: ImageConstant.ic_rcmeet)
             default:
                 receiverMessageTypeView?.isHidden = true
             }
@@ -180,7 +182,7 @@ class ParticipantCell: UITableViewCell {
                 break
             case .sent:
                 switch recentChat.lastMessageType {
-                case .video, .audio, .image,.text,.contact:
+                case .video, .audio, .image,.text,.contact , .autoText:
                     statusImage?.image = UIImage(named: ImageConstant.ic_hour)
                 default:
                     statusImage?.image = UIImage(named: ImageConstant.ic_sent)

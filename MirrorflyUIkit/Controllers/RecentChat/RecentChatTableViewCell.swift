@@ -117,7 +117,8 @@ class RecentChatTableViewCell: UITableViewCell {
     }
     
     func setLastContentTextColor(searchText: String,recentChat: RecentChat, caption : String = "", searchMessage: ChatMessage? = nil) {
-        var recentMessage = recentChat.lastMessageContent.trim()
+        let editMesssage = ChatManager.getMessageOfId(messageId: recentChat.lastMessageId)?.editedTextContent ?? emptyString()
+        var recentMessage = editMesssage.isEmpty ? recentChat.lastMessageContent.trim() : editMesssage.trim()
         var captionText = caption
         if !recentChat.mentionedUsersIds.isEmpty && searchText.isNotEmpty {
             recentMessage = ChatUtils.convertNormalMentionUser(message: recentMessage, mentionedUsersIds: recentChat.mentionedUsersIds)
@@ -153,7 +154,7 @@ class RecentChatTableViewCell: UITableViewCell {
                     userMessageLabel?.text = ChatUtils.convertMentionUser(message: recentMessage, mentionedUsersIds: recentChat.mentionedUsersIds).replacingOccurrences(of: "`", with: "")
                 }
             } else {
-                userMessageLabel?.text = recentChat.lastMessageContent
+                userMessageLabel?.text = recentMessage
             }
         }
     }
@@ -262,6 +263,8 @@ class RecentChatTableViewCell: UITableViewCell {
                 receiverMessageTypeImageView?.image = UIImage(named: ImageConstant.ic_rcvideo)
             case .document:
                 receiverMessageTypeImageView?.image = UIImage(named: ImageConstant.ic_rcdocument)
+            case .meet:
+                receiverMessageTypeImageView?.image = UIImage(named: ImageConstant.ic_rcmeet)
             default:
                 receiverMessageTypeView?.isHidden = true
             }
@@ -314,8 +317,26 @@ class RecentChatTableViewCell: UITableViewCell {
             break
         case .video, .image,.audio,.contact,.location:
             let mentionedUsersIds = chatMessage?.mentionedUsersIds ?? []
-            if !mentionedUsersIds.isEmpty, chatMessage?.mediaChatMessage?.mediaCaptionText.trim().isNotEmpty ?? false {
-                let message = chatMessage?.mediaChatMessage?.mediaCaptionText.trim() ?? ""
+            if let mediaMessage = chatMessage?.mediaChatMessage {
+                let captionText = mediaMessage.mediaCaptionEditedText.isEmpty ? mediaMessage.mediaCaptionText : mediaMessage.mediaCaptionEditedText
+                if !mentionedUsersIds.isEmpty, captionText.trim().isNotEmpty {
+                    let isMessageSentByMe = chatMessage?.isMessageSentByMe ?? false
+                    if recentChatMessage.profileType == .groupChat {
+                        userMessageLabel?.attributedText = ChatUtils.getMentionTextContent(message: captionText, uiLabel: userMessageLabel, isMessageSentByMe: isMessageSentByMe, mentionedUsers: mentionedUsersIds)
+                    } else {
+                        userMessageLabel?.text = ChatUtils.convertMentionUser(message: captionText, mentionedUsersIds: mentionedUsersIds).replacingOccurrences(of: "`", with: "")
+                    }
+                } else {
+                    userMessageLabel?.text = (captionText.trim().isNotEmpty) ? captionText : recentChatMessage.lastMessageType?.rawValue.capitalized
+                }
+            }
+           // userMessageLabel?.text = (chatMessage?.mediaChatMessage?.mediaCaptionText.trim().isNotEmpty ?? false) ? chatMessage?.mediaChatMessage?.mediaCaptionText : recentChatMessage.lastMessageType?.rawValue.capitalized
+        case .document:
+            userMessageLabel?.text = "Document"
+        case .meet:
+            let mentionedUsersIds = chatMessage?.mentionedUsersIds ?? []
+            if !mentionedUsersIds.isEmpty, (chatMessage?.meetChatMessage?.scheduledDateTime != 0) {
+                let message = DateFormatterUtility.shared.getSchduleMeetingDate(date: chatMessage?.meetChatMessage?.scheduledDateTime ?? 0)
                 let isMessageSentByMe = chatMessage?.isMessageSentByMe ?? false
                 if recentChatMessage.profileType == .groupChat {
                     userMessageLabel?.attributedText = ChatUtils.getMentionTextContent(message: message, uiLabel: userMessageLabel, isMessageSentByMe: isMessageSentByMe, mentionedUsers: mentionedUsersIds)
@@ -323,11 +344,8 @@ class RecentChatTableViewCell: UITableViewCell {
                     userMessageLabel?.text = ChatUtils.convertMentionUser(message: message, mentionedUsersIds: mentionedUsersIds).replacingOccurrences(of: "`", with: "")
                 }
             } else {
-                userMessageLabel?.text = (chatMessage?.mediaChatMessage?.mediaCaptionText.trim().isNotEmpty ?? false) ? chatMessage?.mediaChatMessage?.mediaCaptionText : recentChatMessage.lastMessageType?.rawValue.capitalized
+                userMessageLabel?.text = "Scheduled on " + (((chatMessage?.meetChatMessage?.scheduledDateTime != 0) ? DateFormatterUtility.shared.getSchduleMeetingDate(date: chatMessage?.meetChatMessage?.scheduledDateTime ?? 0) : recentChatMessage.lastMessageType?.rawValue.capitalized) ?? "")
             }
-           // userMessageLabel?.text = (chatMessage?.mediaChatMessage?.mediaCaptionText.trim().isNotEmpty ?? false) ? chatMessage?.mediaChatMessage?.mediaCaptionText : recentChatMessage.lastMessageType?.rawValue.capitalized
-        case .document:
-            userMessageLabel?.text = "Document"
         default:
             break
         }

@@ -89,6 +89,7 @@ enum Color {
     static let highlightColor = UIColor.init(hex: "FFF4BC")
     static let color_AFBDDF = UIColor(named: "color_AFBDDF")
     static let color_D0D8EB = UIColor(named: "color_D0D8EB")
+    static let color_817B7B = UIColor(named: "color_817B7B")
 }
 
 extension UIColor {

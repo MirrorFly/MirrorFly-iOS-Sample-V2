@@ -31,7 +31,7 @@ class AudioReceiver: BaseTableViewCell, AVAudioPlayerDelegate {
     @IBOutlet weak var downloadButton: UIButton?
     
     // Reply Outlet
-    @IBOutlet weak var mapView: GMSMapView?
+    @IBOutlet weak var mapView: UIView?
     @IBOutlet weak var mediaMessageImageView: UIImageView?
     @IBOutlet weak var messageTypeIconView: UIView?
     @IBOutlet weak var messageTypeIcon: UIImageView?
@@ -278,21 +278,35 @@ class AudioReceiver: BaseTableViewCell, AVAudioPlayerDelegate {
                        return nil
                    }
                    
-                   mapView?.camera = GMSCameraPosition.camera(withLatitude: latitude, longitude: longitude, zoom: 16.0, bearing: 360.0, viewingAngle: 15.0)
-                   
-                   DispatchQueue.main.async
-                   { [self] in
-                       // 2. Perform UI Operations.
-                       var position = CLLocationCoordinate2DMake(latitude,longitude)
-                       var marker = GMSMarker(position: position)
-                       marker.map = mapView
+                   AppUtils.shared.fetchStaticMapImage(latitude: latitude, longitude: longitude, zoomLevel: "16", size: CGSize(width: mapView?.bounds.width ?? 250, height: mapView?.bounds.height ?? 250)) { [self] mapImage in
+                       let mapImageView = UIImageView(frame: CGRect(x: 0, y: 0, width: mapView?.bounds.width ?? 250, height: mapView?.bounds.height ?? 250))
+                       mapImageView.image = mapImage
+                       mapView?.addSubview(mapImageView)
                    }
+//                   mapView?.camera = GMSCameraPosition.camera(withLatitude: latitude, longitude: longitude, zoom: 16.0, bearing: 360.0, viewingAngle: 15.0)
+//                   
+//                   DispatchQueue.main.async
+//                   { [self] in
+//                       // 2. Perform UI Operations.
+//                       var position = CLLocationCoordinate2DMake(latitude,longitude)
+//                       var marker = GMSMarker(position: position)
+//                       marker.map = mapView
+//                   }
                    replyWithMediaCons?.isActive = true
                    replyWithOutMediaCons?.isActive = false
                } else if replyMessage?.contactChatMessage != nil {
                    replyTextLabel?.attributedText = ChatUtils.setAttributeString(name: message?.replyParentChatMessage?.contactChatMessage?.contactName)
                    messageTypeIcon?.image = UIImage(named: (message?.isMessageSentByMe ?? false) ? "senderContact" : "receiverContact")
                    messageTypeIconView?.isHidden = false
+                   replyWithMediaCons?.isActive = true
+                   replyWithOutMediaCons?.isActive = false
+               } else if replyMessage?.meetChatMessage != nil {
+                   messageTypeIcon?.image = UIImage(named: (message?.isMessageSentByMe ?? false) ? "video_link" : "video_link")
+                   replyTextLabel?.text = DateFormatterUtility.shared.getSchduleMeetingDate(date: replyMessage?.meetChatMessage?.scheduledDateTime ?? 0)
+                   replyWithMediaCons?.isActive = true
+                   mediaMessageImageView?.isHidden = false
+                   mediaMessageImageView?.image = UIImage(named: "app_icon")
+                   mediaMessageImageView?.contentMode = .center
                    replyWithMediaCons?.isActive = true
                    replyWithOutMediaCons?.isActive = false
                } else {
@@ -318,7 +332,7 @@ class AudioReceiver: BaseTableViewCell, AVAudioPlayerDelegate {
         self.message = message
         self.currentIndexPath = indexPath
         let duration = Int(message?.mediaChatMessage?.mediaDuration ?? 0)
-            audioDuration?.text = "\(duration.msToSeconds.minuteSecondMS)"
+            audioDuration?.text = FlyUtils.secondsToDurationInString(seconds:  Double(duration / 1000) )
         switch message?.mediaChatMessage?.mediaDownloadStatus {
         case .not_downloaded:
             download?.image = UIImage(named: ImageConstant.ic_download)
@@ -327,6 +341,7 @@ class AudioReceiver: BaseTableViewCell, AVAudioPlayerDelegate {
             nicoProgressBar?.isHidden = true
             playBtn?.isHidden = true
             downloadButton?.isHidden = false
+            newProgressBar.removeFromSuperview()
             slider?.isUserInteractionEnabled = false
         case .failed:
             download?.image = UIImage(named: ImageConstant.ic_download)
@@ -335,6 +350,7 @@ class AudioReceiver: BaseTableViewCell, AVAudioPlayerDelegate {
             nicoProgressBar?.isHidden = true
             playBtn?.isHidden = true
             downloadButton?.isHidden = false
+            newProgressBar.removeFromSuperview()
             slider?.isUserInteractionEnabled = false
         case .downloading:
             download?.image = UIImage(named: ImageConstant.ic_download_cancel)
@@ -343,6 +359,10 @@ class AudioReceiver: BaseTableViewCell, AVAudioPlayerDelegate {
             download?.isHidden = false
             playImage?.isHidden = true
             nicoProgressBar?.isHidden = false
+            if nicoProgressBar.subviews.isEmpty{
+                self.nicoProgressBar.addSubview(self.newProgressBar)
+            }
+            newProgressBar.setProg(per: CGFloat(message?.mediaChatMessage?.mediaProgressStatus ?? 0))
             slider?.isUserInteractionEnabled = false
         case .downloaded:
             playImage?.image = isPlaying ? UIImage(named: ImageConstant.ic_audio_pause_gray) : UIImage(named: ImageConstant.ic_play_dark)
@@ -351,6 +371,7 @@ class AudioReceiver: BaseTableViewCell, AVAudioPlayerDelegate {
             downloadButton?.isHidden = true
             playImage?.isHidden = false
             nicoProgressBar?.isHidden = true
+            newProgressBar.removeFromSuperview()
             slider?.isUserInteractionEnabled = true
         default:
             download?.image = UIImage(named: ImageConstant.ic_download)
@@ -359,6 +380,7 @@ class AudioReceiver: BaseTableViewCell, AVAudioPlayerDelegate {
             playBtn?.isHidden = true
             downloadButton?.isHidden = false
             nicoProgressBar?.isHidden = true
+            newProgressBar.removeFromSuperview()
             slider?.isUserInteractionEnabled = false
         }
         guard let timeStamp =  message?.messageSentTime else {
@@ -412,8 +434,11 @@ class AudioReceiver: BaseTableViewCell, AVAudioPlayerDelegate {
             self.downloadButton?.isHidden = false
             self.download?.isHidden = false
             self.playImage?.isHidden = true
-            self.nicoProgressBar.addSubview(self.newProgressBar)
             self.slider?.isUserInteractionEnabled = false
+            if self.nicoProgressBar.subviews.isEmpty{
+                self.nicoProgressBar.addSubview(self.newProgressBar)
+            }
+            self.newProgressBar.setProg(per: CGFloat(self.message?.mediaChatMessage?.mediaProgressStatus ?? 0))
         }
     }
     

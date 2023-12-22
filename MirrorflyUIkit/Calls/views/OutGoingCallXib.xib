@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21225" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina5_5" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21207"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -166,7 +166,7 @@
                             </userDefinedRuntimeAttributes>
                         </button>
                         <stackView opaque="NO" contentMode="scaleToFill" spacing="24" translatesAutoresizingMaskIntoConstraints="NO" id="vic-XV-0Md">
-                            <rect key="frame" x="39.666666666666657" y="0.66666666666662877" width="334.66666666666674" height="69.333333333333329"/>
+                            <rect key="frame" x="86.333333333333329" y="0.66666666666662877" width="241.33333333333337" height="69.333333333333329"/>
                             <subviews>
                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3Qk-17-9wc">
                                     <rect key="frame" x="0.0" y="0.0" width="69" height="69.333333333333329"/>
@@ -176,18 +176,18 @@
                                     <state key="normal" image="IconAudioOff"/>
                                 </button>
                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bPP-JJ-o22">
-                                    <rect key="frame" x="93" y="0.0" width="69.333333333333314" height="69.333333333333329"/>
+                                    <rect key="frame" x="93.000000000000028" y="0.0" width="69.333333333333343" height="69.333333333333329"/>
                                     <state key="normal" image="IconCameraOff"/>
                                 </button>
                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ONG-Rf-h5F">
-                                    <rect key="frame" x="186.33333333333334" y="0.0" width="55" height="69.333333333333329"/>
+                                    <rect key="frame" x="186.33333333333337" y="0.0" width="55" height="69.333333333333329"/>
                                     <accessibility key="accessibilityConfiguration">
                                         <bool key="isElement" value="NO"/>
                                     </accessibility>
                                     <state key="normal" image="VideoDisabled"/>
                                 </button>
-                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ivY-91-8wT">
-                                    <rect key="frame" x="265.33333333333331" y="0.0" width="69.333333333333314" height="69.333333333333329"/>
+                                <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ivY-91-8wT">
+                                    <rect key="frame" x="241.33333333333337" y="0.0" width="0.0" height="69.333333333333329"/>
                                     <state key="normal" image="IconSpeakerOff"/>
                                 </button>
                             </subviews>

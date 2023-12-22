@@ -25,7 +25,7 @@ class ChatViewParentMessageCell: BaseTableViewCell {
     
     //Outgoing And Incoming cell -  Basic view and its elements
     @IBOutlet weak var baseView: UIView?
-    @IBOutlet weak var bubbleImageView: UIImageView?
+    @IBOutlet weak var bubbleBGView: UIView?
     
     @IBOutlet weak var replyUserLabelWidthCons: NSLayoutConstraint?
     @IBOutlet weak var locationOutgoingView: UIView!
@@ -49,8 +49,8 @@ class ChatViewParentMessageCell: BaseTableViewCell {
     @IBOutlet weak var sendFromLabel: UILabel?
     @IBOutlet weak var senderToLabel: UILabel?
     @IBOutlet weak var senderImageView: UIImageView?
-    @IBOutlet weak var chatLocationMapView: GMSMapView?
-    @IBOutlet weak var mediaLocationMapView: GMSMapView?
+    @IBOutlet weak var chatLocationMapView: UIView?
+    @IBOutlet weak var mediaLocationMapView: UIView?
     
     // Location message view and its elements
     @IBOutlet weak var locationImageView: UIImageView?
@@ -98,7 +98,10 @@ class ChatViewParentMessageCell: BaseTableViewCell {
     
     @IBOutlet weak var linkView: UIView?
     @IBOutlet weak var receiverLinkView: UIView?
-    
+
+    //Scheduled meeting
+    @IBOutlet weak var scheduledMeetingTimeLabel: UILabel?
+
     var refreshDelegate: RefreshBubbleImageViewDelegate? = nil
     var selectedForwardMessage: [SelectedMessages]? = []
     var isDeleteSelected: Bool = false
@@ -166,6 +169,11 @@ class ChatViewParentMessageCell: BaseTableViewCell {
     }
     
     func getCellFor(_ message: ChatMessage?, at indexPath: IndexPath?,isShowForwardView: Bool?, fromChat: Bool = false, isMessageSearch: Bool = false, searchText: String = "", profileDetails: ProfileDetails) -> ChatViewParentMessageCell? {
+        if let replyMessage = message?.isReplyMessage {
+            replyView?.isHidden = !replyMessage
+        } else {
+            replyView?.isHidden = true
+        }
         currentIndexPath = nil
         currentIndexPath = indexPath
         replyViewHeightCons?.isActive = true
@@ -227,7 +235,7 @@ class ChatViewParentMessageCell: BaseTableViewCell {
         // Reply view elements and its data
        let isReplyMessage = message?.isReplyMessage ?? false
        if isReplyMessage {
-            replyView?.isHidden = false
+           replyTextLabelTrailingCons?.constant = 10
            let replyMessage = FlyMessenger.getMessageOfId(messageId: message?.replyParentChatMessage?.messageId ?? "")
            if message?.replyParentChatMessage?.isMessageRecalled == true || message?.replyParentChatMessage?.isMessageDeleted == true || replyMessage == nil {
                replyTextLabel?.text = "Original message not available"
@@ -241,7 +249,7 @@ class ChatViewParentMessageCell: BaseTableViewCell {
                replyVIewWithMediaCons?.isActive = false
                replyViewWithoutMediaCons?.isActive = true
            } else {
-            let getReplymessage =  replyMessage?.messageTextContent
+               let getReplymessage =  message?.replyParentChatMessage?.messageTextContent
 //           replyViewHeightCons?.isActive = (getReplymessage?.count ?? 0 > 20) ? false : true
                if let getReplyMessage =  replyMessage, profileDetails.profileChatType == .groupChat, !getReplyMessage.mentionedUsersIds.isEmpty {
                    replyTextLabel?.attributedText = ChatUtils.getMentionTextContent(message: getReplyMessage.messageTextContent, isMessageSentByMe: getReplyMessage.isMessageSentByMe, mentionedUsers: getReplyMessage.mentionedUsersIds, searchedText: searchText)
@@ -388,15 +396,28 @@ class ChatViewParentMessageCell: BaseTableViewCell {
                mediaImageView?.isHidden = true
                mediaLocationMapView?.isHidden = false
                replyTextLabel?.text = "Location"
-               mediaLocationMapView?.camera = GMSCameraPosition.camera(withLatitude: replyMessage?.locationChatMessage?.latitude ?? 0.0, longitude: replyMessage?.locationChatMessage?.longitude ?? 0.0, zoom: 16.0, bearing: 360.0, viewingAngle: 15.0)
-               mediaLocationMapView?.isUserInteractionEnabled = false
-               DispatchQueue.main.async
-               { [self] in
-                   // 2. Perform UI Operations.
-                   let position = CLLocationCoordinate2DMake(replyMessage?.locationChatMessage?.latitude ?? 0.0,replyMessage?.locationChatMessage?.longitude ?? 0.0)
-                   let marker = GMSMarker(position: position)
-                   marker.map = mediaLocationMapView
+               guard let latitude = replyMessage?.locationChatMessage?.latitude else {
+                   return nil
                }
+               guard let longitude = replyMessage?.locationChatMessage?.longitude  else {
+                   return nil
+               }
+               
+               
+               AppUtils.shared.fetchStaticMapImage(latitude: latitude, longitude: longitude, zoomLevel: "16", size: CGSize(width: 52, height: 52)) { [self] mapImage in
+                   let mapImageView = UIImageView(frame: CGRect(x: 0, y: 0, width: 52, height: 52))
+                   mapImageView.image = mapImage
+                   mediaLocationMapView?.addSubview(mapImageView)
+               }
+//               mediaLocationMapView?.camera = GMSCameraPosition.camera(withLatitude: replyMessage?.locationChatMessage?.latitude ?? 0.0, longitude: replyMessage?.locationChatMessage?.longitude ?? 0.0, zoom: 16.0, bearing: 360.0, viewingAngle: 15.0)
+//               mediaLocationMapView?.isUserInteractionEnabled = false
+//               DispatchQueue.main.async
+//               { [self] in
+//                   // 2. Perform UI Operations.
+//                   let position = CLLocationCoordinate2DMake(replyMessage?.locationChatMessage?.latitude ?? 0.0,replyMessage?.locationChatMessage?.longitude ?? 0.0)
+//                   let marker = GMSMarker(position: position)
+//                   marker.map = mediaLocationMapView
+//               }
                replyVIewWithMediaCons?.isActive = true
                replyViewWithoutMediaCons?.isActive = false
                messageTypeIcon?.image = UIImage(named: (message?.isMessageSentByMe ?? false) ? "map" : "receivedMap")
@@ -418,6 +439,21 @@ class ChatViewParentMessageCell: BaseTableViewCell {
                replyTextLabelTrailingCons?.isActive = true
                replyVIewWithMediaCons?.isActive = false
                replyViewWithoutMediaCons?.isActive = true
+           }else if replyMessage?.meetChatMessage != nil {
+               replyTextLabel?.text = DateFormatterUtility.shared.getSchduleMeetingDate(date: replyMessage?.meetChatMessage?.scheduledDateTime ?? 0)
+               messageTypeIcon?.image = UIImage(named: (message?.isMessageSentByMe ?? false) ? "video_link" : "video_link")
+               mediaImageView?.contentMode = .center
+               mediaImageView?.isHidden = false
+               mediaImageView?.image = UIImage(named: "app_icon")
+               mediaImageViewWidthCons?.constant = 50
+               messageIconView?.isHidden = false
+               replyMessageIconWidthCons?.constant = 12
+               replyMessageIconHeightCons?.isActive = true
+               replyTextWithImageTrailingCons?.isActive = false
+               replyTextLabelTrailingCons?.isActive = true
+               replyTextLabelTrailingCons?.constant = 50
+               replyVIewWithMediaCons?.isActive = false
+               replyViewWithoutMediaCons?.isActive = true
            } else {
                mediaImageView?.isHidden = true
                messageIconView?.isHidden = true
@@ -434,7 +470,7 @@ class ChatViewParentMessageCell: BaseTableViewCell {
             replyUserLabel?.text = you.localized
         }
         else {
-            let name =   getUserName(jid: replyMessage?.senderUserJid ?? "", name: replyMessage?.senderUserName ?? "", nickName: replyMessage?.senderNickName ?? "", contactType: (replyMessage?.isDeletedUser ?? false) ? .deleted : (replyMessage?.isSavedContact ?? false) ? .live : .unknown)
+            let name =   getUserName(jid: replyMessage?.chatUserJid ?? "", name: replyMessage?.senderUserName ?? "", nickName: replyMessage?.senderNickName ?? "", contactType: (replyMessage?.isDeletedUser ?? false) ? .deleted : (replyMessage?.isSavedContact ?? false) ? .live : .unknown)
             replyUserLabel?.text = name
         }
            
@@ -446,15 +482,14 @@ class ChatViewParentMessageCell: BaseTableViewCell {
             replyMessageIconHeightCons?.isActive = false
             replyTextWithImageTrailingCons?.isActive = false
             replyTextLabelTrailingCons?.isActive = true
-            replyView?.isHidden = true
         }
         
         //Bubble View
         if (message!.isMessageSentByMe) {
-            ChatUtils.setSenderBubbleBackground(imageView: bubbleImageView)
+            ChatUtils.setSenderBubbleBackground(imageView: bubbleBGView)
         }
         else {
-            ChatUtils.setReceiverBubbleBackground(imageView: bubbleImageView)
+            ChatUtils.setReceiverBubbleBackground(imageView: bubbleBGView)
             if message?.messageChatType == .groupChat {
                 if let nameLabel = groupMsgSenderName {
                     nameLabel.text = ChatUtils.getGroupSenderName(messsage: message)
@@ -507,20 +542,28 @@ class ChatViewParentMessageCell: BaseTableViewCell {
         textMessageTimeLabel?.isAccessibilityElement =  true
         textMessageTimeLabel?.accessibilityLabel = Utility.currentMillisecondsToTime(milliSec: timeStamp)
         textMessageTimeLabel?.accessibilityLabel = DateFormatterUtility.shared.currentMillisecondsToLocalTime(milliSec: timeStamp)
-        textMessageTimeLabel?.text = DateFormatterUtility.shared.currentMillisecondsToLocalTime(milliSec: timeStamp)
-        
+       // textMessageTimeLabel?.text = DateFormatterUtility.shared.currentMillisecondsToLocalTime(milliSec: timeStamp)
+        if (message?.editedTextContent.isEmpty ?? true) {
+            textMessageTimeLabel?.text = DateFormatterUtility.shared.currentMillisecondsToLocalTime(milliSec: timeStamp)
+        } else {
+            textMessageTimeLabel?.text = "Edited \(DateFormatterUtility.shared.currentMillisecondsToLocalTime(milliSec: timeStamp))"
+        }
         
         self.isAccessibilityElement = true
         self.accessibilityLabel = message?.messageId
         favouriteImageView?.accessibilityLabel = message?.messageId
-        bubbleImageView?.isAccessibilityElement =  true
+        bubbleBGView?.isAccessibilityElement =  true
         
         switch  message?.messageType {
-        case .text:
+        case .text, .meet, .autoText:
             if let label = messageLabel {
-                messageLabel?.attributedText = processTextMessage(message: message?.messageTextContent ?? "", uiLabel: label, fromChat: fromChat, isMessageSearch: isMessageSearch, searchText: searchText, isMessageSentByMe: message?.isMessageSentByMe ?? false, mentionedUsers: message?.mentionedUsersIds ?? [], profileDetails: profileDetails)
+                let textMessage = (message?.editedTextContent.isEmpty ?? true) ? message?.messageTextContent : message?.editedTextContent
+                messageLabel?.attributedText = processTextMessage(message: (message?.messageType == .text || message?.messageType == .autoText) ? textMessage ?? "" : message?.meetChatMessage?.link ?? "", uiLabel: label, fromChat: fromChat, isMessageSearch: isMessageSearch, searchText: searchText, isMessageSentByMe: message?.isMessageSentByMe ?? false, mentionedUsers: message?.mentionedUsersIds ?? [], profileDetails: profileDetails)
                 print("message label width = \(messageLabel?.frame.size.width)")
 
+            }
+            if let meetTimeLabel = scheduledMeetingTimeLabel {
+                scheduledMeetingTimeLabel?.text = DateFormatterUtility.shared.getSchduleMeetingDate(date: message?.meetChatMessage?.scheduledDateTime ?? 0)
             }
         case .location:
             
@@ -531,15 +574,21 @@ class ChatViewParentMessageCell: BaseTableViewCell {
                 return nil
             }
             
-            chatLocationMapView?.camera = GMSCameraPosition.camera(withLatitude: latitude, longitude: longitude, zoom: 16.0, bearing: 360.0, viewingAngle: 15.0)
-   
-            DispatchQueue.main.async
-            { [self] in
-                // 2. Perform UI Operations.
-                var position = CLLocationCoordinate2DMake(latitude,longitude)
-                let marker = GMSMarker(position: position)
-                marker.map = chatLocationMapView
+            AppUtils.shared.fetchStaticMapImage(latitude: latitude, longitude: longitude, zoomLevel: "16", size: CGSize(width: chatLocationMapView?.bounds.width ?? 250, height: chatLocationMapView?.bounds.height ?? 250)) { [self] mapImage in
+                let mapImageView = UIImageView(frame: CGRect(x: 0, y: 0, width: chatLocationMapView?.bounds.width ?? 250, height: chatLocationMapView?.bounds.height ?? 250))
+                mapImageView.image = mapImage
+                chatLocationMapView?.addSubview(mapImageView)
             }
+            
+//            chatLocationMapView?.camera = GMSCameraPosition.camera(withLatitude: latitude, longitude: longitude, zoom: 16.0, bearing: 360.0, viewingAngle: 15.0)
+//   
+//            DispatchQueue.main.async
+//            { [self] in
+//                // 2. Perform UI Operations.
+//                var position = CLLocationCoordinate2DMake(latitude,longitude)
+//                let marker = GMSMarker(position: position)
+//                marker.map = chatLocationMapView
+//            }
             
            break
         case .contact:
@@ -559,8 +608,8 @@ class ChatViewParentMessageCell: BaseTableViewCell {
         
         if (message!.isMessageTranslated && CommonDefaults.isTranlationEnabled) {
             guard let chatMessage = message,let messageLabeltemp = messageLabel, let translatedTextLabeltemp = translatedTextLabel else {return self }
-
-            messageLabel?.attributedText = processTextMessage(message: chatMessage.messageTextContent , uiLabel: messageLabeltemp, fromChat: fromChat, isMessageSearch: isMessageSearch, searchText: searchText, isMessageSentByMe: message?.isMessageSentByMe ?? false, mentionedUsers: message?.mentionedUsersIds ?? [], profileDetails: profileDetails)
+            let textMessage = (message?.editedTextContent.isEmpty ?? true) ? message?.messageTextContent : message?.editedTextContent
+            messageLabel?.attributedText = processTextMessage(message: textMessage ?? "", uiLabel: messageLabeltemp, fromChat: fromChat, isMessageSearch: isMessageSearch, searchText: searchText, isMessageSentByMe: message?.isMessageSentByMe ?? false, mentionedUsers: message?.mentionedUsersIds ?? [], profileDetails: profileDetails)
             translatedTextLabel?.attributedText = processTextMessage(message: chatMessage.translatedMessageTextContent , uiLabel: translatedTextLabeltemp, fromChat: fromChat, isMessageSearch: isMessageSearch, searchText: searchText, isMessageSentByMe: message?.isMessageSentByMe ?? false, mentionedUsers: message?.mentionedUsersIds ?? [], profileDetails: profileDetails)
 
         }
@@ -583,27 +632,22 @@ class ChatViewParentMessageCell: BaseTableViewCell {
                         }
                         
                     } else if text.isURL {
+                        
                         let textRange = (tempName as NSString).range(of: text)
+                        
                         if(sender.didTapAttributedTextInLabel(label: textUILabel, inRange: textRange)) {
-                            print("didTapTextLabel isURL \(text)")
+                            
                             if text.contains(WEB_LOGIN_URL) {
                                 
-                                let callID = self.getCallLinkID(callLink: text)
-                                
-                                if callID.components(separatedBy: "-").count == 3 {
+                                if !CallManager.isOngoingCall() && !CallManager.isAlreadyOnAnotherCall() {
                                     
-                                    if !CallManager.isOngoingCall() {
-                                        
-                                        linkDelegate?.pushToJoinCallView(callLink: text)
-                                    }else {
-                                        linkDelegate?.showAlreadyInCallAlert(callLink: text)
-                                    }
+                                    linkDelegate?.pushToJoinCallView(callLink: text)
                                 }else {
-                                    AppUtils.shared.openURLInBrowser(urlString: text)
+                                    linkDelegate?.showAlreadyInCallAlert(callLink: text)
                                 }
-                                
                             }else {
                                 AppUtils.shared.openURLInBrowser(urlString: text)
+                                
                             }
                             break
                         }
@@ -613,49 +657,35 @@ class ChatViewParentMessageCell: BaseTableViewCell {
         }
         
     }
-    
 
     func processTextMessage(message : String, uiLabel : UILabel, fromChat: Bool = false, isMessageSearch: Bool = false, searchText: String = "", isMessageSentByMe: Bool, mentionedUsers: [String], profileDetails: ProfileDetails) -> NSMutableAttributedString? {
-
+        
         uiLabel.isUserInteractionEnabled = true
         var attributedString : NSMutableAttributedString?
         if !message.isEmpty {
             attributedString = NSMutableAttributedString(string: message)
-
-            let linkTypes: NSTextCheckingResult.CheckingType = .link
-
-            let linkDetector = try? NSDataDetector(types: linkTypes.rawValue)
-
-            if let detect = linkDetector {
-                let matches = detect.matches(in: message, options: .reportCompletion, range: NSMakeRange(0, message.count))
+            
+            let linkDetector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
+            
+            if let detector = linkDetector {
+                let matches = detector.matches(in: message, options: .reportCompletion, range: NSRange(location: 0, length : message.utf16.count))
                 for match in matches {
-                    if let urlString = match.url?.absoluteString.lowercased() {
-                        let range = (message.lowercased() as NSString).range(of: urlString )
-                        attributedString?.addAttributes([NSAttributedString.Key.foregroundColor: UIColor.systemBlue], range: range)
-                        attributedString?.addAttribute(.underlineStyle,
-                                                       value: NSUnderlineStyle.single.rawValue,
-                                                       range: range)
-                        if urlString.contains(WEB_LOGIN_URL) {
-                            
-                            let callID = self.getCallLinkID(callLink: urlString)
-                            
-                            if callID.components(separatedBy: "-").count == 3 {
-                                
-                                if(isMessageSentByMe) {
-                                    linkView?.isHidden = false
-                                }else {
-                                    receiverLinkView?.isHidden = false
-                                }
-                            }
+                    attributedString?.addAttributes([NSAttributedString.Key.foregroundColor: UIColor.systemBlue], range: match.range)
+                    attributedString?.addAttribute(.underlineStyle,
+                                                   value: NSUnderlineStyle.single.rawValue,
+                                                   range: match.range)
+                    if message.contains(WEB_LOGIN_URL) {
+                        if(isMessageSentByMe) {
+                            linkView?.isHidden = false
+                        }else {
+                            receiverLinkView?.isHidden = false
                         }
                     }
-                   
                 }
-                
             }
             
             let numTypes: NSTextCheckingResult.CheckingType = .phoneNumber
-
+            
             let phoneNumberDetector = try? NSDataDetector(types: numTypes.rawValue)
             
             if let phoneNumberDetector = phoneNumberDetector {
@@ -667,7 +697,7 @@ class ChatViewParentMessageCell: BaseTableViewCell {
                         attributedString?.addAttribute(.underlineStyle,
                                                        value: NSUnderlineStyle.single.rawValue,
                                                        range: range)
-
+                        
                     }
                 }
             }
@@ -681,6 +711,11 @@ class ChatViewParentMessageCell: BaseTableViewCell {
                 } else {
                     attributedString = NSMutableAttributedString(string: ChatUtils.convertMentionUser(message: message, mentionedUsersIds: mentionedUsers).replacingOccurrences(of: "`", with: ""))
                 }
+            } else {
+                if fromChat && isMessageSearch {
+                    let range = (message.lowercased() as NSString).range(of: searchText.lowercased())
+                    attributedString?.addAttribute(NSAttributedString.Key.backgroundColor, value: Color.highlightColor, range: range)
+                }
             }
         } else {
             attributedString = NSMutableAttributedString(string: message)
@@ -691,7 +726,7 @@ class ChatViewParentMessageCell: BaseTableViewCell {
     
     func getCallLinkID(callLink: String) -> String {
         
-        return callLink.components(separatedBy: "/").last ?? ""
+        return (callLink.components(separatedBy: "/").last ?? "")
     }
 }
 

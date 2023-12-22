@@ -129,6 +129,11 @@ class MainTabBarController: UITabBarController{
             }
            return
         }
+        if current is ChatViewParentController {
+            if (((current as? ChatViewParentController)?.editMessageId.isNotEmpty ?? false)) {
+                (current as? ChatViewParentController)?.closeContextMenu()
+            }
+        }
         if CommonDefaults.appFingerprintenable {
             let vc = PrivateChatFingerPrintPINViewController(nibName: "PrivateChatFingerPrintPINViewController", bundle: nil)
             self.navigationController?.pushViewController(vc, animated: false)
@@ -190,9 +195,11 @@ class MainTabBarController: UITabBarController{
     }
     
     @objc func updateMessageUnreadCount(notification: NSNotification) {
-        if let count = notification.object as? Int {
-            if let item : UITabBarItem = chatTabBars?.items?[0] {
-                item.badgeValue = (count == 0) ? nil : "\(count)"
+        executeOnMainThread {
+            if let count = notification.object as? Int {
+                if let item : UITabBarItem = self.chatTabBars?.items?[0] {
+                    item.badgeValue = (count == 0) ? nil : "\(count)"
+                }
             }
         }
     }

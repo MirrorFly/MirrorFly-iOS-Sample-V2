@@ -11,18 +11,22 @@ extension UIViewController {
 
     static let activityIndicator: UIActivityIndicatorView = UIActivityIndicatorView()
 
-    func startLoading(withText: String) {
-        UIViewController.showUniversalLoadingView(true, loadingText: withText)
+    func startLoading(withText: String, color: UIColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.5)) {
+        executeOnMainThread {
+            UIViewController.showUniversalLoadingView(true, loadingText: withText, color: color)
+        }
     }
 
     func stopLoading() {
-        UIViewController.showUniversalLoadingView(false)
+        executeOnMainThread {
+            UIViewController.showUniversalLoadingView(false)
+        }
       }
     
     
-    class func makeLoadingView(withFrame frame: CGRect, loadingText text: String?) -> UIView? {
+    class func makeLoadingView(withFrame frame: CGRect, loadingText text: String?, color: UIColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.5)) -> UIView? {
        let loadingView = UIView(frame: frame)
-       loadingView.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.5)
+       loadingView.backgroundColor = color
        let activityIndicator = UIActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
        //activityIndicator.backgroundColor = UIColor(red:0.16, green:0.17, blue:0.21, alpha:1)
        activityIndicator.layer.cornerRadius = 6
@@ -52,13 +56,13 @@ extension UIViewController {
        return loadingView
    }
     
-    class func showUniversalLoadingView(_ show: Bool, loadingText : String = "") {
+    class func showUniversalLoadingView(_ show: Bool, loadingText : String = "", color: UIColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.5)) {
         let existingView = UIApplication.shared.windows[0].viewWithTag(1200)
         if show {
             if existingView != nil {
                 return
             }
-            let loadingView = self.makeLoadingView(withFrame: UIScreen.main.bounds, loadingText: loadingText)
+            let loadingView = self.makeLoadingView(withFrame: UIScreen.main.bounds, loadingText: loadingText, color: color)
             loadingView?.tag = 1200
             UIApplication.shared.windows[0].addSubview(loadingView!)
         } else {

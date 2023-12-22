@@ -308,11 +308,14 @@ public class IPImage: NSObject {
     }
     
     public func generateInitialSqareImage() -> UIImage? {
-            let view = setupSquareView()
-            UIGraphicsBeginImageContextWithOptions(view.bounds.size, false, 0.0)
-            view.layer.render(in: UIGraphicsGetCurrentContext()!)
+        let view = setupSquareView()
+        UIGraphicsBeginImageContextWithOptions(view.bounds.size, false, 0.0)
+        if let graphicsContext = UIGraphicsGetCurrentContext(){
+            view.layer.render(in: graphicsContext)
             let image = UIGraphicsGetImageFromCurrentImageContext()
             UIGraphicsEndImageContext()
             return image
+        }
+        return nil
     }
 }

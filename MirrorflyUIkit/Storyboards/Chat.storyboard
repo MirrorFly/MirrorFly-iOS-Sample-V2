@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="a6v-qf-Ud1">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="22154" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="a6v-qf-Ud1">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22130"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -31,16 +31,16 @@
         <!--Chat View Parent Controller-->
         <scene sceneID="vs6-El-iH6">
             <objects>
-                <viewController storyboardIdentifier="ChatViewParentController" id="U3O-Rv-gdd" customClass="ChatViewParentController" customModule="Mirrorfly" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="ChatViewParentController" id="U3O-Rv-gdd" customClass="ChatViewParentController" customModule="UiKitQa" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" clipsSubviews="YES" contentMode="scaleToFill" id="ful-Hf-t8u">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="GL1-9R-WMd" userLabel="Top status view">
-                                <rect key="frame" x="0.0" y="15" width="393" height="44"/>
+                                <rect key="frame" x="0.0" y="29" width="393" height="30"/>
                                 <color key="backgroundColor" name="NavigationColor"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="44" id="lWZ-Ed-nFD"/>
+                                    <constraint firstAttribute="height" constant="30" id="lWZ-Ed-nFD"/>
                                 </constraints>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tYR-ZY-lng">
@@ -66,7 +66,7 @@
                                             <constraint firstItem="dbT-9V-hrO" firstAttribute="leading" secondItem="pnK-vo-bIg" secondAttribute="leading" id="gJV-V7-6va"/>
                                         </constraints>
                                     </view>
-                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_testimage" translatesAutoresizingMaskIntoConstraints="NO" id="ZfW-dr-kdl">
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="ZfW-dr-kdl">
                                         <rect key="frame" x="50" y="10" width="40" height="40"/>
                                         <constraints>
                                             <constraint firstAttribute="width" secondItem="ZfW-dr-kdl" secondAttribute="height" multiplier="1:1" id="9zF-F8-1wu"/>
@@ -438,16 +438,16 @@
                                 </constraints>
                             </view>
                             <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BX6-b4-TQW">
-                                <rect key="frame" x="0.0" y="618" width="393" height="200"/>
+                                <rect key="frame" x="0.0" y="818" width="393" height="0.0"/>
                                 <subviews>
                                     <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="c5o-qz-r0o">
-                                        <rect key="frame" x="0.0" y="0.0" width="393" height="200"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="393" height="0.0"/>
                                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                     </tableView>
                                 </subviews>
                                 <color key="backgroundColor" name="progress_green"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="200" id="2gV-y7-A28"/>
+                                    <constraint firstAttribute="height" id="2gV-y7-A28"/>
                                     <constraint firstAttribute="bottom" secondItem="c5o-qz-r0o" secondAttribute="bottom" id="7KV-5b-tg6"/>
                                     <constraint firstAttribute="trailing" secondItem="c5o-qz-r0o" secondAttribute="trailing" id="YiY-5h-eiP"/>
                                     <constraint firstItem="c5o-qz-r0o" firstAttribute="leading" secondItem="BX6-b4-TQW" secondAttribute="leading" id="dvZ-65-l46"/>
@@ -484,7 +484,7 @@
                             <constraint firstItem="o1q-Mw-BVQ" firstAttribute="leading" secondItem="tYR-ZY-lng" secondAttribute="leading" id="bk2-rY-pwb"/>
                             <constraint firstItem="t8I-hg-Oof" firstAttribute="bottom" secondItem="1Rn-uK-goY" secondAttribute="bottom" id="bkQ-1w-zEO"/>
                             <constraint firstItem="sAz-2n-OhK" firstAttribute="trailing" secondItem="t8I-hg-Oof" secondAttribute="trailing" id="bkr-9H-XDP"/>
-                            <constraint firstItem="t8I-hg-Oof" firstAttribute="top" secondItem="GL1-9R-WMd" secondAttribute="top" constant="44" id="f8h-dk-8p0"/>
+                            <constraint firstItem="t8I-hg-Oof" firstAttribute="top" secondItem="GL1-9R-WMd" secondAttribute="top" constant="30" id="f8h-dk-8p0"/>
                             <constraint firstItem="GL1-9R-WMd" firstAttribute="leading" secondItem="t8I-hg-Oof" secondAttribute="leading" id="fae-RU-jhM"/>
                             <constraint firstItem="HdH-nz-NUv" firstAttribute="bottom" secondItem="tYR-ZY-lng" secondAttribute="bottom" id="keG-j0-AtU"/>
                             <constraint firstItem="RJu-Nd-zCH" firstAttribute="leading" secondItem="t8I-hg-Oof" secondAttribute="leading" id="lWi-gx-moh"/>
@@ -550,7 +550,7 @@
         <!--Update Group Info View Controller-->
         <scene sceneID="Y79-ds-fqK">
             <objects>
-                <viewController storyboardIdentifier="UpdateGroupInfoViewController" id="RYw-oI-ztD" customClass="UpdateGroupInfoViewController" customModule="Mirrorfly" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="UpdateGroupInfoViewController" id="RYw-oI-ztD" customClass="UpdateGroupInfoViewController" customModule="UiKitQa" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="lBi-SQ-dR4">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -691,7 +691,7 @@
         <!--Group Info Options View Controller-->
         <scene sceneID="OL8-PY-GF5">
             <objects>
-                <viewController storyboardIdentifier="GroupInfoOptionsViewController" id="Sqt-Wi-Ts5" customClass="GroupInfoOptionsViewController" customModule="Mirrorfly" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="GroupInfoOptionsViewController" id="Sqt-Wi-Ts5" customClass="GroupInfoOptionsViewController" customModule="UiKitQa" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="uZj-QO-3ID">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -762,7 +762,7 @@
         <!--Location View Controller-->
         <scene sceneID="Clb-Oh-zej">
             <objects>
-                <viewController storyboardIdentifier="LocationViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="fOx-Bf-IYX" customClass="LocationViewController" customModule="Mirrorfly" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="LocationViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="fOx-Bf-IYX" customClass="LocationViewController" customModule="UiKitQa" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="MYk-o2-1fs">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -814,7 +814,7 @@
                                     <constraint firstItem="ghc-YN-afB" firstAttribute="centerX" secondItem="TJE-oY-ibn" secondAttribute="centerX" id="zIB-XC-dM3"/>
                                 </constraints>
                             </view>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="YjC-07-9YX" customClass="GMSMapView">
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="YjC-07-9YX">
                                 <rect key="frame" x="0.0" y="109" width="393" height="643.33333333333337"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                             </view>
@@ -912,7 +912,7 @@
         <!--Contact Info View Controller-->
         <scene sceneID="kg4-Xi-PgD">
             <objects>
-                <viewController storyboardIdentifier="ContactInfoViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="1f9-pt-Jc4" customClass="ContactInfoViewController" customModule="Mirrorfly" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="ContactInfoViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="1f9-pt-Jc4" customClass="ContactInfoViewController" customModule="UiKitQa" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="Dl0-z9-xCO">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -943,7 +943,7 @@
         <!--Group Info View Controller-->
         <scene sceneID="YpJ-TX-3li">
             <objects>
-                <viewController storyboardIdentifier="GroupInfoViewController" id="fHd-BT-aN9" customClass="GroupInfoViewController" customModule="Mirrorfly" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="GroupInfoViewController" id="fHd-BT-aN9" customClass="GroupInfoViewController" customModule="UiKitQa" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="qDO-jP-Owt">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -975,7 +975,7 @@
         <!--View User Image Controller-->
         <scene sceneID="hI9-9U-5Ud">
             <objects>
-                <viewController storyboardIdentifier="ViewUserImageController" id="GFG-CH-EPd" customClass="ViewUserImageController" customModule="Mirrorfly" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="ViewUserImageController" id="GFG-CH-EPd" customClass="ViewUserImageController" customModule="UiKitQa" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="5U4-Cq-fqf">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -1063,13 +1063,13 @@
         <!--Chat Contact View Controller-->
         <scene sceneID="k4L-QI-Hae">
             <objects>
-                <viewController id="Pto-9t-rvq" customClass="ChatContactViewController" customModule="Mirrorfly" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="Pto-9t-rvq" customClass="ChatContactViewController" customModule="UiKitQa" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="cU1-ry-Y4x">
-                        <rect key="frame" x="0.0" y="0.0" width="393" height="783"/>
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="842"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="pXI-Lh-PO1">
-                                <rect key="frame" x="0.0" y="59" width="393" height="724"/>
+                                <rect key="frame" x="0.0" y="0.0" width="393" height="842"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" distribution="fillProportionally" translatesAutoresizingMaskIntoConstraints="NO" id="Okn-2y-Fhl">
                                         <rect key="frame" x="0.0" y="0.0" width="393" height="50"/>
@@ -1150,12 +1150,12 @@
                                         </constraints>
                                     </stackView>
                                     <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" indicatorStyle="white" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="40" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="Ry3-Py-Z1i">
-                                        <rect key="frame" x="0.0" y="130" width="393" height="594"/>
+                                        <rect key="frame" x="0.0" y="130" width="393" height="712"/>
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <color key="sectionIndexBackgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <color key="sectionIndexTrackingBackgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <prototypes>
-                                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="ChatContactCell" rowHeight="50" id="bvn-fr-4Vt" customClass="ChatContactCell" customModule="Mirrorfly" customModuleProvider="target">
+                                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="ChatContactCell" rowHeight="50" id="bvn-fr-4Vt" customClass="ChatContactCell" customModule="UiKitQa" customModuleProvider="target">
                                                 <rect key="frame" x="0.0" y="50" width="393" height="50"/>
                                                 <autoresizingMask key="autoresizingMask"/>
                                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="bvn-fr-4Vt" id="DkX-ZW-OyM">
@@ -1306,7 +1306,7 @@
         <!--Message Info View Controller-->
         <scene sceneID="NXr-bN-Nrx">
             <objects>
-                <viewController storyboardIdentifier="MessageInfoViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="gKS-vL-MPK" customClass="MessageInfoViewController" customModule="Mirrorfly" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="MessageInfoViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="gKS-vL-MPK" customClass="MessageInfoViewController" customModule="UiKitQa" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="ZQ6-dD-YAp">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -1354,7 +1354,7 @@
         <!--View All Media Controller-->
         <scene sceneID="zL4-tS-ZHH">
             <objects>
-                <viewController storyboardIdentifier="ViewAllMediaController" id="ufg-7W-KRH" customClass="ViewAllMediaController" customModule="Mirrorfly" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="ViewAllMediaController" id="ufg-7W-KRH" customClass="ViewAllMediaController" customModule="UiKitQa" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="amc-T0-FmX">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -1414,7 +1414,7 @@
                                                     <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                                 </collectionViewFlowLayout>
                                                 <cells>
-                                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="MediaCell" id="djs-Wz-AmC" customClass="MediaCell" customModule="Mirrorfly" customModuleProvider="target">
+                                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="MediaCell" id="djs-Wz-AmC" customClass="MediaCell" customModule="UiKitQa" customModuleProvider="target">
                                                         <rect key="frame" x="0.0" y="50" width="100" height="100"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                         <collectionViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="MFY-FP-sho">
@@ -1505,7 +1505,7 @@
                                                         </connections>
                                                     </collectionViewCell>
                                                 </cells>
-                                                <collectionReusableView key="sectionHeaderView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" reuseIdentifier="SectionHeaderView" id="yzM-5l-ezU" customClass="SectionHeaderView" customModule="Mirrorfly" customModuleProvider="target">
+                                                <collectionReusableView key="sectionHeaderView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" reuseIdentifier="SectionHeaderView" id="yzM-5l-ezU" customClass="SectionHeaderView" customModule="UiKitQa" customModuleProvider="target">
                                                     <rect key="frame" x="0.0" y="0.0" width="393" height="50"/>
                                                     <autoresizingMask key="autoresizingMask"/>
                                                     <subviews>
@@ -1539,7 +1539,7 @@
                                                         <outlet property="monthLabel" destination="t26-Lh-ByK" id="rqA-qz-IIc"/>
                                                     </connections>
                                                 </collectionReusableView>
-                                                <collectionReusableView key="sectionFooterView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" reuseIdentifier="SectionFooterView" id="0UY-W0-7Bz" customClass="SectionFooterView" customModule="Mirrorfly" customModuleProvider="target">
+                                                <collectionReusableView key="sectionFooterView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" reuseIdentifier="SectionFooterView" id="0UY-W0-7Bz" customClass="SectionFooterView" customModule="UiKitQa" customModuleProvider="target">
                                                     <rect key="frame" x="0.0" y="150" width="393" height="50"/>
                                                     <autoresizingMask key="autoresizingMask"/>
                                                     <subviews>
@@ -1664,7 +1664,6 @@
         <image name="ic_reply" width="20" height="20"/>
         <image name="ic_selected" width="17" height="17"/>
         <image name="ic_star" width="20" height="20"/>
-        <image name="ic_testimage" width="128" height="128"/>
         <image name="ic_videocall" width="29" height="29"/>
         <image name="ic_white_headphone" width="22.666666030883789" height="17.333333969116211"/>
         <image name="info" width="20" height="20"/>
@@ -1724,7 +1723,7 @@
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="tintColor">
-            <color red="0.0" green="0.47843137254901963" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

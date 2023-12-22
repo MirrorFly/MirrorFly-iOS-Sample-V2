@@ -40,7 +40,7 @@ class ChatViewVideoIncomingCell: BaseTableViewCell {
     @IBOutlet weak var playButton: UIButton!
     
     // Reply Outlet
-    @IBOutlet weak var mapView: GMSMapView?
+    @IBOutlet weak var mapView: UIView?
     @IBOutlet weak var mediaImageView: UIImageView?
     @IBOutlet weak var replyTextLabel: UILabel?
     @IBOutlet weak var messageIconView: UIView?
@@ -94,6 +94,7 @@ class ChatViewVideoIncomingCell: BaseTableViewCell {
         newProgressBar = ProgressBar(frame: CGRect(x: 0, y: 0, width: progressLoader.frame.width, height: progressLoader.frame.height))
         newProgressBar.primaryColor = .white
         newProgressBar.bgColor = .clear
+        progressLoader.addSubview(newProgressBar)
         caption.font = UIFont.font12px_appRegular()
         fileSizeLabel.font = UIFont.font12px_appSemibold()
         progressView.layer.cornerRadius = 4
@@ -239,7 +240,7 @@ class ChatViewVideoIncomingCell: BaseTableViewCell {
                    case .audio:
                        ChatUtils.setIconForAudio(imageView: messageTypeIcon, chatMessage: message)
                        let duration = Int(replyMessage?.mediaChatMessage?.mediaDuration ?? 0)
-                       replyTextLabel?.text = (!(replyMessage?.mediaChatMessage?.mediaCaptionText.isEmpty ?? false)) ? replyMessage?.mediaChatMessage?.mediaCaptionText : replyMessage?.mediaChatMessage?.messageType.rawValue.capitalized.appending(" (\(duration.msToSeconds.minuteSecondMS))")
+                       replyTextLabel?.text = (!(replyMessage?.mediaChatMessage?.mediaCaptionText.isEmpty ?? false)) ? replyMessage?.mediaChatMessage?.mediaCaptionText : replyMessage?.mediaChatMessage?.messageType.rawValue.capitalized.appending(" (\(FlyUtils.secondsToDurationInString(seconds: Double(duration / 1000))))")
                        replyWithoutMediaCOns?.isActive = false
                        replyWithMediaCons?.isActive = true
                    case .video:
@@ -297,15 +298,21 @@ class ChatViewVideoIncomingCell: BaseTableViewCell {
                        return nil
                    }
                    
-                   mapView?.camera = GMSCameraPosition.camera(withLatitude: latitude, longitude: longitude, zoom: 16.0, bearing: 360.0, viewingAngle: 15.0)
-                   
-                   DispatchQueue.main.async
-                   { [self] in
-                       // 2. Perform UI Operations.
-                       var position = CLLocationCoordinate2DMake(latitude,longitude)
-                       var marker = GMSMarker(position: position)
-                       marker.map = mapView
+                   AppUtils.shared.fetchStaticMapImage(latitude: latitude, longitude: longitude, zoomLevel: "16", size: CGSize(width: mapView?.bounds.width ?? 250, height: mapView?.bounds.height ?? 250)) { [self] mapImage in
+                       let mapImageView = UIImageView(frame: CGRect(x: 0, y: 0, width: mapView?.bounds.width ?? 250, height: mapView?.bounds.height ?? 250))
+                       mapImageView.image = mapImage
+                       mapView?.addSubview(mapImageView)
                    }
+                   
+//                   mapView?.camera = GMSCameraPosition.camera(withLatitude: latitude, longitude: longitude, zoom: 16.0, bearing: 360.0, viewingAngle: 15.0)
+//                   
+//                   DispatchQueue.main.async
+//                   { [self] in
+//                       // 2. Perform UI Operations.
+//                       var position = CLLocationCoordinate2DMake(latitude,longitude)
+//                       var marker = GMSMarker(position: position)
+//                       marker.map = mapView
+//                   }
                    replyWithoutMediaCOns?.isActive = false
                    replyWithMediaCons?.isActive = true
                    messageIconView?.isHidden = false
@@ -316,6 +323,15 @@ class ChatViewVideoIncomingCell: BaseTableViewCell {
                    mediaImageView?.isHidden = true
                    replyWithoutMediaCOns?.isActive = true
                    replyWithMediaCons?.isActive = false
+               } else if replyMessage?.meetChatMessage != nil {
+                   replyTextLabel?.text = DateFormatterUtility.shared.getSchduleMeetingDate(date: replyMessage?.meetChatMessage?.scheduledDateTime ?? 0)
+                   messageTypeIcon?.image = UIImage(named: (message?.isMessageSentByMe ?? false) ? "video_link" : "video_link")
+                   messageIconView?.isHidden = false
+                   replyWithoutMediaCOns?.isActive = false
+                   replyWithMediaCons?.isActive = true
+                   mediaImageView?.image = UIImage(named: "app_icon")
+                   mediaImageView?.isHidden = false
+                   mediaImageView?.contentMode = .center
                } else {
                    mediaImageView?.isHidden = true
                    replyWithoutMediaCOns?.isActive = true
@@ -327,7 +343,7 @@ class ChatViewVideoIncomingCell: BaseTableViewCell {
             replyUserLabel?.text = you.localized
         }
         else {
-            replyUserLabel?.text = getUserName(jid: replyMessage?.senderUserJid ?? "" ,name: replyMessage?.senderUserName ?? "",
+            replyUserLabel?.text = getUserName(jid: replyMessage?.chatUserJid ?? "" ,name: replyMessage?.senderUserName ?? "",
                                                nickName: replyMessage?.senderNickName ?? "", contactType: (replyMessage?.isDeletedUser ?? false) ? .deleted : (replyMessage?.isSavedContact ?? false) ? .live : .unknown)
         }
            ChatUtils.setDeletedReplyMessage(chatMessage: replyMessage, messageIconView: messageIconView, messageTypeIcon: messageTypeIcon, replyTextLabel: replyTextLabel, mediaImageView: mediaImageView, mediaImageViewWidthCons: nil, replyMessageIconWidthCons: nil, replyMessageIconHeightCons: nil)
@@ -348,16 +364,25 @@ class ChatViewVideoIncomingCell: BaseTableViewCell {
         
         if let captionTxt = message?.mediaChatMessage?.mediaCaptionText, captionTxt != "" {
             //ChatUtils.highlight(uilabel: caption, message: captionTxt, searchText: searchText, isMessageSearch: isMessageSearch, isSystemBlue: isStarredMessagePage == true && isMessageSearch ? true : false)
+            let messageTxt = (message?.mediaChatMessage?.mediaCaptionEditedText.isEmpty ?? true) ? captionTxt : message?.mediaChatMessage?.mediaCaptionEditedText ?? ""
             let mentionedUsersIds = message?.mentionedUsersIds ?? []
             let isMessageSentByMe = message?.isMessageSentByMe ?? false
             if !mentionedUsersIds.isEmpty {
                 if profileDetails.profileChatType == .groupChat {
-                    caption.attributedText = ChatUtils.getMentionTextContent(message: captionTxt, uiLabel: caption, isMessageSentByMe: isMessageSentByMe, mentionedUsers: mentionedUsersIds, searchedText: searchText)
+                    caption.attributedText = ChatUtils.getMentionTextContent(message: messageTxt, uiLabel: caption, isMessageSentByMe: isMessageSentByMe, mentionedUsers: mentionedUsersIds, searchedText: searchText)
                 } else {
-                    caption.text = ChatUtils.convertMentionUser(message: captionTxt, mentionedUsersIds: mentionedUsersIds).replacingOccurrences(of: "`", with: "")
+                    caption.text = ChatUtils.convertMentionUser(message: messageTxt, mentionedUsersIds: mentionedUsersIds).replacingOccurrences(of: "`", with: "")
                 }
             } else {
-                caption.text = captionTxt
+                var attributedString : NSMutableAttributedString?
+                if fromChat && isMessageSearch {
+                    attributedString = NSMutableAttributedString(string: captionTxt)
+                    let range = (captionTxt.lowercased() as NSString).range(of: searchText.lowercased())
+                    attributedString?.addAttribute(NSAttributedString.Key.backgroundColor, value: Color.highlightColor, range: range)
+                    caption.attributedText = attributedString
+                } else {
+                    caption.text = messageTxt
+                }
             }
             timeOverlay.isHidden = true
             reecivedTime.isHidden = true
@@ -376,7 +401,7 @@ class ChatViewVideoIncomingCell: BaseTableViewCell {
         }
         
         if let duration = message?.mediaChatMessage?.mediaDuration {
-            videoTimeLabel.text = Int(duration).msToSeconds.minuteSecondMS
+            videoTimeLabel.text =  FlyUtils.secondsToDurationInString(seconds: Double(duration / 1000))
         } else {
             videoTimeLabel.text = ""
         }
@@ -423,7 +448,7 @@ class ChatViewVideoIncomingCell: BaseTableViewCell {
         }
         let receivedTime = DateFormatterUtility.shared.convertMillisecondsToTime(milliSeconds: timeStamp).getTimeFormat()
         self.reecivedTime.text = receivedTime.uppercased()
-        self.captionTime?.text = receivedTime.uppercased()
+        self.captionTime?.text = (message?.mediaChatMessage?.mediaCaptionEditedText.isEmpty ?? true) ? receivedTime.uppercased() : "Edited \(receivedTime.uppercased())"
         
         //MARK: - Populating the Incoming Cell with the translated message
         
@@ -461,11 +486,12 @@ class ChatViewVideoIncomingCell: BaseTableViewCell {
             downloadView.isHidden = false
             downloadButton.isHidden = false
             progressView.isHidden = true
+            progressLoader.isHidden = true
+            newProgressBar.isHidden = true
             playButton.isHidden = true
             fileSizeLabel.isHidden = false
-//            progressLoader?.transition(to: .indeterminate)
             if let fileSize = message?.mediaChatMessage?.mediaFileSize{
-                fileSizeLabel.text = "\(Units(bytes: Int64(fileSize)).getReadableUnit())"
+                fileSizeLabel.text = "\(ByteCountFormatter.string(fromByteCount: Int64(fileSize), countStyle: .file))"
             }else {
                 fileSizeLabel.text = ""
             }
@@ -473,27 +499,30 @@ class ChatViewVideoIncomingCell: BaseTableViewCell {
             downloadView.isHidden = false
             downloadButton.isHidden = false
             progressView.isHidden = true
+            progressLoader.isHidden = true
+            newProgressBar.isHidden = true
             playButton.isHidden = true
             fileSizeLabel.isHidden = false
             if let fileSize = message?.mediaChatMessage?.mediaFileSize{
-                fileSizeLabel.text = "\(Units(bytes: Int64(fileSize)).getReadableUnit())"
+                fileSizeLabel.text = "\(ByteCountFormatter.string(fromByteCount: Int64(fileSize), countStyle: .file))"
             }else {
                 fileSizeLabel.text = ""
             }
         case .downloading:
             downloadView.isHidden = true
             downloadButton.isHidden = true
-            let progrss = message?.mediaChatMessage?.mediaProgressStatus ?? 0
-            newProgressBar.setProg(per: CGFloat(progrss))
-//            progressLoader?.transition(to: .determinate(percentage: CGFloat(progrss/100)))
-//            if progrss == 0 || progrss == 100{
-//                progressLoader?.transition(to: .indeterminate)
-//            }
-            progressLoader.addSubview(newProgressBar)
+            progressLoader.isHidden = false
+            fileSizeLabel.isHidden = true
+            progressLoader.isHidden = false
+            if progressLoader.subviews.isEmpty{
+                progressLoader.addSubview(newProgressBar)
+            }
+            newProgressBar.setProg(per: CGFloat(message?.mediaChatMessage?.mediaProgressStatus ?? 0))
+            newProgressBar.isHidden = false
             progressView.isHidden = false
             playButton.isHidden = true
         case .downloaded:
-            if let localPath = message?.mediaChatMessage?.mediaLocalStoragePath {
+            if let localPath = message?.mediaChatMessage?.mediaLocalStoragePath, message?.messageType == .image {
                 if FileManager.default.fileExists(atPath: localPath) {
                     let url = URL.init(fileURLWithPath: localPath)
                     let data = NSData(contentsOf: url as URL)
@@ -504,12 +533,17 @@ class ChatViewVideoIncomingCell: BaseTableViewCell {
             downloadView.isHidden = true
             downloadButton.isHidden = true
             progressView.isHidden = true
-//            progressLoader?.transition(to: .determinate(percentage: CGFloat(100)))
+            progressLoader.isHidden = true
+            newProgressBar.isHidden = true
+            fileSizeLabel.isHidden = true
             playButton.isHidden = false
         default:
             downloadView.isHidden = false
             downloadButton.isHidden = false
             progressView.isHidden = true
+            progressLoader.isHidden = true
+            newProgressBar.isHidden = true
+            fileSizeLabel.isHidden = true
             playButton.isHidden = true
             if let fileSize = message?.mediaChatMessage?.mediaFileSize{
                 fileSizeLabel.text = "\(fileSize.byteSize)"

@@ -38,7 +38,7 @@ class ReceiverDocumentsTableViewCell: BaseTableViewCell {
     @IBOutlet weak var replyTypeImageView: UIImageView?
     @IBOutlet weak var replyTypeIconView: UIView?
     @IBOutlet weak var topStackView: UIStackView?
-    @IBOutlet weak var mapView: GMSMapView?
+    @IBOutlet weak var mapView: UIView?
 
     @IBOutlet weak var documentSizeLabel: UILabel?
     
@@ -318,14 +318,20 @@ class ReceiverDocumentsTableViewCell: BaseTableViewCell {
                     return nil
                 }
                 
-                mapView?.camera = GMSCameraPosition.camera(withLatitude: latitude, longitude: longitude, zoom: 16.0, bearing: 360.0, viewingAngle: 15.0)
-       
-                DispatchQueue.main.async { [self] in
-                    // 2. Perform UI Operations.
-                    let position = CLLocationCoordinate2DMake(latitude,longitude)
-                    let marker = GMSMarker(position: position)
-                    marker.map = mapView
+                AppUtils.shared.fetchStaticMapImage(latitude: latitude, longitude: longitude, zoomLevel: "16", size: CGSize(width: mapView?.bounds.width ?? 250, height: mapView?.bounds.height ?? 250)) { [self] mapImage in
+                    let mapImageView = UIImageView(frame: CGRect(x: 0, y: 0, width: mapView?.bounds.width ?? 250, height: mapView?.bounds.height ?? 250))
+                    mapImageView.image = mapImage
+                    mapView?.addSubview(mapImageView)
                 }
+                
+//                mapView?.camera = GMSCameraPosition.camera(withLatitude: latitude, longitude: longitude, zoom: 16.0, bearing: 360.0, viewingAngle: 15.0)
+//       
+//                DispatchQueue.main.async { [self] in
+//                    // 2. Perform UI Operations.
+//                    let position = CLLocationCoordinate2DMake(latitude,longitude)
+//                    let marker = GMSMarker(position: position)
+//                    marker.map = mapView
+//                }
                 replyTypeImageView?.isHidden = true
                 replyImageWidthCons?.isActive = false
                 replyTypeIconImageView?.isHidden = false
@@ -341,6 +347,16 @@ class ReceiverDocumentsTableViewCell: BaseTableViewCell {
                 mapView?.isHidden = true
                 replyTypeImageView?.isHidden = true
                 replyImageWidthCons?.isActive = false
+            } else if replyMessage?.meetChatMessage != nil {
+                replyTypeIconWidthCons?.constant = 12
+                replyTypeIconImageView?.image = UIImage(named: (message?.isMessageSentByMe ?? false) ? "video_link" : "video_link")
+                replyTypeLabel?.text = DateFormatterUtility.shared.getSchduleMeetingDate(date: replyMessage?.meetChatMessage?.scheduledDateTime ?? 0)
+                replyTypeIconImageView?.isHidden = false
+                replyStackViewTrailingCons?.constant = 50
+                mapView?.isHidden = true
+                replyTypeImageView?.image = UIImage(named: "app_icon")
+                replyTypeImageView?.contentMode = .center
+                replyTypeImageView?.isHidden = false
             }
         } else {
             replyView?.isHidden = true
@@ -350,12 +366,14 @@ class ReceiverDocumentsTableViewCell: BaseTableViewCell {
         case .not_downloaded:
             downloadImageView?.image = UIImage(named: ImageConstant.ic_download)
             downloadImageView?.isHidden = false
+            nicoProgressBar.isHidden = true
             newProgressBar.removeFromSuperview()
             downloadButton?.isHidden = false
             downloadView?.isHidden = false
         case .failed:
             downloadImageView?.image = UIImage(named: ImageConstant.ic_download)
             downloadImageView?.isHidden = false
+            nicoProgressBar.isHidden = true
             newProgressBar.removeFromSuperview()
             downloadButton?.isHidden = false
             downloadView?.isHidden = false
@@ -363,11 +381,16 @@ class ReceiverDocumentsTableViewCell: BaseTableViewCell {
             downloadImageView?.image = UIImage(named: ImageConstant.ic_download_cancel)
             downloadButton?.isHidden = false
             downloadImageView?.isHidden = false
-            nicoProgressBar.addSubview(newProgressBar)
+            nicoProgressBar.isHidden = false
+            if nicoProgressBar.subviews.isEmpty{
+                nicoProgressBar.addSubview(self.newProgressBar)
+            }
+            newProgressBar.setProg(per: CGFloat(message?.mediaChatMessage?.mediaProgressStatus ?? 0))
             downloadView?.isHidden = false
         case .downloaded:
             downloadImageView?.isHidden = true
             downloadButton?.isHidden = true
+            nicoProgressBar.isHidden = true
             newProgressBar.removeFromSuperview()
         default:
             downloadImageView?.image = UIImage(named: ImageConstant.ic_download)
@@ -437,7 +460,11 @@ class ReceiverDocumentsTableViewCell: BaseTableViewCell {
             self.downloadImageView?.image = UIImage(named: ImageConstant.ic_download_cancel)
             self.downloadImageView?.isHidden = false
             self.downloadButton?.isHidden = false
-            self.nicoProgressBar.addSubview(self.newProgressBar)
+            self.nicoProgressBar.isHidden = false
+            if self.nicoProgressBar.subviews.isEmpty{
+                self.nicoProgressBar.addSubview(self.newProgressBar)
+            }
+            self.newProgressBar.setProg(per: CGFloat(self.message?.mediaChatMessage?.mediaProgressStatus ?? 0))
             self.downloadView?.isHidden = false
         }
     }
@@ -446,6 +473,7 @@ class ReceiverDocumentsTableViewCell: BaseTableViewCell {
         DispatchQueue.main.async { [weak self] in
             self?.downloadImageView?.image = UIImage(named: ImageConstant.ic_download)
             self?.downloadImageView?.isHidden = false
+            self?.nicoProgressBar.isHidden = true
             self?.newProgressBar.removeFromSuperview()
             self?.downloadButton?.isHidden = false
             self?.downloadView?.isHidden = false

@@ -1,0 +1,4 @@
+ChatSDK now supports large file uploads and downloads along with pause and resume capability. By calling the new method FlyMessenger.sendMediaFileMessage() while sending media files we can utilise those features
+
+#BUILD_DATE# Dec 22, 2023
+

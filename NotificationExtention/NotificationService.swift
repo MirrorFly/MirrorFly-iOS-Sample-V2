@@ -10,12 +10,10 @@ import AVFoundation
 import AudioToolbox
 import MirrorFlySDK
 
-let BASE_URL =  "https://api-preprod-sandbox.mirrorfly.com/api/v1/"
+let LICENSE_KEY = "lu3Om85JYSghcsB6vgVoSgTlSQArL5"
 let CONTAINER_ID = "group.com.mirrorfly.qa"
-let LICENSE_KEY = "xxxxxxxxxxxxxxxx"
 let IS_LIVE = false
-let APP_NAME = "UiKit"
-let ENABLE_CONTACT_SYNC = false
+let APP_NAME = "UiKitQa"
 
 let isHideNotificationContent = false
 
@@ -49,13 +47,13 @@ class NotificationService: UNNotificationServiceExtension {
             })
         } else if payloadType == "adminblock" {
             ChatSDK.Builder.initializeDelegate()
-            NotificationMessageSupport.shared.handleAdminBlockNotification(request.content.mutableCopy() as? UNMutableNotificationContent) {  bestAttemptContent in
+            NotificationMessageSupport.shared.handleAdminBlockNotification(request.content.mutableCopy() as? UNMutableNotificationContent) {  bestAttemptContent,chatMessage  in
                 contentHandler(bestAttemptContent!)
             }
         } else {
             /// Handle Push messages
             ChatSDK.Builder.initializeDelegate()
-            NotificationMessageSupport.shared.didReceiveNotificationRequest(request.content.mutableCopy() as? UNMutableNotificationContent, appName: APP_NAME ,onCompletion: { [self] bestAttemptContents in
+            NotificationMessageSupport.shared.didReceiveNotificationRequest(request.content.mutableCopy() as? UNMutableNotificationContent, appName: APP_NAME ,onCompletion: { [self] bestAttemptContents,chatMessage  in
             let userId = (request.content.userInfo["group_id"] as? String ?? "").isEmpty ? request.content.userInfo["from_user"] as? String ?? "" : request.content.userInfo["group_id"] as? String ?? ""
             self.checkForDeliveredNotification(userId, isGroup: !((request.content.userInfo["group_id"] as? String ?? "").isEmpty)) { notification in
                 if let notify = notification {
@@ -145,7 +143,6 @@ class NotificationService: UNNotificationServiceExtension {
             })
         }
     }
-
 
     func checkForDeliveredNotification(_ ID: String, isGroup: Bool, completionHandler: @escaping (UNNotification?) -> Void) {
         var foundNotification: UNNotification?

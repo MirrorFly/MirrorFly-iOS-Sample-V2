@@ -8,8 +8,9 @@
 import UIKit
 import WebRTC
 import MirrorFlySDK
+import RxSwift
 
-class JoinCallViaLinkViewController: UIViewController {
+class JoinCallViaLinkViewController: BaseViewController, CallUIDelegate {
 
     @IBOutlet var profileImage: [UIImageView]!
     @IBOutlet weak var titleLabel: UILabel!
@@ -34,51 +35,96 @@ class JoinCallViaLinkViewController: UIViewController {
     
     var callLink = emptyString()
     
+    var callMode : MirrorFlySDK.CallMode = .ONE_TO_ONE
+    
+    var localVideTrack : RTCVideoTrack? = nil
+    
+    let disposeBag = DisposeBag()
+    let videoMuteTap = PublishSubject<Bool>()
+    var internetObserver = PublishSubject<Bool>()
+    
+    var isVideoMuted = false
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        self.setupUI()
+        localRenderer.frame = CGRect(x: 0, y: 0, width: videoView.bounds.width, height: videoView.bounds.height)
+        setupUI()
         CallManager.setJoinCallDelegate(delegate: self)
+        videoMuteTap.throttle(.milliseconds(310), scheduler: MainScheduler.instance).subscribe { [weak self] term in
+            if self?.isVideoMuted ?? false{
+                CallManager.startVideoCapture()
+                CallManager.muteVideo(false)
+                self?.isVideoMuted = false
+                self?.videoButton.isSelected = false
+                self?.userProfileImage.isHidden = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(300)) {
+                    self?.localRenderer.isHidden = false
+                    if let track = self?.localVideTrack, let renderer = self?.localRenderer{
+                        track.add(renderer)
+                    }
+                }
+            }else {
+                self?.userProfileImage.isHidden = false
+                self?.videoView.bringSubviewToFront(self?.userProfileImage ?? UIView())
+                self?.localRenderer.isHidden = true
+                self?.videoButton.isSelected = true
+                self?.isVideoMuted = true
+                CallManager.muteVideo(true)
+            }
+        } onError: { error in } onCompleted: {} onDisposed: {}.disposed(by: disposeBag)
         
+        internetObserver.throttle(.seconds(1),latest: true,scheduler: MainScheduler.instance).distinctUntilChanged().subscribe { [weak self] event in
+            switch event {
+            case .next(let data):
+                guard let self = self else{
+                    return
+                }
+                if NetworkReachability.shared.isConnected {
+                    print("#int_ avaialble")
+                    CallManager.subscribeToCallEvents(link: self.callLink, name: ContactManager.getMyProfile().name) { isSuccess, flyError in
+                        if !isSuccess {
+                            let error = flyError?.description ?? ""
+                            self.handleErrorResponse(errorMessage: error)
+                        }else{
+                            self.joinButton.isEnabled = true
+                            self.joinButton.alpha = 1
+                            self.enableButtons(isEnable: true)
+                        }
+                    }
+                    self.alertLabel.isHidden = true
+                    self.alertLabel.text = ""
+                }else{
+                    print("#int_ not avaialble")
+                    self.alertLabel.isHidden = false
+                    self.alertLabel.text = "Please check your internet connection"
+                    self.joinButton.isEnabled = false
+                    self.joinButton.alpha = 0.5
+                    self.enableButtons(isEnable: false)
+                }
+            case .error(let error):
+                print("#int_ error \(error.localizedDescription)")
+            case .completed:
+                print("#int_ completed")
+            }
+            
+        }.disposed(by: disposeBag)
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
-        CallManager.startVideoCapture()
-        localRenderer.frame = CGRect(x: 0, y: 0, width: videoView.bounds.width, height: videoView.bounds.height)
-        
-        CallManager.subscribeToCallEvents(link: self.callLink, name: ContactManager.getMyProfile().name) { isSuccess, flyError in
-            if !isSuccess {
-                let error = flyError?.description ?? ""
-                self.handleErrorResponse(errorMessage: error)
-            }else{
-                self.joinButton.isEnabled = true
-                self.joinButton.alpha = 1
-                self.checkMicPermission()
-                self.checkCameraPermission(sourceType: .camera)
-            }
-        }
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        
-        super.viewDidAppear(animated)
-        
-//        CallManager.subscribeToCallEvents(link: self.callLink, name:  FlyDefaults.myName) { isSuccess, flyError in
-//            print("#join \(message)")
-//
-//            if !isSuccess {
-//                let error = flyError?.description ?? ""
-//                self.handleErrorResponse(errorMessage: error)
-//            }
-//        }
+        initJoinLink()
+        CallManager.callUiDelegate = self
     }
     
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         localRenderer.removeFromSuperview()
         CallManager.cleanUpJoinCallViaLink()
+        CallManager.callUiDelegate = nil
+        isVideoMuted = false
+
+        NotificationCenter.default.removeObserver(self, name: UIApplication.willEnterForegroundNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIApplication.didEnterBackgroundNotification, object: nil)
     }
     
     func setupUI() {
@@ -111,6 +157,7 @@ class JoinCallViaLinkViewController: UIViewController {
         
         joinButton.isEnabled = false
         joinButton.alpha = 0.5
+        self.enableButtons(isEnable: false)
         
         self.localRenderer.frame = CGRect(x: 0, y: 0, width: videoView.bounds.width, height: videoView.bounds.height)
         videoView.addSubview(self.localRenderer)
@@ -123,6 +170,10 @@ class JoinCallViaLinkViewController: UIViewController {
     func initJoinLink() {
         CallManager.setJoinCallDelegate(delegate: self)
         CallManager.setupJoinCallViaLink()
+        subsCribeToCallEvents()
+    }
+    
+    func subsCribeToCallEvents(){
         CallManager.subscribeToCallEvents(link: self.callLink, name: ContactManager.getMyProfile().name) { isSuccess, flyError in
             if !isSuccess {
                 let error = flyError?.description ?? ""
@@ -130,6 +181,8 @@ class JoinCallViaLinkViewController: UIViewController {
             }else{
                 self.joinButton.isEnabled = true
                 self.joinButton.alpha = 1
+                self.enableButtons(isEnable: true)
+                
                 self.checkMicPermission()
                 self.checkCameraPermission(sourceType: .camera)
             }
@@ -144,6 +197,7 @@ class JoinCallViaLinkViewController: UIViewController {
         
         CallManager.cleanUpJoinCallViaLink()
         self.navigationController?.popViewController(animated: true)
+        CallManager.callUiDelegate = nil
     }
     
     @IBAction func audioButtonAction(_ sender: Any) {
@@ -168,26 +222,7 @@ class JoinCallViaLinkViewController: UIViewController {
     @IBAction func videoButtonAction(_ sender: Any) {
         
         if isVideoPermissionEnabled {
-            
-            if videoButton.isSelected {
-                
-                userProfileImage.isHidden = true
-                videoButton.isSelected = false
-                CallManager.muteVideo(false)
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    self.localRenderer.isHidden = false
-                }
-                
-            }else {
-                
-                userProfileImage.isHidden = false
-                videoView.bringSubviewToFront(userProfileImage)
-                
-                localRenderer.isHidden = true
-                
-                videoButton.isSelected = true
-                CallManager.muteVideo(true)
-            }
+            videoMuteTap.onNext(!isVideoMuted)
         }else {
             AppPermissions.shared.presentSettingsForPermission(permission: .camera, instance: self as Any)
         }
@@ -197,7 +232,7 @@ class JoinCallViaLinkViewController: UIViewController {
         
         if !NetworkReachability.shared.isConnected {
             self.alertLabel.isHidden = false
-            self.alertLabel.text = "Please check you’re internet connection"
+            self.alertLabel.text = "Please check your internet connection"
             return
         }
         
@@ -209,7 +244,8 @@ class JoinCallViaLinkViewController: UIViewController {
                 if success{
                     executeOnMainThread {
                         //CallManager.cleanUpJoinCallViaLink()
-                        self.navigationController?.popViewController(animated: true)
+                        self.localVideTrack?.remove(self.localRenderer)
+                        self.localVideTrack = nil
                     }
                 }else {
                     let errorMessage = flyError?.description ?? ""
@@ -221,7 +257,9 @@ class JoinCallViaLinkViewController: UIViewController {
     
     func updateUsersDetails(usersList: [String]) {
         
-        if usersList.count == 0 || usersList.count == 1 {
+        callMode = CallManager.getCallMode()
+        
+        if (usersList.count == 0 || usersList.count == 1) && callMode != .MEET {
             
             let current = UIApplication.shared.keyWindow?.getTopViewController()
             if (current is CallEndedViewController) {
@@ -233,11 +271,13 @@ class JoinCallViaLinkViewController: UIViewController {
             callEndedView.isInvalidLink = false
             self.navigationController?.pushViewController(callEndedView, animated: true)
             
+        }else if usersList.count == 0 && callMode == .MEET{
+            titleLabel.text = "No one else is here"
         }
         
         if !NetworkReachability.shared.isConnected {
             alertLabel.isHidden = false
-            alertLabel.text = "Please check you’re internet connection"
+            alertLabel.text = "Please check your internet connection"
         }else {
             alertLabel.isHidden = (usersList.count >= 8) ? false : true
             alertLabel.text = (usersList.count >= 8) ? "Maximum 8 members allowed in call" : ""
@@ -315,22 +355,11 @@ class JoinCallViaLinkViewController: UIViewController {
         
         if !NetworkReachability.shared.isConnected {
                 self.alertLabel.isHidden = false
-                self.alertLabel.text = "Please check you’re internet connection"
+                self.alertLabel.text = "Please check your internet connection"
         }
         
         NetworkReachability.shared.netStatusChangeHandler = {
-            if !NetworkReachability.shared.isConnected {
-                executeOnMainThread {
-                    self.initJoinLink()
-                    self.alertLabel.isHidden = false
-                    self.alertLabel.text = "Please check you’re internet connection"
-                }
-            }else{
-                executeOnMainThread {
-                    self.alertLabel.isHidden = true
-                    self.alertLabel.text = ""
-                }
-            }
+            self.internetObserver.on(.next(NetworkReachability.shared.isConnected))
         }
     }
     
@@ -367,11 +396,18 @@ class JoinCallViaLinkViewController: UIViewController {
             CallManager.cleanUpJoinCallViaLink()
             self.navigationController?.popViewController(animated: true)
             
-        }else {
-            CallManager.cleanUpJoinCallViaLink()
-            self.navigationController?.popViewController(animated: true)
+        }else if errorMessage.contains("800") {
+            if CallManager.getCallMode() == .MEET{
+                joinButton.isEnabled = false
+                self.enableButtons(isEnable: false)
+            }
+            AppAlert.shared.showToast(message: ErrorMessage.noInternet)
         }
         
+    }
+    
+    func uiPresented() {
+        navigationController?.popViewController(animated: false)
     }
 }
 extension JoinCallViaLinkViewController: JoinCallDelegate {
@@ -380,18 +416,21 @@ extension JoinCallViaLinkViewController: JoinCallDelegate {
         print("#join onSubscribeSuccess")
         joinButton.isEnabled = true
         joinButton.alpha = 1
+        self.enableButtons(isEnable: true)
     }
     
     func onUsersUpdated(usersList: [String]) {
         
-        if usersList.count == 8 && usersList.contains(AppUtils.getMyJid()){
+        var users = usersList.filter { $0 != AppUtils.getMyJid()}
+        if users.count == 8 && users.contains(AppUtils.getMyJid()){
             return
         }
-        self.updateUsersDetails(usersList: usersList)
+        self.updateUsersDetails(usersList: users)
     }
     
     func onLocalTrack(videoTrack: RTCVideoTrack?) {
-        videoTrack?.add(localRenderer)
+        localVideTrack = videoTrack
+        localVideTrack?.add(localRenderer)
     }
     
     func onError(reason: String) {
@@ -464,18 +503,34 @@ extension JoinCallViaLinkViewController {
         executeOnMainThread {
             self.userProfileImage.isHidden = false
             self.videoView.bringSubviewToFront(self.userProfileImage)
-            self.localRenderer.isHidden = true
-            self.videoButton.isSelected = true
-            CallManager.muteVideo(true)}
+            self.localRenderer.isHidden = self.isVideoMuted
+            self.videoButton.isSelected = self.isVideoMuted
+            CallManager.muteVideo(true)
+        }
     }
     
     func videoPermissionEnabled() {
         
         executeOnMainThread {
-            self.userProfileImage.isHidden = true
-            self.videoButton.isSelected = false
-            self.localRenderer.isHidden = false
-            CallManager.muteVideo(false)
+            self.userProfileImage.isHidden = !self.isVideoMuted
+            self.videoButton.isSelected = self.isVideoMuted
+            self.localRenderer.isHidden = self.isVideoMuted
+            self.localVideTrack?.remove(self.localRenderer)
+            if self.isVideoMuted{
+                self.videoView.bringSubviewToFront(self.userProfileImage)
+            }
+            if !self.isVideoMuted{
+                CallManager.muteVideo(false)
+                CallManager.startVideoCapture()
+            }
         }
+    }
+    
+    func enableButtons(isEnable: Bool) {
+        
+        self.audioButton.isEnabled = isEnable
+        self.audioButton.alpha = (isEnable) ? 1 : 0.5
+        self.videoButton.isEnabled = isEnable
+        self.videoButton.alpha = (isEnable) ? 1 : 0.5
     }
 }

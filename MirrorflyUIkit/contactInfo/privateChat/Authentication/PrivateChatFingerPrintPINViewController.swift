@@ -9,7 +9,7 @@ import UIKit
 import LocalAuthentication
 import MirrorFlySDK
 
-class PrivateChatFingerPrintPINViewController: UIViewController {
+class PrivateChatFingerPrintPINViewController: BaseViewController {
 
     var isSystemCancel = false
     var isFromPrivateRecentChat: Bool = false
@@ -47,11 +47,11 @@ class PrivateChatFingerPrintPINViewController: UIViewController {
         super.viewDidLoad()
         handleBackgroundAndForground()
         authenticationWithTouchID()
-        CallViewController.dismissDelegate = self
+        CallUIViewController.dismissDelegate = self
     }
 
     override func viewDidDisappear(_ animated: Bool) {
-        CallViewController.dismissDelegate = nil
+        CallUIViewController.dismissDelegate = nil
     }
 
     func showAlert() {

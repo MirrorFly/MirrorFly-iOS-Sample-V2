@@ -48,7 +48,7 @@ class SenderDocumentsTableViewCell: BaseTableViewCell {
     @IBOutlet weak var replyUserNameLabel: UILabel?
     @IBOutlet weak var replyTypeLabel: UILabel?
     @IBOutlet weak var replyTypeImageView: UIImageView?
-    @IBOutlet weak var mediaMapView: GMSMapView?
+    @IBOutlet weak var mediaMapView: UIView?
     @IBOutlet weak var replyMediaImageWidthCons: NSLayoutConstraint?
     // Forward Outlet
     @IBOutlet weak var forwardImageView: UIImageView?
@@ -61,7 +61,6 @@ class SenderDocumentsTableViewCell: BaseTableViewCell {
     var isShowAudioLoadingIcon: Bool? = false
     
     var selectedForwardMessage: [SelectedMessages]? = []
-    var sendMediaMessages: [ChatMessage]? = []
     var message: ChatMessage?
     //MARK: StarredMessage local variable
     var isStarredMessagePage: Bool? = false
@@ -265,15 +264,22 @@ class SenderDocumentsTableViewCell: BaseTableViewCell {
                 guard let longitude = replyMessage?.locationChatMessage?.longitude  else {
                     return nil
                 }
-                mediaMapView?.camera = GMSCameraPosition.camera(withLatitude: latitude, longitude: longitude, zoom: 16.0, bearing: 360.0, viewingAngle: 15.0)
-                mediaMapView?.isUserInteractionEnabled = false
-                DispatchQueue.main.async
-                { [self] in
-                    // 2. Perform UI Operations.
-                    let position = CLLocationCoordinate2DMake(replyMessage?.locationChatMessage?.latitude ?? 0.0,replyMessage?.locationChatMessage?.longitude ?? 0.0)
-                    let marker = GMSMarker(position: position)
-                    marker.map = mediaMapView
+                
+                AppUtils.shared.fetchStaticMapImage(latitude: latitude, longitude: longitude, zoomLevel: "16", size: CGSize(width: mediaMapView?.bounds.width ?? 250, height: mediaMapView?.bounds.height ?? 250)) { [self] mapImage in
+                    let mapImageView = UIImageView(frame: CGRect(x: 0, y: 0, width: mediaMapView?.bounds.width ?? 250, height: mediaMapView?.bounds.height ?? 250))
+                    mapImageView.image = mapImage
+                    mediaMapView?.addSubview(mapImageView)
                 }
+                
+//                mediaMapView?.camera = GMSCameraPosition.camera(withLatitude: latitude, longitude: longitude, zoom: 16.0, bearing: 360.0, viewingAngle: 15.0)
+//                mediaMapView?.isUserInteractionEnabled = false
+//                DispatchQueue.main.async
+//                { [self] in
+//                    // 2. Perform UI Operations.
+//                    let position = CLLocationCoordinate2DMake(replyMessage?.locationChatMessage?.latitude ?? 0.0,replyMessage?.locationChatMessage?.longitude ?? 0.0)
+//                    let marker = GMSMarker(position: position)
+//                    marker.map = mediaMapView
+//                }
                 replyTypeIconImageView?.isHidden = false
                 replyTypeImageView?.isHidden = true
                 replyMediaImageWidthCons?.constant = 50
@@ -286,6 +292,16 @@ class SenderDocumentsTableViewCell: BaseTableViewCell {
                 replyTypeIconImageView?.isHidden = false
                 replyTypeImageView?.isHidden = true
                 mediaMapView?.isHidden = true
+            } else if replyMessage?.meetChatMessage != nil {
+                replyMessageIconWidth?.constant = 12
+                replyTypeIconImageView?.image = UIImage(named: (message?.isMessageSentByMe ?? false) ? "video_link" : "video_link")
+                replyTypeLabel?.text = DateFormatterUtility.shared.getSchduleMeetingDate(date: replyMessage?.meetChatMessage?.scheduledDateTime ?? 0)
+                replyTypeImageView?.isHidden = false
+                replyMediaImageWidthCons?.constant = 50
+                mediaMapView?.isHidden = true
+                replyTypeImageView?.image = UIImage(named: "app_icon")
+                replyTypeImageView?.contentMode = .center
+                replyTypeImageView?.isHidden = false
             }
             }
         } else {
@@ -358,50 +374,29 @@ class SenderDocumentsTableViewCell: BaseTableViewCell {
                 uploadCancelImage?.isHidden = false
                 uploadCancelImage?.image = UIImage(named: ImageConstant.ic_upload)
                 uploadButton?.isHidden = false
-
-                if ((sendMediaMessages?.count ?? 0) > 0 && (sendMediaMessages?.filter({$0.messageId == message?.messageId}).count ?? 0) > 0) {
-                    nicoProgressBar.addSubview(newProgressBar)
-                } else {
-                    print("sender", sendMediaMessages?.count ?? 0)
-                    newProgressBar.removeFromSuperview()
-                    
-                }
+                newProgressBar.removeFromSuperview()
                 documentNameTrailingCons?.isActive = true
                 doctNameTrailingWithoutImageCons?.isActive = false
             } else if message?.mediaChatMessage?.mediaUploadStatus == .failed {
                 uploadCancelImage?.isHidden = false
                 uploadCancelImage?.image = UIImage(named: ImageConstant.ic_upload)
                 uploadButton?.isHidden = false
-
-                if ((sendMediaMessages?.count ?? 0) > 0 && (sendMediaMessages?.filter({$0.messageId == message?.messageId}).count ?? 0) > 0) {
-                    newProgressBar.removeFromSuperview()
-                } else {
-                    print("sender", sendMediaMessages?.count ?? 0)
-                    newProgressBar.removeFromSuperview()
-                    
-                }
+                newProgressBar.removeFromSuperview()
                 documentNameTrailingCons?.isActive = true
                 doctNameTrailingWithoutImageCons?.isActive = false
             } else if message?.mediaChatMessage?.mediaUploadStatus == .uploading {
-                uploadCancelImage?.image = UIImage(named: ImageConstant.ic_audioUploadCancel)
-                uploadButton?.isHidden = true
+                uploadCancelImage?.image = UIImage(named: ImageConstant.ic_uploadCancel)
+                uploadButton?.isHidden = false
                 uploadImageView?.isHidden = true
                 uploadCancelImage?.isHidden = false
-                nicoProgressBar.addSubview(newProgressBar)
+                nicoProgressBar.isHidden = false
+                if nicoProgressBar.subviews.isEmpty{
+                    nicoProgressBar.addSubview(newProgressBar)
+                }
+                newProgressBar.setProg(per: CGFloat(message?.mediaChatMessage?.mediaProgressStatus ?? 0))
                 documentNameTrailingCons?.isActive = true
                 doctNameTrailingWithoutImageCons?.isActive = false
             } else if message?.mediaChatMessage?.mediaUploadStatus == .uploaded {
-                if let localPath = message?.mediaChatMessage?.mediaFileName {
-                    if let directoryURL: URL = FlyUtils.getGroupContainerIDPath() {
-                        let folderPath: URL = directoryURL.appendingPathComponent("FlyMedia/Document", isDirectory: true)
-                        let fileURL: URL = folderPath.appendingPathComponent(localPath)
-                        if FileManager.default.fileExists(atPath: fileURL.relativePath) {
-                            let data = NSData(contentsOf: fileURL)
-                            let image = UIImage(data: data! as Data)
-                            bubbleImageView?.image = image
-                        }
-                    }
-                }
                 documentNameTrailingCons?.isActive = false
                 doctNameTrailingWithoutImageCons?.isActive = true
                 newProgressBar.removeFromSuperview()
@@ -413,13 +408,7 @@ class SenderDocumentsTableViewCell: BaseTableViewCell {
                 uploadCancelImage?.isHidden = false
                 uploadCancelImage?.image = (isShowAudioLoadingIcon == true && indexPath == IndexPath(row: 0, section: 0)) ? UIImage(named: ImageConstant.ic_uploadCancel) : UIImage(named: "download")
                 uploadButton?.isHidden = (isShowAudioLoadingIcon == true && indexPath == IndexPath(row: 0, section: 0)) ? true : false
-                if ((sendMediaMessages?.count ?? 0) > 0 && (sendMediaMessages?.filter({$0.messageId == message?.messageId}).count ?? 0) > 0) {
-                    print("sender", sendMediaMessages?.count ?? 0)
-                    nicoProgressBar.addSubview(newProgressBar)
-                } else {
-                    print("sender", sendMediaMessages?.count ?? 0)
-                    newProgressBar.removeFromSuperview()
-                }
+                newProgressBar.removeFromSuperview()
             } else {
                 newProgressBar.removeFromSuperview()
                 uploadCancelImage?.isHidden = true
@@ -431,45 +420,30 @@ class SenderDocumentsTableViewCell: BaseTableViewCell {
         } else {
             if message?.mediaChatMessage?.mediaDownloadStatus == .not_downloaded || message?.messageStatus == .sent {
                 uploadCancelImage?.isHidden = false
-                uploadCancelImage?.image = (isShowAudioLoadingIcon == true && indexPath == IndexPath(row: 0, section: 0)) ? UIImage(named: ImageConstant.ic_uploadCancel) : UIImage(named: "download")
-                uploadButton?.isHidden = (isShowAudioLoadingIcon == true && indexPath == IndexPath(row: 0, section: 0)) ? true : false
-                if ((sendMediaMessages?.count ?? 0) > 0 && (sendMediaMessages?.filter({$0.messageId == message?.messageId}).count ?? 0) > 0) {
-                    print("sender", sendMediaMessages?.count ?? 0)
-                    nicoProgressBar.addSubview(newProgressBar)
-                } else {
-                    print("sender", sendMediaMessages?.count ?? 0)
-                    newProgressBar.removeFromSuperview()
-                    
-                }
+                uploadCancelImage?.image =  UIImage(named: "download")
+                uploadButton?.isHidden = false
             } else if message?.mediaChatMessage?.mediaDownloadStatus == .failed  {
                 uploadCancelImage?.isHidden = false
-                uploadCancelImage?.image = (isShowAudioLoadingIcon == true && indexPath == IndexPath(row: 0, section: 0)) ? UIImage(named: ImageConstant.ic_uploadCancel) : UIImage(named: "download")
-                uploadButton?.isHidden = (isShowAudioLoadingIcon == true && indexPath == IndexPath(row: 0, section: 0)) ? true : false
-                if ((sendMediaMessages?.count ?? 0) > 0 && (sendMediaMessages?.filter({$0.messageId == message?.messageId}).count ?? 0) > 0) {
-                    print("sender", sendMediaMessages?.count ?? 0)
-                    newProgressBar.removeFromSuperview()
-                } else {
-                    print("sender", sendMediaMessages?.count ?? 0)
-                    newProgressBar.removeFromSuperview()
-                    
-                }
+                uploadCancelImage?.image = UIImage(named: "download")
+                uploadButton?.isHidden = false
             } else if message?.mediaChatMessage?.mediaDownloadStatus == .downloading {
                 uploadCancelImage?.image = UIImage(named: ImageConstant.ic_uploadCancel)
                 uploadCancelImage?.isHidden = false
+                uploadButton?.isHidden = false
                 nicoProgressBar.addSubview(newProgressBar)
                 
             } else if message?.mediaChatMessage?.mediaDownloadStatus == .downloaded {
-                if let localPath = message?.mediaChatMessage?.mediaFileName {
-                    if let directoryURL: URL = FlyUtils.getGroupContainerIDPath() {
-                        let folderPath: URL = directoryURL.appendingPathComponent("FlyMedia/Document", isDirectory: true)
-                        let fileURL: URL = folderPath.appendingPathComponent(localPath)
-                        if FileManager.default.fileExists(atPath: fileURL.relativePath) {
-                            let data = NSData(contentsOf: fileURL)
-                            let image = UIImage(data: data! as Data)
-                            bubbleImageView?.image = image
-                        }
-                    }
-                }
+//                if let localPath = message?.mediaChatMessage?.mediaFileName {
+//                    if let directoryURL: URL = FlyUtils.getGroupContainerIDPath() {
+//                        let folderPath: URL = directoryURL.appendingPathComponent("FlyMedia/Document", isDirectory: true)
+//                        let fileURL: URL = folderPath.appendingPathComponent(localPath)
+//                        if FileManager.default.fileExists(atPath: fileURL.relativePath) {
+//                            let data = NSData(contentsOf: fileURL)
+//                            let image = UIImage(data: data! as Data)
+//                            bubbleImageView?.image = image
+//                        }
+//                    }
+//                }
                 uploadCancelImage?.isHidden = true
                 newProgressBar.removeFromSuperview()
                 
@@ -494,18 +468,24 @@ class SenderDocumentsTableViewCell: BaseTableViewCell {
     func startUpload() {
         uploadCancelImage?.isHidden = false
         uploadCancelImage?.image = UIImage(named: ImageConstant.ic_uploadCancel)
-        nicoProgressBar.addSubview(newProgressBar)
+        nicoProgressBar.isHidden = false
+        if nicoProgressBar.subviews.isEmpty{
+            nicoProgressBar.addSubview(newProgressBar)
+        }
+        newProgressBar.setProg(per: CGFloat(message?.mediaChatMessage?.mediaProgressStatus ?? 0))
     }
     
     func stopUpload() {
         uploadCancelImage?.isHidden = false
         uploadCancelImage?.image = UIImage(named: ImageConstant.ic_upload)
+        nicoProgressBar.isHidden = true
         newProgressBar.removeFromSuperview()
     }
     
     func stopDownload() {
         uploadCancelImage?.isHidden = false
         uploadCancelImage?.image = UIImage(named: "Download")
+        nicoProgressBar.isHidden = true
         newProgressBar.removeFromSuperview()
     }
 }

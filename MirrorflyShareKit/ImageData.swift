@@ -29,6 +29,7 @@ public struct ImageData {
     var encryptedKey : String = emptyString()
     var inProgress : Bool = false
     var fileSize : Double = 0.0
+    var fileURL: URL? = nil
 }
 
 //struct Profile {

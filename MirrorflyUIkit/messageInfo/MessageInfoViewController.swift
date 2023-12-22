@@ -94,6 +94,8 @@ class MessageInfoViewController: BaseViewController {
         messageInfoTableView.register(UINib(nibName: Identifiers.chatViewTextOutgoingCell , bundle: .main), forCellReuseIdentifier: Identifiers.chatViewTextOutgoingCell)
         messageInfoTableView.register(UINib(nibName: Identifiers.chatViewLocationOutgoingCell , bundle: .main), forCellReuseIdentifier: Identifiers.chatViewLocationOutgoingCell)
         messageInfoTableView.register(UINib(nibName: Identifiers.chatViewContactOutgoingCell , bundle: .main), forCellReuseIdentifier: Identifiers.chatViewContactOutgoingCell)
+        messageInfoTableView.register(UINib(nibName: Identifiers.scheduledMeetingSenderCell,
+                                                 bundle: .main), forCellReuseIdentifier: Identifiers.scheduledMeetingSenderCell)
         messageInfoTableView.register(UINib(nibName: Identifiers.audioSender , bundle: .main), forCellReuseIdentifier: Identifiers.audioSender)
         messageInfoTableView.register(UINib(nibName: Identifiers.imageSender , bundle: .main), forCellReuseIdentifier: Identifiers.imageSender)
         messageInfoTableView.register(UINib(nibName: Identifiers.videoOutgoingCell , bundle: .main), forCellReuseIdentifier: Identifiers.videoOutgoingCell)
@@ -156,8 +158,10 @@ extension MessageInfoViewController : UITableViewDelegate, UITableViewDataSource
         if section == 0 {
             if let message = chatMessage {
                 switch(message.messageType) {
-                case .text:
-                    cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.chatViewTextOutgoingCell, for: indexPath) as? ChatViewParentMessageCell
+                case .text, .meet, .autoText:
+
+                    cell = tableView.dequeueReusableCell(withIdentifier: (message.messageType == .text || message.messageType == .autoText) ? Identifiers.chatViewTextOutgoingCell : Identifiers.scheduledMeetingSenderCell, for: indexPath) as? ChatViewParentMessageCell
+                    //cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.chatViewTextOutgoingCell, for: indexPath) as? ChatViewParentMessageCell
                     cell.starredMessageView?.isHidden = true
                     cell = cell?.getCellFor(message, at: indexPath, isShowForwardView: false, profileDetails: profileDetails)
                     cell.selectionStyle = .none
@@ -563,12 +567,15 @@ extension MessageInfoViewController: AVAudioPlayerDelegate{
     }
 }
 
-extension MessageInfoViewController : MessageEventsDelegate {
-    func onMessageReceived(message: ChatMessage, chatJid: String) {
+extension MessageInfoViewController  {
+    // override func derived from base view controller
+    override func onMessageReceived(message: ChatMessage, chatJid: String) {
+        super.onMessageReceived(message: message, chatJid: chatJid)
        // messageDelegate?.whileReceivingMessage(chatMessage: message, chatUserJid: chatJid)
     }
     
-    func onMessageStatusUpdated(messageId: String, chatJid: String, status: MessageStatus) {
+    override func onMessageStatusUpdated(messageId: String, chatJid: String, status: MessageStatus) {
+        super.onMessageStatusUpdated(messageId: messageId, chatJid: chatJid, status: status)
         if chatMessage?.messageId == messageId {
             chatMessage?.messageStatus = status
             executeOnMainThread { [weak self] in
@@ -578,35 +585,37 @@ extension MessageInfoViewController : MessageEventsDelegate {
         messageDelegate?.whileUpdatingMessageStatus(messageId: messageId, chatJid: chatJid, status: status)
     }
     
-    func onMediaStatusUpdated(message: ChatMessage) {
+    override func onMediaStatusUpdated(message: ChatMessage) {
+        super.onMediaStatusUpdated(message: message)
         
     }
     
-    func onMediaStatusFailed(error: String, messageId: String, errorCode: Int) {
-        
+    override func onMediaStatusFailed(error: String, messageId: String, errorCode: Int) {
+        super.onMediaStatusFailed(error: error, messageId: messageId, errorCode: errorCode)
     }
     
-    func onMediaProgressChanged(message: ChatMessage, progressPercentage: Float) {
-        
+    override func onMediaProgressChanged(message: ChatMessage, progressPercentage: Float) {
+        super.onMediaProgressChanged(message: message, progressPercentage: progressPercentage)
     }
     
-    func onMessagesClearedOrDeleted(messageIds: Array<String>) {
-        
+    override func onMessagesClearedOrDeleted(messageIds: Array<String>) {
+        super.onMessagesClearedOrDeleted(messageIds: messageIds)
     }
     
-    func onMessagesDeletedforEveryone(messageIds: Array<String>) {
-        
+    override func onMessagesDeletedforEveryone(messageIds: Array<String>) {
+        super.onMessagesDeletedforEveryone(messageIds: messageIds)
     }
     
-    func showOrUpdateOrCancelNotification() {
-        
+    override func showOrUpdateOrCancelNotification() {
+        super.showOrUpdateOrCancelNotification()
     }
     
-    func onMessagesCleared(toJid: String, deleteType: String?) {
-        
+    override func onMessagesCleared(toJid: String, deleteType: String?) {
+        super.onMessagesCleared(toJid: toJid, deleteType: deleteType)
     }
     
-    func setOrUpdateFavourite(messageId: String, favourite: Bool, removeAllFavourite: Bool) {
+    override func setOrUpdateFavourite(messageId: String, favourite: Bool, removeAllFavourite: Bool) {
+        super.setOrUpdateFavourite(messageId: messageId, favourite: favourite, removeAllFavourite: removeAllFavourite)
         if chatMessage?.messageId == messageId {
             chatMessage?.isMessageStarred = favourite
             messageInfoTableView?.reloadData()
@@ -614,11 +623,13 @@ extension MessageInfoViewController : MessageEventsDelegate {
         }
     }
     
-    func onMessageTranslated(message: ChatMessage, jid: String) {
-        
+    override func onMessageTranslated(message: ChatMessage, jid: String) {
+        super.onMessageTranslated(message: message, jid: jid)
     }
     
-    func clearAllConversationForSyncedDevice() {}
+    override func clearAllConversationForSyncedDevice() {
+        super.clearAllConversationForSyncedDevice()
+    }
 }
 // For viewing doucument
 // MARK - Text Delegate

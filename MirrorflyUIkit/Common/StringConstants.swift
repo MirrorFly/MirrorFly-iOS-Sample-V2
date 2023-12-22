@@ -264,6 +264,12 @@ let thereIsNoConversation = "There is no conversation"
 let setBusyStatusDescription = "Set busy status as the Auto response to the message recieved from the individuals"
 let editBusyStatus = "Edit Busy Status Message"
 
+let generateMeetLink = "Generate Meeting Link"
+let generateMeetLinkDesc = "Anyone with Mirror Fly can use this link to join this call.Only share it with people you trust"
+
+let scheduledGenerateMeetLink = "Instant Meet"
+let scheduledGenerateMeetLinkDesc = "Copy the link or click to join the meeting"
+
 //MARK: Group
 let groupNameRequired = "Please provide group name"
 let groupNameCharLimit = 25
@@ -392,8 +398,8 @@ public struct ErrorMessage {
     public static let restrictedforwardUsers = NSLocalizedString("You can only forward with up to 5 users or groups", comment: "")
     public static let checkYourInternet = NSLocalizedString("Please check your internet connection", comment: "")
     public static let fileSizeLarge = NSLocalizedString("File size is too large", comment: "")
-    public static let largeImageFile = NSLocalizedString("File size is too large. Try uploading file size below 10MB", comment: "")
-    public static let largeVideoFile = NSLocalizedString("File size is too large. Try uploading file size below 30MB", comment: "")
+    public static let largeImageFile = NSLocalizedString("File size is too large. Try uploading file size below 40MB", comment: "")
+    public static let largeVideoFile = NSLocalizedString("File size is too large. Try uploading file size below 2GB", comment: "")
     public static let numberDoesntMatch =  NSLocalizedString("mobileNumberDoesntMatch", comment: "")
     public static let invalidPIN = NSLocalizedString("Invalid PIN! Try again", comment: "")
     public static let invalidOLDPIN = NSLocalizedString("Invalid old PIN", comment: "")
@@ -454,6 +460,7 @@ enum MessageActions : String, CaseIterable {
     case reply = "Reply"
     case share = "Share"
     case copy = "Copy"
+    case edit = "Edit Message"
     case forward = "Forward"
     case info = "Info"
     case report = "Report"
@@ -478,3 +485,38 @@ public struct TermsAndConditionsUrl {
     public static let termsAndConditions = "https://www.mirrorfly.com/terms-and-conditions.php"
     public static let privacyPolicy = "https://www.mirrorfly.com/privacy-policy.php"
 }
+
+
+// MARK: Automation Constants
+
+// MARK: Login Ids
+
+let numTextAM = "Login_Number_TextField"
+let otp1TextAM = "Login_OtpOne_TextField"
+let otp2TextAM = "Login_OtpTwo_TextField"
+let otp3TextAM = "Login_OtpThree_TextField"
+let otp4TextAM = "Login_OtpFour_TextField"
+let otp5TextAM = "Login_OtpFive_TextField"
+let otp6TextAM = "Login_OtpSix_TextField"
+let countrySearchAM = "Login_Search_TextField"
+
+
+let getOtpBtnAM = "Login_GetOtp_Button"
+let verifyOtpBtnAM = "Login_VerifyOtp_Button"
+let resendOtpBtnAM = "Login_ResendOtp_Button"
+let changeNumberBtnAM = "Login_ChangeNumber_Button"
+let countryPickerBtnAM = "Login_CountryPicker_Button"
+
+// MARK: Login Strings
+
+let numTextString = "PhoneNumberTextField"
+let otp1TextString = "OtpOneTextField"
+let otp2TextString = "OtpTwoTextField"
+let otp3TextString = "OtpThreeTextField"
+let otp4TextString = "OtpFourTextField"
+let otp5TextString = "OtpFiveTextField"
+let otp6TextString = "OtpSixTextField"
+
+let countrySearchString = "CountrySearchTextField"
+
+let countryPickerString = "CountryPicker"

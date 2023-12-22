@@ -73,11 +73,11 @@ class AuthenticationPINViewController: BaseViewController, UITextFieldDelegate {
         handleBackgroundAndForground()
         didMoveToBackground()
         willCometoForeground()
-        CallViewController.dismissDelegate = self
+        CallUIViewController.dismissDelegate = self
     }
 
     override func viewDidDisappear(_ animated: Bool) {
-        CallViewController.dismissDelegate = nil
+        CallUIViewController.dismissDelegate = nil
     }
 
     func showAlerts() {

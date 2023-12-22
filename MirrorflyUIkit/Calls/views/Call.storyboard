@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21225" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="wST-Oy-5V5">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="i8s-UE-I1l">
     <device id="retina5_5" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21207"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -188,6 +188,36 @@
                 <tapGestureRecognizer id="Ll6-NK-4TY"/>
             </objects>
             <point key="canvasLocation" x="-133.33333333333334" y="21.195652173913047"/>
+        </scene>
+        <!--CallUI View Controller-->
+        <scene sceneID="fbD-8r-nVB">
+            <objects>
+                <viewController storyboardIdentifier="CallUIViewController" id="i8s-UE-I1l" customClass="CallUIViewController" customModule="Mirrorfly" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="3dX-Ga-kHT">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="MwD-kn-Aik" customClass="CallUIXib" customModule="Mirrorfly" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                            </view>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="QM0-rv-yvE"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="MwD-kn-Aik" firstAttribute="leading" secondItem="QM0-rv-yvE" secondAttribute="leading" id="9MF-kJ-dBx"/>
+                            <constraint firstItem="MwD-kn-Aik" firstAttribute="bottom" secondItem="QM0-rv-yvE" secondAttribute="bottom" id="TOG-ll-SPc"/>
+                            <constraint firstItem="MwD-kn-Aik" firstAttribute="top" secondItem="QM0-rv-yvE" secondAttribute="top" id="U4h-lc-YlX"/>
+                            <constraint firstItem="MwD-kn-Aik" firstAttribute="trailing" secondItem="QM0-rv-yvE" secondAttribute="trailing" id="eiB-J6-QfC"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="outgoingCallView" destination="MwD-kn-Aik" id="Ps1-hr-KiY"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="5j7-aF-qeN" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-133.33333333333334" y="763.85869565217399"/>
         </scene>
         <!--Group Call View Controller-->
         <scene sceneID="0a5-iy-ev3">
@@ -507,7 +537,7 @@
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3xt-Wa-1AR">
                                 <rect key="frame" x="0.0" y="0.0" width="414" height="70"/>
                                 <subviews>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="MirrorFly User" textAlignment="center" lineBreakMode="wordWrap" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="v4F-YL-Ke1">
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="No one else is here" textAlignment="center" lineBreakMode="wordWrap" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="v4F-YL-Ke1">
                                         <rect key="frame" x="70" y="10" width="274" height="50"/>
                                         <fontDescription key="fontDescription" name="SFUIDisplay-Medium" family="SF UI Display" pointSize="15"/>
                                         <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -900,12 +930,194 @@
             </objects>
             <point key="canvasLocation" x="2533.3333333333335" y="44.836956521739133"/>
         </scene>
+        <!--Share Call Link View Controller-->
+        <scene sceneID="fB8-Iz-N2F">
+            <objects>
+                <viewController storyboardIdentifier="ShareCallLinkViewController" id="cpK-KC-gaD" customClass="ShareCallLinkViewController" customModule="Mirrorfly" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="8VF-Sh-UDk">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Generate Meeting Link" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="XZZ-MV-Mjj">
+                                <rect key="frame" x="32" y="8" width="350" height="20"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="20" id="br1-ve-0cE"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="SFUIDisplay-Semibold" family="SF UI Display" pointSize="18"/>
+                                <color key="textColor" name="color_181818"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Anyone with Mirrofly can use this link to join this meet. Only share it with people you trust" lineBreakMode="tailTruncation" numberOfLines="3" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Xlb-nh-bTG">
+                                <rect key="frame" x="32" y="56" width="350" height="40"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="40" id="qT0-Pa-Db9"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="SFUIDisplay-Regular" family="SF UI Display" pointSize="14"/>
+                                <color key="textColor" name="color_767676"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sfu-G0-XEC" userLabel="handle">
+                                <rect key="frame" x="175" y="10" width="64" height="5"/>
+                                <color key="backgroundColor" systemColor="systemGray3Color"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="64" id="G3O-PE-GK9"/>
+                                    <constraint firstAttribute="height" constant="5" id="H0X-Fw-UV4"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                        <integer key="value" value="3"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
+                            </view>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="hN3-Ku-Fja" userLabel="linkBox">
+                                <rect key="frame" x="32" y="96" width="350" height="56"/>
+                                <subviews>
+                                    <stackView opaque="NO" contentMode="scaleToFill" distribution="fillProportionally" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="pEO-6Z-Sty">
+                                        <rect key="frame" x="16" y="0.0" width="326" height="56"/>
+                                        <subviews>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Loading" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pya-Wu-u65">
+                                                <rect key="frame" x="0.0" y="0.0" width="270" height="56"/>
+                                                <fontDescription key="fontDescription" name="SFUIDisplay-Regular" family="SF UI Display" pointSize="14"/>
+                                                <color key="textColor" name="color_6580CB"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="copy_link" translatesAutoresizingMaskIntoConstraints="NO" id="R3Y-dG-jbl">
+                                                <rect key="frame" x="278" y="0.0" width="48" height="56"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="56" id="7qu-yH-MGO"/>
+                                                    <constraint firstAttribute="width" constant="48" id="tsf-ZA-GNC"/>
+                                                </constraints>
+                                            </imageView>
+                                        </subviews>
+                                    </stackView>
+                                </subviews>
+                                <color key="backgroundColor" name="color_F2F2F2"/>
+                                <constraints>
+                                    <constraint firstItem="pEO-6Z-Sty" firstAttribute="leading" secondItem="hN3-Ku-Fja" secondAttribute="leading" constant="16" id="Dzc-68-UPx"/>
+                                    <constraint firstAttribute="height" constant="56" id="HyS-Wd-oNd"/>
+                                    <constraint firstAttribute="trailing" secondItem="pEO-6Z-Sty" secondAttribute="trailing" constant="8" id="dD5-cB-FtZ"/>
+                                    <constraint firstAttribute="bottom" secondItem="pEO-6Z-Sty" secondAttribute="bottom" id="lfu-3B-jJC"/>
+                                    <constraint firstItem="pEO-6Z-Sty" firstAttribute="top" secondItem="hN3-Ku-Fja" secondAttribute="top" id="yY9-5o-e9P"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                        <integer key="value" value="10"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
+                            </view>
+                            <button opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="IgQ-zp-12F">
+                                <rect key="frame" x="32" y="176" width="350" height="48"/>
+                                <color key="backgroundColor" name="color_3276E2"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="48" id="xuv-Hr-NNN"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="SFUIDisplay-Semibold" family="SF UI Display" pointSize="17"/>
+                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                <state key="normal" title="Join Meeting">
+                                    <color key="titleColor" name="Color"/>
+                                </state>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                        <integer key="value" value="24"/>
+                                    </userDefinedRuntimeAttribute>
+                                    <userDefinedRuntimeAttribute type="boolean" keyPath="layer.clipToBounds" value="YES"/>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="joinMeeting:" destination="cpK-KC-gaD" eventType="touchUpInside" id="zkx-3J-aIS"/>
+                                </connections>
+                            </button>
+                            <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="lCW-hB-PAW" userLabel="shareStack">
+                                <rect key="frame" x="32" y="242" width="350" height="48"/>
+                                <subviews>
+                                    <button opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sDg-pV-sf4">
+                                        <rect key="frame" x="0.0" y="0.0" width="167" height="48"/>
+                                        <fontDescription key="fontDescription" name="SFUIDisplay-Semibold" family="SF UI Display" pointSize="16"/>
+                                        <color key="tintColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                        <state key="normal" title="Share">
+                                            <color key="titleColor" name="color_3276E2"/>
+                                        </state>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                <integer key="value" value="24"/>
+                                            </userDefinedRuntimeAttribute>
+                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.borderWidth">
+                                                <integer key="value" value="1"/>
+                                            </userDefinedRuntimeAttribute>
+                                        </userDefinedRuntimeAttributes>
+                                        <connections>
+                                            <action selector="shareLink:" destination="cpK-KC-gaD" eventType="touchUpInside" id="urr-IG-poY"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="KOP-cv-Gfo">
+                                        <rect key="frame" x="183" y="0.0" width="167" height="48"/>
+                                        <color key="backgroundColor" name="BackgroundColor"/>
+                                        <fontDescription key="fontDescription" name="SFUIDisplay-Semibold" family="SF UI Display" pointSize="16"/>
+                                        <color key="tintColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                        <state key="normal" title="Invite Contacts">
+                                            <color key="titleColor" name="color_3276E2"/>
+                                        </state>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                <integer key="value" value="24"/>
+                                            </userDefinedRuntimeAttribute>
+                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.borderWidth">
+                                                <integer key="value" value="1"/>
+                                            </userDefinedRuntimeAttribute>
+                                        </userDefinedRuntimeAttributes>
+                                        <connections>
+                                            <action selector="inviteContacts:" destination="cpK-KC-gaD" eventType="touchUpInside" id="wzq-cI-y8D"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="48" id="Jym-qc-0nt"/>
+                                </constraints>
+                            </stackView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="eTb-Ia-DED"/>
+                        <color key="backgroundColor" name="BackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="eTb-Ia-DED" firstAttribute="trailing" secondItem="hN3-Ku-Fja" secondAttribute="trailing" constant="32" id="0yh-Dh-taU"/>
+                            <constraint firstItem="Xlb-nh-bTG" firstAttribute="top" secondItem="XZZ-MV-Mjj" secondAttribute="bottom" constant="8" id="3Ym-LO-56P"/>
+                            <constraint firstItem="eTb-Ia-DED" firstAttribute="trailing" secondItem="IgQ-zp-12F" secondAttribute="trailing" constant="32" id="6vo-gE-GXa"/>
+                            <constraint firstItem="IgQ-zp-12F" firstAttribute="leading" secondItem="eTb-Ia-DED" secondAttribute="leading" constant="32" id="7th-5c-5T8"/>
+                            <constraint firstItem="hN3-Ku-Fja" firstAttribute="top" secondItem="Xlb-nh-bTG" secondAttribute="bottom" constant="20" id="91E-es-NY9"/>
+                            <constraint firstItem="Xlb-nh-bTG" firstAttribute="leading" secondItem="eTb-Ia-DED" secondAttribute="leading" constant="32" id="CeS-Zw-2E3"/>
+                            <constraint firstItem="lCW-hB-PAW" firstAttribute="top" secondItem="IgQ-zp-12F" secondAttribute="bottom" constant="18" id="ERa-aq-FXM"/>
+                            <constraint firstItem="sfu-G0-XEC" firstAttribute="top" secondItem="8VF-Sh-UDk" secondAttribute="top" constant="10" id="JvH-Qp-Svs"/>
+                            <constraint firstItem="eTb-Ia-DED" firstAttribute="trailing" secondItem="Xlb-nh-bTG" secondAttribute="trailing" constant="32" id="Phf-Ek-ZeY"/>
+                            <constraint firstItem="XZZ-MV-Mjj" firstAttribute="leading" secondItem="eTb-Ia-DED" secondAttribute="leading" constant="32" id="TDf-Md-gcC"/>
+                            <constraint firstItem="sfu-G0-XEC" firstAttribute="centerX" secondItem="8VF-Sh-UDk" secondAttribute="centerX" id="YcP-4k-jPI"/>
+                            <constraint firstItem="IgQ-zp-12F" firstAttribute="top" secondItem="hN3-Ku-Fja" secondAttribute="bottom" constant="24" id="Ziq-hl-MRl"/>
+                            <constraint firstItem="XZZ-MV-Mjj" firstAttribute="top" secondItem="eTb-Ia-DED" secondAttribute="top" constant="8" id="anc-LK-YEy"/>
+                            <constraint firstItem="eTb-Ia-DED" firstAttribute="trailing" secondItem="XZZ-MV-Mjj" secondAttribute="trailing" constant="32" id="ujY-xY-fpb"/>
+                            <constraint firstItem="eTb-Ia-DED" firstAttribute="trailing" secondItem="lCW-hB-PAW" secondAttribute="trailing" constant="32" id="wxT-ie-cyb"/>
+                            <constraint firstItem="hN3-Ku-Fja" firstAttribute="leading" secondItem="eTb-Ia-DED" secondAttribute="leading" constant="32" id="z21-Ep-0hT"/>
+                            <constraint firstItem="lCW-hB-PAW" firstAttribute="leading" secondItem="eTb-Ia-DED" secondAttribute="leading" constant="32" id="zbo-A6-iiN"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="copyImage" destination="R3Y-dG-jbl" id="wHc-Yp-RCy"/>
+                        <outlet property="inviteContactButton" destination="KOP-cv-Gfo" id="Z4I-Wq-G9W"/>
+                        <outlet property="joinBtn" destination="IgQ-zp-12F" id="5SH-IM-Oq0"/>
+                        <outlet property="meetLink" destination="pya-Wu-u65" id="kZd-9c-b5n"/>
+                        <outlet property="shareBtn" destination="sDg-pV-sf4" id="OWc-Pw-zj5"/>
+                        <outlet property="shareStack" destination="lCW-hB-PAW" id="pHC-KF-3Wq"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="QCf-Ni-ftX" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1568.1159420289857" y="-1184.5108695652175"/>
+        </scene>
     </scenes>
     <resources>
         <image name="AudioCallBG" width="375" height="641"/>
         <image name="IconVideoOffHighlighted" width="69.333335876464844" height="69.333335876464844"/>
         <image name="backArrow" width="19.333333969116211" height="13.666666984558105"/>
         <image name="back_button" width="18.333333969116211" height="15.333333015441895"/>
+        <image name="copy_link" width="14.333333015441895" height="17"/>
         <image name="ic_audio_active" width="54" height="54"/>
         <image name="ic_profile_placeholder" width="139" height="139"/>
         <image name="ic_video_active" width="54.333332061767578" height="54.333332061767578"/>
@@ -913,8 +1125,23 @@
         <image name="icon_mirrofly" width="224.33332824707031" height="36"/>
         <image name="mic.slash.fill" catalog="system" width="108" height="128"/>
         <image name="nameBG" width="187" height="86"/>
+        <namedColor name="BackgroundColor">
+            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="Color">
+            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="color_181818">
+            <color red="0.094117647058823528" green="0.094117647058823528" blue="0.094117647058823528" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
         <namedColor name="color_3276E2">
             <color red="0.19607843137254902" green="0.46274509803921571" blue="0.88627450980392153" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="color_6580CB">
+            <color red="0.396078431372549" green="0.50196078431372548" blue="0.79607843137254897" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="color_767676">
+            <color red="0.46274509803921571" green="0.46274509803921571" blue="0.46274509803921571" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="color_F2F2F2">
             <color red="0.94901960784313721" green="0.94901960784313721" blue="0.94901960784313721" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -925,8 +1152,11 @@
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
+        <systemColor name="systemGray3Color">
+            <color red="0.78039215689999997" green="0.78039215689999997" blue="0.80000000000000004" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
         <systemColor name="systemRedColor">
-            <color red="1" green="0.23137254901960785" blue="0.18823529411764706" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="1" green="0.23137254900000001" blue="0.18823529410000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

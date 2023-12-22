@@ -81,7 +81,55 @@ extension QuickSharePopupViewController : UITableViewDelegate, UITableViewDataSo
         let attachment = mediaFiles[indexPath.row]
         //if let data = try? Data(contentsOf: attachment.url!) {
 
-        guard let sharedURL = attachment.url else { return UITableViewCell() }
+        guard let sharedURL = attachment.url else {
+
+            guard let data = attachment.data else { return UITableViewCell() }
+            //if let data = attachment.data {
+                let size = Double(data.count / 1000)
+                let fileSize = Double(Double(size / 1000) / 1000)
+
+
+                var maxSize = Int()
+                switch attachment.contentType {
+                case .video:
+                    cell?.mediaFile?.image = thumbnailForVideoAtURL(url: attachment.url ?? URL(fileURLWithPath: ""))
+                    maxSize = 2048
+                case .document:
+                    maxSize = 2048
+                    cell?.mediaFile?.contentMode = .scaleAspectFit
+                    ShareKitUtility.shared.checkFileType(url: attachment.url?.absoluteString ?? "", typeImageView: cell?.mediaFile)
+                case .audio:
+                    maxSize = 2048
+                    cell?.mediaFile?.image = UIImage(named: "audio")
+                default:
+                    maxSize = 40
+                    cell?.mediaFile?.contentMode = .scaleAspectFill
+                    cell?.mediaFile?.image = attachment.thumbImage
+                }
+
+                cell?.TitleLabel?.text = attachment.url?.lastPathComponent
+                cell?.fileTypeLabel?.text = attachment.url?.pathExtension
+                switch attachment.contentType {
+                case .video:
+                    let asset = AVAsset(url: ((attachment.url ?? URL(string: ""))!))
+                    let duration = asset.duration
+                    let durationSeconds = CMTimeGetSeconds(duration)
+                    let durationMin = (Int(durationSeconds) / 60) % 60
+                    let durationSec = Int(durationSeconds) % 60
+                    cell?.durationLabel?.text = "\(durationMin)m \(durationSec)s"
+                    cell?.durationLabel?.isHidden = false
+                default:
+                    cell?.durationLabel?.isHidden = true
+                }
+            let sizeString = attachment.contentType == .image ? "\(maxSize)MB" : "\(maxSize)GB"
+                cell?.errorLabel?.text = attachment.invalidType == .size ? "File size is too large. Try uploading file size below \(sizeString)" : attachment.contentType == .document ? unSupportedFileFormate : unsupportedFile
+                cell?.fileSizeLabel?.text = String(describing: "\(fileSize.roundTo2f())MB")
+                cell?.backgroundColor = .white
+                cell?.selectionStyle = .none
+                return cell ?? UITableViewCell()
+            //}
+
+        }
         //if let data = try? Data(contentsOf: sharedURL) {
         //let data = Data()
 
@@ -89,23 +137,23 @@ extension QuickSharePopupViewController : UITableViewDelegate, UITableViewDataSo
         let pathExtension = sharedURL.pathExtension
         let size = Double(resource?.fileSize ?? 0 / 1000)
         let fileSize = Double(Double(size / 1000) / 1000)
-
+        
         var maxSize = Int()
         switch attachment.contentType {
         case .video:
             cell?.mediaFile?.image = thumbnailForVideoAtURL(url: attachment.url ?? URL(fileURLWithPath: ""))
-            maxSize = 30
+            maxSize = 2048
         case .document:
-            maxSize = 20
             cell?.mediaFile?.contentMode = .scaleAspectFit
             ShareKitUtility.shared.checkFileType(url: attachment.url?.absoluteString ?? "", typeImageView: cell?.mediaFile)
+            maxSize = 2048
         case .audio:
-            maxSize = 30
             cell?.mediaFile?.image = UIImage(named: "audio")
+            maxSize = 2048
         default:
-            maxSize = 10
             cell?.mediaFile?.contentMode = .scaleAspectFill
-            cell?.mediaFile?.image = attachment.thumbImage
+            cell?.mediaFile?.image = ShareMediaUtils.downsample(imageAt: sharedURL, to: cell?.mediaFile?.bounds.size ?? CGSize(width: 70, height: 70))
+            maxSize = 40
         }
 
         cell?.TitleLabel?.text = attachment.url?.lastPathComponent
@@ -122,7 +170,8 @@ extension QuickSharePopupViewController : UITableViewDelegate, UITableViewDataSo
         default:
             cell?.durationLabel?.isHidden = true
         }
-        cell?.errorLabel?.text = attachment.invalidType == .size ? "File size is too large. Try uploading file size below \(maxSize)MB" : attachment.contentType == .document ? unSupportedFileFormate : unsupportedFile
+        let sizeString = attachment.contentType == .image ? "\(maxSize)MB" : "\(maxSize)GB"
+        cell?.errorLabel?.text = attachment.invalidType == .size ? "File size is too large. Try uploading file size below \(sizeString)" : attachment.contentType == .document ? unSupportedFileFormate : unsupportedFile
         cell?.fileSizeLabel?.text = String(describing: "\(fileSize.roundTo2f())MB")
         cell?.backgroundColor = .white
         cell?.selectionStyle = .none

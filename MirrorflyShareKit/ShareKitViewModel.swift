@@ -13,15 +13,15 @@ import Social
 import CoreServices
 import Contacts
 
-let BASE_URL =  "https://api-preprod-sandbox.mirrorfly.com/api/v1/"
 let CONTAINER_ID = "group.com.mirrorfly.qa"
-let LICENSE_KEY = "xxxxxxxxxxxxxxxx"
+let LICENSE_KEY = "lu3Om85JYSghcsB6vgVoSgTlSQArL5"
 let IS_LIVE = false
-let APP_NAME = "UiKit"
+let APP_NAME = "UiKitQa"
 let ENABLE_CONTACT_SYNC = false
 
 protocol ShareKitDelegate {
     func removeData()
+    func onError(description: String)
 }
 
 protocol ShareEditImageDelegate: class {
@@ -45,6 +45,7 @@ class ShareKitViewModel {
     var locationList = [String]()
     var handledAssets = [PHAsset]()
     var handledURL = [URL]()
+    var handledScreenShot = [UIImage]()
 
     init() {
         initialize()
@@ -70,6 +71,7 @@ class ShareKitViewModel {
         locationList = []
         handledAssets = []
         handledURL = []
+        handledScreenShot = []
     }
 
     func loadData(attachments: [NSItemProvider], completion: @escaping() -> Void) {
@@ -78,7 +80,7 @@ class ShareKitViewModel {
         var hasVcard = false
         var hasUrl = false
         var hasExternalUrl = false
-        
+
         var locationValues = [String]()
 
         attachments.forEach { attachment in
@@ -131,11 +133,22 @@ class ShareKitViewModel {
                 imageVideoList.append(attachment)
                 attachment.loadItem(forTypeIdentifier: kUTTypeImage as String, options: nil) { [weak self] data, error in
                     print ("data: \(String(describing: data))")
-                    var sharedData = ShareData()
-                    sharedData.url = data as? URL
-                    sharedData.contentType = .image
-                    self?.insertData(sharedData: sharedData)
-                    self?.dispatchGroup.leave()
+                    if let imageData = data as? URL {
+                        var sharedData = ShareData()
+                        sharedData.url = data as? URL
+                        sharedData.contentType = .image
+                        sharedData.image = data as? UIImage
+                        self?.insertData(sharedData: sharedData)
+                        self?.dispatchGroup.leave()
+                    } else if let image = data as? UIImage {
+                        var sharedData = ShareData()
+                        sharedData.url = nil
+                        sharedData.contentType = .image
+                        sharedData.image = image
+                        sharedData.data = image.pngData()
+                        self?.insertData(sharedData: sharedData)
+                        self?.dispatchGroup.leave()
+                    }
                 }
                 break
             case attachment.hasItemConformingToTypeIdentifier(kUTTypeContact as String):
@@ -294,7 +307,7 @@ class ShareKitViewModel {
             completion()
         }
     }
-    
+
     private func saveInLocalPath(path: String,localPath: String) -> URL {
         let directoryURL: URL = FlyUtils.getGroupContainerIDPath()!
         let folderPath: URL = directoryURL.appendingPathComponent(path, isDirectory: true)
@@ -307,97 +320,127 @@ class ShareKitViewModel {
         //            contacts?.append(sharedData)
         //            return
         //        }
-        guard let sharedURL = sharedData.url else { return }
-        //if let data = try? Data(contentsOf: sharedURL) {
-        //let data = Data()
+        if let sharedURL = sharedData.url {
+            //if let data = try? Data(contentsOf: sharedURL) {
+            //let data = Data()
 
-        let resource = try? sharedURL.resourceValues(forKeys:[.fileSizeKey])
-        let pathExtension = sharedData.url?.pathExtension
-        let size = Double(resource?.fileSize ?? 0 / 1000)
-        let fileSize = Double(Double(size / 1000) / 1000)
-        switch sharedData.contentType {
-        case .audio:
-            if fileSize <= 30 && (pathExtension?.lowercased() == "aac" || pathExtension?.lowercased() == "mp3" || pathExtension?.lowercased() == "wav" || pathExtension?.lowercased() == "m4a") {
-                MediaUtils.processAudio(url: sharedData.url ?? URL(string: "")!) { isSuccess, fileName ,localPath, fileSize, duration, fileKey  in
-                    print("#media \(duration)")
-                    if isSuccess {
-                        if let localPathURL = localPath, isSuccess{
-                            var mediaData = MediaData()
-                            mediaData.fileName = fileName
-                            mediaData.fileURL = localPathURL
-                            mediaData.fileSize = fileSize
-                            mediaData.duration = duration
-                            mediaData.fileKey = fileKey
-                            mediaData.mediaType = .audio
-                            self.listOfMediaData?.append(mediaData)
+            let resource = try? sharedURL.resourceValues(forKeys:[.fileSizeKey])
+            let pathExtension = sharedData.url?.pathExtension
+            let size = Double(resource?.fileSize ?? 0 / 1000)
+            let fileSize = Double(Double(size / 1000) / 1000)
+            switch sharedData.contentType {
+            case .audio:
+                if fileSize <= 2048 && (pathExtension?.lowercased() == "aac" || pathExtension?.lowercased() == "mp3" || pathExtension?.lowercased() == "wav" || pathExtension?.lowercased() == "m4a") {
+                    MediaUtils.processAudioFile(url: sharedData.url ?? URL(string: "")!) { [weak self] isSuccess, fileName ,localPath, fileSize, duration, fileKey, errorMessage    in
+                        print("#media \(duration)")
+                        if isSuccess {
+                            if let localPathURL = localPath, isSuccess{
+                                var mediaData = MediaData()
+                                mediaData.fileName = fileName
+                                mediaData.fileURL = localPathURL
+                                mediaData.fileSize = fileSize
+                                mediaData.duration = duration
+                                mediaData.fileKey = fileKey
+                                mediaData.mediaType = .audio
+                                self?.listOfMediaData?.append(mediaData)
+                            }
+                        } else {
+                            DispatchQueue.main.async { [weak self] in
+                                self?.delegate?.onError(description: errorMessage)
+                            }
+                            print("#shareKitError: \(errorMessage)")
                         }
                     }
+
+                } else {
+                    var file = sharedData
+                    file.invalidType = fileSize > 30 ? .size : .format
+                    invaildMediaFiles?.append(file)
                 }
-
-            } else {
-                var file = sharedData
-                file.invalidType = fileSize > 30 ? .size : .format
-                invaildMediaFiles?.append(file)
-            }
-        case .image:
-            if fileSize > 10 {
-                var file = sharedData
-                file.invalidType = .size
-                invaildMediaFiles?.append(file)
-            } else {
-                var mediaData = MediaData()
-                mediaData.fileName = sharedData.url?.lastPathComponent
-                mediaData.fileSize = Double(fileSize)
-                let asset = AVAsset(url: ((sharedData.url ?? URL(string: ""))!))
-                let duration = asset.duration
-                let durationTime = CMTimeGetSeconds(duration)
-                mediaData.duration = Double(durationTime)
-                mediaData.mediaType = .image
-                mediaData.fileURL = saveInLocalPath(path: "FlyMedia/Image",localPath: sharedData.url?.lastPathComponent ?? "")
-                listOfMediaData?.append(mediaData)
-            }
-        case .document:
-            if fileSize <= 20 && (pathExtension?.lowercased() == "pdf" || pathExtension?.lowercased() == "xls" || pathExtension?.lowercased() == "xlsx" || pathExtension?.lowercased() == "doc" || pathExtension?.lowercased() == "docx" ||
-                                  pathExtension?.lowercased() == "txt" || pathExtension?.lowercased() == "ppt" || pathExtension?.lowercased() == "zip" || pathExtension?.lowercased() == "rar" || pathExtension?.lowercased() == "pptx" || pathExtension?.lowercased() == "csv" || pathExtension?.lowercased() == "csv") {
-                MediaUtils.processDocument(url: sharedData.url ?? URL(string: "")!){ isSuccess,localPath,fileSize,fileName, errorMessage in
-                    if isSuccess {
-                        if let localPathURL = localPath, isSuccess {
-                            var mediaData = MediaData()
-                            mediaData.fileName = fileName
-                            mediaData.fileURL = localPathURL
-                            mediaData.fileSize = fileSize
-                            mediaData.mediaType = .document
-
-                            self.listOfMediaData?.append(mediaData)
+            case .image:
+                if fileSize > 40 {
+                    var file = sharedData
+                    file.invalidType = .size
+                    file.url = sharedURL
+                    invaildMediaFiles?.append(file)
+                } else {
+                    var mediaData = MediaData()
+                    mediaData.fileName = sharedData.url?.lastPathComponent
+                    mediaData.fileSize = Double(fileSize)
+                    let asset = AVAsset(url: ((sharedData.url ?? URL(string: ""))!))
+                    let duration = asset.duration
+                    let durationTime = CMTimeGetSeconds(duration)
+                    mediaData.duration = Double(durationTime)
+                    mediaData.mediaType = .image
+                    mediaData.fileURL = saveInLocalPath(path: "FlyMedia/Image",localPath: sharedData.url?.lastPathComponent ?? "")
+                    listOfMediaData?.append(mediaData)
+                }
+            case .document:
+                if fileSize <= 2048 && (pathExtension?.lowercased() == "pdf" || pathExtension?.lowercased() == "xls" || pathExtension?.lowercased() == "xlsx" || pathExtension?.lowercased() == "doc" || pathExtension?.lowercased() == "docx" ||
+                                        pathExtension?.lowercased() == "txt" || pathExtension?.lowercased() == "ppt" || pathExtension?.lowercased() == "zip" || pathExtension?.lowercased() == "rar" || pathExtension?.lowercased() == "pptx" || pathExtension?.lowercased() == "csv" || pathExtension?.lowercased() == "csv") {
+                    MediaUtils.processDocumentFile(url: sharedData.url ?? URL(string: "")!){ [weak self] isSuccess,localPath,fileSize,fileName,errorMessage in
+                        if isSuccess {
+                            if let localPathURL = localPath, isSuccess {
+                                var mediaData = MediaData()
+                                mediaData.fileName = fileName
+                                mediaData.fileURL = localPathURL
+                                mediaData.fileSize = fileSize
+                                mediaData.mediaType = .document
+                                self?.listOfMediaData?.append(mediaData)
+                            }
+                        } else {
+                            DispatchQueue.main.async { [weak self] in
+                                self?.delegate?.onError(description: errorMessage)
+                            }
+                            print("#shareKitError: \(errorMessage)")
                         }
                     }
+                } else {
+                    var file = sharedData
+                    file.invalidType = fileSize > 20 ? .size : .format
+                    invaildMediaFiles?.append(file)
                 }
-            } else {
-                var file = sharedData
-                file.invalidType = fileSize > 20 ? .size : .format
-                invaildMediaFiles?.append(file)
+            case .video:
+                if fileSize >= 2048 {
+                    var file = sharedData
+                    file.invalidType = .size
+                    invaildMediaFiles?.append(file)
+                } else {
+                    var mediaData = MediaData()
+                    mediaData.fileName = sharedData.url?.lastPathComponent
+                    mediaData.fileURL = saveInLocalPath(path: "FlyMedia/Image",localPath: sharedData.url?.lastPathComponent ?? "")
+                    mediaData.fileSize = Double(fileSize)
+                    let asset = AVAsset(url: ((sharedData.url ?? URL(string: ""))!))
+                    let duration = asset.duration
+                    let durationTime = CMTimeGetSeconds(duration)
+                    mediaData.duration = Double(durationTime)
+                    mediaData.mediaType = .video
+                    listOfMediaData?.append(mediaData)
+                }
+            default:
+                break
             }
-        case .video:
-            if fileSize >= 30 {
-                var file = sharedData
-                file.invalidType = .size
-                invaildMediaFiles?.append(file)
-            } else {
-                var mediaData = MediaData()
-                mediaData.fileName = sharedData.url?.lastPathComponent
-                mediaData.fileURL = saveInLocalPath(path: "FlyMedia/Image",localPath: sharedData.url?.lastPathComponent ?? "")
-                mediaData.fileSize = Double(fileSize)
-                let asset = AVAsset(url: ((sharedData.url ?? URL(string: ""))!))
-                let duration = asset.duration
-                let durationTime = CMTimeGetSeconds(duration)
-                mediaData.duration = Double(durationTime)
-                mediaData.mediaType = .video
-                listOfMediaData?.append(mediaData)
-            }
-        default:
-            break
         }
-        //}
+        if let data = sharedData.data {
+            if sharedData.contentType == .image {
+                let size = Double(data.count / 1000)
+                let fileSize = Double(Double(size / 1000) / 1000)
+                if fileSize > 40 {
+                    var file = sharedData
+                    file.invalidType = .size
+                    file.data = data
+                    file.image = sharedData.image
+                    invaildMediaFiles?.append(file)
+                } else {
+                    var mediaData = MediaData()
+                    mediaData.fileName = sharedData.image?.description ?? "screenShot"
+                    mediaData.fileSize = Double(fileSize)
+                    mediaData.mediaType = .image
+                    mediaData.fileURL = saveInLocalPath(path: "FlyMedia/Image",localPath: sharedData.image?.description ?? "screenShot")
+                    listOfMediaData?.append(mediaData)
+                }
+            }
+        }
     }
 
     /// Key is the matched asset's original file name without suffix. E.g. IMG_193
@@ -444,27 +487,30 @@ class ShareKitViewModel {
             provider.loadItem(forTypeIdentifier: kUTTypeImage as String, options: nil) {
                 data, _ in
                 if let url = data as? URL {
-                    if let fileName = url.lastPathComponent.components(separatedBy: ".").first {
-                        if let asset = self.imageAssetDictionary[fileName] {
-                            self.handledAssets.append(asset)
-                        } else {
+//                    if let fileName = url.lastPathComponent.components(separatedBy: ".").first {
+//                        if let asset = self.imageAssetDictionary[fileName] {
+//                            self.handledAssets.append(asset)
+//                        } else {
                             self.handledURL.append(url)
-                        }
+                        //}
                         self.assetDispatchGroup.leave()
-                    }
+                    //}
+                } else if let img = data as? UIImage {
+                    self.handledScreenShot.append(img)
+                    self.assetDispatchGroup.leave()
                 }
             }
             provider.loadItem(forTypeIdentifier: kUTTypeMovie as String, options: nil) {
                 data, _ in
                 if let url = data as? URL {
-                    if let fileName = url.lastPathComponent.components(separatedBy: ".").first {
-                        if let asset = self.videoAssetDictionary[fileName] {
-                            self.handledAssets.append(asset)
-                        } else {
+//                    if let fileName = url.lastPathComponent.components(separatedBy: ".").first {
+//                        if let asset = self.videoAssetDictionary[fileName] {
+//                            self.handledAssets.append(asset)
+//                        } else {
                             self.handledURL.append(url)
-                        }
+                        //}
                         self.assetDispatchGroup.leave()
-                    }
+                    //}
                 }
             }
         }

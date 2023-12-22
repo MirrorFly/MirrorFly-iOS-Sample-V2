@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21225" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="22154" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21207"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22130"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -27,7 +27,7 @@
                 <rect key="frame" x="0.0" y="0.0" width="335" height="178"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="zD8-Lm-Z04">
+                    <view hidden="YES" contentMode="scaleToFill" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zD8-Lm-Z04">
                         <rect key="frame" x="10" y="79" width="20" height="20"/>
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="UAV-n8-pn1">
@@ -136,6 +136,9 @@
                     <view clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="GtI-XK-hBb">
                         <rect key="frame" x="30" y="3" width="234.5" height="172"/>
                         <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="5mZ-Gy-VHc">
+                                <rect key="frame" x="0.0" y="0.0" width="234.5" height="172"/>
+                            </view>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="K3J-sz-32E">
                                 <rect key="frame" x="0.0" y="0.0" width="234.5" height="172"/>
                                 <accessibility key="accessibilityConfiguration">
@@ -226,7 +229,7 @@
                                                     <constraint firstAttribute="width" constant="50" id="rET-QZ-ruO"/>
                                                 </constraints>
                                             </imageView>
-                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="TMu-J6-tZg" customClass="GMSMapView">
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="TMu-J6-tZg">
                                                 <rect key="frame" x="178.5" y="0.0" width="50" height="52"/>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             </view>
@@ -391,8 +394,8 @@
                                                 </constraints>
                                                 <variation key="default">
                                                     <mask key="constraints">
-                                                        <exclude reference="lV2-bq-sX2"/>
                                                         <exclude reference="yBO-3q-r0V"/>
+                                                        <exclude reference="lV2-bq-sX2"/>
                                                     </mask>
                                                 </variation>
                                             </stackView>
@@ -458,7 +461,11 @@
                             <constraint firstAttribute="bottom" secondItem="K3J-sz-32E" secondAttribute="bottom" id="FP3-Ar-tPa"/>
                             <constraint firstAttribute="trailing" secondItem="V7C-rL-g5h" secondAttribute="trailing" constant="3" id="HaG-x7-HNV"/>
                             <constraint firstItem="K3J-sz-32E" firstAttribute="top" secondItem="V7C-rL-g5h" secondAttribute="top" constant="-2" id="KTa-Rz-wIy"/>
+                            <constraint firstAttribute="bottom" secondItem="5mZ-Gy-VHc" secondAttribute="bottom" id="Lxz-rH-iLo"/>
+                            <constraint firstItem="5mZ-Gy-VHc" firstAttribute="top" secondItem="GtI-XK-hBb" secondAttribute="top" id="NAg-PM-R5V"/>
                             <constraint firstAttribute="trailing" secondItem="K3J-sz-32E" secondAttribute="trailing" id="YNq-pw-ib2"/>
+                            <constraint firstAttribute="trailing" secondItem="5mZ-Gy-VHc" secondAttribute="trailing" id="ern-uO-4YI"/>
+                            <constraint firstItem="5mZ-Gy-VHc" firstAttribute="leading" secondItem="GtI-XK-hBb" secondAttribute="leading" id="fR6-m1-JFq"/>
                             <constraint firstItem="V7C-rL-g5h" firstAttribute="top" secondItem="GtI-XK-hBb" secondAttribute="top" constant="3" id="hsm-o0-MnS"/>
                             <constraint firstAttribute="bottom" secondItem="V7C-rL-g5h" secondAttribute="bottom" constant="3" id="thQ-2u-Ma3"/>
                             <constraint firstItem="K3J-sz-32E" firstAttribute="top" secondItem="GtI-XK-hBb" secondAttribute="top" id="uyK-cW-pVT"/>
@@ -469,6 +476,9 @@
                             </userDefinedRuntimeAttribute>
                         </userDefinedRuntimeAttributes>
                         <variation key="default">
+                            <mask key="subviews">
+                                <exclude reference="K3J-sz-32E"/>
+                            </mask>
                             <mask key="constraints">
                                 <exclude reference="KTa-Rz-wIy"/>
                             </mask>
@@ -504,9 +514,9 @@
             <connections>
                 <outlet property="baseView" destination="GtI-XK-hBb" id="ghR-Xo-y4w"/>
                 <outlet property="baseViewTopConstraint" destination="puG-XR-G1q" id="izQ-RD-Ewf"/>
+                <outlet property="bubbleBGView" destination="5mZ-Gy-VHc" id="YdW-50-g38"/>
                 <outlet property="bubbleImageBottomCons" destination="dOu-T3-zfD" id="yB9-0j-uqR"/>
                 <outlet property="bubbleImageLeadingCons" destination="zvm-Vh-VtC" id="MFx-no-GD3"/>
-                <outlet property="bubbleImageView" destination="K3J-sz-32E" id="JLo-ng-hGA"/>
                 <outlet property="favouriteIcon" destination="Pwo-HL-QBC" id="QUo-1i-IsO"/>
                 <outlet property="forwardButton" destination="Cw2-Eh-X6t" id="T5Y-1E-723"/>
                 <outlet property="forwardImageView" destination="UAV-n8-pn1" id="QVn-g6-MVO"/>

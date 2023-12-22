@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="22154" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22130"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -122,6 +122,7 @@
                             <constraint firstItem="kPa-7i-aqK" firstAttribute="top" secondItem="WJr-At-DBW" secondAttribute="top" id="8Sm-Qw-lfL"/>
                             <constraint firstItem="kPa-7i-aqK" firstAttribute="centerX" secondItem="WJr-At-DBW" secondAttribute="centerX" id="Fkz-Xh-Fwy"/>
                             <constraint firstItem="kPa-7i-aqK" firstAttribute="leading" secondItem="WJr-At-DBW" secondAttribute="leading" id="Mm0-nS-LDJ"/>
+                            <constraint firstAttribute="width" secondItem="WJr-At-DBW" secondAttribute="height" multiplier="1:1" id="NDB-Qc-QxK"/>
                             <constraint firstItem="kPa-7i-aqK" firstAttribute="centerY" secondItem="WJr-At-DBW" secondAttribute="centerY" id="Ta0-mw-6rK"/>
                             <constraint firstAttribute="trailing" secondItem="kPa-7i-aqK" secondAttribute="trailing" id="kJv-Qc-UpI"/>
                             <constraint firstAttribute="bottom" secondItem="kPa-7i-aqK" secondAttribute="bottom" id="mFb-fT-0TV"/>
@@ -212,7 +213,7 @@
                                                     <constraint firstAttribute="width" constant="50" id="GKc-EL-FsL"/>
                                                 </constraints>
                                             </imageView>
-                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="1OT-0o-zwh" customClass="GMSMapView">
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="1OT-0o-zwh">
                                                 <rect key="frame" x="421" y="0.0" width="50" height="50"/>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             </view>
@@ -607,7 +608,6 @@
                     <constraint firstItem="b2C-k8-ViR" firstAttribute="centerY" secondItem="1pJ-5n-Ffb" secondAttribute="centerY" id="88H-Vz-VxU"/>
                     <constraint firstItem="WJr-At-DBW" firstAttribute="leading" secondItem="1pJ-5n-Ffb" secondAttribute="leading" id="AgV-Pc-dcb"/>
                     <constraint firstAttribute="trailing" secondItem="qgY-k2-8ZT" secondAttribute="trailing" constant="10" id="M9C-Zg-0Im"/>
-                    <constraint firstItem="WJr-At-DBW" firstAttribute="width" secondItem="WJr-At-DBW" secondAttribute="height" multiplier="1:1" id="NDB-Qc-QxK"/>
                     <constraint firstItem="S0C-lE-EUf" firstAttribute="leading" secondItem="oc3-3N-WFh" secondAttribute="leading" id="NNy-Jd-DXv"/>
                     <constraint firstAttribute="bottom" secondItem="Lkw-S5-G5l" secondAttribute="bottom" id="OI4-IN-5zt"/>
                     <constraint firstItem="5Tm-hg-BtZ" firstAttribute="top" secondItem="Mes-lH-UuS" secondAttribute="top" id="Q4F-oK-EOm"/>

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="20037" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="22154" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="20020"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22130"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -40,6 +40,7 @@
                             <constraint firstAttribute="bottom" secondItem="DYU-8p-636" secondAttribute="bottom" id="QVA-xR-ZwI"/>
                             <constraint firstItem="DYU-8p-636" firstAttribute="top" secondItem="v6z-Kn-OSD" secondAttribute="top" id="R7J-6H-62y"/>
                             <constraint firstItem="DYU-8p-636" firstAttribute="centerY" secondItem="v6z-Kn-OSD" secondAttribute="centerY" id="S3X-Ev-7nM"/>
+                            <constraint firstAttribute="width" secondItem="v6z-Kn-OSD" secondAttribute="height" multiplier="1:1" id="dkd-tC-E00"/>
                             <constraint firstItem="DYU-8p-636" firstAttribute="leading" secondItem="v6z-Kn-OSD" secondAttribute="leading" id="qSg-Bd-PmM"/>
                             <constraint firstItem="DYU-8p-636" firstAttribute="centerX" secondItem="v6z-Kn-OSD" secondAttribute="centerX" id="wwX-KQ-3Yy"/>
                         </constraints>
@@ -152,7 +153,7 @@
                                                     <constraint firstAttribute="width" constant="50" id="4tD-xc-GsT"/>
                                                 </constraints>
                                             </imageView>
-                                            <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="je8-YE-TGl" customClass="GMSMapView">
+                                            <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="je8-YE-TGl">
                                                 <rect key="frame" x="325.5" y="0.0" width="50" height="50"/>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             </view>
@@ -396,7 +397,6 @@
                     <constraint firstItem="inx-1O-BXB" firstAttribute="bottom" secondItem="KJW-np-gPr" secondAttribute="bottom" id="bXY-h0-hA9"/>
                     <constraint firstItem="v6z-Kn-OSD" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="c11-JM-bO3"/>
                     <constraint firstAttribute="bottom" secondItem="Rji-oW-gny" secondAttribute="bottom" id="cAf-SI-ZG6"/>
-                    <constraint firstItem="v6z-Kn-OSD" firstAttribute="width" secondItem="v6z-Kn-OSD" secondAttribute="height" multiplier="1:1" id="dkd-tC-E00"/>
                     <constraint firstAttribute="bottom" secondItem="qGE-4d-wqp" secondAttribute="bottom" constant="3" id="igD-CS-R5t"/>
                     <constraint firstItem="Rji-oW-gny" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="kSs-FT-RnO"/>
                     <constraint firstItem="ZQU-J7-he2" firstAttribute="trailing" secondItem="sSP-Gi-mVL" secondAttribute="trailing" constant="-10" id="pHl-bR-ET6"/>
@@ -458,7 +458,7 @@
         <image name="foward" width="24" height="24"/>
         <image name="videotime" width="114.5" height="53"/>
         <systemColor name="secondaryLabelColor">
-            <color red="0.23529411764705882" green="0.23529411764705882" blue="0.2627450980392157" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.23529411759999999" green="0.23529411759999999" blue="0.26274509800000001" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

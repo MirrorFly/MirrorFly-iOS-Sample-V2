@@ -21,27 +21,24 @@ import AVFoundation
 import MirrorFlySDK
 
 let BASE_URL = "https://api-preprod-sandbox.mirrorfly.com/api/v1/"
-let LICENSE_KEY = "xxxxxxxxxxxxxxxx"
+let LICENSE_KEY = "lu3Om85JYSghcsB6vgVoSgTlSQArL5"
 let XMPP_DOMAIN = "xmpp-preprod-sandbox.mirrorfly.com"
 let XMPP_PORT = 5222
 let SOCKETIO_SERVER_HOST = "https://signal-preprod-sandbox.mirrorfly.com"
 let JANUS_URL = "wss://janus.mirrorfly.com"
 let CONTAINER_ID = "group.com.mirrorfly.qa"
 let ENABLE_CONTACT_SYNC = false
-let ENABLE_CHAT_HISTORY = false
 let IS_LIVE = false
 let WEB_LOGIN_URL = "https://webchat-preprod-sandbox.mirrorfly.com/"
 let IS_MOBILE_NUMBER_LOGIN = false
 let APP_NAME = "UiKitQa"
 let ICLOUD_CONTAINER_ID = "iCloud.com.mirrorfly.qa"
-
-
+let ENABLE_CHAT_HISTORY = false
 
 let isMigrationDone = "isMigrationDone"
 let isHideNotificationContent = false
 
 #if DEBUG
-
 let ISEXPORT = false
 #else
 let ISEXPORT = true
@@ -149,7 +146,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
         } else {
             // Fallback on earlier versions
         }
-        ChatManager.setMediaEncryption(isEnable: false)
+        ChatManager.setMediaEncryption(isEnable: true)
         ChatManager.hideNotificationContent(hide: isHideNotificationContent)
         FlyUtils.setAppName(appName: APP_NAME)
         VOIPManager.sharedInstance.updateDeviceToken()
@@ -228,6 +225,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
     func applicationProtectedDataWillBecomeUnavailable(_ application: UIApplication) {
         if (CommonDefaults.appLockenable || CommonDefaults.appFingerprintenable) {
             CommonDefaults.showAppLock = true
+            if let vc = UIApplication.shared.keyWindow?.getTopViewController() {
+                if vc is InstantScheduledMeetingViewController {
+                    vc.dismiss(animated: false)
+                } else if vc is ChatViewParentController, let chatVc = vc as? ChatViewParentController {
+                    chatVc.closeContextMenu()
+                }
+            }
         }
     }
 
@@ -384,6 +388,7 @@ extension AppDelegate : PKPushRegistryDelegate {
     func pushRegistry(_ registry: PKPushRegistry, didReceiveIncomingPushWith payload: PKPushPayload, for type: PKPushType, completion: @escaping () -> Void) {
         NSLog("Push VOIP Received with Payload - %@",payload.dictionaryPayload)
         print("#callopt \(FlyUtils.printTime()) pushRegistry voip received")
+//        CallManager.checkAllPermissions()
         VOIPManager.sharedInstance.processPayload(payload.dictionaryPayload)
         completion()
     }
@@ -611,7 +616,6 @@ extension AppDelegate : LocalNotificationDelegate {
             return
         }
         updateUnreadCount()
-
         if (ChatManager.onGoingChatUserJid == chatMessage.senderUserJid && groupId == "") || (ChatManager.onGoingChatUserJid == groupId  && groupId != "") {
             
             if !CallManager.isOngoingCall() {
@@ -639,7 +643,7 @@ extension AppDelegate : LocalNotificationDelegate {
                 message = "This message was deleted"
             } else {
                 switch chatMessage.messageType{
-                case .text :
+                case .text, .autoText :
                     message = (message.count > 64) ? message : message
                 case .notification:
                     if chatMessage.messageChatType == .groupChat {
@@ -679,6 +683,10 @@ extension AppDelegate : LocalNotificationDelegate {
             
             if !chatMessage.mentionedUsersIds.isEmpty {
                 message = ChatUtils.getMentionTextContent(message: message, isMessageSentByMe: chatMessage.isMessageSentByMe, mentionedUsers: chatMessage.mentionedUsersIds).string
+            }
+
+            if chatMessage.messageType == .meet {
+                message = "Meet scheduled on " + ((chatMessage.meetChatMessage?.scheduledDateTime != 0) ? DateFormatterUtility.shared.getSchduleMeetingDate(date: chatMessage.meetChatMessage?.scheduledDateTime ?? 0) : chatMessage.messageType.rawValue.capitalized)
             }
 
             if let chat = ChatManager.getRechtChat(jid: groupId.isEmpty ? jid : groupId) {
@@ -820,9 +828,6 @@ extension AppDelegate {
             if (current is PrivateChatFingerPrintPINViewController) || (current is PrivateChatAuthenticationPINViewController) {
                 return
             }
-            if (current is CallViewController) {
-                (current as! CallViewController).showCallOverlay()
-            }
             
             //Redirect to chat page
             if let message = (sender?.view?.accessibilityElements as? [ChatMessage])?.first {
@@ -862,6 +867,11 @@ extension AppDelegate {
                 }
             }
             
+            //Show PIP-Mode when click missed call notification in ongoing call
+            if (current is CallUIViewController) && CallManager.isOngoingCall() {
+                (current as! CallUIViewController).showCallOverlay()
+            }
+            
             self.notificationView?.removeFromSuperview()
         }
 
@@ -874,7 +884,7 @@ extension AppDelegate {
                 let url = URL(fileURLWithPath: path)
 
                 do {
-                    try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.soloAmbient, options: AVAudioSession.CategoryOptions.mixWithOthers)
+                    try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playback, options: AVAudioSession.CategoryOptions.duckOthers)
                     try AVAudioSession.sharedInstance().setActive(true)
                     player = try AVAudioPlayer(contentsOf: url)
                     player?.play()

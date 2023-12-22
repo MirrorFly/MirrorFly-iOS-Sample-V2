@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21225" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="22154" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21207"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22130"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -123,6 +123,7 @@
                             <constraint firstItem="gwR-eh-t41" firstAttribute="top" secondItem="ZUW-E0-Fqu" secondAttribute="top" id="SaB-04-Wi4"/>
                             <constraint firstItem="gwR-eh-t41" firstAttribute="centerY" secondItem="ZUW-E0-Fqu" secondAttribute="centerY" id="XGB-Qh-1kY"/>
                             <constraint firstAttribute="height" constant="20" id="eJ7-bT-11d"/>
+                            <constraint firstAttribute="width" secondItem="ZUW-E0-Fqu" secondAttribute="height" multiplier="1:1" id="p8y-QD-uBw"/>
                             <constraint firstAttribute="trailing" secondItem="gwR-eh-t41" secondAttribute="trailing" id="sp3-SY-Hpo"/>
                         </constraints>
                     </view>
@@ -218,7 +219,7 @@
                                                     <constraint firstAttribute="width" constant="50" id="AIW-OQ-fcD"/>
                                                 </constraints>
                                             </imageView>
-                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Afo-SX-z9Z" customClass="GMSMapView">
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Afo-SX-z9Z">
                                                 <rect key="frame" x="480" y="0.0" width="50" height="50"/>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             </view>
@@ -479,7 +480,6 @@
                     <constraint firstItem="P0V-Wk-k5o" firstAttribute="leading" secondItem="Jt1-KH-emY" secondAttribute="trailing" constant="23" id="nxh-eq-Gyi"/>
                     <constraint firstItem="DjW-mm-eWZ" firstAttribute="bottom" secondItem="7f0-SW-8Zd" secondAttribute="bottom" id="o6f-ie-8io"/>
                     <constraint firstItem="Kku-3O-ZDW" firstAttribute="trailing" secondItem="3dY-aV-7Bw" secondAttribute="trailing" constant="-3" id="ozp-o5-QJz"/>
-                    <constraint firstItem="ZUW-E0-Fqu" firstAttribute="width" secondItem="ZUW-E0-Fqu" secondAttribute="height" multiplier="1:1" id="p8y-QD-uBw"/>
                     <constraint firstItem="QBT-vP-tw3" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="rc0-ej-5FD"/>
                     <constraint firstItem="tDa-KR-uNA" firstAttribute="bottom" secondItem="BWN-dR-yX2" secondAttribute="bottom" id="vzB-ZV-lC2"/>
                     <constraint firstItem="Kku-3O-ZDW" firstAttribute="bottom" secondItem="3dY-aV-7Bw" secondAttribute="bottom" id="xAz-Qj-wKl"/>

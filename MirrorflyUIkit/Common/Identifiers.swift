@@ -136,6 +136,7 @@ enum Identifiers {
     static let groupInfoOptionsViewController = "GroupInfoOptionsViewController"
     static let groupInfoOptionsTableViewCell = "GroupInfoOptionsTableViewCell"
     static let privateChatCell = "PrivateChatCell"
+    static let shareCallLinkViewController = "ShareCallLinkViewController"
     
     //MARK: ChatSettings
     static let chatSettingsTableViewCell = "ChatSettingsTableViewCell"
@@ -157,6 +158,9 @@ enum Identifiers {
     /// MARK: DeleteMessage Cells
     static let deleteEveryOneCell = "DeleteForEveryOneViewCell"
     static let deleteEveryOneReceiverCell = "DeleteForEveryOneReceiverCell"
+
+    static let scheduledMeetingReceiverCell = "ScheduledMeetingReceiverCell"
+    static let scheduledMeetingSenderCell = "ScheduledMeetingSenderCell"
     
     // MARK: Message Info
     static let messageInfoDivider = "MessageInfoDivider"
@@ -183,4 +187,5 @@ enum Storyboards {
     static let chat = "Chat"
     static let profile = "Profile"
     static let backupRestore = "BackupRestore"
+    static let call = "Call"
 }

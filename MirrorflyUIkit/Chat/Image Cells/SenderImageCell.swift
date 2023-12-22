@@ -46,7 +46,7 @@ class SenderImageCell: BaseTableViewCell {
     @IBOutlet weak var mediaImageView: UIImageView?
     @IBOutlet weak var replyVuew: UIView?
     @IBOutlet weak var imageContainerTopCons: NSLayoutConstraint?
-    @IBOutlet weak var chatLocationMapView: GMSMapView?
+    @IBOutlet weak var chatLocationMapView: UIView?
     @IBOutlet weak var replyWithMediaCons: NSLayoutConstraint?
     @IBOutlet weak var replyWithoutMediaCons: NSLayoutConstraint?
     
@@ -218,15 +218,22 @@ class SenderImageCell: BaseTableViewCell {
                replyWithMediaCons?.isActive = true
                replyWithoutMediaCons?.isActive = false
                chatLocationMapView?.isUserInteractionEnabled = false
-               chatLocationMapView?.camera = GMSCameraPosition.camera(withLatitude: latitude, longitude: longitude, zoom: 16.0, bearing: 360.0, viewingAngle: 15.0)
-      
-               DispatchQueue.main.async
-               { [self] in
-                   // 2. Perform UI Operations.
-                   let position = CLLocationCoordinate2DMake(latitude,longitude)
-                   let marker = GMSMarker(position: position)
-                   marker.map = chatLocationMapView
+               
+               AppUtils.shared.fetchStaticMapImage(latitude: latitude, longitude: longitude, zoomLevel: "16", size: CGSize(width: chatLocationMapView?.bounds.width ?? 250, height: chatLocationMapView?.bounds.height ?? 250)) { [self] mapImage in
+                   let mapImageView = UIImageView(frame: CGRect(x: 0, y: 0, width: chatLocationMapView?.bounds.width ?? 250, height: chatLocationMapView?.bounds.height ?? 250))
+                   mapImageView.image = mapImage
+                   chatLocationMapView?.addSubview(mapImageView)
                }
+               
+//               chatLocationMapView?.camera = GMSCameraPosition.camera(withLatitude: latitude, longitude: longitude, zoom: 16.0, bearing: 360.0, viewingAngle: 15.0)
+//      
+//               DispatchQueue.main.async
+//               { [self] in
+//                   // 2. Perform UI Operations.
+//                   let position = CLLocationCoordinate2DMake(latitude,longitude)
+//                   let marker = GMSMarker(position: position)
+//                   marker.map = chatLocationMapView
+//               }
                messageTypeView?.isHidden = false
            } else if replyMessage?.contactChatMessage != nil {
                    replyTextLabel?.attributedText = ChatUtils.setAttributeString(name: replyMessage?.contactChatMessage?.contactName)

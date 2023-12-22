@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="22154" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22130"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -112,7 +112,7 @@
                                                     <constraint firstAttribute="width" constant="50" id="jn3-hO-Qif"/>
                                                 </constraints>
                                             </imageView>
-                                            <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Shv-Dl-HsF" customClass="GMSMapView">
+                                            <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Shv-Dl-HsF">
                                                 <rect key="frame" x="245" y="0.0" width="50" height="50"/>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             </view>
@@ -311,6 +311,7 @@
                             <constraint firstAttribute="height" constant="20" id="Kvs-y6-dSW"/>
                             <constraint firstAttribute="trailing" secondItem="8Ax-IU-YyL" secondAttribute="trailing" id="XjJ-Q7-w4P"/>
                             <constraint firstItem="8Ax-IU-YyL" firstAttribute="centerX" secondItem="HpO-ko-Hhn" secondAttribute="centerX" id="Zlo-Pa-N75"/>
+                            <constraint firstAttribute="width" secondItem="HpO-ko-Hhn" secondAttribute="height" multiplier="1:1" id="am3-KS-rRp"/>
                             <constraint firstItem="8Ax-IU-YyL" firstAttribute="leading" secondItem="HpO-ko-Hhn" secondAttribute="leading" id="cHs-4V-HIU"/>
                             <constraint firstItem="8Ax-IU-YyL" firstAttribute="top" secondItem="HpO-ko-Hhn" secondAttribute="top" id="xzY-Pd-h1U"/>
                             <constraint firstAttribute="bottom" secondItem="8Ax-IU-YyL" secondAttribute="bottom" id="ywh-Y3-ipH"/>
@@ -401,7 +402,6 @@
                     <constraint firstItem="QPI-59-te6" firstAttribute="leading" secondItem="7fp-bS-Htc" secondAttribute="leading" constant="-46" id="WZZ-6p-peE"/>
                     <constraint firstItem="4K9-mq-tDe" firstAttribute="leading" secondItem="BR4-ue-YqW" secondAttribute="leading" constant="7" id="XWH-I5-ZSC"/>
                     <constraint firstItem="7fp-bS-Htc" firstAttribute="width" secondItem="H2p-sc-9uM" secondAttribute="width" multiplier="0.7" id="aJg-zU-dsa"/>
-                    <constraint firstItem="HpO-ko-Hhn" firstAttribute="width" secondItem="HpO-ko-Hhn" secondAttribute="height" multiplier="1:1" id="am3-KS-rRp"/>
                     <constraint firstItem="lYG-0t-CyZ" firstAttribute="leading" secondItem="ezH-3q-Q43" secondAttribute="leading" id="fGx-7R-tvK"/>
                     <constraint firstItem="wL7-lU-YU5" firstAttribute="trailing" secondItem="BR4-ue-YqW" secondAttribute="trailing" id="hQy-FH-C5n"/>
                     <constraint firstItem="5zV-mo-3UN" firstAttribute="trailing" secondItem="QPI-59-te6" secondAttribute="trailing" constant="10" id="hqx-hj-dXj"/>

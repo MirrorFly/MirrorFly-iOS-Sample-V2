@@ -9,6 +9,7 @@ import UIKit
 import MirrorFlySDK
 import Floaty
 import RxSwift
+import BottomSheet
 
 
 public protocol refreshCallLogDelegate {
@@ -56,12 +57,14 @@ class CallLogViewController: UIViewController {
         refreshControl.tintColor = UIColor.gray
         return refreshControl
     }()
-
+    
+    @IBOutlet weak var callLinkView: UIView!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setUpStatusBar()
         NotificationCenter.default.addObserver(self, selector: #selector(updateCallCount), name: NSNotification.Name("updateCallCount"), object: nil)
-        noCallLogView.isHidden = false
+        noCallLogView.isHidden = true
         // Do any additional setup after loading the view.
         internetObserver.throttle(.seconds(4), latest: false ,scheduler: MainScheduler.instance).subscribe { [weak self] event in
             switch event {
@@ -83,6 +86,9 @@ class CallLogViewController: UIViewController {
         callLogTableView.addSubview(refreshControl)
         let longPress = UILongPressGestureRecognizer(target: self, action: #selector(longpressAction))
         callLogTableView.addGestureRecognizer(longPress)
+        let tap = UITapGestureRecognizer(target: self, action: #selector(callLinkViewTapped(sender:)))
+        callLinkView.addGestureRecognizer(tap)
+        callLogTableView.tableFooterView = createTableFooterView()
     }
    
     override func viewWillAppear(_ animated: Bool) {
@@ -140,7 +146,6 @@ class CallLogViewController: UIViewController {
             floaty.overlayColor = UIColor(white: 1, alpha: 0.0)
             view.addSubview(floaty)
         }
-        callLogTableView.tableFooterView = UIView()
         callLogTableView.reloadData()
     }
 
@@ -154,13 +159,12 @@ class CallLogViewController: UIViewController {
         ChatManager.shared.adminBlockDelegate = self
         ChatManager.shared.availableFeaturesDelegate = self
         CallManager.callLogDelegate = self
-        CallViewController.refreshDelegate = self
+        CallUIViewController.refreshDelegate = self
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
             self?.callLogsBadgeCountUpdation()
         }
         if !isSearchEnabled {
-            self.startLoading(withText: "")
             executeInBackground { [weak self] in
                 guard let self else {return}
                 self.callLogArray = CallLogManager.getAllCallLogs()
@@ -170,7 +174,7 @@ class CallLogViewController: UIViewController {
                     self.deleteAllBtn.isHidden = self.callLogArray.isEmpty
                     self.updateButtons()
                     self.callLogTableView.reloadData()
-                    self.stopLoading()
+                    self.callLogTableView.tableFooterView = nil
                 }
                 if self.callLogArray.isEmpty {
                     if NetworkReachability.shared.isConnected {
@@ -201,7 +205,7 @@ class CallLogViewController: UIViewController {
         callLogsBadgeCountUpdation()
         
         CallManager.callLogDelegate = nil
-        CallViewController.refreshDelegate = nil
+        CallUIViewController.refreshDelegate = nil
     }
     
     override func viewDidDisappear(_ animated: Bool) {
@@ -300,6 +304,24 @@ class CallLogViewController: UIViewController {
         NotificationCenter.default.post(name: NSNotification.Name("updateUnReadMissedCallCount"), object: CallLogManager.getUnreadMissedCallCount())
     }
     
+    
+    
+    func showShareLinkSheet(link : String){
+        self.view.endEditing(true)
+        let storyboard = UIStoryboard.init(name: Storyboards.call, bundle: nil)
+        if let bottomSheet = storyboard.instantiateViewController(withIdentifier: Identifiers.shareCallLinkViewController) as? ShareCallLinkViewController{
+            //bottomSheet.link = "\(WEB_LOGIN_URL)\(link)"
+            bottomSheet.callLinkDelegate = self
+            presentBottomSheetInsideNavigationController(viewController: bottomSheet,configuration: BottomSheetConfiguration(
+                cornerRadius: 16,
+                pullBarConfiguration: .hidden,
+                shadowConfiguration: .init(backgroundColor: UIColor.black.withAlphaComponent(0.6))
+            ),canBeDismissed: {
+                true
+            },dismissCompletion: {
+            })
+        }
+    }
 }
 
 
@@ -1246,7 +1268,7 @@ extension CallLogViewController : CallLogDelegate {
 }
 
 //Call log refresh delegate
-extension CallLogViewController: refreshCallLogDelegate {
+extension CallLogViewController: refreshCallLogDelegate, CallLinkDelegate {
 
     func refreshCallLog() {
         executeOnMainThread { [weak self] in
@@ -1264,5 +1286,55 @@ extension CallLogViewController: refreshCallLogDelegate {
             self.updateButtons()
         }
     }
+    
+    
+    @objc func callLinkViewTapped(sender: UIButton) {
+        
+        if NetStatus.shared.isConnected{
+            self.showShareLinkSheet(link: emptyString())
+        }else{
+            executeOnMainThread {
+                AppAlert.shared.showToast(message: ErrorMessage.noInternet)
+            }
+        }
+    }
+    
+    func didJoinClicked(link :String) {
+        
+        if CallManager.isAlreadyOnAnotherCall() || CallManager.isOngoingCall(){
+            
+            let alertController = UIAlertController.init(title: "You're already in a call" , message: "Do you want to leave your call to join this one?", preferredStyle: .alert)
+            
+            let okAction = UIAlertAction(title: "OK", style: .default) { [weak self]_ in
+                CallManager.disconnectCall()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+                    CallManager.setupJoinCallViaLink()
+                    self?.initJoinCall(link: link)
+                }
+            }
+            let cancelAction = UIAlertAction(title: "CANCEL", style: .default) { _ in
+                
+            }
+            okAction.setValue(Color.primaryAppColor!, forKey: "titleTextColor")
+            cancelAction.setValue(Color.primaryAppColor!, forKey: "titleTextColor")
+            alertController.addAction(cancelAction)
+            alertController.addAction(okAction)
+            executeOnMainThread {
+                self.dismiss(animated: true)
+                self.present(alertController, animated: true)
+            }
+        }else{
+            initJoinCall(link: link)
+        }
+    }
 
+    func initJoinCall(link : String){
+        let result = link.split(separator: Character("/"))
+        let callLinkID =  String(describing: result.last ?? "")
+        
+        let storyboard = UIStoryboard(name: "Call", bundle: nil)
+        let joinCall = storyboard.instantiateViewController(withIdentifier: "JoinCallViaLinkViewController") as! JoinCallViaLinkViewController
+        joinCall.callLink = callLinkID
+        self.navigationController?.pushViewController(joinCall, animated: true)
+    }
 }

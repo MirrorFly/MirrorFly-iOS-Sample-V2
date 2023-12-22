@@ -75,6 +75,7 @@ public class MentionTextView: UITextView {
        // delegate = self
         
         self.autocorrectionType = .no
+        self.spellCheckingType = .yes
     }
     
     override init(frame: CGRect, textContainer: NSTextContainer?) {
@@ -82,6 +83,7 @@ public class MentionTextView: UITextView {
       //  delegate = self
         
         self.autocorrectionType = .no
+        self.spellCheckingType = .yes
     }
     
 }

@@ -56,13 +56,12 @@ class GroupInfoViewModel: NSObject {
         }
     }
     
+    
     func removeParticipantFromGroup(groupID: String, removeGroupMemberJid: String,
-                                    completionHandler: @escaping (Bool) -> Void) {
+                                    completionHandler: @escaping FlyCompletionHandler) {
         
         try! GroupManager.shared.removeParticipantFromGroup(groupId: groupID,
-                                                            removeGroupMemberJid: removeGroupMemberJid) { isSuccess, error, data in
-            completionHandler(isSuccess)
-        }
+                                                            removeGroupMemberJid: removeGroupMemberJid, completionHandler: completionHandler)
     }
     
     func removeGroupProfileImage(groupID: String, completionHandler: @escaping(_ isSuccess: Bool,
