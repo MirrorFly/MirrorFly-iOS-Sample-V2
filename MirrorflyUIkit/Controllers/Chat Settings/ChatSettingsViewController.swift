@@ -35,7 +35,7 @@ class ChatSettingsViewController: UIViewController {
     var availableFeatures = ChatManager.getAvailableFeatures()
 
     //Need to make false for releases
-    var showExportCallLog = false
+    var showExportCallLog = true
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -58,15 +58,25 @@ class ChatSettingsViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         ChatManager.shared.archiveEventsDelegate = self
         ChatManager.shared.availableFeaturesDelegate = self
+        ChatManager.shared.userBusyStatusDelegate = self
     }
 
     override func viewWillDisappear(_ animated: Bool) {
         ChatManager.shared.archiveEventsDelegate = nil
         ChatManager.shared.availableFeaturesDelegate = nil
+        ChatManager.shared.userBusyStatusDelegate = nil
     }
 
     @IBAction func onTapBack(_ sender: UIButton) {
         self.navigationController?.popViewController(animated: true)
+    }
+}
+
+extension ChatSettingsViewController: UserBusyStatusDelegate {
+    func didUpdateBusyStatus(status: Bool, message: String) {
+        executeOnMainThread {
+            self.chatSettingsTable.reloadData()
+        }
     }
 }
 
@@ -267,9 +277,22 @@ extension ChatSettingsViewController : UITableViewDelegate,UITableViewDataSource
 
 
         case .UserBusyStatus:
-            ChatManager.shared.enableDisableBusyStatus(!ChatManager.shared.isBusyStatusEnabled())
+            if NetStatus.shared.isConnected {
+                startLoading(withText: "")
+                ChatManager.shared.enableDisableBusyStatus(!ChatManager.shared.isBusyStatusEnabled()) {isSuccess,error,data in
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        self.chatSettingsTable.reloadData()
+                        self.stopLoading()
+                        if !isSuccess {
+                            AppAlert.shared.showToast(message: data["message"] as! String)
+                        }
+                    }
+                }
+            } else {
+                AppAlert.shared.showToast(message: ErrorMessage.noInternet)
+            }
         case .exportCallLog:
-            if let logFileUrl = try? FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false).appendingPathComponent(FlyLogWriter.sharedInstance.logStatusFileName) {
+            if let logFileUrl = try? FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false).appendingPathComponent(FlyLogWriter.sharedInstance.callsLog) {
                 let vc = UIActivityViewController(activityItems: [logFileUrl], applicationActivities: [])
                 self.present(vc, animated: true)
             }

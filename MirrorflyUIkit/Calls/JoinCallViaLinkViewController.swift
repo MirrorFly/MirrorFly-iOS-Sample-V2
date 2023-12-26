@@ -88,6 +88,7 @@ class JoinCallViaLinkViewController: BaseViewController, CallUIDelegate {
                         }else{
                             self.joinButton.isEnabled = true
                             self.joinButton.alpha = 1
+                            self.enableButtons(isEnable: true)
                         }
                     }
                     self.alertLabel.isHidden = true
@@ -98,6 +99,7 @@ class JoinCallViaLinkViewController: BaseViewController, CallUIDelegate {
                     self.alertLabel.text = "Please check your internet connection"
                     self.joinButton.isEnabled = false
                     self.joinButton.alpha = 0.5
+                    self.enableButtons(isEnable: false)
                 }
             case .error(let error):
                 print("#int_ error \(error.localizedDescription)")
@@ -155,6 +157,7 @@ class JoinCallViaLinkViewController: BaseViewController, CallUIDelegate {
         
         joinButton.isEnabled = false
         joinButton.alpha = 0.5
+        self.enableButtons(isEnable: false)
         
         self.localRenderer.frame = CGRect(x: 0, y: 0, width: videoView.bounds.width, height: videoView.bounds.height)
         videoView.addSubview(self.localRenderer)
@@ -178,6 +181,8 @@ class JoinCallViaLinkViewController: BaseViewController, CallUIDelegate {
             }else{
                 self.joinButton.isEnabled = true
                 self.joinButton.alpha = 1
+                self.enableButtons(isEnable: true)
+                
                 self.checkMicPermission()
                 self.checkCameraPermission(sourceType: .camera)
             }
@@ -394,6 +399,7 @@ class JoinCallViaLinkViewController: BaseViewController, CallUIDelegate {
         }else if errorMessage.contains("800") {
             if CallManager.getCallMode() == .MEET{
                 joinButton.isEnabled = false
+                self.enableButtons(isEnable: false)
             }
             AppAlert.shared.showToast(message: ErrorMessage.noInternet)
         }
@@ -410,6 +416,7 @@ extension JoinCallViaLinkViewController: JoinCallDelegate {
         print("#join onSubscribeSuccess")
         joinButton.isEnabled = true
         joinButton.alpha = 1
+        self.enableButtons(isEnable: true)
     }
     
     func onUsersUpdated(usersList: [String]) {
@@ -517,5 +524,13 @@ extension JoinCallViaLinkViewController {
                 CallManager.startVideoCapture()
             }
         }
+    }
+    
+    func enableButtons(isEnable: Bool) {
+        
+        self.audioButton.isEnabled = isEnable
+        self.audioButton.alpha = (isEnable) ? 1 : 0.5
+        self.videoButton.isEnabled = isEnable
+        self.videoButton.alpha = (isEnable) ? 1 : 0.5
     }
 }

@@ -205,7 +205,7 @@
                                                     <constraint firstAttribute="width" constant="50" id="WnS-n8-Umj"/>
                                                 </constraints>
                                             </imageView>
-                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tUK-mz-uJI" customClass="GMSMapView">
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tUK-mz-uJI">
                                                 <rect key="frame" x="168" y="0.0" width="50" height="52"/>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             </view>

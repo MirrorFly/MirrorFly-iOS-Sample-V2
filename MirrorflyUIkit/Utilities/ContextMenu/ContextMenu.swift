@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import MirrorFlySDK
 
 public protocol ContextMenuItem {
     var title : String {
@@ -44,6 +45,8 @@ public protocol ContextMenuDelegate : AnyObject {
     func contextMenuDidDeselect(_ contextMenu: ContextMenu, cell: ContextMenuCell, targetedView: UIView, didSelect item: ContextMenuItem, forRowAt index: Int)
     func contextMenuDidAppear(_ contextMenu: ContextMenu)
     func contextMenuDidDisappear(_ contextMenu: ContextMenu)
+    func contextMenuDidMentionSelect(_ contextMenu: ContextMenu, jid: String, profileDetail: ProfileDetails)
+
 }
 extension ContextMenuDelegate {
     func contextMenuDidAppear(_ contextMenu: ContextMenu){}
@@ -119,12 +122,20 @@ open class ContextMenu: NSObject {
     private var mW : CGFloat = 0.0
     private var mY : CGFloat = 0.0
     private var mX : CGFloat = 0.0
+    private var safeAreaTop : CGFloat = 0.0
+    private var safeAreaBottom : CGFloat = 0.0
+    public var mentionTableView: UITableView?
+    public var scrollView = UIScrollView(frame: .zero)
+    public var searchGroupMembers = [GroupParticipantDetail]()
 
+    
     // MARK:- Init Functions
     public init(window: UIView? = nil) {
         let wind = window ?? UIApplication.shared.windows.first ?? UIApplication.shared.keyWindow
         self.customView = wind!
         self.mainViewRect = wind!.frame
+        self.safeAreaTop = wind?.safeAreaInsets.top ?? 0
+        self.safeAreaBottom = wind?.safeAreaInsets.bottom ?? 0
     }
 
     init?(viewTargeted: UIView, window: UIView? = nil) {
@@ -166,6 +177,10 @@ open class ContextMenu: NSObject {
 
     open func closeMenu(){
         self.closeAllViews()
+    }
+    
+    open func closeOnlyMenu() {
+        self.menuView.removeFromSuperview()
     }
 
     open func closeMenu(withAnimation animation: Bool) {
@@ -216,7 +231,7 @@ open class ContextMenu: NSObject {
         }
 
         let rect = viewTargeted.convert(mainViewRect.origin, to: nil)
-        targetedImageView.contentMode = .scaleAspectFit
+        targetedImageView.contentMode = .scaleAspectFill
         targetedImageView.image = viewTargeted.image()
         targetedImageView.frame = CGRect(x: rect.x,
                                          y: rect.y,
@@ -302,6 +317,7 @@ open class ContextMenu: NSObject {
         self.targetedImageView.isUserInteractionEnabled = false
         self.menuView.isUserInteractionEnabled = false
         self.closeButton.isUserInteractionEnabled = false
+        self.targetedImageView.translatesAutoresizingMaskIntoConstraints = true
 
         let rect = self.viewTargeted.convert(self.mainViewRect.origin, to: nil)
         if self.closeAnimation {
@@ -361,6 +377,8 @@ open class ContextMenu: NSObject {
         self.closeButton.removeFromSuperview()
         self.menuView.removeFromSuperview()
         self.tableView.removeFromSuperview()
+        self.mentionTableView?.removeFromSuperview()
+        self.scrollView.removeFromSuperview()
     }
 
     func getZoomedTargetedSize() -> CGRect{
@@ -623,31 +641,162 @@ open class ContextMenu: NSObject {
             height: weakSelf.mainViewRect.height
         )
     }
+    
+    func updateTargetedImage(viewTargeted: UIView) {
+        self.viewTargeted = viewTargeted
+        targetedImageView.image = viewTargeted.image()
+    }
+    
+    func updateBaseviewPosition(height: CGFloat) {
+        let weakSelf = self
+        let safeHeight = safeAreaBottom + height
+//        UIView.animate(withDuration: 0.2) {
+            weakSelf.blurEffectView.frame = CGRect(
+                x: weakSelf.mainViewRect.origin.x ,
+                y: weakSelf.mainViewRect.origin.y - safeHeight,
+                width: weakSelf.mainViewRect.width,
+                height: weakSelf.mainViewRect.height
+            )
+            
+            let width = weakSelf.targetedImageView.bounds.width
+            let diffHeight = weakSelf.tvH - (safeHeight + 15)
+            weakSelf.targetedImageView.clipsToBounds = true
+            weakSelf.targetedImageView.contentMode = .scaleAspectFit
+            if !(weakSelf.tvH > diffHeight) {
+                weakSelf.targetedImageView.frame = CGRect(
+                    x: weakSelf.tvX,
+                    y: weakSelf.safeAreaTop, //(weakSelf.tvH >= weakSelf.mainViewRect.height ? 30 : weakSelf.tvY) - height
+                    width: weakSelf.tvW,
+                    height: (weakSelf.tvH - (diffHeight))
+                )
+            } else {
+                weakSelf.targetedImageView.removeFromSuperview()
+                if weakSelf.scrollView != nil {
+                    weakSelf.scrollView.removeFromSuperview()
+                }
+                weakSelf.scrollView = UIScrollView(frame: CGRect(
+                    x: weakSelf.tvX,
+                    y: weakSelf.safeAreaTop, //(weakSelf.tvH >= weakSelf.mainViewRect.height ? 30 : weakSelf.tvY) - height
+                    width: weakSelf.tvW,
+                    height: (weakSelf.customView.bounds.height - safeHeight - weakSelf.safeAreaBottom - 50)
+                ))
+                if weakSelf.closeGesture != nil {
+                    weakSelf.scrollView.addGestureRecognizer(weakSelf.closeGesture!)
+                }
+                weakSelf.scrollView.delegate = self
+                weakSelf.customView.addSubview(weakSelf.scrollView)
+                weakSelf.scrollView.addSubview(weakSelf.targetedImageView)
+                if let mentionTable = weakSelf.mentionTableView {
+                    let safeHeight = weakSelf.safeAreaBottom + height
+                    let tableHeight = CGFloat((weakSelf.searchGroupMembers.count >= 3) ? 210 : (weakSelf.searchGroupMembers.count * 70))
+                    weakSelf.mentionTableView?.frame = CGRect(x: 0, y: (weakSelf.scrollView.bounds.height) - (tableHeight - weakSelf.safeAreaTop), width: weakSelf.blurEffectView.bounds.width, height: tableHeight)
+                    weakSelf.customView.bringSubviewToFront(mentionTable)
+                }
+                weakSelf.targetedImageView.translatesAutoresizingMaskIntoConstraints = false
+                let height = weakSelf.scrollView.bounds.height
+                if height < weakSelf.tvH {
+                    weakSelf.targetedImageView.topAnchor.constraint(equalTo: weakSelf.scrollView.topAnchor, constant: 0).isActive = true
+                } else {
+                    weakSelf.targetedImageView.topAnchor.constraint(equalTo: weakSelf.scrollView.topAnchor, constant: weakSelf.scrollView.bounds.height - weakSelf.tvH).isActive = true
+                }
+                weakSelf.targetedImageView.leadingAnchor.constraint(equalTo: weakSelf.scrollView.leadingAnchor).isActive = true
+                weakSelf.targetedImageView.trailingAnchor.constraint(equalTo: weakSelf.scrollView.trailingAnchor).isActive = true
+                weakSelf.targetedImageView.widthAnchor.constraint(equalTo: weakSelf.scrollView.widthAnchor).isActive = true
+                weakSelf.targetedImageView.bottomAnchor.constraint(equalTo: weakSelf.scrollView.bottomAnchor).isActive = true
+                weakSelf.scrollView.contentSize = CGSize(width: 0, height: weakSelf.targetedImageView.bounds.height)
+                weakSelf.scrollView.showsHorizontalScrollIndicator = false // Hide horizontal scroll indicator
+                weakSelf.scrollView.contentInset = UIEdgeInsets.zero
+                weakSelf.scrollView.contentInsetAdjustmentBehavior = .never
+                weakSelf.customView.layoutIfNeeded()
+                //              scrollToBottom()
+            }
+//        }
+    }
+    
+    func scrollToBottom() {
+        let bottomOffset = CGPoint(x: 0, y: scrollView.contentSize.height - scrollView.bounds.size.height)
+        scrollView.setContentOffset(bottomOffset, animated: true)
+    }
+    
+    public func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if scrollView.contentOffset.x != 0 {
+            scrollView.contentOffset.x = 0
+        }
+    }
+    
+    func showMentionView(height: CGFloat, members: [GroupParticipantDetail] = []) {
+        let weakSelf = self
+        let safeHeight = safeAreaBottom + height
+        let tableHeight = CGFloat((members.count >= 3) ? 210 : (members.count * 70))
+        searchGroupMembers = members
+        mentionTableView = UITableView(frame: CGRect(x: 0, y: (weakSelf.scrollView.bounds.height) - (tableHeight - weakSelf.safeAreaTop), width: weakSelf.blurEffectView.bounds.width, height: tableHeight))
+        if let mentionTable = mentionTableView {
+            weakSelf.customView.addSubview(mentionTable)
+            mentionTable.register(UINib(nibName: "MentionTableViewCell",
+                                            bundle: nil), forCellReuseIdentifier: "MentionTableViewCell")
+            mentionTable.delegate = self
+            mentionTable.dataSource = self
+        }
+    }
+    
+    func reloadMentionTableview(height: CGFloat, members: [GroupParticipantDetail] = []) {
+        let weakSelf = self
+        searchGroupMembers = members
+        let safeHeight = safeAreaBottom + height
+        let tableHeight = CGFloat((members.count >= 3) ? 210 : (members.count * 70))
+        mentionTableView?.frame = CGRect(x: 0, y: (weakSelf.scrollView.bounds.height) - (tableHeight - weakSelf.safeAreaTop), width: weakSelf.blurEffectView.bounds.width, height: tableHeight)
+        self.mentionTableView?.reloadData()
+    }
 }
 
 extension ContextMenu : UITableViewDataSource, UITableViewDelegate {
 
     open func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return self.items.count
+        return tableView == mentionTableView ? self.searchGroupMembers.count : self.items.count
     }
 
     open func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ContextMenuCell", for: indexPath) as! ContextMenuCell
-        cell.contextMenu = self
-        cell.tableView = tableView
-        cell.style = self.MenuConstants
-        cell.item = self.items[indexPath.row]
-        cell.setup()
-        return cell
+        if tableView == mentionTableView {
+            let mentionCell = tableView.dequeueReusableCell(withIdentifier: "MentionTableViewCell", for: indexPath) as? MentionTableViewCell
+            mentionCell?.userNameLabel?.text = searchGroupMembers[indexPath.row].displayName
+            if let profileDetail = searchGroupMembers[indexPath.row].profileDetail {
+                if profileDetail.contactType == .deleted || profileDetail.isBlockedMe || profileDetail.isBlockedByAdmin || (IS_LIVE && ENABLE_CONTACT_SYNC && profileDetail.isItSavedContact == false) {
+                    mentionCell?.userImageView?.image = UIImage(named: "ic_profile_placeholder") ?? UIImage()
+                } else {
+                    let imageUrl = profileDetail.thumbImage.isEmpty ? profileDetail.image : profileDetail.thumbImage
+                    mentionCell?.userImageView.sd_setImage(with: ChatUtils.getUserImaeUrl(imageUrl: imageUrl),
+                                                           placeholderImage: UIImage(named: "ic_profile_placeholder"))
+                }
+            }
+            return mentionCell ?? UITableViewCell()
+        } else {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "ContextMenuCell", for: indexPath) as! ContextMenuCell
+            cell.contextMenu = self
+            cell.tableView = tableView
+            cell.style = self.MenuConstants
+            cell.item = self.items[indexPath.row]
+            cell.setup()
+            return cell
+        }
     }
 
     open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let item = self.items[indexPath.row]
-        if self.onItemTap?(indexPath.row, item) ?? false {
-            self.closeAllViews()
-        }
-        if self.delegate?.contextMenuDidSelect(self, cell: tableView.cellForRow(at: indexPath) as! ContextMenuCell, targetedView: self.viewTargeted, didSelect: self.items[indexPath.row], forRowAt: indexPath.row) ?? false {
-            self.closeAllViews()
+        if tableView == mentionTableView {
+            let jid = searchGroupMembers[indexPath.row].memberJid
+            if let profileDetail = searchGroupMembers[indexPath.row].profileDetail {
+                self.delegate?.contextMenuDidMentionSelect(self, jid: jid, profileDetail: profileDetail)
+                self.mentionTableView?.removeFromSuperview()
+            }
+        } else {
+            let item = self.items[indexPath.row]
+            if self.onItemTap?(indexPath.row, item) ?? false {
+                self.closeAllViews()
+            }
+            if self.delegate?.contextMenuDidSelect(self, cell: tableView.cellForRow(at: indexPath) as! ContextMenuCell, targetedView: self.viewTargeted, didSelect: self.items[indexPath.row], forRowAt: indexPath.row) ?? false {
+                if item.title != MessageActions.edit.rawValue {
+                    self.closeAllViews()
+                }
+            }
         }
     }
 
@@ -656,7 +805,7 @@ extension ContextMenu : UITableViewDataSource, UITableViewDelegate {
     }
 
     open func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return MenuConstants.ItemDefaultHeight
+        return tableView == mentionTableView ? 70 : MenuConstants.ItemDefaultHeight
     }
 
     open func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {

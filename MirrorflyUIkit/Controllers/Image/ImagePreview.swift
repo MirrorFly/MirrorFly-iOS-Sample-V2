@@ -16,6 +16,7 @@ class ImagePreview: BaseViewController  {
  
     func shareMedia(media: MediaChatMessage?) {
         var type = String()
+        ChatManager.disconnect()
         
         switch media?.messageType {
         case .audio:
@@ -36,6 +37,11 @@ class ImagePreview: BaseViewController  {
         
         activityController.popoverPresentationController?.sourceView = view
         activityController.popoverPresentationController?.sourceRect = view.frame
+
+        activityController.completionWithItemsHandler = { (type,completed,items,error) in
+            ChatManager.connect()
+        }
+
         self.present(activityController, animated: true, completion: nil)
     }
     

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="22154" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21679"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22130"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -229,7 +229,7 @@
                                                     <constraint firstAttribute="width" constant="50" id="rET-QZ-ruO"/>
                                                 </constraints>
                                             </imageView>
-                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="TMu-J6-tZg" customClass="GMSMapView">
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="TMu-J6-tZg">
                                                 <rect key="frame" x="184" y="0.0" width="50" height="52"/>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             </view>
@@ -286,10 +286,10 @@
                                                 <rect key="frame" x="-3" y="0.0" width="240" height="150"/>
                                                 <subviews>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="a1e-bB-LnY">
-                                                        <rect key="frame" x="0.0" y="0.0" width="240" height="50"/>
+                                                        <rect key="frame" x="0.0" y="0.0" width="240" height="5"/>
                                                         <subviews>
                                                             <label opaque="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hsZ-3a-pXN">
-                                                                <rect key="frame" x="10" y="5" width="210" height="45"/>
+                                                                <rect key="frame" x="10" y="5" width="210" height="0.0"/>
                                                                 <accessibility key="accessibilityConfiguration">
                                                                     <accessibilityTraits key="traits" none="YES"/>
                                                                     <bool key="isElement" value="YES"/>
@@ -319,7 +319,7 @@
                                                         </constraints>
                                                     </view>
                                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="B5h-ON-zGp">
-                                                        <rect key="frame" x="0.0" y="58" width="240" height="84"/>
+                                                        <rect key="frame" x="0.0" y="13" width="240" height="84"/>
                                                         <subviews>
                                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="IWB-tc-cDr">
                                                                 <rect key="frame" x="0.0" y="0.0" width="240" height="50"/>
@@ -405,10 +405,10 @@
                                                         </subviews>
                                                     </stackView>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="O9m-0m-g2f" userLabel="Translated View">
-                                                        <rect key="frame" x="0.0" y="150" width="240" height="0.0"/>
+                                                        <rect key="frame" x="0.0" y="105" width="240" height="45"/>
                                                         <subviews>
                                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rXk-Eg-Hef">
-                                                                <rect key="frame" x="12" y="0.0" width="208" height="0.0"/>
+                                                                <rect key="frame" x="12" y="0.0" width="208" height="45"/>
                                                                 <constraints>
                                                                     <constraint firstAttribute="width" constant="208" id="Spt-4l-c5E"/>
                                                                 </constraints>
@@ -417,7 +417,7 @@
                                                                 <nil key="highlightedColor"/>
                                                             </label>
                                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="NbP-fX-ya5">
-                                                                <rect key="frame" x="0.0" y="0.0" width="2" height="0.0"/>
+                                                                <rect key="frame" x="0.0" y="0.0" width="2" height="45"/>
                                                                 <color key="backgroundColor" red="0.59215686274509804" green="0.6470588235294118" blue="0.7803921568627451" alpha="1" colorSpace="calibratedRGB"/>
                                                                 <constraints>
                                                                     <constraint firstAttribute="width" constant="2" id="nND-xt-bnZ"/>

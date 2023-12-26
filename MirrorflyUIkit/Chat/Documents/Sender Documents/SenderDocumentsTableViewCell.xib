@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="22154" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22130"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -140,7 +140,7 @@
                                             <constraint firstAttribute="width" constant="50" id="mXz-9s-6dO"/>
                                         </constraints>
                                     </imageView>
-                                    <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="H8M-9X-bat" customClass="GMSMapView">
+                                    <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="H8M-9X-bat">
                                         <rect key="frame" x="198" y="0.0" width="50" height="50"/>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                     </view>
@@ -260,8 +260,8 @@
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="fns-mf-CvH" userLabel="DocumentInfoView">
                                 <rect key="frame" x="0.0" y="100" width="248" height="30"/>
                                 <subviews>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="64 KB" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="k6Q-bt-PNY">
-                                        <rect key="frame" x="7" y="11" width="18.5" height="8.5"/>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="649.777 KB" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="k6Q-bt-PNY">
+                                        <rect key="frame" x="7" y="11" width="35" height="8.5"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="8.5" id="Xhv-ud-mGY"/>
                                         </constraints>
@@ -325,6 +325,7 @@
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
+                            <constraint firstAttribute="width" secondItem="zYX-FI-qsE" secondAttribute="height" multiplier="1:1" id="EQI-vK-xbc"/>
                             <constraint firstAttribute="height" constant="20" id="Gqf-6t-TUz"/>
                             <constraint firstItem="9hx-TY-kOG" firstAttribute="top" secondItem="zYX-FI-qsE" secondAttribute="top" id="LaJ-r9-XAE"/>
                             <constraint firstAttribute="trailing" secondItem="9hx-TY-kOG" secondAttribute="trailing" id="O24-SD-c3R"/>
@@ -367,7 +368,6 @@
                     <constraint firstAttribute="trailing" secondItem="UUH-Ez-yfZ" secondAttribute="trailing" constant="10" id="8Cm-cv-RRI"/>
                     <constraint firstItem="UUH-Ez-yfZ" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="10" id="C7H-8n-7eY"/>
                     <constraint firstItem="5VL-SA-98G" firstAttribute="trailing" secondItem="Ho1-W4-jUu" secondAttribute="trailing" id="ELk-aX-9FJ"/>
-                    <constraint firstItem="zYX-FI-qsE" firstAttribute="width" secondItem="zYX-FI-qsE" secondAttribute="height" multiplier="1:1" id="EQI-vK-xbc"/>
                     <constraint firstItem="5VL-SA-98G" firstAttribute="leading" secondItem="Ho1-W4-jUu" secondAttribute="leading" id="G3O-ia-OCl"/>
                     <constraint firstItem="Pph-vn-6rq" firstAttribute="top" secondItem="b5b-Jp-f58" secondAttribute="top" id="Kxv-Wb-9Nz"/>
                     <constraint firstItem="sCy-l4-rvi" firstAttribute="top" secondItem="UUH-Ez-yfZ" secondAttribute="bottom" id="PZ1-1z-Vb3"/>

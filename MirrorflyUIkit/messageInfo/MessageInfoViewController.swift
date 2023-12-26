@@ -158,9 +158,9 @@ extension MessageInfoViewController : UITableViewDelegate, UITableViewDataSource
         if section == 0 {
             if let message = chatMessage {
                 switch(message.messageType) {
-                case .text, .meet:
+                case .text, .meet, .autoText:
 
-                    cell = tableView.dequeueReusableCell(withIdentifier: message.messageType == .text ? Identifiers.chatViewTextOutgoingCell : Identifiers.scheduledMeetingSenderCell, for: indexPath) as? ChatViewParentMessageCell
+                    cell = tableView.dequeueReusableCell(withIdentifier: (message.messageType == .text || message.messageType == .autoText) ? Identifiers.chatViewTextOutgoingCell : Identifiers.scheduledMeetingSenderCell, for: indexPath) as? ChatViewParentMessageCell
                     //cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.chatViewTextOutgoingCell, for: indexPath) as? ChatViewParentMessageCell
                     cell.starredMessageView?.isHidden = true
                     cell = cell?.getCellFor(message, at: indexPath, isShowForwardView: false, profileDetails: profileDetails)

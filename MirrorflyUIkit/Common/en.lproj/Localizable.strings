@@ -67,5 +67,5 @@
 "enterMobileNumber" = "Please enter your mobile number.";
 "sessionExpired" = "The SMS code has expired. Please re-send the verification code to try again";
 "fileformat_NotSupport" = "File format is not supported";
-"fileSize" = "File size is too large. Try uploading the file size below 10MB";
+"fileSize" = "File size is too large. Try uploading the file size below 2GB";
 "mobileNumberDoesntMatch" = "The mobile number you entered doesn't match your account.";

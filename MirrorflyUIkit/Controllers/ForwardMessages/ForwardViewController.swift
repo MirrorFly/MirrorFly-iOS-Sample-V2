@@ -167,6 +167,7 @@ class ForwardViewController: UIViewController {
         super.viewDidAppear(animated)
         ContactManager.shared.profileDelegate = self
         ChatManager.shared.adminBlockDelegate = self
+        ChatManager.shared.userBusyStatusDelegate = self
         ChatManager.shared.messageEventsDelegate = self
         FlyMessenger.shared.messageEventsDelegate = self
         GroupManager.shared.groupDelegate = self
@@ -176,6 +177,7 @@ class ForwardViewController: UIViewController {
         super.viewWillDisappear(animated)
         ContactManager.shared.profileDelegate = nil
         ChatManager.shared.messageEventsDelegate = nil
+        ChatManager.shared.userBusyStatusDelegate = nil
         ChatManager.shared.adminBlockDelegate = nil
         FlyMessenger.shared.messageEventsDelegate = nil
         navigationController?.isNavigationBarHidden = true
@@ -470,22 +472,24 @@ extension ForwardViewController : UITableViewDelegate, UITableViewDataSource {
                 cell.removeIcon?.isHidden = true
                 cell.receiverMessageTypeView?.isHidden = true
                 let chatMessage = recentChatDetails.lastMessageContent.trim()
+                let getmessage = getMessages(messageId: recentChatDetails.lastMessageId)
+                var lastMessageContent = getmessage.editedTextContent.isEmpty ? getmessage.messageTextContent : getmessage.editedTextContent
                 if recentChatDetails.isMentionedUser, chatMessage.isNotEmpty {
                     var message = emptyString()
                     if recentChatDetails.profileType == .groupChat {
-                        message = ChatUtils.getMentionTextContent(message: recentChatDetails.lastMessageContent, isMessageSentByMe: recentChatDetails.isLastMessageSentByMe, mentionedUsers: recentChatDetails.mentionedUsersIds).string
+                        message = ChatUtils.getMentionTextContent(message: lastMessageContent, isMessageSentByMe: recentChatDetails.isLastMessageSentByMe, mentionedUsers: recentChatDetails.mentionedUsersIds).string
                     } else {
-                        message = ChatUtils.convertMentionUser(message: recentChatDetails.lastMessageContent, mentionedUsersIds: recentChatDetails.mentionedUsersIds).replacingOccurrences(of: "`", with: "")
+                        message = ChatUtils.convertMentionUser(message: lastMessageContent, mentionedUsersIds: recentChatDetails.mentionedUsersIds).replacingOccurrences(of: "`", with: "")
                     }
-                    if recentChatDetails.lastMessageType == .text || recentChatDetails.lastMessageType == .notification {
+                    if recentChatDetails.lastMessageType == .text || recentChatDetails.lastMessageType == .notification || recentChatDetails.lastMessageType == .autoText {
                         cell.statusUILabel?.text = message
                     } else {
                         cell.receiverMessageTypeView?.isHidden = false
                         cell.statusUILabel?.text = message + (recentChatDetails.lastMessageType?.rawValue ?? "")
                     }
                 } else {
-                    if recentChatDetails.lastMessageType == .text || recentChatDetails.lastMessageType == .notification {
-                        cell.statusUILabel?.text = recentChatDetails.lastMessageContent
+                    if recentChatDetails.lastMessageType == .text || recentChatDetails.lastMessageType == .notification || recentChatDetails.lastMessageType == .autoText {
+                        cell.statusUILabel?.text = lastMessageContent
                     } else if recentChatDetails.lastMessageType == .meet {
                         cell.receiverMessageTypeView?.isHidden = false
                         let message = getMessages(messageId: recentChatDetails.lastMessageId)
@@ -517,14 +521,14 @@ extension ForwardViewController : UITableViewDelegate, UITableViewDataSource {
                     } else {
                         message = ChatUtils.convertMentionUser(message: recentChatDetails.lastMessageContent, mentionedUsersIds: recentChatDetails.mentionedUsersIds).replacingOccurrences(of: "`", with: "")
                     }
-                    if recentChatDetails.lastMessageType == .text || recentChatDetails.lastMessageType == .notification {
+                    if recentChatDetails.lastMessageType == .text || recentChatDetails.lastMessageType == .notification || recentChatDetails.lastMessageType == .autoText {
                         cell.statusUILabel?.text = message
                     } else {
                         cell.receiverMessageTypeView?.isHidden = false
                         cell.statusUILabel?.text = message + (recentChatDetails.lastMessageType?.rawValue ?? "")
                     }
                 } else {
-                    if recentChatDetails.lastMessageType == .text || recentChatDetails.lastMessageType == .notification {
+                    if recentChatDetails.lastMessageType == .text || recentChatDetails.lastMessageType == .notification || recentChatDetails.lastMessageType == .autoText {
                         cell.statusUILabel?.text = recentChatDetails.lastMessageContent
                     } else if recentChatDetails.lastMessageType == .meet {
                         cell.receiverMessageTypeView?.isHidden = false
@@ -568,13 +572,17 @@ extension ForwardViewController : UITableViewDelegate, UITableViewDataSource {
                     saveUserToDatabase(jid: profile.jid)
                     if selectedMessages.filter({$0.jid == profile.jid}).count == 0  && selectedMessages.count < 5 {
                         checkUserBusyStatusEnabled(self, jid: profile.jid) { [weak self] status in
-                            if status {
-                                self?.getRecentChat.filter({$0.jid == profile.jid}).first?.isSelected = true
-                                self?.filteredContactList[indexPath.row].isSelected = true
-                                self?.selectedMessages.append(profile)
-                                self?.selectedJids = self?.selectedMessages.compactMap { profile in profile.jid } ?? []
+                            executeOnMainThread {
+                                if status {
+                                    self?.getRecentChat.filter({$0.jid == profile.jid}).first?.isSelected = true
+                                    self?.filteredContactList[indexPath.row].isSelected = true
+                                    self?.selectedMessages.append(profile)
+                                    self?.selectedJids = self?.selectedMessages.compactMap { profile in profile.jid } ?? []
+                                    self?.sendButton?.isEnabled = self?.selectedMessages.count == 0 ? false : true
+                                    self?.sendButton?.alpha = self?.selectedMessages.count == 0 ? 0.4 : 1.0
+                                }
+                                self?.forwardTableView?.reloadRows(at: [indexPath], with: .none)
                             }
-                            self?.forwardTableView?.reloadRows(at: [indexPath], with: .none)
                         }
                     } else if selectedMessages.filter({$0.jid == filteredContactList[indexPath.row].jid}).count > 0 {
                         selectedMessages.enumerated().forEach({ (index,item) in
@@ -603,13 +611,17 @@ extension ForwardViewController : UITableViewDelegate, UITableViewDataSource {
                     saveUserToDatabase(jid: profile.jid)
                     if selectedMessages.filter({$0.jid == profile.jid}).count == 0  && selectedMessages.count < 5 {
                         checkUserBusyStatusEnabled(self, jid: profile.jid) { [weak self] status in
-                            if status {
-                                self?.getAllRecentChat.filter({$0.jid == profile.jid}).first?.isSelected = true
-                                self?.allContactsList[indexPath.row].isSelected = true
-                                self?.selectedMessages.append(profile)
-                                self?.selectedJids = self?.selectedMessages.compactMap { profile in profile.jid } ?? []
+                            executeOnMainThread {
+                                if status {
+                                    self?.getAllRecentChat.filter({$0.jid == profile.jid}).first?.isSelected = true
+                                    self?.allContactsList[indexPath.row].isSelected = true
+                                    self?.selectedMessages.append(profile)
+                                    self?.selectedJids = self?.selectedMessages.compactMap { profile in profile.jid } ?? []
+                                    self?.sendButton?.isEnabled = self?.selectedMessages.count == 0 ? false : true
+                                    self?.sendButton?.alpha = self?.selectedMessages.count == 0 ? 0.4 : 1.0
+                                }
+                                self?.forwardTableView?.reloadRows(at: [indexPath], with: .none)
                             }
-                            self?.forwardTableView?.reloadRows(at: [indexPath], with: .none)
                         }
                     } else if selectedMessages.filter({$0.jid == allContactsList[indexPath.row].jid}).count > 0 {
                         selectedMessages.enumerated().forEach({ (index,item) in
@@ -710,13 +722,17 @@ extension ForwardViewController : UITableViewDelegate, UITableViewDataSource {
                     saveUserToDatabase(jid: profile.jid)
                     if selectedMessages.filter({$0.jid == getRecentChat[indexPath.row].jid}).count == 0 && selectedMessages.count < 5 {
                         checkUserBusyStatusEnabled(self, jid: profile.jid) { [weak self] status in
-                            if status {
-                                self?.getRecentChat[indexPath.row].isSelected = true
-                                self?.filteredContactList.filter({$0.jid == self?.getRecentChat[indexPath.row].jid}).first?.isSelected = true
-                                self?.selectedMessages.append(profile)
-                                self?.selectedJids = self?.selectedMessages.compactMap { profile in profile.jid } ?? []
+                            executeOnMainThread {
+                                if status {
+                                    self?.getRecentChat[indexPath.row].isSelected = true
+                                    self?.filteredContactList.filter({$0.jid == self?.getRecentChat[indexPath.row].jid}).first?.isSelected = true
+                                    self?.selectedMessages.append(profile)
+                                    self?.selectedJids = self?.selectedMessages.compactMap { profile in profile.jid } ?? []
+                                    self?.sendButton?.isEnabled = self?.selectedMessages.count == 0 ? false : true
+                                    self?.sendButton?.alpha = self?.selectedMessages.count == 0 ? 0.4 : 1.0
+                                }
+                                self?.forwardTableView?.reloadRows(at: [indexPath], with: .none)
                             }
-                            self?.forwardTableView?.reloadRows(at: [indexPath], with: .none)
                         }
                     } else if selectedMessages.filter({$0.jid == getRecentChat[indexPath.row].jid}).count > 0 {
                         selectedMessages.enumerated().forEach({ (index,item) in
@@ -748,13 +764,17 @@ extension ForwardViewController : UITableViewDelegate, UITableViewDataSource {
                     profile.isSelected = !(profile.isSelected ?? false)
                     if selectedMessages.filter({$0.jid == getAllRecentChat[indexPath.row].jid}).count == 0  && selectedMessages.count < 5 {
                         checkUserBusyStatusEnabled(self, jid: profile.jid) { [weak self] status in
-                            if status {
-                                self?.getAllRecentChat[indexPath.row].isSelected = true
-                                self?.allContactsList.filter({$0.jid == self?.getAllRecentChat[indexPath.row].jid}).first?.isSelected = true
-                                self?.selectedMessages.append(profile)
-                                self?.selectedJids = self?.selectedMessages.compactMap { profile in profile.jid } ?? []
+                            executeOnMainThread {
+                                if status {
+                                    self?.getAllRecentChat[indexPath.row].isSelected = true
+                                    self?.allContactsList.filter({$0.jid == self?.getAllRecentChat[indexPath.row].jid}).first?.isSelected = true
+                                    self?.selectedMessages.append(profile)
+                                    self?.selectedJids = self?.selectedMessages.compactMap { profile in profile.jid } ?? []
+                                    self?.sendButton?.isEnabled = self?.selectedMessages.count == 0 ? false : true
+                                    self?.sendButton?.alpha = self?.selectedMessages.count == 0 ? 0.4 : 1.0
+                                }
+                                self?.forwardTableView?.reloadRows(at: [indexPath], with: .none)
                             }
-                            self?.forwardTableView?.reloadRows(at: [indexPath], with: .none)
                         }
                     } else if selectedMessages.filter({$0.jid == getAllRecentChat[indexPath.row].jid}).count > 0 {
                         selectedMessages.enumerated().forEach({ (index,item) in
@@ -1561,8 +1581,13 @@ extension ForwardViewController {
         if ChatManager.shared.isBusyStatusEnabled() && ContactManager.shared.getUserProfileDetails(for: jid)?.profileChatType == .singleChat {
             let alertController = UIAlertController.init(title: "Disable busy Status. Do you want to continue?" , message: "", preferredStyle: .alert)
             let forwardAction = UIAlertAction(title: "Yes", style: .default) {_ in
-                ChatManager.shared.enableDisableBusyStatus(!ChatManager.shared.isBusyStatusEnabled())
-                completion(true)
+                if NetStatus.shared.isConnected {
+                    ChatManager.shared.enableDisableBusyStatus(!ChatManager.shared.isBusyStatusEnabled()) {isSuccess,error,data in
+                        completion(isSuccess)
+                    }
+                } else {
+                    AppAlert.shared.showToast(message: ErrorMessage.noInternet)
+                }
             }
             let cancelAction = UIAlertAction(title: "No", style: .cancel) { [weak controller] (action) in
                 controller?.dismiss(animated: true,completion: nil)
@@ -1577,6 +1602,13 @@ extension ForwardViewController {
             }
         } else {
             completion(true)
+        }
+    }
+}
+extension ForwardViewController: UserBusyStatusDelegate {
+    func didUpdateBusyStatus(status: Bool, message: String) {
+        executeOnMainThread {
+            self.forwardTableView.reloadData()
         }
     }
 }

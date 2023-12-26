@@ -1326,7 +1326,8 @@ extension RecentChatViewController : UITableViewDataSource ,UITableViewDelegate 
                             let chatMessage = getMessages(messageId: recentChat.lastMessageId)
                             let getGroupSenderName = ChatUtils.getGroupSenderName(messsage: chatMessage)
                             cell.setRecentChatMessage(recentChatMessage: recentChat, color: color, chatMessage: chatMessage, senderName: getGroupSenderName, fromArchive: showArchivedChat, forSearch: true)
-                            cell.setLastContentTextColor(searchText: searchBar?.text ?? "", recentChat: recentChat, caption: chatMessage.messageType == .meet ? chatMessage.meetChatMessage?.link ?? "" : chatMessage.mediaChatMessage?.mediaCaptionText ?? "", searchMessage: chatMessage)
+                            let caption = chatMessage.messageType == .meet ? chatMessage.meetChatMessage?.link ?? "" : ((chatMessage.mediaChatMessage?.mediaCaptionEditedText.isEmpty ?? true) ? (chatMessage.mediaChatMessage?.mediaCaptionText ?? "") : chatMessage.mediaChatMessage?.mediaCaptionEditedText ?? "")
+                            cell.setLastContentTextColor(searchText: searchBar?.text ?? "", recentChat: recentChat, caption: caption, searchMessage: chatMessage)
                             cell.profileImageButton?.isHidden = true
                             cell.setChatTimeTextColor(lastMessageTime: recentChat.lastMessageTime, unreadCount: recentChat.unreadMessageCount)
                             cell.countLabel?.isHidden = true

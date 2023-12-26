@@ -83,7 +83,7 @@ class ViewAllMediaViewModel {
 
     func whileReceivingNewMessage(chatMessage : ChatMessage, completionHandler : @escaping (_ linkModels : LinkModel) -> Void) {
         var links = [String]()
-        if chatMessage.messageType == .text {
+        if chatMessage.messageType == .text || chatMessage.messageType == .autoText {
             links = ChatUtils.getLinksFrom(text: chatMessage.messageTextContent)
         } else if  chatMessage.messageType == .video || chatMessage.messageType == .image {
             links = ChatUtils.getLinksFrom(text: chatMessage.mediaChatMessage?.mediaCaptionText ?? "")

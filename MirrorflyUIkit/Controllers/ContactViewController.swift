@@ -9,7 +9,13 @@ import SDWebImage
 import Contacts
 import RxSwift
 
+
+protocol particpantsAddDelegate: AnyObject {
+    func participantsAdded(profiles: [String])
+}
+
 class ContactViewController: BaseViewController {
+
     @IBOutlet weak var profilePopupContainer: UIView!
     @IBOutlet weak var profilePopup: UIView!
     @IBOutlet weak var userName: UILabel!
@@ -56,7 +62,7 @@ class ContactViewController: BaseViewController {
     var isGroupBlockedByAdmin : Bool = false
 
     var permissionDialogShowedOnViewDidLoad = false
-    
+    var addParicipantDelegate: particpantsAddDelegate?
     var refreshDelegate : RefreshProfileInfo? = nil
     
     public var profileCount = Int()
@@ -119,6 +125,7 @@ class ContactViewController: BaseViewController {
             }
         }
         searchSubject.throttle(.milliseconds(25), scheduler: MainScheduler.instance).distinctUntilChanged().subscribe { [weak self] term in
+            print("onnextcalled=>")
             self?.searchTerm = term
             self?.allContacts.removeAll()
             self?.contacts.removeAll()
@@ -239,7 +246,7 @@ class ContactViewController: BaseViewController {
         let tap = UITapGestureRecognizer(target: self, action: #selector(self.handleTap(_:)))
         profilePopupContainer.addGestureRecognizer(tap)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(notification:)), name: UIResponder.keyboardWillShowNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(notification:)), name: UIResponder.keyboardDidHideNotification, object: nil)
     }
     
     @objc func handleRefresh(_ refreshControl: UIRefreshControl) {
@@ -419,7 +426,12 @@ class ContactViewController: BaseViewController {
     
     @IBAction func bottomBtnTapped(_ sender: Any) {
         if makeCall{
-            makeFlyCall()
+            if isInvite {
+                addParicipantDelegate?.participantsAdded(profiles: selectedProfilesJid as! [String])
+                navigationController?.popViewController(animated: true)
+            } else {
+                makeFlyCall()
+            }
         }
     }
     
@@ -659,11 +671,30 @@ extension ContactViewController: CallStatusContactDelegate {
             callUsers.removeAll { user in
                 user == userId
             }
-            resetParams()
-            allContacts.removeAll()
-            contacts.removeAll()
-            contactList.reloadData()
-            getUsersList(pageNo: 1, pageSize: 20, searchTerm: searchTerm)
+            if groupJid.isEmpty {
+                resetParams()
+                allContacts.removeAll()
+                contacts.removeAll()
+                contactList.reloadData()
+                getUsersList(pageNo: 1, pageSize: 20, searchTerm: searchTerm)
+            }
+        case .ACTION_INVITE_USERS:
+            let invitedUsers = CallManager.getCallUsersList() ?? []
+            if invitedUsers.count >= 7 {
+                executeOnMainThread {
+                    self.selectedProfilesJid.removeAllObjects()
+                    self.updateBottomButton()
+                    self.contactList.reloadData()
+                }
+            } else {
+                executeOnMainThread {
+                    self.selectedProfilesJid.remove(userId)
+                    self.contacts.removeAll { pd in
+                        pd.jid == userId
+                    }
+                    self.contactList.reloadData()
+                }
+            }
             
         default: break
         }
@@ -686,14 +717,17 @@ extension ContactViewController: CallStatusContactDelegate {
                     self.contactList.reloadData()
                 }
             }else {
-                resetParams()
-                allContacts.removeAll()
-                contacts.removeAll()
-                contactList.reloadData()
-                getUsersList(pageNo: 1, pageSize: 20, searchTerm: searchTerm)
+                if groupJid.isEmpty {
+                    resetParams()
+                    allContacts.removeAll()
+                    contacts.removeAll()
+                    contactList.reloadData()
+                    getUsersList(pageNo: 1, pageSize: 20, searchTerm: searchTerm)
+                }
             }
         case .CONNECTED:
             executeOnMainThread {
+                self.callUsers.append(contentsOf: CallManager.getCallUsersList() ?? [])
                 self.contacts.removeAll { pd in
                     pd.jid == userId
                 }
@@ -744,6 +778,7 @@ extension ContactViewController: UISearchBarDelegate {
         searchBar.resignFirstResponder()
         searchTxt.setShowsCancelButton(false, animated: true)
         searchTxt.text = ""
+        searchSubject.onNext("")
         searchTerm = emptyString()
         if ENABLE_CONTACT_SYNC || !groupJid.isEmpty{
             contacts = allContacts
@@ -917,9 +952,11 @@ extension ContactViewController :  UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        searchTxt.resignFirstResponder()
         if isMultiSelect {
             if makeCall {
                 let profile = contacts[indexPath.row]
+                print("didSelectRowAt=> \(profile.name) - \(profile.nickName) - \(profile.mobileNumber)")
                 if getBlocked(jid: profile.jid) {
                     showBlockUnblockConfirmationPopUp(jid: profile.jid, name: profile.nickName)
                     return
@@ -1163,25 +1200,12 @@ extension ContactViewController {
             return
         }
         
-        if !CallManager.isOngoingCall() || isInvite{
-            if isInvite{
-                CallManager.inviteUsersToOngoingCall(selectedProfilesJid as! [String]) { isSuccess, message in
-                    if !isSuccess {
-                        let errorMessage = AppUtils.shared.getErrorMessage(description: message)
-                        AppAlert.shared.showAlert(view: self, title: "", message: errorMessage, buttonTitle: "Okay")
-                    } else {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500)) {
-                            self.navigationController?.popViewController(animated: true)
-                            for item in self.navigationController?.viewControllers ?? [] {
-                                if let vc = item as? CallViewController {
-                                    vc.reloadForInVite = true
-                                }
-                            }
-                           
-                        }
-                    }
-                }
-            }else{
+        if !CallManager.isOngoingCall(){
+//            if isInvite{
+//                
+                
+//            }
+//            else{
                 RootViewController.sharedInstance.callViewController?.makeCall(usersList: selectedProfilesJid as! [String], callType: callType, groupId : groupJid, onCompletion: { isSuccess, message in
                     
                     if(!isSuccess){
@@ -1189,7 +1213,7 @@ extension ContactViewController {
                         AppAlert.shared.showAlert(view: self, title: "", message: errorMessage, buttonTitle: "Okay")
                     }
                 })
-            }
+//            }
             //self.navigationController?.popViewController(animated: false)
             
         }else{

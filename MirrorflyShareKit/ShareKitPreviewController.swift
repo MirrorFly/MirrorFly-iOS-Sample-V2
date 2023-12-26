@@ -42,10 +42,12 @@ class ShareKitPreviewController : ShareKitBaseViewController {
     public var currentDeSelectedAssets = [PHAsset]()
 
     public var selectedURL = [URL]()
+    public var selectedScreenShot = [UIImage]()
 
     var imageEditIndex = Int()
     var botmImageIndex = Int()
     weak var delegate: ShareEditImageDelegate? = nil
+    var shareDelegate: ShareKitDelegate? = nil
     var profileName = ""
     var captionText: String?
     public var iscamera = false
@@ -70,7 +72,8 @@ class ShareKitPreviewController : ShareKitBaseViewController {
             self?.startLoadingIndicator(view: self?.view ?? UIView(), blurView: self?.loader?.0 ?? UIView(), activityIndicatorView: self?.loader?.1 ?? UIActivityIndicatorView(), label: self?.loader?.2 ?? UILabel(), withText: "Processing")
         }
         backgroundQueue.async { [weak self] in
-            _ = self?.getAssetsImageInfo(assets: self!.selectedAssets, urls: self!.selectedURL)
+            guard let strongSelf = self else { return }
+            strongSelf.getAssetsImageInfo(assets: strongSelf.selectedAssets, urls: strongSelf.selectedURL, images: strongSelf.selectedScreenShot)
         }
         hideKeyboardWhenTappedAround()
         setupUI()
@@ -149,6 +152,7 @@ class ShareKitPreviewController : ShareKitBaseViewController {
         navigationController?.navigationBar.isHidden = false
         NotificationCenter.default.removeObserver(self, name:UIApplication.willResignActiveNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name:UIApplication.willEnterForegroundNotification, object: nil)
+        shareDelegate = nil
     }
     
     func setupUI() {
@@ -191,7 +195,7 @@ class ShareKitPreviewController : ShareKitBaseViewController {
     }
     
     private func showHideDeleteView() {
-        deleteViw.isHidden = (selectedAssets.count + selectedURL.count) == 1 ? true : false
+        deleteViw.isHidden = (selectedAssets.count + selectedURL.count + selectedScreenShot.count) == 1 ? true : false
     }
     
     private func showHideAddMoreOption() {
@@ -234,39 +238,58 @@ class ShareKitPreviewController : ShareKitBaseViewController {
                     if let processedVideoURL = item.processedVideoURL, !item.inProgress{
                         print("#media size before \(item.fileSize)")
                         self?.imageAray[index].inProgress = true
-                        MediaUtils.compressVideo(videoURL:processedVideoURL) { [weak self] isSuccess, url, fileName, fileKey, fileSize , duration in
-                            if let compressedURL = url{
-                                print("#media size before \(item.fileSize)")
-                                self?.imageAray[index].isCompressed = true
-                                _ = self?.mediaProcessed.popLast()
-                                var media = MediaData()
-                                media.mediaType = .video
-                                media.fileURL = compressedURL
-                                media.fileName = fileName
-                                media.fileSize = fileSize
-                                media.fileKey = fileKey
-                                media.duration = duration
-                                media.base64Thumbnail = self?.imageAray[index].base64Image ?? emptyString()
-                                media.caption = self?.imageAray[index].caption ?? emptyString()
-                                self?.mediaData.append(media)
-                                self?.backToConversationScreen()
+                        MediaUtils.compressVideoFile(videoURL: processedVideoURL, mediaQuality: .medium) { [weak self] isSuccess, url, fileName, fileKey, fileSize , duration, error  in
+                            if isSuccess {
+                                if let compressedURL = url{
+                                    print("#media size before \(item.fileSize)")
+                                    self?.imageAray[index].isCompressed = true
+                                    _ = self?.mediaProcessed.popLast()
+                                    var media = MediaData()
+                                    media.mediaType = .video
+                                    media.fileURL = compressedURL
+                                    media.fileName = fileName
+                                    media.fileSize = fileSize
+                                    media.fileKey = fileKey
+                                    media.duration = duration
+                                    media.base64Thumbnail = self?.imageAray[index].base64Image ?? emptyString()
+                                    media.caption = self?.imageAray[index].caption ?? emptyString()
+                                    self?.mediaData.append(media)
+                                    self?.backToConversationScreen()
+                                }
+                            } else {
+                                DispatchQueue.main.async { [weak self] in
+                                    self?.popView()
+                                    self?.shareDelegate?.onError(description: error ?? "")
+                                }
+//                                DispatchQueue.main.async { [weak self] in
+//                                    guard let strongSelf = self else { return }
+//                                    strongSelf.stopLoadingIndicator(view: strongSelf.view ?? UIView(), blurView: strongSelf.loader?.0 ?? UIView(), activityIndicatorView: strongSelf.loader?.1 ?? UIActivityIndicatorView(), label: strongSelf.loader?.2 ?? UILabel())
+//                                    self?.shareDelegate?.onError(description: error ?? "")
+//                                }
                             }
                         }
                     }
                 }else{
                     print("#media size before \(item.fileSize)")
-                    if let (data, fileName ,localFilePath,fileKey,fileSize) = MediaUtils.compressImage(imageData : item.mediaData!){
+                    MediaUtils.compressImageFile(imageData: item.mediaData!, mediaQuality: .medium) { [weak self] isSucess, data, fileName, localFilePath, fileKey, fileSize, errorMessage  in
                         print("#media size after \(fileSize)")
-                        self?.imageAray[index].isCompressed = true
-                        var media = MediaData()
-                        media.mediaType = .image
-                        media.fileURL = localFilePath
-                        media.fileName = fileName
-                        media.fileSize = fileSize
-                        media.fileKey = fileKey
-                        media.base64Thumbnail = self?.imageAray[index].base64Image ?? emptyString()
-                        media.caption = self?.imageAray[index].caption ?? emptyString()
-                        self?.mediaData.append(media)
+                        if isSucess {
+                            self?.imageAray[index].isCompressed = true
+                            var media = MediaData()
+                            media.mediaType = .image
+                            media.fileURL = localFilePath
+                            media.fileName = fileName
+                            media.fileSize = fileSize
+                            media.fileKey = fileKey
+                            media.base64Thumbnail = self?.imageAray[index].base64Image ?? emptyString()
+                            media.caption = self?.imageAray[index].caption ?? emptyString()
+                            self?.mediaData.append(media)
+                        } else {
+                            DispatchQueue.main.async { [weak self] in
+                                self?.popView()
+                                self?.shareDelegate?.onError(description: errorMessage ?? "")
+                            }
+                        }
                     }
                     
                     _ =  self?.mediaProcessed.popLast()
@@ -302,6 +325,9 @@ class ShareKitPreviewController : ShareKitBaseViewController {
                 }
                 self.selectedAssets.removeAll { asset in
                     (PHAssetResource.assetResources(for: asset).first?.originalFilename ?? "") == value.fileName
+                }
+                self.selectedScreenShot.removeAll { asset in
+                    asset.description == value.fileName
                 }
                 imageAray.remove(at: imageEditIndex)
             } else {
@@ -391,6 +417,7 @@ class ShareKitPreviewController : ShareKitBaseViewController {
         navigationController?.popViewController(animated: true)
         selectedAssets = []
         selectedURL = []
+        selectedScreenShot = []
     }
     
     func closeKeyboard() {
@@ -437,16 +464,25 @@ extension ShareKitPreviewController: UICollectionViewDelegate, UICollectionViewD
             let imgeDetail = imageAray[indexPath.row]
             cell.cellImage?.contentMode = .scaleAspectFit
             autoreleasepool {
-                if let asset = imageAray[indexPath.row].phAsset {
-                    let manager = PHImageManager.default()
-                    let option = PHImageRequestOptions()
-                    option.isSynchronous = true
-                    option.version = .current
-                    manager.requestImage(for: asset, targetSize: CGSize(width: cell.cellImage?.bounds.width ?? 100, height: cell.cellImage?.bounds.height ?? 100), contentMode: .aspectFit, options: option, resultHandler: {(result, info)->Void in
-                        cell.cellImage?.image = result
-                    })
+//                if let asset = imageAray[indexPath.row].phAsset {
+//                    let manager = PHImageManager.default()
+//                    let option = PHImageRequestOptions()
+//                    option.isSynchronous = true
+//                    option.version = .current
+//                    manager.requestImage(for: asset, targetSize: CGSize(width: cell.cellImage?.bounds.width ?? 100, height: cell.cellImage?.bounds.height ?? 100), contentMode: .aspectFit, options: option, resultHandler: {(result, info)->Void in
+//                        cell.cellImage?.image = result
+//                    })
+//                } else {
+//                    cell.cellImage?.image = ShareMediaUtils.resizeImage(image: imgeDetail.image ?? UIImage(), targetSize: CGSize(width: cell.cellImage?.bounds.width ?? 300, height: cell.cellImage?.bounds.height ?? 300))
+//                }
+                if imgeDetail.isVideo {
+                    cell.cellImage?.image = imgeDetail.image
                 } else {
-                    cell.cellImage?.image = ShareMediaUtils.resizeImage(image: imgeDetail.image ?? UIImage(), targetSize: CGSize(width: cell.cellImage?.bounds.width ?? 300, height: cell.cellImage?.bounds.height ?? 300))
+                    if let url = imgeDetail.fileURL {
+                        cell.cellImage?.image = ShareMediaUtils.downsample(imageAt: url, to: cell.cellImage?.bounds.size ?? CGSize(width: 400, height: 400))
+                    } else {
+                        cell.cellImage?.image = imgeDetail.image
+                    }
                 }
             }
             cell.playButton?.isHidden = true
@@ -462,15 +498,24 @@ extension ShareKitPreviewController: UICollectionViewDelegate, UICollectionViewD
             let imgeDetail = imageAray[indexPath.row]
             cell.cellImage.contentMode = .scaleAspectFill
             autoreleasepool {
-                if let asset = imageAray[indexPath.row].phAsset {
-                    let manager = PHImageManager.default()
-                    let option = PHImageRequestOptions()
-                    option.isSynchronous = true
-                    manager.requestImage(for: asset, targetSize: CGSize(width: cell.cellImage?.bounds.width ?? 100, height: cell.cellImage?.bounds.height ?? 100), contentMode: .aspectFit, options: option, resultHandler: {(result, info)->Void in
-                        cell.cellImage?.image = result
-                    })
+//                if let asset = imageAray[indexPath.row].phAsset {
+//                    let manager = PHImageManager.default()
+//                    let option = PHImageRequestOptions()
+//                    option.isSynchronous = true
+//                    manager.requestImage(for: asset, targetSize: CGSize(width: cell.cellImage?.bounds.width ?? 100, height: cell.cellImage?.bounds.height ?? 100), contentMode: .aspectFit, options: option, resultHandler: {(result, info)->Void in
+//                        cell.cellImage?.image = result
+//                    })
+//                } else {
+//                    cell.cellImage.image = ShareMediaUtils.resizeImage(image: imgeDetail.image ?? UIImage(), targetSize: CGSize(width: 100, height: 100))
+//                }
+                if imgeDetail.isVideo {
+                    cell.cellImage?.image = imgeDetail.image
                 } else {
-                    cell.cellImage.image = ShareMediaUtils.resizeImage(image: imgeDetail.image ?? UIImage(), targetSize: CGSize(width: 100, height: 100))
+                    if let url = imgeDetail.fileURL {
+                        cell.cellImage?.image = ShareMediaUtils.downsample(imageAt: url, to: cell.cellImage?.bounds.size ?? CGSize(width: 400, height: 400))
+                    } else {
+                        cell.cellImage?.image = imgeDetail.image
+                    }
                 }
             }
             if botmImageIndex == indexPath.row {
@@ -638,9 +683,25 @@ extension ShareKitPreviewController {
         let index = sender.tag
         print("indexPath.row: \(index)")
         let imageDetail = imageAray[index]
-        playVideo(view: self, phAsset: imageDetail.phAsset)
+        if let detail = imageDetail.processedVideoURL {
+            playVideo(view: self, url: detail)
+        } else {
+            playVideo(view: self, phAsset: imageDetail.phAsset)
+        }
     }
-    
+
+    func playVideo (view:UIViewController, url: URL?) {
+        guard let videoURL = url else {
+            return
+        }
+        let player = AVPlayer(url: videoURL)
+        let playerViewController = AVPlayerViewController()
+        playerViewController.player = player
+        view.present(playerViewController, animated: true) {
+            playerViewController.player!.play()
+        }
+    }
+
     func playVideo (view:UIViewController, phAsset: PHAsset?) {
         guard (phAsset!.mediaType == PHAssetMediaType.video) else {
             print("Not a valid video media type")
@@ -675,9 +736,9 @@ extension ShareKitPreviewController {
         }
     }
     
-    func getAssetsImageInfo(assets: [PHAsset], urls: [URL]){
+    func getAssetsImageInfo(assets: [PHAsset], urls: [URL], images: [UIImage]) {
         var isSuccess = true
-        if assets.count > 0 || urls.count > 0 {
+        if assets.count > 0 || urls.count > 0 || images.count > 0 {
             for asset in assets {
                 if isSuccess {
                     if let (fileName, data, size, image, thumbImage,isVideo) = MediaUtils.getAssetsImageInfo(asset: asset), let fileExtension =  URL(string: fileName)?.pathExtension{
@@ -688,7 +749,8 @@ extension ShareKitPreviewController {
                             if videoAsset.count > 0 {
                                 imageAray.append(videoAsset[0])
                             } else {
-                                imageAray.append(ImageData(image: image, caption: nil, isVideo: true, phAsset: asset, isSlowMotion: false, mediaData : data,fileName : fileName, base64Image : MediaUtils.convertImageToBase64(img: thumbImage) ,fileExtension : fileExtension,fileSize: size))
+                                let thumbnail = ShareMediaUtils.resizeImage(image: image, imageUrl: nil, targetSize: CGSize(width: image.size.width/2, height: image.size.height/2))
+                                imageAray.append(ImageData(image: image,thumbImage: thumbnail, caption: nil, isVideo: true, phAsset: asset, isSlowMotion: false, mediaData : data,fileName : fileName, base64Image : MediaUtils.convertImageToBase64(img: thumbImage) ,fileExtension : fileExtension,fileSize: size))
                             }
                         }else{
                             if MediaUtils.checkMediaFileFormat(format:fileExtension){
@@ -698,7 +760,8 @@ extension ShareKitPreviewController {
                                 if imageAsset.count > 0 {
                                     imageAray.append(imageAsset[0])
                                 } else {
-                                    imageAray.append(ImageData(image: image, caption: nil, isVideo: false, phAsset: asset, isSlowMotion: false,mediaData : data, fileName : fileName, base64Image : MediaUtils.convertImageToBase64(img: thumbImage), fileExtension : fileExtension, fileSize: size))
+                                    let thumbnail = ShareMediaUtils.resizeImage(image: image, imageUrl: nil, targetSize: CGSize(width: image.size.width/2, height: image.size.height/2))
+                                    imageAray.append(ImageData(image: image,thumbImage: thumbnail, caption: nil, isVideo: false, phAsset: asset, isSlowMotion: false,mediaData : data, fileName : fileName, base64Image : MediaUtils.convertImageToBase64(img: thumbImage), fileExtension : fileExtension, fileSize: size))
                                 }
                             }
                         }
@@ -723,9 +786,22 @@ extension ShareKitPreviewController {
                         if imageAsset.count > 0 {
                             imageAray.append(imageAsset[0])
                         } else {
-                            imageAray.append(ImageData(image: image,thumbImage: thumbImage, caption: nil, isVideo: false, isSlowMotion: false,mediaData : data, fileName : fileName, base64Image : MediaUtils.convertImageToBase64(img: thumbImage), fileExtension : url.pathExtension, fileSize: size))
+                            autoreleasepool {
+                                imageAray.append(ImageData(image: image,thumbImage: thumbImage, caption: nil, isVideo: false, isSlowMotion: false,mediaData : data, fileName : fileName, base64Image : MediaUtils.convertImageToBase64(img: thumbImage), fileExtension : url.pathExtension, fileSize: size, fileURL: url))
+                            }
                         }
                     }
+                }
+            }
+            for image in images {
+                if isSuccess {
+                    if let (fileName, data, size, image, thumbImage,isVideo) = self.getAssetsFromScreenshotImageInfo(asset: image) {
+                        let thumbnail = ShareMediaUtils.resizeImage(image: image, imageUrl: nil, targetSize: CGSize(width: image.size.width/2, height: image.size.height/2))
+                            imageAray.append(ImageData(image: image,thumbImage: thumbnail, caption: nil, isVideo: false, isSlowMotion: false,mediaData : data, fileName : fileName, base64Image : MediaUtils.convertImageToBase64(img: thumbImage), fileExtension : "png", fileSize: size))
+                    }
+                }else {
+                    imageAray.removeAll()
+                    break
                 }
             }
             checkForSlowMotionVideo()
@@ -737,6 +813,23 @@ extension ShareKitPreviewController {
             }
         }
         
+    }
+
+    public  func getAssetsFromScreenshotImageInfo(asset : UIImage) -> (String,Data,Double,UIImage, UIImage,Bool)? {
+        var imageData : Data? =  nil
+        let fileName : String =  asset.description
+        let thumbnail = ShareMediaUtils.resizeImage(image: asset, imageUrl: nil, targetSize: CGSize(width: asset.size.width, height: asset.size.height)) ?? UIImage()
+
+         var imageSize = 0.0
+        if let data:Data = asset.pngData(){
+            imageData = data
+            imageSize = Double(data.count)
+        }
+        if imageData == nil{
+            return nil
+        }else{
+            return (fileName, imageData!, imageSize, asset , thumbnail ,false)
+        }
     }
 }
 

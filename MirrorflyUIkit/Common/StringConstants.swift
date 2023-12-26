@@ -398,8 +398,8 @@ public struct ErrorMessage {
     public static let restrictedforwardUsers = NSLocalizedString("You can only forward with up to 5 users or groups", comment: "")
     public static let checkYourInternet = NSLocalizedString("Please check your internet connection", comment: "")
     public static let fileSizeLarge = NSLocalizedString("File size is too large", comment: "")
-    public static let largeImageFile = NSLocalizedString("File size is too large. Try uploading file size below 10MB", comment: "")
-    public static let largeVideoFile = NSLocalizedString("File size is too large. Try uploading file size below 30MB", comment: "")
+    public static let largeImageFile = NSLocalizedString("File size is too large. Try uploading file size below 40MB", comment: "")
+    public static let largeVideoFile = NSLocalizedString("File size is too large. Try uploading file size below 2GB", comment: "")
     public static let numberDoesntMatch =  NSLocalizedString("mobileNumberDoesntMatch", comment: "")
     public static let invalidPIN = NSLocalizedString("Invalid PIN! Try again", comment: "")
     public static let invalidOLDPIN = NSLocalizedString("Invalid old PIN", comment: "")
@@ -460,6 +460,7 @@ enum MessageActions : String, CaseIterable {
     case reply = "Reply"
     case share = "Share"
     case copy = "Copy"
+    case edit = "Edit Message"
     case forward = "Forward"
     case info = "Info"
     case report = "Report"

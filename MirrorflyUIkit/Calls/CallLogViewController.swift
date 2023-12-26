@@ -159,7 +159,7 @@ class CallLogViewController: UIViewController {
         ChatManager.shared.adminBlockDelegate = self
         ChatManager.shared.availableFeaturesDelegate = self
         CallManager.callLogDelegate = self
-        CallViewController.refreshDelegate = self
+        CallUIViewController.refreshDelegate = self
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
             self?.callLogsBadgeCountUpdation()
@@ -205,7 +205,7 @@ class CallLogViewController: UIViewController {
         callLogsBadgeCountUpdation()
         
         CallManager.callLogDelegate = nil
-        CallViewController.refreshDelegate = nil
+        CallUIViewController.refreshDelegate = nil
     }
     
     override func viewDidDisappear(_ animated: Bool) {

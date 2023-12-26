@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="22154" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21679"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22130"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -123,6 +123,7 @@
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="aWc-F0-nYD" firstAttribute="top" secondItem="i0X-Jj-6MT" secondAttribute="top" id="0C0-Jq-bYl"/>
+                            <constraint firstAttribute="width" secondItem="i0X-Jj-6MT" secondAttribute="height" multiplier="1:1" id="87D-qN-OE3"/>
                             <constraint firstAttribute="bottom" secondItem="aWc-F0-nYD" secondAttribute="bottom" id="DC6-3e-1Fx"/>
                             <constraint firstAttribute="height" constant="20" id="GlB-fz-baj"/>
                             <constraint firstItem="aWc-F0-nYD" firstAttribute="centerY" secondItem="i0X-Jj-6MT" secondAttribute="centerY" id="RTF-1U-bzI"/>
@@ -224,7 +225,7 @@
                                                     <constraint firstAttribute="width" constant="50" id="Mft-XZ-6uG"/>
                                                 </constraints>
                                             </imageView>
-                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="c4i-pG-PTa" customClass="GMSMapView">
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="c4i-pG-PTa">
                                                 <rect key="frame" x="168" y="0.0" width="50" height="50"/>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             </view>
@@ -267,7 +268,7 @@
                                     <view clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="yVj-vk-b3J">
                                         <rect key="frame" x="0.0" y="86" width="218" height="216"/>
                                         <subviews>
-                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="jK9-14-01U" customClass="GMSMapView">
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="jK9-14-01U">
                                                 <rect key="frame" x="0.0" y="0.0" width="218" height="216"/>
                                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                                 <constraints>
@@ -352,8 +353,8 @@
                                         </userDefinedRuntimeAttributes>
                                         <variation key="default">
                                             <mask key="constraints">
-                                                <exclude reference="5g9-LO-Tw4"/>
                                                 <exclude reference="cSM-bU-VMm"/>
+                                                <exclude reference="5g9-LO-Tw4"/>
                                             </mask>
                                         </variation>
                                     </view>
@@ -410,7 +411,6 @@
                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                 <constraints>
                     <constraint firstItem="mTN-CP-a8f" firstAttribute="top" secondItem="Z2u-cl-Fiy" secondAttribute="bottom" id="2LI-JB-F16"/>
-                    <constraint firstItem="i0X-Jj-6MT" firstAttribute="width" secondItem="i0X-Jj-6MT" secondAttribute="height" multiplier="1:1" id="87D-qN-OE3"/>
                     <constraint firstItem="i0X-Jj-6MT" firstAttribute="leading" secondItem="2Mt-Tl-YgI" secondAttribute="leading" id="C6T-ip-vdG"/>
                     <constraint firstAttribute="bottom" secondItem="mTN-CP-a8f" secondAttribute="bottom" id="Elm-pi-byk"/>
                     <constraint firstItem="DTW-ZN-jUM" firstAttribute="trailing" secondItem="mTN-CP-a8f" secondAttribute="trailing" constant="46" id="Ftt-9e-fan"/>

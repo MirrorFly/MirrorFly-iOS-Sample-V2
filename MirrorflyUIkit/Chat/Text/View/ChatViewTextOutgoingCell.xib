@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="22154" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21679"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22130"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -124,6 +124,7 @@
                             <constraint firstItem="Mi8-ol-TiZ" firstAttribute="leading" secondItem="Diz-ZB-Sb4" secondAttribute="leading" id="J0t-Ts-827"/>
                             <constraint firstAttribute="bottom" secondItem="Mi8-ol-TiZ" secondAttribute="bottom" id="buz-ht-dht"/>
                             <constraint firstItem="Mi8-ol-TiZ" firstAttribute="centerX" secondItem="Diz-ZB-Sb4" secondAttribute="centerX" id="fbL-sA-DgM"/>
+                            <constraint firstAttribute="width" secondItem="Diz-ZB-Sb4" secondAttribute="height" multiplier="1:1" id="nO9-wz-QQF"/>
                             <constraint firstItem="Mi8-ol-TiZ" firstAttribute="top" secondItem="Diz-ZB-Sb4" secondAttribute="top" id="yLs-bo-ci0"/>
                         </constraints>
                     </view>
@@ -204,7 +205,7 @@
                                                     <constraint firstAttribute="width" constant="50" id="WnS-n8-Umj"/>
                                                 </constraints>
                                             </imageView>
-                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tUK-mz-uJI" customClass="GMSMapView">
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tUK-mz-uJI">
                                                 <rect key="frame" x="168" y="0.0" width="50" height="52"/>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             </view>
@@ -243,8 +244,8 @@
                                         </userDefinedRuntimeAttributes>
                                         <variation key="default">
                                             <mask key="constraints">
-                                                <exclude reference="c0N-ix-qDX"/>
                                                 <exclude reference="rUZ-w2-Ssx"/>
+                                                <exclude reference="c0N-ix-qDX"/>
                                             </mask>
                                         </variation>
                                     </view>
@@ -433,7 +434,6 @@
                     <constraint firstItem="Nad-CC-gR6" firstAttribute="leading" secondItem="ael-Zp-zfN" secondAttribute="leading" constant="10" id="hRd-Ry-HWM"/>
                     <constraint firstItem="Nad-CC-gR6" firstAttribute="top" secondItem="ael-Zp-zfN" secondAttribute="top" id="ktx-Nm-4In"/>
                     <constraint firstItem="ObL-Ct-3Za" firstAttribute="top" secondItem="Nad-CC-gR6" secondAttribute="bottom" id="mck-cb-coO"/>
-                    <constraint firstItem="Diz-ZB-Sb4" firstAttribute="width" secondItem="Diz-ZB-Sb4" secondAttribute="height" multiplier="1:1" id="nO9-wz-QQF"/>
                 </constraints>
             </tableViewCellContentView>
             <viewLayoutGuide key="safeArea" id="nnR-za-wMZ"/>
@@ -474,7 +474,7 @@
                 <outlet property="starredMessageView" destination="Nad-CC-gR6" id="ob5-77-304"/>
                 <outlet property="textMessageTimeLabel" destination="5OR-B6-njD" id="HT3-Iv-Hkm"/>
             </connections>
-            <point key="canvasLocation" x="60.869565217391312" y="79.6875"/>
+            <point key="canvasLocation" x="113" y="-16"/>
         </tableViewCell>
     </objects>
     <resources>

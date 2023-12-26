@@ -23,7 +23,7 @@ class ChatTextView: UIView, UITextViewDelegate {
     @IBOutlet weak var closeImage: UIImageView?
     @IBOutlet weak var messageTypeWidthCons: NSLayoutConstraint?
     @IBOutlet weak var spacierView: UIView?
-    @IBOutlet weak var mapView: GMSMapView?
+    @IBOutlet weak var mapView: UIView?
     @IBOutlet weak var contactNameLabel: UILabel?
     @IBOutlet weak var cannotSendMessageView: UIView?
     @IBOutlet weak var blockedMessageLabel: UILabel!
@@ -63,7 +63,7 @@ class ChatTextView: UIView, UITextViewDelegate {
         mapView?.isHidden = true
         contactNameLabel?.isHidden = true
         titleLabel?.text = message.isMessageSentByMe ? "You" : getUserName(jid: message.senderUserJid, name: message.senderUserName, nickName: message.senderNickName, contactType: contactType)
-        messageTypeImage?.isHidden = message.messageType == .text || message.isMessageRecalled == true ? true : false
+        messageTypeImage?.isHidden = (message.messageType == .text || message.messageType == .autoText) || message.isMessageRecalled == true ? true : false
         if message.messageType == .image || message.messageType == .video || message.messageType == .location {
             let thumbImage = message.mediaChatMessage?.mediaThumbImage ?? ""
             if let mediaMessage = ChatManager.getMessageOfId(messageId: message.messageId) {
@@ -141,12 +141,12 @@ class ChatTextView: UIView, UITextViewDelegate {
             spacierView?.isHidden = true
         } else {
             switch message.messageType {
-            case .text:
+            case .text, .autoText:
                 if !mentionedUsers.isEmpty {
-                    let replyMessage = message.messageTextContent
+                    let replyMessage = message.editedTextContent.isEmpty ? message.messageTextContent : message.editedTextContent
                     messageTypeLabel?.text = ChatUtils.getMentionTextContent(message: replyMessage, uiLabel: messageTypeLabel, isMessageSentByMe: isMessageSentByMe, mentionedUsers: mentionedUsers).string
                 } else {
-                    messageTypeLabel?.text = message.messageTextContent
+                    messageTypeLabel?.text = message.editedTextContent.isEmpty ? message.messageTextContent : message.editedTextContent
                 }
                 messageTypeWidthCons?.constant = 0
                 spacierView?.isHidden = true
@@ -229,14 +229,20 @@ class ChatTextView: UIView, UITextViewDelegate {
                     return
                 }
                 
-                mapView?.camera = GMSCameraPosition.camera(withLatitude: latitude, longitude: longitude, zoom: 16.0, bearing: 360.0, viewingAngle: 15.0)
-                
-                DispatchQueue.main.async { [self] in
-                    // 2. Perform UI Operations.
-                    let position = CLLocationCoordinate2DMake(latitude,longitude)
-                    let marker = GMSMarker(position: position)
-                    marker.map = mapView
+                AppUtils.shared.fetchStaticMapImage(latitude: latitude, longitude: longitude, zoomLevel: "16", size: CGSize(width: mapView?.bounds.width ?? 250, height: mapView?.bounds.height ?? 250)) { [self] mapImage in
+                    let mapImageView = UIImageView(frame: CGRect(x: 0, y: 0, width: mapView?.bounds.width ?? 250, height: mapView?.bounds.height ?? 250))
+                    mapImageView.image = mapImage
+                    mapView?.addSubview(mapImageView)
                 }
+                
+//                mapView?.camera = GMSCameraPosition.camera(withLatitude: latitude, longitude: longitude, zoom: 16.0, bearing: 360.0, viewingAngle: 15.0)
+//                
+//                DispatchQueue.main.async { [self] in
+//                    // 2. Perform UI Operations.
+//                    let position = CLLocationCoordinate2DMake(latitude,longitude)
+//                    let marker = GMSMarker(position: position)
+//                    marker.map = mapView
+//                }
             }
     }
 }

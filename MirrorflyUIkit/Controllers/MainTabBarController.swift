@@ -129,6 +129,11 @@ class MainTabBarController: UITabBarController{
             }
            return
         }
+        if current is ChatViewParentController {
+            if (((current as? ChatViewParentController)?.editMessageId.isNotEmpty ?? false)) {
+                (current as? ChatViewParentController)?.closeContextMenu()
+            }
+        }
         if CommonDefaults.appFingerprintenable {
             let vc = PrivateChatFingerPrintPINViewController(nibName: "PrivateChatFingerPrintPINViewController", bundle: nil)
             self.navigationController?.pushViewController(vc, animated: false)

@@ -36,11 +36,11 @@ class FingerPrintPINViewController: UIViewController {
         super.viewDidLoad()
         handleBackgroundAndForground()
         authenticationWithTouchID()
-        CallViewController.dismissDelegate = self
+        CallUIViewController.dismissDelegate = self
     }
 
     override func viewDidDisappear(_ animated: Bool) {
-        CallViewController.dismissDelegate = nil
+        CallUIViewController.dismissDelegate = nil
     }
 
     func showAlert() {

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="22154" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21679"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22130"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -129,6 +129,7 @@
                             <constraint firstAttribute="trailing" secondItem="EXW-Xv-ZfN" secondAttribute="trailing" id="5CD-8D-xsV"/>
                             <constraint firstItem="EXW-Xv-ZfN" firstAttribute="centerY" secondItem="bap-tR-LPd" secondAttribute="centerY" id="Fuf-Ix-l7Y"/>
                             <constraint firstItem="EXW-Xv-ZfN" firstAttribute="centerX" secondItem="bap-tR-LPd" secondAttribute="centerX" id="Tcx-dc-ugU"/>
+                            <constraint firstAttribute="width" secondItem="bap-tR-LPd" secondAttribute="height" multiplier="1:1" id="dPW-Zh-CXn"/>
                             <constraint firstItem="EXW-Xv-ZfN" firstAttribute="leading" secondItem="bap-tR-LPd" secondAttribute="leading" id="fbl-un-sUe"/>
                             <constraint firstAttribute="bottom" secondItem="EXW-Xv-ZfN" secondAttribute="bottom" id="i4k-xZ-ja1"/>
                             <constraint firstAttribute="height" constant="20" id="y6s-GG-aq5"/>
@@ -227,7 +228,7 @@
                                                     <constraint firstAttribute="width" constant="50" id="qng-a7-0DU"/>
                                                 </constraints>
                                             </imageView>
-                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="6rL-08-7Dd" customClass="GMSMapView">
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="6rL-08-7Dd">
                                                 <rect key="frame" x="108" y="0.0" width="50" height="50"/>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             </view>
@@ -430,7 +431,6 @@
                     <constraint firstItem="bap-tR-LPd" firstAttribute="leading" secondItem="o8l-po-0Om" secondAttribute="leading" id="PV4-e9-BZ9"/>
                     <constraint firstItem="OSJ-rp-psc" firstAttribute="top" secondItem="CtU-Bq-hXg" secondAttribute="bottom" id="QjD-RC-vRC"/>
                     <constraint firstItem="OSJ-rp-psc" firstAttribute="leading" secondItem="bap-tR-LPd" secondAttribute="trailing" id="bmD-9q-48f"/>
-                    <constraint firstItem="bap-tR-LPd" firstAttribute="width" secondItem="bap-tR-LPd" secondAttribute="height" multiplier="1:1" id="dPW-Zh-CXn"/>
                     <constraint firstItem="vLd-1a-ZMr" firstAttribute="top" secondItem="o8l-po-0Om" secondAttribute="top" id="j20-TN-ELO"/>
                     <constraint firstItem="GS4-9N-A2S" firstAttribute="trailing" secondItem="OSJ-rp-psc" secondAttribute="trailing" constant="46" id="o6b-zn-YuJ"/>
                     <constraint firstAttribute="bottom" secondItem="vLd-1a-ZMr" secondAttribute="bottom" id="q6w-JN-fsb"/>

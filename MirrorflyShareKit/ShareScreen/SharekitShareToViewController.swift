@@ -51,12 +51,12 @@ class SharekitShareToViewController: ShareKitBaseViewController {
     var mediaFiles: [MediaData] = []
     var shareKitViewModel = ShareKitViewModel.shared
 
-    let documentShareDispatchGroup = DispatchGroup()
-    let documentProfileShareDispatchGroup = DispatchGroup()
-    let contactShareDispatchGroup = DispatchGroup()
-    let dispatchGroup = DispatchGroup()
-    let sendDispatchGroup = DispatchGroup()
-    var isProcessing = true
+//    let documentShareDispatchGroup = DispatchGroup()
+//    let documentProfileShareDispatchGroup = DispatchGroup()
+//    let contactShareDispatchGroup = DispatchGroup()
+//    let dispatchGroup = DispatchGroup()
+//    let sendDispatchGroup = DispatchGroup()
+//    var isProcessing = true
 
     let child = SpinnerViewController()
 
@@ -80,9 +80,16 @@ class SharekitShareToViewController: ShareKitBaseViewController {
    }
 
     var messageIDs = [String]()
+    var uploadedMessageIDs = [String]()
     var shareMediaCount = Int()
-    var isXmppConnected = Bool()
-    
+    var isXmppConnected = false
+
+    var uploadingMessages = [String]()
+    var forwardingMessages = [String]()
+    var totalMessages = 0
+
+    var sendingMessagesCount = Int()
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setViewModelData()
@@ -190,12 +197,7 @@ class SharekitShareToViewController: ShareKitBaseViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        ContactManager.shared.profileDelegate = self
-        ChatManager.shared.adminBlockDelegate = self
-        ChatManager.shared.messageEventsDelegate = self
-        FlyMessenger.shared.messageEventsDelegate = self
-        GroupManager.shared.groupDelegate = self
-        ChatManager.shared.connectionDelegate = self
+        setDelegate()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -212,7 +214,16 @@ class SharekitShareToViewController: ShareKitBaseViewController {
         super.viewDidDisappear(animated)
         NotificationCenter.default.removeObserver(self, name: Notification.Name(NetStatus.networkNotificationObserver), object: nil)
     }
-    
+
+    func setDelegate() {
+        ContactManager.shared.profileDelegate = self
+        ChatManager.shared.adminBlockDelegate = self
+        ChatManager.shared.messageEventsDelegate = self
+        FlyMessenger.shared.messageEventsDelegate = self
+        GroupManager.shared.groupDelegate = self
+        ChatManager.shared.connectionDelegate = self
+    }
+
     func checkMemberOfGroup(index: Int,recentChat: RecentChat) -> Bool? {
         if recentChat.profileType == .groupChat && !isParticipantExist(jid: recentChat.jid).doesExist {
             return true
@@ -256,7 +267,8 @@ class SharekitShareToViewController: ShareKitBaseViewController {
     
     @IBAction func sendButtonTapped(_ sender: Any) {
         if NetworkReachability.shared.isConnected {
-            shareAttachments()
+            shareMedia()
+            //shareAttachments()
         } else {
             ShareKitAlert.shared.showToast(controller: self, message: ErrorMessage.noInternet)
         }
@@ -276,17 +288,51 @@ class SharekitShareToViewController: ShareKitBaseViewController {
     }
 
     func closeShareKit() {
+        removeLoader()
         messageIDs = []
         selectedJids = []
+        ChatManager.disconnect()
         self.extensionContext?.completeRequest(returningItems: nil, completionHandler: nil)
     }
 
-    func shareAttachments() {
-        addLoader()
+    func shareMedia() {
+
+        let mediaCount = self.shareKitViewModel.handledAssets.count + self.shareKitViewModel.handledURL.count + self.shareKitViewModel.handledScreenShot.count
+        let docFilesCount = self.shareKitViewModel.listOfMediaData?.filter({ $0.mediaType == .document || $0.mediaType == .audio }).count
+        sendingMessagesCount = mediaCount + (docFilesCount ?? 0)
 
         if let files = self.shareKitViewModel.invaildMediaFiles, files.count > 0 {
             var invalidFiles = files
-            removeLoader()
+            let initialViewController = QuickSharePopupViewController(nibName: "QuickSharePopupViewController", bundle: nil)
+            self.navigationController?.setNavigationBarHidden(true, animated: true)
+            //invalidFiles.indices.forEach{ invalidFiles[$0].thumbImage = invalidFiles[$0].image == nil ? UIImage(data: UIImage(data: try! Data(contentsOf: invalidFiles[$0].url ?? URL(fileURLWithPath: "")))?.jpegData(compressionQuality: 0.1) ?? Data()) : invalidFiles[$0].image}
+            initialViewController.mediaFiles = invalidFiles
+            initialViewController.shareDelegate = self
+            initialViewController.modalPresentationStyle = .overCurrentContext
+            self.navigationController?.present(initialViewController, animated: true)
+        }
+        else if !self.shareKitViewModel.handledAssets.isEmpty || !self.shareKitViewModel.handledURL.isEmpty || !self.shareKitViewModel.handledScreenShot.isEmpty {
+            if let initialViewController = UIStoryboard(name: "MainInterface", bundle: nil).instantiateViewController(withIdentifier: "ShareKitPreviewController") as? ShareKitPreviewController {
+                self.navigationController?.setNavigationBarHidden(true, animated: true)
+                initialViewController.mediaData = []
+                initialViewController.delegate = self
+                initialViewController.shareDelegate = self
+                initialViewController.jids = self.selectedProfiles.compactMap( { $0.jid })
+                initialViewController.selectedAssets = self.shareKitViewModel.handledAssets
+                initialViewController.selectedURL = self.shareKitViewModel.handledURL
+                initialViewController.selectedScreenShot = self.shareKitViewModel.handledScreenShot
+                initialViewController.modalPresentationStyle = .overCurrentContext
+                self.navigationController?.pushViewController(initialViewController, animated: true)
+            }
+        } else {
+            addLoader()
+            shareAttachments()
+        }
+    }
+
+    func shareAttachments() {
+        if let files = self.shareKitViewModel.invaildMediaFiles, files.count > 0 {
+            var invalidFiles = files
 
             let initialViewController = QuickSharePopupViewController(nibName: "QuickSharePopupViewController", bundle: nil)
             self.navigationController?.setNavigationBarHidden(true, animated: true)
@@ -299,80 +345,39 @@ class SharekitShareToViewController: ShareKitBaseViewController {
             let files = self.shareKitViewModel.listOfMediaData?.filter({ $0.mediaType == .document || $0.mediaType == .audio })
             if let documents = files, documents.count > 0 {
                 documents.forEach { file in
-                    self.documentShareDispatchGroup.enter()
                     switch file.mediaType {
                     case .document:
-                        self.documentProfileShareDispatchGroup.enter()
                         var profilesList = self.selectedProfiles
                         if !profilesList.isEmpty {
                             let profile = profilesList.first!
-                            let documentParams = FileMessageParams(fileUrl: file.fileURL, fileName: file.fileName)
-                            FlyMessenger.sendFileMessage(messageParams: FileMessage(toId: profile.jid, messageType: .document, fileMessage: documentParams)) { isSuccess, _, message in
+                            let documentParams = FileMessageParams(fileUrl: file.fileURL, fileName: file.fileName, fileKey: file.fileKey)
+                            FlyMessenger.sendMediaFileMessage(messageParams: FileMessage(toId: profile.jid, messageType: .document, fileMessage: documentParams)) { isSuccess, _, message in
+                                self.messageIDs.append(message?.messageId ?? "")
+                                self.uploadingMessages.append(message?.messageId ?? "")
                                 if isSuccess {
-                                    profilesList.removeFirst()
-                                    let jids = profilesList.compactMap({ $0.jid })
-                                    if !jids.isEmpty {
-                                        if let chatMessage = message {
-                                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                                ChatManager.forwardMessages(messageIdList: [chatMessage.messageId], toJidList: jids, chatType: (self.getProfileDetails?.profileChatType ?? .singleChat), completionHandler: {isSuccess,error,data in
-                                                })
-                                                self.documentProfileShareDispatchGroup.leave()
-                                            }
-                                        }
-                                    } else { self.documentProfileShareDispatchGroup.leave() }
+                                    print("#shareKitUpload document send \(self.isXmppConnected) \(message?.messageId ?? "")")
                                 }
                             }
                         }
                         break
                     case .audio:
-                        self.documentProfileShareDispatchGroup.enter()
                         var profilesList = self.selectedProfiles
                         if !profilesList.isEmpty {
                             let profile = profilesList.first!
                             let audioParams = FileMessageParams(fileUrl: file.fileURL, fileName: file.fileName,fileSize: file.fileSize, duration: file.duration, fileKey: file.fileKey)
-                            FlyMessenger.sendFileMessage(messageParams: FileMessage(toId: profile.jid, messageType: .audio, fileMessage: audioParams)) { isSuccess, _, message in
+                            FlyMessenger.sendMediaFileMessage(messageParams: FileMessage(toId: profile.jid, messageType: .audio, fileMessage: audioParams)) { isSuccess, _, message in
+                                self.messageIDs.append(message?.messageId ?? "")
+                                self.uploadingMessages.append(message?.messageId ?? "")
                                 if isSuccess {
-                                    profilesList.removeFirst()
-                                    let jids = profilesList.compactMap({ $0.jid })
-                                    if !jids.isEmpty {
-                                        if let chatMessage = message {
-                                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                                ChatManager.forwardMessages(messageIdList: [chatMessage.messageId], toJidList: jids, chatType: (self.getProfileDetails?.profileChatType ?? .singleChat), completionHandler: {isSuccess,error,data in
-                                                })
-                                                self.documentProfileShareDispatchGroup.leave()
-                                            }
-                                        }
-                                    } else { self.documentProfileShareDispatchGroup.leave() }
+                                    print("#shareKitUpload audio send \(self.isXmppConnected) \(message?.messageId ?? "")")
                                 }
                             }
                         }
                     default:
-                        self.documentShareDispatchGroup.leave()
                         break
-                    }
-                    self.documentProfileShareDispatchGroup.notify(queue: .main) {
-                        self.documentShareDispatchGroup.leave()
-                    }
-                }
-                self.documentShareDispatchGroup.notify(queue: .main) {
-                    self.removeLoader()
-                    if !self.shareKitViewModel.handledAssets.isEmpty || !self.shareKitViewModel.handledURL.isEmpty {
-                        if let initialViewController = UIStoryboard(name: "MainInterface", bundle: nil).instantiateViewController(withIdentifier: "ShareKitPreviewController") as? ShareKitPreviewController {
-                            self.navigationController?.setNavigationBarHidden(true, animated: true)
-                            initialViewController.mediaData = []
-                            initialViewController.delegate = self
-                            initialViewController.jids = self.selectedProfiles.compactMap( { $0.jid })
-                            initialViewController.selectedAssets = self.shareKitViewModel.handledAssets
-                            initialViewController.selectedURL = self.shareKitViewModel.handledURL
-                            initialViewController.modalPresentationStyle = .overCurrentContext
-                            self.navigationController?.pushViewController(initialViewController, animated: true)
-                        }
-                    } else {
-                        self.closeShareKit()
                     }
                 }
             } else if let contacts = self.shareKitViewModel.contactsList, contacts.count > 0 {
-                self.removeLoader()
                 if let contact = contacts.first {
                     let detail = self.parseContact(contact: contact)
                     if let initialViewController = UIStoryboard(name: "MainInterface", bundle: nil).instantiateViewController(withIdentifier: "ShareContactViewController") as? ShareContactViewController {
@@ -384,7 +389,6 @@ class SharekitShareToViewController: ShareKitBaseViewController {
                     }
                 }
             } else if self.shareKitViewModel.locationList.count > 0 {
-                self.removeLoader()
                 self.shareKitViewModel.locationList.forEach { location in
                     self.selectedProfiles.forEach { profile in
                         let messageParams = TextMessage(toId: profile.jid, messageText : location)
@@ -394,7 +398,6 @@ class SharekitShareToViewController: ShareKitBaseViewController {
                 }
                 self.closeShareKit()
             } else if self.shareKitViewModel.textList.count > 0 {
-                self.removeLoader()
                 self.shareKitViewModel.textList.forEach { text in
                     self.selectedProfiles.forEach { profile in
                         let messageParams = TextMessage(toId: profile.jid, messageText : text)
@@ -403,34 +406,6 @@ class SharekitShareToViewController: ShareKitBaseViewController {
                     }
                 }
                 self.closeShareKit()
-            } else if !self.shareKitViewModel.handledAssets.isEmpty || !self.shareKitViewModel.handledURL.isEmpty {
-                self.removeLoader()
-                if let initialViewController = UIStoryboard(name: "MainInterface", bundle: nil).instantiateViewController(withIdentifier: "ShareKitPreviewController") as? ShareKitPreviewController {
-                    self.navigationController?.setNavigationBarHidden(true, animated: true)
-                    initialViewController.mediaData = []
-                    initialViewController.delegate = self
-                    initialViewController.jids = self.selectedProfiles.compactMap( { $0.jid })
-                    initialViewController.selectedAssets = self.shareKitViewModel.handledAssets
-                    initialViewController.selectedURL = self.shareKitViewModel.handledURL
-                    initialViewController.modalPresentationStyle = .overCurrentContext
-                    self.navigationController?.pushViewController(initialViewController, animated: true)
-                }
-            } else {
-                self.removeLoader()
-                if shareModel.locationList.isEmpty {
-                    ShareKitAlert.shared.showToast(controller: self, message: "No files to share")
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                        self.closeShareKit()
-                    }
-                } else {
-                    var profilesList = self.selectedProfiles
-                    if !profilesList.isEmpty {
-                        let profile = profilesList.first!
-                        let messageParams = TextMessage(toId: profile.jid, messageText : shareModel.locationList.joined(separator: " "))
-                        FlyMessenger.sendTextMessage(messageParams: messageParams) { _, _, _ in
-                        }
-                    }
-                }
             }
         }
     }
@@ -452,6 +427,7 @@ class SharekitShareToViewController: ShareKitBaseViewController {
                 self.addLoader()
             }
             self.shareKitViewModel.clearModel()
+            shareKitViewModel.delegate = self
             shareKitViewModel.loadData(attachments: attachments) { [weak self] in
                 guard let self else { return }
                 self.shareKitViewModel.getAsset {
@@ -613,6 +589,18 @@ class SharekitShareToViewController: ShareKitBaseViewController {
 }
 
 extension SharekitShareToViewController : ShareKitDelegate {
+
+    func onError(description: String) {
+        self.removeLoader()
+        DispatchQueue.main.async { [weak self] in
+            guard let strongSelf = self else { return }
+            ShareKitAlert.shared.showToast(controller: strongSelf, message: description)
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            self.closeShareKit()
+        }
+    }
+    
     func removeData() {
         shareKitViewModel.invaildMediaFiles?.forEach { file in
             shareKitViewModel.handledAssets.forEach { asset in
@@ -698,14 +686,14 @@ extension SharekitShareToViewController : UITableViewDelegate, UITableViewDataSo
                 let chatMessage = recentChatDetails.lastMessageContent.trim()
                 if recentChatDetails.isMentionedUser, chatMessage.isNotEmpty {
                     let message = ShareKitUtility.shared.getMentionTextContent(message: recentChatDetails.lastMessageContent, isMessageSentByMe: recentChatDetails.isLastMessageSentByMe, mentionedUsers: recentChatDetails.mentionedUsersIds)
-                    if recentChatDetails.lastMessageType == .text || recentChatDetails.lastMessageType == .notification {
+                    if recentChatDetails.lastMessageType == .text || recentChatDetails.lastMessageType == .notification || recentChatDetails.lastMessageType == .autoText {
                         cell.statusUILabel?.text = message.string
                     } else {
                         cell.receiverMessageTypeView?.isHidden = false
                         cell.statusUILabel?.text = message.string + (recentChatDetails.lastMessageType?.rawValue ?? "")
                     }
                 } else {
-                    if recentChatDetails.lastMessageType == .text || recentChatDetails.lastMessageType == .notification {
+                    if recentChatDetails.lastMessageType == .text || recentChatDetails.lastMessageType == .notification || recentChatDetails.lastMessageType == .autoText {
                         cell.statusUILabel?.text = recentChatDetails.lastMessageContent
                     } else  {
                         cell.receiverMessageTypeView?.isHidden = false
@@ -733,14 +721,14 @@ extension SharekitShareToViewController : UITableViewDelegate, UITableViewDataSo
                 let chatMessage = recentChatDetails.lastMessageContent.trim()
                 if recentChatDetails.isMentionedUser, chatMessage.isNotEmpty {
                     let message = ShareKitUtility.shared.getMentionTextContent(message: recentChatDetails.lastMessageContent, isMessageSentByMe: recentChatDetails.isLastMessageSentByMe, mentionedUsers: recentChatDetails.mentionedUsersIds)
-                    if recentChatDetails.lastMessageType == .text || recentChatDetails.lastMessageType == .notification {
+                    if recentChatDetails.lastMessageType == .text || recentChatDetails.lastMessageType == .notification || recentChatDetails.lastMessageType == .autoText {
                         cell.statusUILabel?.text = message.string
                     } else {
                         cell.receiverMessageTypeView?.isHidden = false
                         cell.statusUILabel?.text = message.string + (recentChatDetails.lastMessageType?.rawValue ?? "")
                     }
                 } else {
-                    if recentChatDetails.lastMessageType == .text || recentChatDetails.lastMessageType == .notification {
+                    if recentChatDetails.lastMessageType == .text || recentChatDetails.lastMessageType == .notification || recentChatDetails.lastMessageType == .autoText {
                         cell.statusUILabel?.text = recentChatDetails.lastMessageContent
                     } else  {
                         cell.receiverMessageTypeView?.isHidden = false
@@ -783,13 +771,17 @@ extension SharekitShareToViewController : UITableViewDelegate, UITableViewDataSo
                     saveUserToDatabase(jid: profile.jid)
                     if selectedProfiles.filter({$0.jid == profile.jid}).count == 0  && selectedProfiles.count < 5 {
                         checkUserBusyStatusEnabled(self, jid: profile.jid) { [weak self] status in
-                            if status {
-                                self?.getRecentChat.filter({$0.jid == profile.jid}).first?.isSelected = true
-                                self?.filteredContactList[indexPath.row].isSelected = true
-                                self?.selectedProfiles.append(profile)
-                                self?.selectedJids = self?.selectedProfiles.compactMap { profile in profile.jid } ?? []
+                            executeOnMainThread {
+                                if status {
+                                    self?.getRecentChat.filter({$0.jid == profile.jid}).first?.isSelected = true
+                                    self?.filteredContactList[indexPath.row].isSelected = true
+                                    self?.selectedProfiles.append(profile)
+                                    self?.selectedJids = self?.selectedProfiles.compactMap { profile in profile.jid } ?? []
+                                    self?.sendButton?.isEnabled = self?.selectedProfiles.count == 0 ? false : true
+                                    self?.sendButton?.alpha = self?.selectedProfiles.count == 0 ? 0.4 : 1.0
+                                }
+                                self?.shareToTableView?.reloadRows(at: [indexPath], with: .none)
                             }
-                            self?.shareToTableView?.reloadRows(at: [indexPath], with: .none)
                         }
                     } else if selectedProfiles.filter({$0.jid == filteredContactList[indexPath.row].jid}).count > 0 {
                         selectedProfiles.enumerated().forEach({ (index,item) in
@@ -822,13 +814,17 @@ extension SharekitShareToViewController : UITableViewDelegate, UITableViewDataSo
                     saveUserToDatabase(jid: profile.jid)
                     if selectedProfiles.filter({$0.jid == profile.jid}).count == 0  && selectedProfiles.count < 5 {
                         checkUserBusyStatusEnabled(self, jid: profile.jid) { [weak self] status in
-                            if status {
-                                self?.getAllRecentChat.filter({$0.jid == profile.jid}).first?.isSelected = true
-                                self?.allContactsList[indexPath.row].isSelected = true
-                                self?.selectedProfiles.append(profile)
-                                self?.selectedJids = self?.selectedProfiles.compactMap { profile in profile.jid } ?? []
+                            executeOnMainThread {
+                                if status {
+                                    self?.getAllRecentChat.filter({$0.jid == profile.jid}).first?.isSelected = true
+                                    self?.allContactsList[indexPath.row].isSelected = true
+                                    self?.selectedProfiles.append(profile)
+                                    self?.selectedJids = self?.selectedProfiles.compactMap { profile in profile.jid } ?? []
+                                    self?.sendButton?.isEnabled = self?.selectedProfiles.count == 0 ? false : true
+                                    self?.sendButton?.alpha = self?.selectedProfiles.count == 0 ? 0.4 : 1.0
+                                }
+                                self?.shareToTableView?.reloadRows(at: [indexPath], with: .none)
                             }
-                            self?.shareToTableView?.reloadRows(at: [indexPath], with: .none)
                         }
                     } else if selectedProfiles.filter({$0.jid == allContactsList[indexPath.row].jid}).count > 0 {
                         selectedProfiles.enumerated().forEach({ (index,item) in
@@ -941,13 +937,18 @@ extension SharekitShareToViewController : UITableViewDelegate, UITableViewDataSo
                     saveUserToDatabase(jid: profile.jid)
                     if selectedProfiles.filter({$0.jid == getRecentChat[indexPath.row].jid}).count == 0 && selectedProfiles.count < 5 {
                         checkUserBusyStatusEnabled(self, jid: profile.jid) { [weak self] status in
-                            if status {
-                                self?.getRecentChat[indexPath.row].isSelected = true
-                                self?.filteredContactList.filter({$0.jid == self?.getRecentChat[indexPath.row].jid}).first?.isSelected = true
-                                self?.selectedProfiles.append(profile)
-                                self?.selectedJids = self?.selectedProfiles.compactMap { profile in profile.jid } ?? []
+                            executeOnMainThread {
+                                if status {
+                                    self?.getRecentChat[indexPath.row].isSelected = true
+                                    self?.filteredContactList.filter({$0.jid == self?.getRecentChat[indexPath.row].jid}).first?.isSelected = true
+                                    self?.selectedProfiles.append(profile)
+                                    self?.selectedJids = self?.selectedProfiles.compactMap { profile in profile.jid } ?? []
+                                    self?.sendButton?.isEnabled = self?.selectedProfiles.count == 0 ? false : true
+                                    self?.sendButton?.alpha = self?.selectedProfiles.count == 0 ? 0.4 : 1.0
+                                }
+                                self?.shareToTableView?.reloadRows(at: [indexPath], with: .none)
                             }
-                            self?.shareToTableView?.reloadRows(at: [indexPath], with: .none)
+                            
                         }
                     } else if selectedProfiles.filter({$0.jid == getRecentChat[indexPath.row].jid}).count > 0 {
                         selectedProfiles.enumerated().forEach({ (index,item) in
@@ -983,13 +984,17 @@ extension SharekitShareToViewController : UITableViewDelegate, UITableViewDataSo
                     profile.isSelected = !(profile.isSelected ?? false)
                     if selectedProfiles.filter({$0.jid == getAllRecentChat[indexPath.row].jid}).count == 0  && selectedProfiles.count < 5 {
                         checkUserBusyStatusEnabled(self, jid: profile.jid) { [weak self] status in
-                            if status {
-                                self?.getAllRecentChat[indexPath.row].isSelected = true
-                                self?.allContactsList.filter({$0.jid == self?.getAllRecentChat[indexPath.row].jid}).first?.isSelected = true
-                                self?.selectedProfiles.append(profile)
-                                self?.selectedJids = self?.selectedProfiles.compactMap { profile in profile.jid } ?? []
+                            executeOnMainThread {
+                                if status {
+                                    self?.getAllRecentChat[indexPath.row].isSelected = true
+                                    self?.allContactsList.filter({$0.jid == self?.getAllRecentChat[indexPath.row].jid}).first?.isSelected = true
+                                    self?.selectedProfiles.append(profile)
+                                    self?.selectedJids = self?.selectedProfiles.compactMap { profile in profile.jid } ?? []
+                                    self?.sendButton?.isEnabled = self?.selectedProfiles.count == 0 ? false : true
+                                    self?.sendButton?.alpha = self?.selectedProfiles.count == 0 ? 0.4 : 1.0
+                                }
+                                self?.shareToTableView?.reloadRows(at: [indexPath], with: .none)
                             }
-                            self?.shareToTableView?.reloadRows(at: [indexPath], with: .none)
                         }
                     } else if selectedProfiles.filter({$0.jid == getAllRecentChat[indexPath.row].jid}).count > 0 {
                         selectedProfiles.enumerated().forEach({ (index,item) in
@@ -1435,8 +1440,9 @@ extension SharekitShareToViewController : GroupEventsDelegate {
 
 // MessageEventDelegate
 extension SharekitShareToViewController : MessageEventsDelegate {
+    
     func onMediaStatusFailed(error: String, messageId: String) {
-        
+
     }
     
   
@@ -1445,16 +1451,30 @@ extension SharekitShareToViewController : MessageEventsDelegate {
     }
     
     func onMessageStatusUpdated(messageId: String, chatJid: String, status: MessageStatus) {
+        print("#shareKitUpload onMessageStatusUpdated \(isXmppConnected) \(status) \(messageId)")
         var canExit = false
-        messageIDs.removeAll { id in
-            if id == messageId && (status == .delivered || status == .acknowledged || status == .sent) {
+        //if isXmppConnected {
+        uploadedMessageIDs.removeAll { id in
+            if id == messageId && (status == .acknowledged) {
+                print("#shareKitUpload onMessageStatusUpdated acknowledged \(messageId) \(status)")
                 canExit = true
+                totalMessages+=1
                 return true
             }
             return false
         }
-        if messageIDs.isEmpty && canExit {
-            self.removeLoader()
+        forwardingMessages.removeAll { id in
+            if id == messageId && (status == .acknowledged) {
+                print("#shareKitUpload onMessageStatusUpdated forwarded acknowledged \(messageId) \(status)")
+                canExit = true
+                totalMessages+=1
+                return true
+            }
+            return false
+        }
+        print("#shareKitUpload onMessageStatusUpdated \(uploadedMessageIDs.count), \(forwardingMessages.count), \(totalMessages), \(messageIDs.count)")
+        if uploadedMessageIDs.isEmpty && canExit && forwardingMessages.isEmpty && totalMessages == messageIDs.count {
+            print("#shareKitUpload onMessageStatusUpdated connected exit")
             self.closeShareKit()
         }
         if isSearchEnabled == false {
@@ -1463,30 +1483,76 @@ extension SharekitShareToViewController : MessageEventsDelegate {
     }
     
     func onMediaStatusUpdated(message: ChatMessage) {
+        var canExit = false
+        if message.mediaChatMessage != nil && message.mediaChatMessage?.mediaUploadStatus == .uploaded {
+            if messageIDs.contains(message.messageId) {
+                uploadedMessageIDs.append(message.messageId)
+                //totalMessages+=1
+
+                print("#shareKitUpload onMediaStatusUpdated uploaded \(message.messageId), \(totalMessages)")
+
+                uploadingMessages.removeAll { id in
+                    if id == message.messageId {
+                        print("#shareKitUpload onMediaStatusUpdated uploadingMessage")
+                        canExit = true
+                        return true
+                    }
+                    return false
+                }
+                var profilesList = self.selectedProfiles
+                profilesList.removeFirst()
+                let jids = profilesList.compactMap({ $0.jid })
+                if !jids.isEmpty {
+                    ChatManager.forwardMessages(messageIdList: [message.messageId], toJidList: jids, chatType: (self.getProfileDetails?.profileChatType ?? .singleChat), completionHandler: {isSuccess,error,data in
+                        var data = data
+                        if let messageId = (data.getData() as? ChatMessage)?.messageId {
+                            self.messageIDs.append(messageId)
+                            self.forwardingMessages.append(messageId)
+                            //self.totalMessages+=1
+                            print("#shareKitUpload forward \(messageId), \(message.messageId)")
+                        }
+                    })
+                }
+            }
+        }
+        if !isXmppConnected {
+            if uploadingMessages.isEmpty && canExit {
+                print("#shareKitUpload onMediaStatusUpdated disconnect exit")
+                if self.selectedProfiles.count > 1 {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                        self.closeShareKit()
+                    }
+                } else {
+                    self.closeShareKit()
+                }
+            }
+            if isSearchEnabled == false {
+                refreshMessages()
+            }
+        }
 
     }
     
     func onMediaStatusFailed(error: String, messageId: String, errorCode: Int) {
+        print("#shareKitUpload onMediaStatusFailed \(messageId) \(errorCode)")
         var canExit = false
-        messageIDs.removeAll { id in
+        uploadingMessages.removeAll { id in
             if id == messageId {
                 canExit = true
                 return true
             }
             return false
         }
-        if messageIDs.isEmpty && canExit {
-            self.removeLoader()
-            self.closeShareKit()
-        }
-        if messageIDs.isEmpty {
-            self.removeLoader()
-            self.closeShareKit()
+        if uploadingMessages.isEmpty && canExit {
+            ShareKitAlert.shared.showToast(controller: self, message: "Media upload failed. Please check your internet connection or try again later")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                self.closeShareKit()
+            }
         }
     }
     
     func onMediaProgressChanged(message: ChatMessage, progressPercentage: Float) {
-        
+        child.label.text = "processing files \((sendingMessagesCount-uploadingMessages.count)+1) of \(sendingMessagesCount) \n \(Int(progressPercentage))% completed"
     }
     
     func onMessagesClearedOrDeleted(messageIds: Array<String>) {
@@ -1811,10 +1877,21 @@ extension SharekitShareToViewController {
 
     func checkUserBusyStatusEnabled(_ controller: UIViewController, jid: String, completion: @escaping (Bool)->()) {
         if ChatManager.shared.isBusyStatusEnabled() && ContactManager.shared.getUserProfileDetails(for: jid)?.profileChatType == .singleChat {
-            let alertController = UIAlertController.init(title: "Disable busy Status. Do you want to continue?" , message: "", preferredStyle: .alert)
+            let longTextMessage = """
+            Disable busy Status.
+            Do you want to continue?
+            """
+            
+//            "Disable busy Status. Do you want to continue?"
+            let alertController = UIAlertController.init(title: nil , message: longTextMessage, preferredStyle: .alert)
             let shareAction = UIAlertAction(title: "Yes", style: .default) {_ in
-                ChatManager.shared.enableDisableBusyStatus(!ChatManager.shared.isBusyStatusEnabled())
-                completion(true)
+                if NetStatus.shared.isConnected {
+                    ChatManager.shared.enableDisableBusyStatus(!ChatManager.shared.isBusyStatusEnabled()) {isSuccess,error,data in
+                        completion(isSuccess)
+                    }
+                } else {
+                    ShareKitAlert.shared.showToast(controller: self, message: ErrorMessage.noInternet)
+                }
             }
             let cancelAction = UIAlertAction(title: "No", style: .cancel) { [weak controller] (action) in
                 controller?.dismiss(animated: true,completion: nil)
@@ -1898,37 +1975,37 @@ extension SharekitShareToViewController {
 extension SharekitShareToViewController: ShareEditImageDelegate {
 
     func sendMedia(mediaData: [MirrorFlySDK.MediaData]) {
-        shareMediaCount = 0
+        setDelegate()
         let profilesList = selectedProfiles.compactMap({ $0.jid })
         if !mediaData.isEmpty {
             self.addLoader()
             mediaData.forEach { media in
                 if media.mediaType == .video {
-                    let profiles = selectedProfiles.compactMap({ $0.jid })
-                    for profile in profiles {
-                        let mediaParams = FileMessageParams(fileUrl: media.fileURL, fileName: media.fileName, caption: media.caption,fileSize: media.fileSize, duration: media.duration, thumbImage: media.base64Thumbnail, fileKey: media.fileKey)
-                        FlyMessenger.sendFileMessage(messageParams: FileMessage(toId: profile, messageType: .video, fileMessage: mediaParams)) { isSuccess, _, message in
-                            if let chatMessage = message {
-                                self.messageIDs.append(chatMessage.messageId)
-                                self.shareMediaCount+=1
-                                if self.isXmppConnected == false && self.shareMediaCount == (mediaData.count*profilesList.count) {
-                                    self.removeLoader()
-                                    self.closeShareKit()
+                    var profilesList = self.selectedProfiles
+                    if !profilesList.isEmpty {
+                        let profile = profilesList.first!
+                        if let url = media.fileURL {
+                            let mediaParams = FileMessageParams(fileUrl: media.fileURL, fileName: media.fileName, caption: media.caption,fileSize: media.fileSize, duration: media.duration, thumbImage: media.base64Thumbnail, fileKey: media.fileKey)
+                            FlyMessenger.sendMediaFileMessage(messageParams: FileMessage(toId: profile.jid, messageType: .video, fileMessage: mediaParams)) { isSuccess, error, message in
+                                self.messageIDs.append(message?.messageId ?? "")
+                                self.uploadingMessages.append(message?.messageId ?? "")
+                                if isSuccess {
+                                    print("#shareKitUpload video send \(self.isXmppConnected) \(message?.messageId ?? "")")
                                 }
                             }
                         }
                     }
                 } else if media.mediaType == .image {
-                    let profiles = selectedProfiles.compactMap({ $0.jid })
-                    for profile in profiles {
-                        let mediaParams = FileMessageParams(fileUrl: media.fileURL, fileName: media.fileName, caption: media.caption,fileSize: media.fileSize, duration: media.duration, thumbImage: media.base64Thumbnail, fileKey: media.fileKey)
-                        FlyMessenger.sendFileMessage(messageParams: FileMessage(toId: profile, messageType: .image, fileMessage: mediaParams)) { isSuccess, _, message in
-                            if let chatMessage = message {
-                                self.messageIDs.append(chatMessage.messageId)
-                                self.shareMediaCount+=1
-                                if self.isXmppConnected == false && self.shareMediaCount == (mediaData.count*profilesList.count) {
-                                    self.removeLoader()
-                                    self.closeShareKit()
+                    var profilesList = self.selectedProfiles
+                    if !profilesList.isEmpty {
+                        let profile = profilesList.first!
+                        if let url = media.fileURL {
+                            let mediaParams = FileMessageParams(fileUrl: media.fileURL, fileName: media.fileName, caption: media.caption,fileSize: media.fileSize, duration: media.duration, thumbImage: media.base64Thumbnail, fileKey: media.fileKey)
+                            FlyMessenger.sendMediaFileMessage(messageParams: FileMessage(toId: profile.jid, messageType: .image, fileMessage: mediaParams)) { isSuccess, error, message in
+                                self.messageIDs.append(message?.messageId ?? "")
+                                self.uploadingMessages.append(message?.messageId ?? "")
+                                if isSuccess {
+                                    print("#shareKitUpload image send \(self.isXmppConnected) \(message?.messageId ?? "")")
                                 }
                             }
                         }
@@ -1936,6 +2013,7 @@ extension SharekitShareToViewController: ShareEditImageDelegate {
                 }
             }
         }
+        shareAttachments()
     }
     
 }
@@ -1948,6 +2026,8 @@ class SpinnerViewController: UIViewController {
         view = UIView()
         view.backgroundColor = UIColor(white: 0, alpha: 0.7)
 
+        label.numberOfLines = 0
+        label.textAlignment = .center
         label.text = "processing files"
         label.textColor = .white
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -1962,6 +2042,7 @@ class SpinnerViewController: UIViewController {
 
         label.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         label.topAnchor.constraint(equalTo: spinner.bottomAnchor, constant: 10).isActive = true
+        label.widthAnchor.constraint(equalToConstant: 250).isActive = true
     }
 }
 
@@ -1980,11 +2061,16 @@ extension SharekitShareToViewController: ConnectionEventDelegate {
     }
     
     func onConnected() {
+        print("#shareKitUpload onConnected")
         isXmppConnected = true
     }
 
     func onDisconnected() {
+        print("#shareKitUpload onDisconnected")
         isXmppConnected = false
+        if uploadingMessages.isEmpty {
+            closeShareKit()
+        }
     }
 
 }

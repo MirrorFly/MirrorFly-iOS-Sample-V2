@@ -182,6 +182,48 @@ class AppUtils: NSObject {
             navigationController.pushViewController(otpViewController, animated: false)
         }
     }
+    
+    func fetchStaticMapImage(latitude: Double, longitude: Double, zoomLevel: String, size: CGSize, completion: @escaping (UIImage) -> ()) {
+        let apiKey = "xxxxxxxxxxx"
+        let location = "\(latitude),\(longitude)" // Latitude and longitude of the location you want to show on the map
+        let markerLocation = "\(latitude),\(longitude)"
+        let zoomLevel = zoomLevel // Zoom level of the map (0-21, where 0 is the world view and 21 is the maximum zoom)
+        
+        let size = "\(2 * Int(size.width))x\(2 * Int(size.height))" // Size of the image in pixels
+        
+        let mapType = "roadmap" // Type of map (e.g., "roadmap", "satellite", "terrain", "hybrid")
+        
+        // Construct the URL for the static map image
+        let urlString = "https://maps.googleapis.com/maps/api/staticmap?center=\(location)&zoom=\(zoomLevel)&size=\(size)&maptype=\(mapType)&markers=\(markerLocation)&key=\(apiKey)"
+        
+        if let url = URL(string: urlString) {
+            // Fetch the map image data
+            URLSession.shared.dataTask(with: url) { data, response, error in
+                if let error = error {
+                    print("Error fetching static map image: \(error)")
+                    return
+                }
+                
+                if let data = data, let image = UIImage(data: data) {
+                    // Use the map image (e.g., display it in an image view)
+                    DispatchQueue.main.async {
+                        completion(image)
+                    }
+                }
+            }.resume()
+        }
+    }
+    
+    func getGoogleApikey() -> String {
+        var key: String = ""
+        if let path = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist"){
+            if let dict = NSDictionary(contentsOfFile: path) as? Dictionary<String, AnyObject> {
+                key = dict["API_KEY"] as? String ?? ""
+            }
+        }
+        return key
+    }
+    
 }
 
 public struct Units {

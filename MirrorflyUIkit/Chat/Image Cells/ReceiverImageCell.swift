@@ -40,7 +40,7 @@ class ReceiverImageCell: BaseTableViewCell {
     @IBOutlet weak var replyView: UIView?
     @IBOutlet weak var messageTypeIconView: UIView?
     @IBOutlet weak var messageTypeIcon: UIImageView?
-    @IBOutlet weak var chatMapView: GMSMapView?
+    @IBOutlet weak var chatMapView: UIView?
     @IBOutlet weak var mediaImageView: UIImageView?
     @IBOutlet weak var replyTextLabel: UILabel?
     @IBOutlet weak var replyUserLabel: UILabel?
@@ -200,14 +200,20 @@ class ReceiverImageCell: BaseTableViewCell {
                    return nil
                }
                
-               chatMapView?.camera = GMSCameraPosition.camera(withLatitude: latitude, longitude: longitude, zoom: 16.0, bearing: 360.0, viewingAngle: 15.0)
-               
-               DispatchQueue.main.async { [self] in
-                   // 2. Perform UI Operations.
-                   let position = CLLocationCoordinate2DMake(latitude,longitude)
-                   let marker = GMSMarker(position: position)
-                   marker.map = chatMapView
+               AppUtils.shared.fetchStaticMapImage(latitude: latitude, longitude: longitude, zoomLevel: "16", size: CGSize(width: chatMapView?.bounds.width ?? 250, height: chatMapView?.bounds.height ?? 250)) { [self] mapImage in
+                   let mapImageView = UIImageView(frame: CGRect(x: 0, y: 0, width: chatMapView?.bounds.width ?? 250, height: chatMapView?.bounds.height ?? 250))
+                   mapImageView.image = mapImage
+                   chatMapView?.addSubview(mapImageView)
                }
+               
+//               chatMapView?.camera = GMSCameraPosition.camera(withLatitude: latitude, longitude: longitude, zoom: 16.0, bearing: 360.0, viewingAngle: 15.0)
+//               
+//               DispatchQueue.main.async { [self] in
+//                   // 2. Perform UI Operations.
+//                   let position = CLLocationCoordinate2DMake(latitude,longitude)
+//                   let marker = GMSMarker(position: position)
+//                   marker.map = chatMapView
+//               }
                replyTrailingCons?.isActive = false
                replyTrailingWithMediaCons?.isActive = true
                messageTypeIconView?.isHidden = false

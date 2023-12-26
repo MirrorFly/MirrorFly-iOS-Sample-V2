@@ -49,8 +49,8 @@ class ChatViewParentMessageCell: BaseTableViewCell {
     @IBOutlet weak var sendFromLabel: UILabel?
     @IBOutlet weak var senderToLabel: UILabel?
     @IBOutlet weak var senderImageView: UIImageView?
-    @IBOutlet weak var chatLocationMapView: GMSMapView?
-    @IBOutlet weak var mediaLocationMapView: GMSMapView?
+    @IBOutlet weak var chatLocationMapView: UIView?
+    @IBOutlet weak var mediaLocationMapView: UIView?
     
     // Location message view and its elements
     @IBOutlet weak var locationImageView: UIImageView?
@@ -249,7 +249,7 @@ class ChatViewParentMessageCell: BaseTableViewCell {
                replyVIewWithMediaCons?.isActive = false
                replyViewWithoutMediaCons?.isActive = true
            } else {
-            let getReplymessage =  replyMessage?.messageTextContent
+               let getReplymessage =  message?.replyParentChatMessage?.messageTextContent
 //           replyViewHeightCons?.isActive = (getReplymessage?.count ?? 0 > 20) ? false : true
                if let getReplyMessage =  replyMessage, profileDetails.profileChatType == .groupChat, !getReplyMessage.mentionedUsersIds.isEmpty {
                    replyTextLabel?.attributedText = ChatUtils.getMentionTextContent(message: getReplyMessage.messageTextContent, isMessageSentByMe: getReplyMessage.isMessageSentByMe, mentionedUsers: getReplyMessage.mentionedUsersIds, searchedText: searchText)
@@ -396,15 +396,28 @@ class ChatViewParentMessageCell: BaseTableViewCell {
                mediaImageView?.isHidden = true
                mediaLocationMapView?.isHidden = false
                replyTextLabel?.text = "Location"
-               mediaLocationMapView?.camera = GMSCameraPosition.camera(withLatitude: replyMessage?.locationChatMessage?.latitude ?? 0.0, longitude: replyMessage?.locationChatMessage?.longitude ?? 0.0, zoom: 16.0, bearing: 360.0, viewingAngle: 15.0)
-               mediaLocationMapView?.isUserInteractionEnabled = false
-               DispatchQueue.main.async
-               { [self] in
-                   // 2. Perform UI Operations.
-                   let position = CLLocationCoordinate2DMake(replyMessage?.locationChatMessage?.latitude ?? 0.0,replyMessage?.locationChatMessage?.longitude ?? 0.0)
-                   let marker = GMSMarker(position: position)
-                   marker.map = mediaLocationMapView
+               guard let latitude = replyMessage?.locationChatMessage?.latitude else {
+                   return nil
                }
+               guard let longitude = replyMessage?.locationChatMessage?.longitude  else {
+                   return nil
+               }
+               
+               
+               AppUtils.shared.fetchStaticMapImage(latitude: latitude, longitude: longitude, zoomLevel: "16", size: CGSize(width: 52, height: 52)) { [self] mapImage in
+                   let mapImageView = UIImageView(frame: CGRect(x: 0, y: 0, width: 52, height: 52))
+                   mapImageView.image = mapImage
+                   mediaLocationMapView?.addSubview(mapImageView)
+               }
+//               mediaLocationMapView?.camera = GMSCameraPosition.camera(withLatitude: replyMessage?.locationChatMessage?.latitude ?? 0.0, longitude: replyMessage?.locationChatMessage?.longitude ?? 0.0, zoom: 16.0, bearing: 360.0, viewingAngle: 15.0)
+//               mediaLocationMapView?.isUserInteractionEnabled = false
+//               DispatchQueue.main.async
+//               { [self] in
+//                   // 2. Perform UI Operations.
+//                   let position = CLLocationCoordinate2DMake(replyMessage?.locationChatMessage?.latitude ?? 0.0,replyMessage?.locationChatMessage?.longitude ?? 0.0)
+//                   let marker = GMSMarker(position: position)
+//                   marker.map = mediaLocationMapView
+//               }
                replyVIewWithMediaCons?.isActive = true
                replyViewWithoutMediaCons?.isActive = false
                messageTypeIcon?.image = UIImage(named: (message?.isMessageSentByMe ?? false) ? "map" : "receivedMap")
@@ -529,8 +542,12 @@ class ChatViewParentMessageCell: BaseTableViewCell {
         textMessageTimeLabel?.isAccessibilityElement =  true
         textMessageTimeLabel?.accessibilityLabel = Utility.currentMillisecondsToTime(milliSec: timeStamp)
         textMessageTimeLabel?.accessibilityLabel = DateFormatterUtility.shared.currentMillisecondsToLocalTime(milliSec: timeStamp)
-        textMessageTimeLabel?.text = DateFormatterUtility.shared.currentMillisecondsToLocalTime(milliSec: timeStamp)
-        
+       // textMessageTimeLabel?.text = DateFormatterUtility.shared.currentMillisecondsToLocalTime(milliSec: timeStamp)
+        if (message?.editedTextContent.isEmpty ?? true) {
+            textMessageTimeLabel?.text = DateFormatterUtility.shared.currentMillisecondsToLocalTime(milliSec: timeStamp)
+        } else {
+            textMessageTimeLabel?.text = "Edited \(DateFormatterUtility.shared.currentMillisecondsToLocalTime(milliSec: timeStamp))"
+        }
         
         self.isAccessibilityElement = true
         self.accessibilityLabel = message?.messageId
@@ -538,9 +555,10 @@ class ChatViewParentMessageCell: BaseTableViewCell {
         bubbleBGView?.isAccessibilityElement =  true
         
         switch  message?.messageType {
-        case .text, .meet:
+        case .text, .meet, .autoText:
             if let label = messageLabel {
-                messageLabel?.attributedText = processTextMessage(message: message?.messageType == .text ? message?.messageTextContent ?? "" : message?.meetChatMessage?.link ?? "", uiLabel: label, fromChat: fromChat, isMessageSearch: isMessageSearch, searchText: searchText, isMessageSentByMe: message?.isMessageSentByMe ?? false, mentionedUsers: message?.mentionedUsersIds ?? [], profileDetails: profileDetails)
+                let textMessage = (message?.editedTextContent.isEmpty ?? true) ? message?.messageTextContent : message?.editedTextContent
+                messageLabel?.attributedText = processTextMessage(message: (message?.messageType == .text || message?.messageType == .autoText) ? textMessage ?? "" : message?.meetChatMessage?.link ?? "", uiLabel: label, fromChat: fromChat, isMessageSearch: isMessageSearch, searchText: searchText, isMessageSentByMe: message?.isMessageSentByMe ?? false, mentionedUsers: message?.mentionedUsersIds ?? [], profileDetails: profileDetails)
                 print("message label width = \(messageLabel?.frame.size.width)")
 
             }
@@ -556,15 +574,21 @@ class ChatViewParentMessageCell: BaseTableViewCell {
                 return nil
             }
             
-            chatLocationMapView?.camera = GMSCameraPosition.camera(withLatitude: latitude, longitude: longitude, zoom: 16.0, bearing: 360.0, viewingAngle: 15.0)
-   
-            DispatchQueue.main.async
-            { [self] in
-                // 2. Perform UI Operations.
-                var position = CLLocationCoordinate2DMake(latitude,longitude)
-                let marker = GMSMarker(position: position)
-                marker.map = chatLocationMapView
+            AppUtils.shared.fetchStaticMapImage(latitude: latitude, longitude: longitude, zoomLevel: "16", size: CGSize(width: chatLocationMapView?.bounds.width ?? 250, height: chatLocationMapView?.bounds.height ?? 250)) { [self] mapImage in
+                let mapImageView = UIImageView(frame: CGRect(x: 0, y: 0, width: chatLocationMapView?.bounds.width ?? 250, height: chatLocationMapView?.bounds.height ?? 250))
+                mapImageView.image = mapImage
+                chatLocationMapView?.addSubview(mapImageView)
             }
+            
+//            chatLocationMapView?.camera = GMSCameraPosition.camera(withLatitude: latitude, longitude: longitude, zoom: 16.0, bearing: 360.0, viewingAngle: 15.0)
+//   
+//            DispatchQueue.main.async
+//            { [self] in
+//                // 2. Perform UI Operations.
+//                var position = CLLocationCoordinate2DMake(latitude,longitude)
+//                let marker = GMSMarker(position: position)
+//                marker.map = chatLocationMapView
+//            }
             
            break
         case .contact:
@@ -584,8 +608,8 @@ class ChatViewParentMessageCell: BaseTableViewCell {
         
         if (message!.isMessageTranslated && CommonDefaults.isTranlationEnabled) {
             guard let chatMessage = message,let messageLabeltemp = messageLabel, let translatedTextLabeltemp = translatedTextLabel else {return self }
-
-            messageLabel?.attributedText = processTextMessage(message: chatMessage.messageTextContent , uiLabel: messageLabeltemp, fromChat: fromChat, isMessageSearch: isMessageSearch, searchText: searchText, isMessageSentByMe: message?.isMessageSentByMe ?? false, mentionedUsers: message?.mentionedUsersIds ?? [], profileDetails: profileDetails)
+            let textMessage = (message?.editedTextContent.isEmpty ?? true) ? message?.messageTextContent : message?.editedTextContent
+            messageLabel?.attributedText = processTextMessage(message: textMessage ?? "", uiLabel: messageLabeltemp, fromChat: fromChat, isMessageSearch: isMessageSearch, searchText: searchText, isMessageSentByMe: message?.isMessageSentByMe ?? false, mentionedUsers: message?.mentionedUsersIds ?? [], profileDetails: profileDetails)
             translatedTextLabel?.attributedText = processTextMessage(message: chatMessage.translatedMessageTextContent , uiLabel: translatedTextLabeltemp, fromChat: fromChat, isMessageSearch: isMessageSearch, searchText: searchText, isMessageSentByMe: message?.isMessageSentByMe ?? false, mentionedUsers: message?.mentionedUsersIds ?? [], profileDetails: profileDetails)
 
         }

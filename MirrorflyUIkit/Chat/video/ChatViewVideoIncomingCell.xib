@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21225" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="22154" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21207"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22130"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -131,6 +131,7 @@
                             <constraint firstItem="Gra-ah-BvG" firstAttribute="leading" secondItem="7q9-ez-TYC" secondAttribute="leading" id="WO5-Fg-cSe"/>
                             <constraint firstItem="Gra-ah-BvG" firstAttribute="centerY" secondItem="7q9-ez-TYC" secondAttribute="centerY" id="bAY-lf-9pM"/>
                             <constraint firstAttribute="bottom" secondItem="Gra-ah-BvG" secondAttribute="bottom" id="fVB-T6-Cj9"/>
+                            <constraint firstAttribute="width" secondItem="7q9-ez-TYC" secondAttribute="height" multiplier="1:1" id="tSk-SB-hRV"/>
                             <constraint firstAttribute="height" constant="20" id="wY3-WQ-zW4"/>
                         </constraints>
                     </view>
@@ -230,7 +231,7 @@
                                                     <constraint firstAttribute="width" constant="50" id="rKj-Z1-LOF"/>
                                                 </constraints>
                                             </imageView>
-                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="JNJ-41-848" customClass="GMSMapView">
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="JNJ-41-848">
                                                 <rect key="frame" x="401" y="0.0" width="50" height="50"/>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             </view>
@@ -581,7 +582,6 @@
                     <constraint firstItem="Muj-gO-060" firstAttribute="top" secondItem="qHU-JL-LBW" secondAttribute="top" id="cFq-ln-9Hm"/>
                     <constraint firstItem="Pc5-Su-loP" firstAttribute="centerX" secondItem="vzx-ne-p5H" secondAttribute="centerX" id="oEG-hc-Ibr"/>
                     <constraint firstItem="7q9-ez-TYC" firstAttribute="leading" secondItem="qHU-JL-LBW" secondAttribute="leading" id="ooz-Jh-R96"/>
-                    <constraint firstItem="7q9-ez-TYC" firstAttribute="width" secondItem="7q9-ez-TYC" secondAttribute="height" multiplier="1:1" id="tSk-SB-hRV"/>
                     <constraint firstItem="H73-Hb-cI8" firstAttribute="leading" secondItem="Jjs-hD-R5J" secondAttribute="leading" id="vGo-i8-sPk"/>
                     <constraint firstItem="JMz-JN-uv7" firstAttribute="trailing" secondItem="Dff-PW-V1r" secondAttribute="trailing" constant="-10" id="w5b-SV-lxi"/>
                     <constraint firstItem="Nhd-G2-JUu" firstAttribute="leading" secondItem="qHU-JL-LBW" secondAttribute="leading" constant="10" id="xJO-Hf-X95"/>

@@ -70,7 +70,9 @@ class ImageEditController: UIViewController {
     var mentionRanges: [(String, NSRange)] = []
     var mentionUsersList: [String] = []
     var mentionBaseHeight: NSLayoutConstraint!
-    
+    var breakCompression : Bool = false
+    var notEnoughStorage : Bool = false
+    var totalCount = 0
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
@@ -155,6 +157,8 @@ class ImageEditController: UIViewController {
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         textMentioned.removeAll()
+        breakCompression = true
+        stopLoading()
     }
     
     override func viewDidLayoutSubviews() {
@@ -296,6 +300,7 @@ class ImageEditController: UIViewController {
                 mentionTableView.reloadData()
             }
         }
+        notEnoughStorage = false
     }
     
     @IBAction func addMoreImages(_ sender: Any) {
@@ -311,61 +316,108 @@ class ImageEditController: UIViewController {
             view.endEditing(true)
         }
         DispatchQueue.main.async { [weak self] in
-            self?.startLoading( withText: "Compressing 1 of \((self?.imageAray.count ?? 0)!)")
+            if !(self?.notEnoughStorage ?? false){
+                self?.startLoading( withText: "Compressing 1 of \((self?.imageAray.count ?? 0)!)")
+            }else{
+                AppAlert.shared.showToast(message:  FlyConstants.ErrorMessage.storageNotAvaialbe)
+            }
+        }
+        if notEnoughStorage {
+            return
         }
         print("#media : ImageEditController sendAction \(imageAray.count)")
-        mediaProcessed = imageAray.compactMap({ data in
-            data.fileName
-        })
-        mediaData.removeAll()
+        breakCompression = false
+        totalCount = imageAray.count
         backgroundQueue.async{ [weak self] in
-            self?.imageAray.enumerated().forEach { (index, item) in
-                print("#media : ImageEditController \(index) \(item.caption)  \(item.fileName) \(item.mediaType) \(item.fileSize) ")
-                if item.isVideo{
-                    if let processedVideoURL = item.processedVideoURL, !item.inProgress{
-                        print("#media size before \(item.fileSize)")
-                        self?.imageAray[index].inProgress = true
-                        MediaUtils.compressVideo(videoURL:processedVideoURL) { [weak self] isSuccess, url, fileName, fileKey, fileSize , duration in
-                            if let compressedURL = url{
-                                print("#media size before \(item.fileSize)")
-                                self?.imageAray[index].isCompressed = true
-                                _ = self?.mediaProcessed.popLast()
-                                var media = MediaData()
-                                media.mediaType = .video
-                                media.fileURL = compressedURL
-                                media.fileName = fileName
-                                media.fileSize = fileSize
-                                media.fileKey = fileKey
-                                media.duration = duration
-                                media.base64Thumbnail = self?.imageAray[index].base64Image ?? emptyString()
-                                media.caption = self?.imageAray[index].caption ?? emptyString()
-                                media.mentionedUsers = self?.imageAray[index].mentionedUsers ?? []
-                                self?.mediaData.append(media)
-                                self?.backToConversationScreen()
-                            }
-                        }
-                    }
-                }else{
-                    print("#media size before \(item.fileSize)")
-                    if let (data, fileName ,localFilePath,fileKey,fileSize) = MediaUtils.compressImage(imageData : item.mediaData!){
-                        print("#media size after \(fileSize)")
-                        self?.imageAray[index].isCompressed = true
+            self?.validateAndCompressNext()
+        }
+    }
+    
+    public func validateAndCompressNext(){
+        executeOnMainThread { [weak self] in
+            self?.stopLoading()
+        }
+        if mediaProcessed.isEmpty{
+            stopLoading()
+            backToConversationScreen()
+        }else{
+            if let index = imageAray.firstIndex(where: { $0.isCompressed == false }) , !breakCompression{
+                executeOnMainThread { [weak self] in
+                    self?.startLoading(withText: "Compressing \((self?.imageAray.filter{$0.isCompressed == true}.count ?? 1) + 1) of \((self?.imageAray.count ?? 0)!)")
+                }
+                compressMedia(item: imageAray[index], index: index)
+            }else{
+                stopLoading()
+                if imageAray.filter({ $0.isCompressed == false }).isEmpty{
+                    backToConversationScreen()
+                }
+            }
+        }
+    }
+    
+    public func compressMedia(item : ImageData , index : Int){
+        if item.isVideo{
+            if let processedVideoURL = item.processedVideoURL{
+                MediaUtils.compressVideoFile(videoURL:processedVideoURL, mediaQuality: .medium) { [weak self] isSuccess, url, fileName, fileKey, fileSize , duration, errorMessage  in
+                    if let compressedURL = url,  isSuccess{
                         var media = MediaData()
-                        media.mediaType = .image
-                        media.fileURL = localFilePath
+                        media.mediaType = .video
+                        media.fileURL = compressedURL
                         media.fileName = fileName
                         media.fileSize = fileSize
                         media.fileKey = fileKey
+                        media.duration = duration
                         media.base64Thumbnail = self?.imageAray[index].base64Image ?? emptyString()
                         media.caption = self?.imageAray[index].caption ?? emptyString()
                         media.mentionedUsers = self?.imageAray[index].mentionedUsers ?? []
+                        self?.imageAray[index].isCompressed = true
+                        if !(self?.mediaData.contains(where: ({$0.fileName == fileName})) ?? false){
+                            self?.mediaData.append(media)
+                        }
+                        _ = self?.mediaProcessed.removeAll(where: { $0 == item.fileName })
+                        self?.validateAndCompressNext()
+                    }else if !isSuccess{
+                        self?.breakCompression = true
+                        self?.imageAray[index].isCompressed = false
+                        if errorMessage == FlyConstants.ErrorMessage.storageNotAvaialbe{
+                            self?.notEnoughStorage = true
+                        }
+                        executeOnMainThread {
+                            self?.stopLoading()
+                            AppAlert.shared.showToast(message: errorMessage ?? emptyString())
+                        }
+                    }
+                }
+            }
+        }else{
+            MediaUtils.compressImageFile(imageData:  item.mediaData!, mediaQuality: .medium) { [weak self]  isSucess, data, fileName, localFilePath, fileKey, fileSize, errorMessage  in
+                if isSucess{
+                    var media = MediaData()
+                    media.mediaType = .image
+                    media.fileURL = localFilePath
+                    media.fileName = fileName
+                    media.fileSize = fileSize
+                    media.fileKey = fileKey
+                    media.base64Thumbnail = self?.imageAray[index].base64Image ?? emptyString()
+                    media.caption = self?.imageAray[index].caption ?? emptyString()
+                    media.mentionedUsers = self?.imageAray[index].mentionedUsers ?? []
+                    self?.imageAray[index].isCompressed = true
+                    if !(self?.mediaData.contains(where: ({$0.fileName == fileName})) ?? false){
                         self?.mediaData.append(media)
                     }
-                    
-                    _ =  self?.mediaProcessed.popLast()
-                    self?.backToConversationScreen()
+                    _ = self?.mediaProcessed.removeAll(where: { $0 == item.fileName })
+                    self?.validateAndCompressNext()
+                }else{
+                    self?.breakCompression = true
+                    self?.imageAray[index].isCompressed = false
+                    if errorMessage == FlyConstants.ErrorMessage.storageNotAvaialbe{
+                        self?.notEnoughStorage = true
+                    }
+                    executeOnMainThread {
+                        self?.stopLoading()
+                        AppAlert.shared.showToast(message: errorMessage ?? emptyString())
+                    }
                 }
-                
             }
         }
     }
@@ -373,16 +425,9 @@ class ImageEditController: UIViewController {
     
     public func backToConversationScreen(){
         FlyMessenger.saveUnsentMessage(id: id, message: emptyString())
-        DispatchQueue.main.async { [weak self] in
-            print("#media : ImageEditController backToConversationScreen  \(self!.imageAray.count)")
-            self?.stopLoading()
-            if self?.mediaProcessed.isEmpty ?? false{
-                self?.navigationController?.popViewController(animated: true)
-//                self?.delegate?.selectedImages(images: self?.imageAray ?? [])
-                self?.delegate?.sendMedia(media: self?.mediaData ?? [])
-            }else{
-                self?.startLoading(withText: "Compressing \((self?.imageAray.filter{$0.isCompressed == true}.count ?? 1) + 1) of \((self?.imageAray.count ?? 0)!)")
-            }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.025){ [weak self] in
+            self?.navigationController?.popViewController(animated: true)
+            self?.delegate?.sendMedia(media: self?.mediaData ?? [])
         }
     }
     
@@ -390,7 +435,11 @@ class ImageEditController: UIViewController {
         if imageAray.count > 0 {
             if imageEditIndex < imageAray.count {
                 self.selectedAssets.remove(at: imageEditIndex)
-                imageAray.remove(at: imageEditIndex)
+                let file = imageAray.remove(at: imageEditIndex)
+                mediaProcessed.removeAll(where: {$0 == file.fileName})
+                if (imageAray.count) > (imageEditIndex - 1){
+                    imageEditIndex = imageEditIndex - 1
+                }
             } else {
                 if imageAray.count > 0 {
                     botmImageIndex = imageEditIndex - 1
@@ -460,15 +509,15 @@ class ImageEditController: UIViewController {
                         var imageSize = ChatUtils.getImageSize(asset: asset)
                         imageSize = imageSize/(1024*1024)
                         print("image size: ",imageSize)
-                        if imageSize >= Float(10) {
-                            AppAlert.shared.showToast(message: ErrorMessage.largeImageFile)
+                        if imageSize >= Float(2048) {
+                            AppAlert.shared.showToast(message: ErrorMessage.largeVideoFile)
                             imagePicker.deselect(asset: asset)
                         } else {
                             strongSelf.selectedAssets.append(asset)
                             strongSelf.currentSelectedAssets.append(asset)
                         }
                     } else if asset.mediaType == PHAssetMediaType.video {
-                        if MediaUtils.isVideoLimit(asset: asset, videoLimit: 30) {
+                        if MediaUtils.isVideoLimit(asset: asset, videoLimit: 2048) {
                             strongSelf.selectedAssets.append(asset)
                             strongSelf.currentSelectedAssets.append(asset)
                         } else {
@@ -606,6 +655,7 @@ class ImageEditController: UIViewController {
     
     func closeKeyboard() {
         self.view.endEditing(true)
+        isKeyboardDisabled = true
     }
 }
 
@@ -1031,6 +1081,9 @@ extension ImageEditController {
             self.setCaption()
             DispatchQueue.main.async { [weak self] in
                 print("#media : ImageEditController reload collectionviews")
+                self?.mediaProcessed = self?.imageAray.compactMap({ data in
+                    data.fileName
+                }) ?? []
                 self?.stopLoading()
                 self?.topCollection?.reloadData()
                 self?.botomCollection.reloadData()
@@ -1343,4 +1396,16 @@ extension ImageEditController {
         groupMembers.filter({ $0.displayName.lowercased().contains(mentionSearch.lowercased()) && $0.memberJid != AppUtils.getMyJid() && $0.profileDetail?.isBlockedByAdmin == false })
     }
     
+}
+
+
+public extension PHAsset {
+    func image(targetSize: CGSize, contentMode: PHImageContentMode, options: PHImageRequestOptions?) -> UIImage {
+        var thumbnail = UIImage()
+        let imageManager = PHCachingImageManager()
+        imageManager.requestImage(for: self, targetSize: targetSize, contentMode: contentMode, options: options, resultHandler: { image, _ in
+            thumbnail = image!
+        })
+        return thumbnail
+    }
 }

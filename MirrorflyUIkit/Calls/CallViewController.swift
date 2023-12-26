@@ -4,7 +4,7 @@
 //
 //  Created by Vasanth Kumar on 19/05/21.
 //
-
+/*
 import UIKit
 import WebRTC
 import Alamofire
@@ -415,7 +415,7 @@ class CallViewController: UIViewController ,AVPictureInPictureControllerDelegate
         
         delegate = self
         showHideParticipantButton(hide :true)
-        showHideCallAgainView(show: false, status: "Trying to connect")
+        showHideCallAgainView(show: false, status: getCurrentCallStatusAsString())
         if CallManager.getCallDirection() == .Incoming {
             updateCallStatus(status: "Connecting")
         } else {
@@ -438,21 +438,23 @@ class CallViewController: UIViewController ,AVPictureInPictureControllerDelegate
                 outgoingCallView?.videoButton.setImage(UIImage(named: "VideoEnabled" ), for: .normal)
             }
         } else {
-            self.outgoingCallView?.OutGoingCallBG.isHidden = true
-            self.outgoingCallView?.cameraButton.isHidden = isVideoMuted
-            self.collectionView?.isHidden = false
-            if let collectionView = self.collectionView , (collectionView.numberOfItems(inSection: 0) == 0 || (members.count != collectionView.numberOfItems(inSection: 0))){
+            if CallManager.isCallConnected() {
+                self.outgoingCallView?.OutGoingCallBG.isHidden = true
+                self.outgoingCallView?.cameraButton.isHidden = isVideoMuted
                 self.collectionView?.isHidden = false
-                self.collectionView?.reloadData()
-            }
-            for member in members {
-                if member.callStatus == .connected && CallManager.getCallType() == .Video {
-                    if !member.isVideoMuted{
-                        addGroupTracks(jid: member.jid)
+                if let collectionView = self.collectionView , (collectionView.numberOfItems(inSection: 0) == 0 || (members.count != collectionView.numberOfItems(inSection: 0))){
+                    self.collectionView?.isHidden = false
+                    self.collectionView?.reloadData()
+                }
+                for member in members {
+                    if member.callStatus == .connected && CallManager.getCallType() == .Video {
+                        if !member.isVideoMuted{
+                            addGroupTracks(jid: member.jid)
+                        }
                     }
                 }
+                showGroupCallUI()
             }
-            showGroupCallUI()
         }
         if CallManager.getCallType() == .Video{
             outgoingCallView?.videoButton.setImage(UIImage(named: "VideoEnabled" ), for: .normal)
@@ -553,7 +555,7 @@ class CallViewController: UIViewController ,AVPictureInPictureControllerDelegate
                 showConnectedVideoCallOneToOneUI()
             }
         } else {
-            if isOnCall && self.checkIfGroupCallUiIsVisible() {
+            if isOnCall && self.checkIfGroupCallUiIsVisible() && CallManager.isCallConnected() {
                 showGroupCallUI()
             }
         }
@@ -982,7 +984,7 @@ class CallViewController: UIViewController ,AVPictureInPictureControllerDelegate
     func showGroupCallUI() {
         showOneToOneVideoCallUI()
         collectionView?.isHidden = false
-        showHideDuration(hide: false)
+        showHideDuration(hide: myCallStatus != .connected)
         outgoingCallView?.imageHeight.constant = 0
         outgoingCallView?.timerTop.constant = 0
         if CallManager.getCallType() == .Video && !isOnCall {
@@ -1412,7 +1414,9 @@ extension CallViewController : CallViewControllerDelegate {
         isAudioMuted = CallManager.isAudioMuted()
         isBackCamera = members.last?.isOnBackCamera ?? false
         isVideoMuted = CallManager.isVideoMuted()
-       // AudioManager.shared().getCurrentAudioInput()
+        if CallManager.isCallConnected() {
+             AudioManager.shared().getCurrentAudioInput()
+        }
     }
     
     func onSwitchCamera() {
@@ -1742,11 +1746,7 @@ extension CallViewController : CallManagerDelegate {
         CallViewController.refreshDelegate?.refreshCallLog()
         
         DispatchQueue.main.async { [weak self] in
-            
-            if userId == AppUtils.getMyJid() && (callStatus != .RECONNECTING && callStatus != .RECONNECTED) {
-                return
-            }
-            
+
             switch callStatus {
             case .CALLING:
                 if !(self?.isOnCall ?? true) {
@@ -1861,7 +1861,7 @@ extension CallViewController : CallManagerDelegate {
             case .DISCONNECTED:
                 self?.outgoingCallView?.speakerButton.setImage(UIImage(named: "IconSpeakerOff" ), for: .normal)
                 self?.validateAndUpdateRoutingIcon()
-                if userId.isEmpty {
+                if userId.isEmpty || userId == AppUtils.getMyJid() {
                     self?.dismissWithDelay()
                 }else {
                     if let index = self?.findIndexOfUser(jid: userId) {
@@ -1929,14 +1929,11 @@ extension CallViewController : CallManagerDelegate {
                 if let contact = ChatManager.getContact(jid: userId), let self = self,userId.isNotEmpty{
                     AppAlert.shared.showToast(message:"\(self.getNameStringWithGroupName(userNames: getUserName(jid: contact.jid, name: contact.name, nickName: contact.nickName, contactType: contact.contactType))) left")
                 }
-                
-            case .INVITE_CALL_TIME_OUT:
-                print("")
             case .CALL_TIME_OUT:
                 print("#call CALL_TIME_OUT  \(self?.isOnCall ?? false)")
                 if (self?.isOnCall ?? false) || CallManager.isCallConnected() {
                     self?.isOnCall = true
-                    let timedOutUsers = self?.getUnavailableUsers(isTimeOut: true) ?? []
+                    let timedOutUsers = userId.components(separatedBy: ",")
                     if (self?.members.count ?? 0) - timedOutUsers.count > 1 {
                         self?.removeUnavailableUsers(removedUsers: timedOutUsers)
                     }else {
@@ -1989,11 +1986,6 @@ extension CallViewController : CallManagerDelegate {
                     self?.updateCallStatus(status: CallManager.isCallOnHold() ? CallStatus.onHold.rawValue : CallStatus.connected.rawValue)
                     self?.updateCallStatus(jid: userId, status: CallManager.isCallOnHold() ? .onHold : .connected)
                 }
-            case .CALLING_10S:
-                print("")
-            case .CALLING_AFTER_10S:
-                print("")
-
             @unknown default:
                 break
             }
@@ -2037,9 +2029,6 @@ extension CallViewController : CallManagerDelegate {
     }
     
     func onCallAction(callAction: CallAction, userId: String) {
-        if userId == AppUtils.getMyJid() {
-            return
-        }
         
         if callAction == CallAction.ACTION_REMOTE_VIDEO_ADDED {
             print("#call onCallAction() ACTION_REMOTE_VIDEO_ADDED : \(userId)")
@@ -2106,7 +2095,7 @@ extension CallViewController : CallManagerDelegate {
         }
         else if callAction == CallAction.ACTION_INVITE_USERS {
             print("#UI menmenersCount before \(members.count)")
-            for userJid in getInvitedUsers(){
+            for userJid in userId.components(separatedBy: ","){
                 addUpdateCallUsersWithStatus(userJid: userJid, status: convertCallStatus(status: CallManager.getCallStatus(userId: userJid) ?? .CALLING), reload: true, skipTracks: true)
             }
             print("#UI menmenersCount after \(members.count)")
@@ -2484,20 +2473,6 @@ extension CallViewController {
         return collectionView?.isHidden ?? false
     }
     
-    func getInvitedUsers()-> [String] {
-        var invitedUsers = CallManager.getCallUsersList() ?? []
-        let localUsers = members.map{$0.jid!}
-        for userJid in localUsers {
-            print("#invited \(userJid)")
-            if invitedUsers.contains(userJid) {
-                invitedUsers.removeAll { oldUser in
-                    oldUser == userJid
-                }
-            }
-        }
-        return invitedUsers
-    }
-    
     func dismissWithDelay(callStatus : CallCurrentStatus = .Disconnected){
         outgoingCallView?.localUserVideoView.willRemoveSubview(localRenderer)
         outgoingCallView?.remoteUserVideoView.willRemoveSubview(remoteRenderer)
@@ -2604,7 +2579,7 @@ extension CallViewController {
         case .ringing :
             status = "Ringing"
         case .calling :
-            status = "Trying to connect"
+            status = CallManager.getCallDirection() == .Incoming ? "Connecting" : "Trying to connect"
         case .connecting :
             status = "Connecting"
         case .connected :
@@ -3180,3 +3155,4 @@ extension String {
     }
     
 }
+*/

@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bucket
+   uuid = "4604A8F8-224D-41B4-86C8-942DDBB45E20"
+   type = "0"
+   version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "5D016EC7-CC69-4D29-98AC-982EF2056B95"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "SubmoduleSDK/MirrorFlySDK/Call/Classes/JanusWebrtc/CallManager.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "753"
+            endingLineNumber = "753"
+            landmarkName = "callRingingStatusWaiting(_:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "5D016EC7-CC69-4D29-98AC-982EF2056B95 - fa9f2deb00c87d52"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "static MirrorFlySDK.CallManager.callRingingStatusWaiting(__C.NSTimer) -&gt; ()"
+                  moduleName = "MirrorFlySDK"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/user/p078-contus-instantmessenger-uikit-ios/SubmoduleSDK/MirrorFlySDK/Call/Classes/JanusWebrtc/CallManager.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "753"
+                  endingLineNumber = "753"
+                  offsetFromSymbolStart = "3968">
+               </Location>
+               <Location
+                  uuid = "5D016EC7-CC69-4D29-98AC-982EF2056B95 - fa9f2deb00c87d52"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "static MirrorFlySDK.CallManager.callRingingStatusWaiting(__C.NSTimer) -&gt; ()"
+                  moduleName = "MirrorFlySDK"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/user/p078-contus-instantmessenger-uikit-ios/SubmoduleSDK/MirrorFlySDK/Call/Classes/JanusWebrtc/CallManager.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "753"
+                  endingLineNumber = "753"
+                  offsetFromSymbolStart = "3992">
+               </Location>
+               <Location
+                  uuid = "5D016EC7-CC69-4D29-98AC-982EF2056B95 - fa9f2deb00c87d52"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "static MirrorFlySDK.CallManager.callRingingStatusWaiting(__C.NSTimer) -&gt; ()"
+                  moduleName = "MirrorFlySDK"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/user/p078-contus-instantmessenger-uikit-ios/SubmoduleSDK/MirrorFlySDK/Call/Classes/JanusWebrtc/CallManager.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "753"
+                  endingLineNumber = "753"
+                  offsetFromSymbolStart = "3756">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "D5FDAD6A-F754-4950-89AA-5440A78DAAE1"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "SubmoduleSDK/MirrorFlySDK/Call/Classes/JanusWebrtc/CallManager.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "751"
+            endingLineNumber = "751"
+            landmarkName = "callRingingStatusWaiting(_:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "D5FDAD6A-F754-4950-89AA-5440A78DAAE1 - fa9f2deb00c87e90"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "static MirrorFlySDK.CallManager.callRingingStatusWaiting(__C.NSTimer) -&gt; ()"
+                  moduleName = "MirrorFlySDK"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/user/p078-contus-instantmessenger-uikit-ios/SubmoduleSDK/MirrorFlySDK/Call/Classes/JanusWebrtc/CallManager.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "751"
+                  endingLineNumber = "751"
+                  offsetFromSymbolStart = "2792">
+               </Location>
+               <Location
+                  uuid = "D5FDAD6A-F754-4950-89AA-5440A78DAAE1 - fa9f2deb00c87e90"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "static MirrorFlySDK.CallManager.callRingingStatusWaiting(__C.NSTimer) -&gt; ()"
+                  moduleName = "MirrorFlySDK"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/user/p078-contus-instantmessenger-uikit-ios/SubmoduleSDK/MirrorFlySDK/Call/Classes/JanusWebrtc/CallManager.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "751"
+                  endingLineNumber = "751"
+                  offsetFromSymbolStart = "2852">
+               </Location>
+               <Location
+                  uuid = "D5FDAD6A-F754-4950-89AA-5440A78DAAE1 - fa9f2deb00c87e90"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "static MirrorFlySDK.CallManager.callRingingStatusWaiting(__C.NSTimer) -&gt; ()"
+                  moduleName = "MirrorFlySDK"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/user/p078-contus-instantmessenger-uikit-ios/SubmoduleSDK/MirrorFlySDK/Call/Classes/JanusWebrtc/CallManager.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "751"
+                  endingLineNumber = "751"
+                  offsetFromSymbolStart = "3252">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "A82333C8-169A-4358-B6E1-765366A5E568"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "SubmoduleSDK/MirrorFlySDK/Call/Classes/JanusWebrtc/WebRtcCallService.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "527"
+            endingLineNumber = "527"
+            landmarkName = "didReceiveSocketMessageFrom(from:eventType:payload:roomId:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
+</Bucket>

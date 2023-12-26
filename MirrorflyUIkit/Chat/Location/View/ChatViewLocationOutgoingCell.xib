@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="22154" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21679"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22130"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -123,6 +123,7 @@
                             <constraint firstItem="ocZ-I5-cTT" firstAttribute="leading" secondItem="8se-7H-zda" secondAttribute="leading" id="WIG-Rx-iRY"/>
                             <constraint firstItem="ocZ-I5-cTT" firstAttribute="top" secondItem="8se-7H-zda" secondAttribute="top" id="b6o-q9-P8G"/>
                             <constraint firstAttribute="bottom" secondItem="ocZ-I5-cTT" secondAttribute="bottom" id="feh-Yo-yex"/>
+                            <constraint firstAttribute="width" secondItem="8se-7H-zda" secondAttribute="height" multiplier="1:1" id="hEO-Cd-GlN"/>
                         </constraints>
                     </view>
                     <view clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="0Hz-YJ-dHP">
@@ -197,10 +198,11 @@
                                                     <constraint firstAttribute="width" constant="50" id="WWg-vL-MLb"/>
                                                 </constraints>
                                             </imageView>
-                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="2Co-o7-9YF" customClass="GMSMapView">
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="2Co-o7-9YF">
                                                 <rect key="frame" x="185.5" y="0.0" width="50" height="50"/>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <constraints>
+                                                    <constraint firstAttribute="width" relation="lessThanOrEqual" secondItem="2Co-o7-9YF" secondAttribute="height" multiplier="4:3" id="Vve-Db-wRP"/>
                                                     <constraint firstAttribute="width" relation="lessThanOrEqual" secondItem="2Co-o7-9YF" secondAttribute="height" multiplier="4:3" id="v6J-o3-8zi"/>
                                                 </constraints>
                                             </view>
@@ -219,7 +221,6 @@
                                             <constraint firstItem="2Co-o7-9YF" firstAttribute="trailing" secondItem="xQf-2v-NaO" secondAttribute="trailing" id="T9M-OH-T2E"/>
                                             <constraint firstItem="QWR-Ca-uyO" firstAttribute="leading" secondItem="u6a-en-9MN" secondAttribute="leading" id="VKW-kZ-wTT"/>
                                             <constraint firstAttribute="bottom" secondItem="QWR-Ca-uyO" secondAttribute="bottom" id="VNq-Lh-7AZ"/>
-                                            <constraint firstItem="2Co-o7-9YF" firstAttribute="width" relation="lessThanOrEqual" secondItem="2Co-o7-9YF" secondAttribute="height" multiplier="4:3" id="Vve-Db-wRP"/>
                                             <constraint firstAttribute="bottom" secondItem="xQf-2v-NaO" secondAttribute="bottom" id="WDA-Y7-IAD"/>
                                             <constraint firstAttribute="bottom" secondItem="t63-6R-mQ8" secondAttribute="bottom" constant="4" id="WsV-BZ-ksN"/>
                                             <constraint firstAttribute="trailing" secondItem="MJH-lc-iek" secondAttribute="trailing" constant="50" id="e4f-8y-cQF"/>
@@ -244,7 +245,7 @@
                                     <view clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="x5B-HO-Ja2">
                                         <rect key="frame" x="0.0" y="53" width="235.5" height="228"/>
                                         <subviews>
-                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="j6I-gl-J5T" customClass="GMSMapView">
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="j6I-gl-J5T">
                                                 <rect key="frame" x="0.0" y="0.0" width="235.5" height="228"/>
                                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                                 <constraints>
@@ -392,7 +393,6 @@
                     <constraint firstItem="0Hz-YJ-dHP" firstAttribute="top" secondItem="JJf-f3-QBW" secondAttribute="top" constant="3" id="Wlg-MA-PaJ"/>
                     <constraint firstAttribute="trailing" secondItem="o3F-Pw-RiY" secondAttribute="trailing" constant="10" id="c2V-sG-cg5"/>
                     <constraint firstAttribute="trailing" secondItem="0Hz-YJ-dHP" secondAttribute="trailing" constant="20" id="duX-me-JzM"/>
-                    <constraint firstItem="8se-7H-zda" firstAttribute="width" secondItem="8se-7H-zda" secondAttribute="height" multiplier="1:1" id="hEO-Cd-GlN"/>
                     <constraint firstItem="0Hz-YJ-dHP" firstAttribute="width" secondItem="JJf-f3-QBW" secondAttribute="width" multiplier="0.7" id="i9x-pF-RZD"/>
                     <constraint firstAttribute="trailing" secondItem="705-QH-8Iy" secondAttribute="trailing" id="int-iy-gBm"/>
                     <constraint firstItem="rPz-hF-JXd" firstAttribute="leading" secondItem="0Hz-YJ-dHP" secondAttribute="leading" id="kQZ-yq-yJW"/>

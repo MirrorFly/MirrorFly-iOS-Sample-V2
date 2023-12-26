@@ -21,7 +21,7 @@ import AVFoundation
 import MirrorFlySDK
 
 let BASE_URL = "https://api-preprod-sandbox.mirrorfly.com/api/v1/"
-let LICENSE_KEY = "xxxxxxxxxxxxxxxx"
+let LICENSE_KEY = "fBSGlLSjOZXsrAuaqaHPqeO9f0J4JU"
 let XMPP_DOMAIN = "xmpp-preprod-sandbox.mirrorfly.com"
 let XMPP_PORT = 5222
 let SOCKETIO_SERVER_HOST = "https://signal-preprod-sandbox.mirrorfly.com"
@@ -148,7 +148,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
         } else {
             // Fallback on earlier versions
         }
-        ChatManager.setMediaEncryption(isEnable: false)
+        ChatManager.setMediaEncryption(isEnable: true)
         ChatManager.hideNotificationContent(hide: isHideNotificationContent)
         FlyUtils.setAppName(appName: APP_NAME)
         VOIPManager.sharedInstance.updateDeviceToken()
@@ -230,6 +230,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
             if let vc = UIApplication.shared.keyWindow?.getTopViewController() {
                 if vc is InstantScheduledMeetingViewController {
                     vc.dismiss(animated: false)
+                } else if vc is ChatViewParentController, let chatVc = vc as? ChatViewParentController {
+                    chatVc.closeContextMenu()
                 }
             }
         }
@@ -388,6 +390,7 @@ extension AppDelegate : PKPushRegistryDelegate {
     func pushRegistry(_ registry: PKPushRegistry, didReceiveIncomingPushWith payload: PKPushPayload, for type: PKPushType, completion: @escaping () -> Void) {
         NSLog("Push VOIP Received with Payload - %@",payload.dictionaryPayload)
         print("#callopt \(FlyUtils.printTime()) pushRegistry voip received")
+//        CallManager.checkAllPermissions()
         VOIPManager.sharedInstance.processPayload(payload.dictionaryPayload)
         completion()
     }
@@ -642,7 +645,7 @@ extension AppDelegate : LocalNotificationDelegate {
                 message = "This message was deleted"
             } else {
                 switch chatMessage.messageType{
-                case .text :
+                case .text, .autoText :
                     message = (message.count > 64) ? message : message
                 case .notification:
                     if chatMessage.messageChatType == .groupChat {
@@ -827,9 +830,6 @@ extension AppDelegate {
             if (current is PrivateChatFingerPrintPINViewController) || (current is PrivateChatAuthenticationPINViewController) {
                 return
             }
-            if (current is CallViewController) {
-                (current as! CallViewController).showCallOverlay()
-            }
             
             //Redirect to chat page
             if let message = (sender?.view?.accessibilityElements as? [ChatMessage])?.first {
@@ -867,6 +867,11 @@ extension AppDelegate {
                     UIApplication.shared.keyWindow?.rootViewController = navigationController
                     UIApplication.shared.keyWindow?.makeKeyAndVisible()
                 }
+            }
+            
+            //Show PIP-Mode when click missed call notification in ongoing call
+            if (current is CallUIViewController) && CallManager.isOngoingCall() {
+                (current as! CallUIViewController).showCallOverlay()
             }
             
             self.notificationView?.removeFromSuperview()

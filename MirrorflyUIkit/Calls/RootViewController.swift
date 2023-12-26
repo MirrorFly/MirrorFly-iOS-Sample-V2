@@ -13,7 +13,7 @@ import BottomSheet
 
 @objc class RootViewController : NSObject {
     public static var sharedInstance = RootViewController()
-    var callViewController : CallViewController?
+    var callViewController : CallUIViewController?
     
     override init() {
         super.init()
@@ -64,9 +64,6 @@ extension RootViewController : CallManagerDelegate {
         
         
         DispatchQueue.main.async { [weak self] in
-            if userId == AppUtils.getMyJid() && (callStatus != .RECONNECTING && callStatus != .RECONNECTED) {
-                return
-            }
             
             switch callStatus {
             case .ATTENDED:
@@ -89,7 +86,7 @@ extension RootViewController : CallManagerDelegate {
                 }
                 let window = UIApplication.shared.windows.filter {$0.isKeyWindow}.first
                 if  let navigationController = window?.rootViewController as? UINavigationController {
-                    if CallManager.getCallDirection() == .Incoming &&  (navigationController.presentedViewController?.isKind(of: CallViewController.self) == false || navigationController.presentedViewController == nil){
+                    if CallManager.getCallDirection() == .Incoming &&  (navigationController.presentedViewController?.isKind(of: CallUIViewController.self) == false || navigationController.presentedViewController == nil){
                         if let callController = self?.callViewController {
                             callController.modalPresentationStyle = .overFullScreen
                             let navigationStack = UINavigationController(rootViewController: callController)
@@ -156,7 +153,7 @@ extension RootViewController {
     
     public func initCallSDK(){
         if callViewController == nil {
-            callViewController = UIStoryboard(name: "Call", bundle: nil).instantiateViewController(withIdentifier: "CallViewController") as? CallViewController
+            callViewController = UIStoryboard(name: "Call", bundle: nil).instantiateViewController(withIdentifier: "CallUIViewController") as? CallUIViewController
         }
         
         do {

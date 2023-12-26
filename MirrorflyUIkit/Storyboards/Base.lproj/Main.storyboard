@@ -820,13 +820,13 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="252" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LXH-Ne-xJz">
-                                                    <rect key="frame" x="80" y="16" width="321" height="0.0"/>
+                                                    <rect key="frame" x="80" y="16" width="294" height="0.0"/>
                                                     <fontDescription key="fontDescription" name="SFUIDisplay-Semibold" family="SF UI Display" pointSize="14"/>
                                                     <color key="textColor" name="name"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="OAp-CC-iZk">
-                                                    <rect key="frame" x="80" y="21" width="321" height="39"/>
+                                                    <rect key="frame" x="80" y="21" width="294" height="39"/>
                                                     <fontDescription key="fontDescription" name="SFUIDisplay-Regular" family="SF UI Display" pointSize="12"/>
                                                     <color key="textColor" name="textColor"/>
                                                     <nil key="highlightedColor"/>
@@ -876,9 +876,9 @@
                                             </subviews>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             <constraints>
-                                                <constraint firstAttribute="trailing" secondItem="OAp-CC-iZk" secondAttribute="trailing" constant="13" id="8SL-U9-1gX"/>
+                                                <constraint firstAttribute="trailing" secondItem="OAp-CC-iZk" secondAttribute="trailing" constant="40" id="8SL-U9-1gX"/>
                                                 <constraint firstAttribute="trailing" secondItem="fRO-7Y-r0d" secondAttribute="trailing" constant="24" id="AOc-OO-r0R"/>
-                                                <constraint firstAttribute="trailing" secondItem="LXH-Ne-xJz" secondAttribute="trailing" constant="13" id="B4C-0u-9fU"/>
+                                                <constraint firstAttribute="trailing" secondItem="LXH-Ne-xJz" secondAttribute="trailing" constant="40" id="B4C-0u-9fU"/>
                                                 <constraint firstItem="LXH-Ne-xJz" firstAttribute="leading" secondItem="Euf-mT-Us2" secondAttribute="trailing" constant="15" id="CE4-nB-2vL"/>
                                                 <constraint firstAttribute="bottom" secondItem="OAp-CC-iZk" secondAttribute="bottom" constant="20" id="GvP-qu-BGN"/>
                                                 <constraint firstItem="fRO-7Y-r0d" firstAttribute="centerY" secondItem="Ewq-m3-HmR" secondAttribute="centerY" id="HDM-t7-SMS"/>

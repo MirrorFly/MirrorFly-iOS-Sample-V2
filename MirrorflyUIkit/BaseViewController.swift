@@ -86,6 +86,7 @@ class BaseViewController : UIViewController {
                 Utility.saveInPreference(key: isProfileSaved, value: false)
                 Utility.saveInPreference(key: isLoggedIn, value: false)
                 ChatManager.disconnect()
+                CallManager.disconnectCall()
                 ChatManager.resetXmppResource()
                 var controller : OTPViewController?
                 if #available(iOS 13.0, *) {
@@ -234,8 +235,11 @@ extension BaseViewController: MessageEventsDelegate {
     }
     
     func getAllInitialMessages() {
+        guard let jid = getProfileDetails?.jid else {
+            return
+        }
         var fetchMessageListParams = FetchMessageListParams()
-        fetchMessageListParams.chatId = getProfileDetails.jid
+        fetchMessageListParams.chatId = jid
         fetchMessageListParams.limit = 100
         fetchMessageListQuery = FetchMessageListQuery(fetchMessageListParams: fetchMessageListParams)
         fetchMessageListQuery?.loadMessages { [self] isSuccess, error, data in
