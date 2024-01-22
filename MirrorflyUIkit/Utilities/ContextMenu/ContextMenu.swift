@@ -650,7 +650,6 @@ open class ContextMenu: NSObject {
     func updateBaseviewPosition(height: CGFloat) {
         let weakSelf = self
         let safeHeight = safeAreaBottom + height
-//        UIView.animate(withDuration: 0.2) {
             weakSelf.blurEffectView.frame = CGRect(
                 x: weakSelf.mainViewRect.origin.x ,
                 y: weakSelf.mainViewRect.origin.y - safeHeight,
@@ -708,14 +707,8 @@ open class ContextMenu: NSObject {
                 weakSelf.scrollView.contentInset = UIEdgeInsets.zero
                 weakSelf.scrollView.contentInsetAdjustmentBehavior = .never
                 weakSelf.customView.layoutIfNeeded()
-                //              scrollToBottom()
+                scrollView.isScrollEnabled = (weakSelf.tvH > scrollView.bounds.height)
             }
-//        }
-    }
-    
-    func scrollToBottom() {
-        let bottomOffset = CGPoint(x: 0, y: scrollView.contentSize.height - scrollView.bounds.size.height)
-        scrollView.setContentOffset(bottomOffset, animated: true)
     }
     
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {

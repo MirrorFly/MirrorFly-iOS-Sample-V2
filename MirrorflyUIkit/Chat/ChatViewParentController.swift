@@ -862,7 +862,7 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
                 }
             }
             isFromSearchSelect = false
-        } else if (pushNotificationSelected && CommonDefaults.showAppLock == false) {
+        } else if (pushNotificationSelected && CommonDefaults.showAppLock == true) {
 //            if CommonDefaults.isInPrivateChat == true {
 //                showLockScreen()
 //            } else {
@@ -1469,8 +1469,12 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
     
     func editSelectedMessage() {
         if let editMessage = ChatManager.getMessageOfId(messageId: editMessageId) {
+            if getProfileDetails.isBlocked {
+                showBlockUnblockConfirmationPopUp()
+                return
+            }
+            self.resetReplyView(resignFirstResponder: false)
             resetAudioRecording(isCancel: true)
-            hideMultiSelectionView()
             attachmentButton.setImage(UIImage(named: "edit_close"), for: .normal)
             chatTextViewXib?.audioButton.isHidden = true
             self.isMessageEditing = true
@@ -1482,10 +1486,10 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
                 var messageContent = emptyString()
                 if editMessage.messageType == .image || editMessage.messageType == .video {
                     if let mediaMessage = editMessage.mediaChatMessage {
-                        messageContent = mediaMessage.mediaCaptionEditedText.isEmpty ? mediaMessage.mediaCaptionText : mediaMessage.mediaCaptionEditedText
+                        messageContent =  mediaMessage.mediaCaptionText
                     }
                 } else {
-                    messageContent = editMessage.editedTextContent.isEmpty ? editMessage.messageTextContent : editMessage.editedTextContent
+                    messageContent = editMessage.messageTextContent
                 }
                  
                 if editMessage.mentionedUsersIds.isEmpty {
@@ -1535,6 +1539,14 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
         if (selectedChatMessage?.messageType == .text || ((selectedChatMessage?.messageType == .image || selectedChatMessage?.messageType == .video || selectedChatMessage?.messageType == .meet || selectedChatMessage?.messageType == .autoText) && !(selectedChatMessage?.mediaChatMessage?.mediaCaptionText.isEmpty ?? false))) && selectedChatMessage?.isMessageRecalled == false {
             menusList.append(ContextMenuItemWithImage(title: MessageActions.copy.rawValue, image: UIImage(named: "ic_copy") ?? UIImage()))
         }
+        
+        ChatManager.isMessageEditable(messageId: message.messageId, completionHandler: { isSuccess, error, data in
+            if isSuccess {
+                if AppUtils.shared.calculateEditMessageTimeDifference(message: message) <= 15 {
+                    menusList.append(ContextMenuItemWithImage(title: MessageActions.edit.rawValue, image: UIImage(named: "icon-edit") ?? UIImage()))
+                }
+            }
+        })
         
         var flag : Bool = false
 
@@ -2108,7 +2120,7 @@ extension ChatViewParentController {
         let board = UIPasteboard.general
         if let chatMessage = getMessage {
             if getMessage?.messageType == .text || getMessage?.messageType == .autoText {
-                let textContent = chatMessage.editedTextContent.isEmpty ? chatMessage.messageTextContent : chatMessage.editedTextContent
+                let textContent = chatMessage.messageTextContent
                 if !chatMessage.mentionedUsersIds.isEmpty {
                     let message = ChatUtils.convertMentionUser(message: textContent, mentionedUsersIds: chatMessage.mentionedUsersIds)
                     board.strings = [message, chatMessage.mentionedUsersIds.joined(separator: ",")]
@@ -2116,7 +2128,7 @@ extension ChatViewParentController {
                     board.string = textContent
                 }
             } else if getMessage?.messageType == .video || getMessage?.messageType == .image {
-                let textContent = (chatMessage.mediaChatMessage?.mediaCaptionEditedText.isEmpty ?? true) ? chatMessage.mediaChatMessage?.mediaCaptionText : chatMessage.mediaChatMessage?.mediaCaptionEditedText
+                let textContent = chatMessage.mediaChatMessage?.mediaCaptionText
                 if !chatMessage.mentionedUsersIds.isEmpty {
                     let message = ChatUtils.convertMentionUser(message: textContent ?? emptyString(), mentionedUsersIds: chatMessage.mentionedUsersIds)
                     board.strings = [message, chatMessage.mentionedUsersIds.joined(separator: ",")]
@@ -2951,9 +2963,9 @@ extension ChatViewParentController {
             if isMessageEditing, let message = ChatManager.getMessageOfId(messageId: editMessageId) {
                 var textContent = emptyString()
                 if let media = message.mediaChatMessage {
-                    textContent =  (media.mediaCaptionEditedText.isEmpty ? media.mediaCaptionText : media.mediaCaptionEditedText)
+                    textContent =  media.mediaCaptionText
                 } else {
-                    textContent = (message.editedTextContent.isEmpty ? message.messageTextContent : message.editedTextContent)
+                    textContent =  message.messageTextContent
                 }
                 if let text = messageTextView?.text.trim(), Array(textContent.trim().utf16).elementsEqual(Array(text.utf16)) {
                     disableSendButton()
@@ -3578,10 +3590,14 @@ extension ChatViewParentController {
             checkUserBusyStatusEnabled(self) { [weak self] status in
                 executeOnMainThread {
                     if status {
-                        self?.sendTextMessage(message: message, jid: self?.getProfileDetails.jid, mentionedUsersIds: mentionedUsers)
-                        self?.resetMessageTextView()
-                        self?.resetUnreadMessages()
-                        self?.scrollToTableViewBottom()
+                        if (!(self?.isMessageEditing ?? false)) {
+                            self?.sendTextMessage(message: message, jid: self?.getProfileDetails.jid, mentionedUsersIds: mentionedUsers)
+                            self?.resetMessageTextView()
+                            self?.resetUnreadMessages()
+                            self?.scrollToTableViewBottom()
+                        } else {
+                            self?.sendEditMessage(message: message, mentionedUsersIds: mentionedUsers)
+                        }
                     }
                 }
             }
@@ -3589,6 +3605,42 @@ extension ChatViewParentController {
         messageTextView.resetMentionTextView()
     }
     
+    func sendEditMessage(message: String, mentionedUsersIds: [String]) {
+        if editMessageId.isEmpty { return }
+        if editMessageType == .text || editMessageType == .autoText {
+            let editMessageParams = EditMessage(messageId: editMessageId, editedTextContent: message, mentionedUsersIds: mentionedUsersIds)
+            FlyMessenger.editTextMessage(editMessageParams: editMessageParams) { [weak self] isSuccess, error, textMessage in
+                CM.closeMenu()
+                if isSuccess {
+                    if let indexPath = chatMessages.indices(where: {$0.messageId == textMessage?.messageId}), let message = textMessage {
+                        self?.resetMessageTextView()
+                        executeOnMainThread {
+                            chatMessages[indexPath.section][indexPath.row] = message
+                            self?.chatTableView.reloadRows(at: [indexPath], with: .automatic)
+                        }
+                    }
+                } else {
+                    AppAlert.shared.showToastWithDuration(message: error?.description ?? "", duration: 4)
+                }
+            }
+        } else if editMessageType == .image || editMessageType == .video {
+            let editMessageParams = EditMessage(messageId: editMessageId, editedTextContent: message, mentionedUsersIds: mentionedUsersIds)
+            FlyMessenger.editMediaCaption(editMessageParams: editMessageParams) { [weak self] isSuccess, error, chatMessage in
+                CM.closeMenu()
+                if isSuccess {
+                    if let indexPath = chatMessages.indices(where: {$0.messageId == chatMessage?.messageId}), let message = chatMessage {
+                        self?.resetMessageTextView()
+                        executeOnMainThread {
+                            chatMessages[indexPath.section][indexPath.row] = message
+                            self?.chatTableView.reloadRows(at: [indexPath], with: .automatic)
+                        }
+                    }
+                } else {
+                    AppAlert.shared.showToastWithDuration(message: error?.description ?? "", duration: 4)
+                }
+            }
+        }
+    }
     
     func sendImageMessage(mediaData : MediaData, mentionedUsersIds: [String], completionHandler :  @escaping (ChatMessage) -> Void) {
         print("#loss sendImageMessage \(chatMessages.count)")
@@ -4147,7 +4199,7 @@ extension ChatViewParentController : UITableViewDataSource ,UITableViewDelegate,
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        if tableView == mentionTableView  {
+        if tableView == mentionTableView, !searchGroupMembers.isEmpty  {
             let mentionCell = tableView.dequeueReusableCell(withIdentifier: "MentionTableViewCell", for: indexPath) as? MentionTableViewCell
             if let profileDetail = searchGroupMembers[indexPath.row].profileDetail {
                 if profileDetail.contactType == .deleted || profileDetail.isBlockedMe || profileDetail.isBlockedByAdmin || (IS_LIVE && ENABLE_CONTACT_SYNC && profileDetail.isItSavedContact == false) {
@@ -4162,7 +4214,7 @@ extension ChatViewParentController : UITableViewDataSource ,UITableViewDelegate,
             mentionCell?.userNameLabel.text = searchGroupMembers[indexPath.row].displayName
             //}
             return mentionCell ?? UITableViewCell()
-        } else {
+        } else if tableView == chatTableView {
             var cell : ChatViewParentMessageCell!
             //Handl
             guard isStarredMessagePage ? isStarredSearchEnabled == true ? starredSearchMessages?.count ?? 0 > 0 : starredMessages.count > 0 : chatMessages.count > 0 else { return UITableViewCell() }
@@ -4804,6 +4856,8 @@ extension ChatViewParentController : UITableViewDataSource ,UITableViewDelegate,
                 break
             }
             return UITableViewCell()
+        } else {
+            return UITableViewCell()
         }
     }
     
@@ -4976,7 +5030,7 @@ extension ChatViewParentController {
 //                    messageText = messageTextView?.text ?? ""
                     replyView.isHidden = false
                     replyCloseButtonTapped = false
-                    replyMessageId = message.editMessageID.isEmpty ? message.messageId : message.editMessageID
+                    replyMessageId = message.messageId
                     chatTextViewXib?.closeButton?.addTarget(self, action: #selector(closeButtontapped(sender:)), for: .touchUpInside)
                     chatTextViewXib?.setupUI()
                     chatTextViewXib?.setSenderReceiverMessage(message: message, contactType: senderInfo?.contactType ?? .unknown)
@@ -5163,6 +5217,19 @@ extension ChatViewParentController  {
             print("onMessageReceived  \(getProfileDetails.jid ?? "") = \(message.chatUserJid) \(message.isMessageSentByMe)")
             let toMardAsRead = (messageDelegate == nil)
             handleWhileRecevingMessage(message: message, chatJid: chatJid, markAsRead: toMardAsRead)
+        }
+    }
+    
+    override func onMessageEdited(message: ChatMessage) {
+        if let indexpath = chatMessages.indices(where: {$0.messageId == message.messageId}) {
+            executeOnMainThread { [weak self] in
+                if let getMessage = ChatManager.getMessageOfId(messageId: message.messageId) {
+                    chatMessages[indexpath.section][indexpath.row] = getMessage
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                        self?.chatTableView.reloadRows(at: [indexpath], with: .automatic)
+                    }
+                }
+            }
         }
     }
     
@@ -6087,21 +6154,29 @@ extension ChatViewParentController : ProfileEventsDelegate {
     
     func blockedThisUser(jid: String) {
         if !isStarredMessagePage {
-            checkUserBlocked()
-            setProfile()
             if jid == getProfileDetails.jid {
                 scheduleMeetBtn.isHidden = true
+                getProfileDetails.isBlocked = true
+                if isMessageEditing {
+                    CM.closeMenu()
+                }
             }
+            checkUserBlocked()
+            setProfile()
         }
     }
     
     func unblockedThisUser(jid: String) {
         if !isStarredMessagePage {
-            checkUserBlocked()
-            setProfile()
             if jid == getProfileDetails.jid {
                 scheduleMeetBtn.isHidden = false
+                getProfileDetails.isBlocked = false
+                if editMessageId.isNotEmpty {
+                    editSelectedMessage()
+                }
             }
+            checkUserBlocked()
+            setProfile()
         }
     }
     
@@ -7216,6 +7291,9 @@ extension ChatViewParentController {
                 }
                 
                 let result = isParticipantExist()
+                if !result.doesExist && editMessageId.isNotEmpty {
+                    CM.closeMenu()
+                }
                 print("ChatViewParentController Group isExist \(result.doesExist) \(result.message)")
                 chatTextViewXib?.cannotSendMessageView?.isHidden = result.doesExist ? true : false
                 disableForBlocking(disable: result.doesExist ? false : true)
@@ -8490,13 +8568,15 @@ extension ChatViewParentController {
         mentionBaseView.isHidden = true
         let didCallCome = didCallCome
         checkUserBusyStatusEnabled(self) { [weak self] status in
-            if status {
-                if CallManager.isOngoingCall() || CallManager.checkForActiveCall() || didCallCome {
-                    AppAlert.shared.showToast(message: cannotRecordAudioDuringCall)
-                    return
+            executeOnMainThread {
+                if status {
+                    if CallManager.isOngoingCall() || CallManager.checkForActiveCall() || didCallCome {
+                        AppAlert.shared.showToast(message: cannotRecordAudioDuringCall)
+                        return
+                    }
+                    self?.checkForMicroPhonePermission()
+                    self?.view.endEditing(true)
                 }
-                self?.checkForMicroPhonePermission()
-                self?.view.endEditing(true)
             }
         }
     }
@@ -9364,9 +9444,7 @@ extension ChatViewParentController: UISearchBarDelegate {
                                 (myName == receiverName ? "" : receiverName.lowercased()).localizedCaseInsensitiveContains(searchText.lowercased()) ||
                                 "You".localizedCaseInsensitiveContains(searchText.lowercased()) ||
                                 $0.mediaChatMessage?.mediaCaptionText.lowercased().localizedCaseInsensitiveContains(searchText.lowercased()) ?? false ||
-                                $0.mediaChatMessage?.mediaCaptionEditedText.lowercased().localizedCaseInsensitiveContains(searchText.lowercased()) ?? false ||
                                 $0.messageTextContent.lowercased().localizedCaseInsensitiveContains(searchText.lowercased()) ||
-                                $0.editedTextContent.lowercased().localizedCaseInsensitiveContains(searchText.lowercased()) ||
                                 ($0.contactChatMessage != nil && $0.contactChatMessage?.contactName.lowercased().localizedCaseInsensitiveContains(searchText.lowercased()) ?? false) ||
                                 ($0.mediaChatMessage != nil && $0.mediaChatMessage?.messageType == .document &&  $0.mediaChatMessage?.mediaFileName.lowercased().localizedCaseInsensitiveContains(searchText.lowercased()) ?? false))
                     })
@@ -9481,7 +9559,7 @@ extension ChatViewParentController: UISearchBarDelegate {
                 foundedIndex = []
                 chatMessages.enumerated().forEach({ (section,messages) in
                     messages.enumerated().forEach({ (row,message) in
-                        if (message.messageTextContent.localizedCaseInsensitiveContains(searchText) || message.editedTextContent.localizedCaseInsensitiveContains(searchText) || message.mediaChatMessage?.mediaCaptionText.localizedCaseInsensitiveContains(searchText) ?? false || message.mediaChatMessage?.mediaCaptionEditedText.localizedCaseInsensitiveContains(searchText) ?? false ||
+                        if (message.messageTextContent.localizedCaseInsensitiveContains(searchText) || message.mediaChatMessage?.mediaCaptionText.localizedCaseInsensitiveContains(searchText) ?? false ||
                             (message.mediaChatMessage?.messageType == .document && message.mediaChatMessage?.mediaFileName.localizedCaseInsensitiveContains(searchText) ?? false) ||
                             message.contactChatMessage?.contactName.localizedCaseInsensitiveContains(searchText) ?? false || message.replyParentChatMessage?.messageTextContent.localizedCaseInsensitiveContains(searchText) ?? false || (message.messageType == .meet && message.meetChatMessage?.link.localizedCaseInsensitiveContains(searchText) ?? false)) && !message.isMessageRecalled && message.messageType != .notification {
                             foundedIndex.append(IndexPath(row: row, section: section))
@@ -10082,29 +10160,31 @@ extension ChatViewParentController: SendMeetLinkMessage {
 
     func showShareLinkSheet(link : String){
         checkUserBusyStatusEnabled(self) { [self] status in
-            if status {
-                if let sheet = bottomSheet {
-                    self.bottomSheetOpened = true
-                    self.view.endEditing(false)
-                    self.view.isUserInteractionEnabled = false
-                    resetAudioRecording(isCancel: true)
-                    sheet.callLinkDelegate = self
-                    sheet.meetMessageDelegate = self
-                    sheet.getProfileDetails = self.getProfileDetails
-                    let delay = keyboardShown ? 0.8 : 0
-                    DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-                        presentBottomSheetInsideNavigationController(viewController: sheet,configuration: BottomSheetConfiguration(
-                            cornerRadius: 16,
-                            pullBarConfiguration: .hidden,
-                            shadowConfiguration: .default
-                        ),canBeDismissed: {
-                            true
-                        },dismissCompletion: {
+            executeOnMainThread {
+                if status {
+                    if let sheet = bottomSheet {
+                        self.bottomSheetOpened = true
+                        self.view.endEditing(false)
+                        self.view.isUserInteractionEnabled = false
+                        resetAudioRecording(isCancel: true)
+                        sheet.callLinkDelegate = self
+                        sheet.meetMessageDelegate = self
+                        sheet.getProfileDetails = self.getProfileDetails
+                        let delay = keyboardShown ? 0.8 : 0
+                        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                            presentBottomSheetInsideNavigationController(viewController: sheet,configuration: BottomSheetConfiguration(
+                                cornerRadius: 16,
+                                pullBarConfiguration: .hidden,
+                                shadowConfiguration: .default
+                            ),canBeDismissed: {
+                                true
+                            },dismissCompletion: {
+                                self.view.isUserInteractionEnabled = true
+                                self.bottomSheetOpened = false
+                            })
                             self.view.isUserInteractionEnabled = true
                             self.bottomSheetOpened = false
-                        })
-                        self.view.isUserInteractionEnabled = true
-                        self.bottomSheetOpened = false
+                        }
                     }
                 }
             }

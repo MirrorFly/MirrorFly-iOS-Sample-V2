@@ -117,7 +117,7 @@ class RecentChatTableViewCell: UITableViewCell {
     }
     
     func setLastContentTextColor(searchText: String,recentChat: RecentChat, caption : String = "", searchMessage: ChatMessage? = nil) {
-        let editMesssage = ChatManager.getMessageOfId(messageId: recentChat.lastMessageId)?.editedTextContent ?? emptyString()
+        let editMesssage = ChatManager.getMessageOfId(messageId: recentChat.lastMessageId)?.messageTextContent ?? emptyString()
         var recentMessage = editMesssage.isEmpty ? recentChat.lastMessageContent.trim() : editMesssage.trim()
         var captionText = caption
         if !recentChat.mentionedUsersIds.isEmpty && searchText.isNotEmpty {
@@ -318,7 +318,7 @@ class RecentChatTableViewCell: UITableViewCell {
         case .video, .image,.audio,.contact,.location:
             let mentionedUsersIds = chatMessage?.mentionedUsersIds ?? []
             if let mediaMessage = chatMessage?.mediaChatMessage {
-                let captionText = mediaMessage.mediaCaptionEditedText.isEmpty ? mediaMessage.mediaCaptionText : mediaMessage.mediaCaptionEditedText
+                let captionText = mediaMessage.mediaCaptionText 
                 if !mentionedUsersIds.isEmpty, captionText.trim().isNotEmpty {
                     let isMessageSentByMe = chatMessage?.isMessageSentByMe ?? false
                     if recentChatMessage.profileType == .groupChat {

@@ -359,7 +359,7 @@ extension GroupCallViewController: CallLogDelegate {
         }
     }
     
-    func callLogUpdate(calllogId: String) {
+    func onCallLogsUpdated() {
         
     }
     

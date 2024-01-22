@@ -1326,7 +1326,7 @@ extension RecentChatViewController : UITableViewDataSource ,UITableViewDelegate 
                             let chatMessage = getMessages(messageId: recentChat.lastMessageId)
                             let getGroupSenderName = ChatUtils.getGroupSenderName(messsage: chatMessage)
                             cell.setRecentChatMessage(recentChatMessage: recentChat, color: color, chatMessage: chatMessage, senderName: getGroupSenderName, fromArchive: showArchivedChat, forSearch: true)
-                            let caption = chatMessage.messageType == .meet ? chatMessage.meetChatMessage?.link ?? "" : ((chatMessage.mediaChatMessage?.mediaCaptionEditedText.isEmpty ?? true) ? (chatMessage.mediaChatMessage?.mediaCaptionText ?? "") : chatMessage.mediaChatMessage?.mediaCaptionEditedText ?? "")
+                            let caption = chatMessage.messageType == .meet ? chatMessage.meetChatMessage?.link ?? "" :  (chatMessage.mediaChatMessage?.mediaCaptionText ?? "")
                             cell.setLastContentTextColor(searchText: searchBar?.text ?? "", recentChat: recentChat, caption: caption, searchMessage: chatMessage)
                             cell.profileImageButton?.isHidden = true
                             cell.setChatTimeTextColor(lastMessageTime: recentChat.lastMessageTime, unreadCount: recentChat.unreadMessageCount)
@@ -2260,6 +2260,41 @@ extension RecentChatViewController : MessageEventsDelegate {
     
     func onMessageTranslated(message: ChatMessage, jid: String) {
         
+    }
+    
+    func onMessageEdited(message: MirrorFlySDK.ChatMessage) {
+        executeOnMainThread {
+            FlyLog.DLog(param1: "#messageTextContentRecent=>\(message.messageTextContent)", param2: "")
+            switch self.isSearchEnabled {
+            case true:
+                if !self.searchedMessages.isEmpty {
+                    if let _ = self.searchedMessages.firstIndex(where: { $0.messageId == message.messageId}), let searchText = self.searchBar?.text?.trim() {
+                        self.searchedMessages = ChatManager.shared.searchMessage(text: searchText).filter { !ChatManager.isPrivateChat(jid: $0.chatUserJid) }
+                        self.recentChatTableView?.reloadData()
+                    }
+                }
+            case false:
+                if !self.getArchiveChat.isEmpty {
+                    if let index = self.getArchiveChat.firstIndex(where: { $0.lastMessageId == message.messageId}) {
+                        self.recentChatTableView?.reloadRows(at: [IndexPath(row: index, section: 0)], with: .none)
+                    }
+                } else if !self.getPrivateChats.isEmpty {
+                    if let index = self.getPrivateChats.firstIndex(where: { $0.lastMessageId == message.messageId}) {
+                        self.recentChatTableView?.reloadRows(at: [IndexPath(row: index, section: 0)], with: .none)
+                    }
+                }
+            }
+            if !self.getRecentChat.isEmpty {
+                if let index = self.getRecentChat.firstIndex(where: { $0.lastMessageId == message.messageId}) {
+                    if let recentChat = ChatManager.getRechtChat(jid: self.getRecentChat[index].jid) {
+                        self.getRecentChat[index] = recentChat
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                        self.recentChatTableView?.reloadDataWithoutScroll()
+                    }
+                }
+            }
+        }
     }
     
     func onMessageStatusUpdated(messageId: String, chatJid: String, status: MessageStatus) {

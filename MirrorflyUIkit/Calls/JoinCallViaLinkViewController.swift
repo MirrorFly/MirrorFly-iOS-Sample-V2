@@ -409,6 +409,18 @@ class JoinCallViaLinkViewController: BaseViewController, CallUIDelegate {
     func uiPresented() {
         navigationController?.popViewController(animated: false)
     }
+    
+    func callReceived(id: String) {
+        
+    }
+    
+    func callAttended(id: String) {
+        
+    }
+    
+    func callDisconnected(id: String) {
+        
+    }
 }
 extension JoinCallViaLinkViewController: JoinCallDelegate {
     

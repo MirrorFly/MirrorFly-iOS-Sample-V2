@@ -155,10 +155,10 @@
 	<key>UIUserInterfaceStyle</key>
 	<string>Light</string>
 	<key>googleApiKey</key>
-	<string>xxxxxxxxxxx</string>
+	<string>xxxxxxxxxxxxxxxxxxx</string>
 	<key>googleApiKeyStaticMap</key>
-	<string>xxxxxxxxxxx</string>
+	<string>xxxxxxxxxxxxxxxxxxx</string>
 	<key>googleApiKey_Translation</key>
-	<string>xxxxxxxxxxx</string>
+	<string>xxxxxxxxxxxxxxxxxxx</string>
 </dict>
 </plist>

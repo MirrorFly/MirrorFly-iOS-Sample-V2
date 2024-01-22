@@ -184,7 +184,7 @@ class AppUtils: NSObject {
     }
     
     func fetchStaticMapImage(latitude: Double, longitude: Double, zoomLevel: String, size: CGSize, completion: @escaping (UIImage) -> ()) {
-        let apiKey = "xxxxxxxxxxx"
+        let apiKey = getGoogleApikey()
         let location = "\(latitude),\(longitude)" // Latitude and longitude of the location you want to show on the map
         let markerLocation = "\(latitude),\(longitude)"
         let zoomLevel = zoomLevel // Zoom level of the map (0-21, where 0 is the world view and 21 is the maximum zoom)
@@ -216,12 +216,19 @@ class AppUtils: NSObject {
     
     func getGoogleApikey() -> String {
         var key: String = ""
-        if let path = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist"){
+        if let path = Bundle.main.path(forResource: "MirrorflyUIkit-info", ofType: "plist"){
             if let dict = NSDictionary(contentsOfFile: path) as? Dictionary<String, AnyObject> {
-                key = dict["API_KEY"] as? String ?? ""
+                key = dict["googleApiKeyStaticMap"] as? String ?? ""
             }
         }
         return key
+    }
+    
+    func calculateEditMessageTimeDifference(message: ChatMessage) -> Int {
+        let timeStamp = message.messageSentTime / 1000
+        let sentDate = Date(timeIntervalSince1970: (Double(timeStamp) / 1000.0))
+        let secondsAgo = Int(Date().timeIntervalSince(sentDate))
+        return secondsAgo / 60
     }
     
 }

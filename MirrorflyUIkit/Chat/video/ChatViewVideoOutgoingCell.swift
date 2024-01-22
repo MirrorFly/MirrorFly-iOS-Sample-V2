@@ -361,7 +361,7 @@ class ChatViewVideoOutgoingCell: BaseTableViewCell {
             timeOverlay?.isHidden = false
             msgStatus.isHidden = false
         }else {
-            let captionTxt = (message?.mediaChatMessage?.mediaCaptionEditedText.isEmpty ?? true) ? message?.mediaChatMessage?.mediaCaptionText ?? "" : message?.mediaChatMessage?.mediaCaptionEditedText ?? ""
+            let captionTxt =  message?.mediaChatMessage?.mediaCaptionText ?? ""
             captionHolder.isHidden = false
             let mentionedUsersIds = message?.mentionedUsersIds ?? []
             let isMessageSentByMe = message?.isMessageSentByMe ?? false
@@ -444,7 +444,7 @@ class ChatViewVideoOutgoingCell: BaseTableViewCell {
         }
         let time = DateFormatterUtility.shared.convertMillisecondsToTime(milliSeconds: timeStamp).getTimeFormat()
         self.sentTime.text = time.uppercased()
-        self.captionLabelTime.text = (message?.mediaChatMessage?.mediaCaptionEditedText.isEmpty ?? true) ? time.uppercased() : "Edited \(time.uppercased())"
+        self.captionLabelTime.text = (message?.isMessageEdited ?? false) ? "Edited \(time.uppercased())" : time.uppercased()
         return self
     }
     

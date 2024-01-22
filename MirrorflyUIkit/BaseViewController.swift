@@ -142,6 +142,12 @@ extension BaseViewController: MessageEventsDelegate {
         }
     }
     
+    func onMessageEdited(message: MirrorFlySDK.ChatMessage) {
+        if let indexpath = chatMessages.indices(where: {$0.messageId == message.messageId}) {
+            chatMessages[indexpath.section][indexpath.row] = message
+        }
+    }
+    
     func onMessageStatusUpdated(messageId: String, chatJid: String, status: MirrorFlySDK.MessageStatus) {
         if chatMessages.isEmpty { return }
         if let indexpath = chatMessages.indices(where: {$0.messageId == messageId}) {

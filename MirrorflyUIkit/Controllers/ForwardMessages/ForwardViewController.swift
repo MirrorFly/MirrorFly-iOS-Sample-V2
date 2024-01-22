@@ -473,7 +473,7 @@ extension ForwardViewController : UITableViewDelegate, UITableViewDataSource {
                 cell.receiverMessageTypeView?.isHidden = true
                 let chatMessage = recentChatDetails.lastMessageContent.trim()
                 let getmessage = getMessages(messageId: recentChatDetails.lastMessageId)
-                var lastMessageContent = getmessage.editedTextContent.isEmpty ? getmessage.messageTextContent : getmessage.editedTextContent
+                var lastMessageContent = getmessage.messageTextContent
                 if recentChatDetails.isMentionedUser, chatMessage.isNotEmpty {
                     var message = emptyString()
                     if recentChatDetails.profileType == .groupChat {
@@ -1236,6 +1236,10 @@ extension ForwardViewController : GroupEventsDelegate {
 extension ForwardViewController : MessageEventsDelegate {
   
     func onMessageTranslated(message: ChatMessage, jid: String) {
+        
+    }
+    
+    func onMessageEdited(message: MirrorFlySDK.ChatMessage) {
         
     }
     
