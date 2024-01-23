@@ -364,7 +364,7 @@ class ChatViewVideoIncomingCell: BaseTableViewCell {
         
         if let captionTxt = message?.mediaChatMessage?.mediaCaptionText, captionTxt != "" {
             //ChatUtils.highlight(uilabel: caption, message: captionTxt, searchText: searchText, isMessageSearch: isMessageSearch, isSystemBlue: isStarredMessagePage == true && isMessageSearch ? true : false)
-            let messageTxt = (message?.mediaChatMessage?.mediaCaptionEditedText.isEmpty ?? true) ? captionTxt : message?.mediaChatMessage?.mediaCaptionEditedText ?? ""
+            let messageTxt =  captionTxt
             let mentionedUsersIds = message?.mentionedUsersIds ?? []
             let isMessageSentByMe = message?.isMessageSentByMe ?? false
             if !mentionedUsersIds.isEmpty {
@@ -448,7 +448,7 @@ class ChatViewVideoIncomingCell: BaseTableViewCell {
         }
         let receivedTime = DateFormatterUtility.shared.convertMillisecondsToTime(milliSeconds: timeStamp).getTimeFormat()
         self.reecivedTime.text = receivedTime.uppercased()
-        self.captionTime?.text = (message?.mediaChatMessage?.mediaCaptionEditedText.isEmpty ?? true) ? receivedTime.uppercased() : "Edited \(receivedTime.uppercased())"
+        self.captionTime?.text = (message?.isMessageEdited ?? false) ? "Edited \(receivedTime.uppercased())" : receivedTime.uppercased()
         
         //MARK: - Populating the Incoming Cell with the translated message
         

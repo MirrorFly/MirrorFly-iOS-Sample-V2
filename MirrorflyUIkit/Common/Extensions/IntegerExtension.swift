@@ -11,3 +11,8 @@ extension Int32 {
         return ByteCountFormatter().string(fromByteCount: Int64(self))
     }
 }
+extension Int64 {
+    var byteSize: String {
+        return ByteCountFormatter().string(fromByteCount: Int64(self))
+    }
+}

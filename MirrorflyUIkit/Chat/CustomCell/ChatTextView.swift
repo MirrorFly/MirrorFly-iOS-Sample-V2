@@ -143,10 +143,10 @@ class ChatTextView: UIView, UITextViewDelegate {
             switch message.messageType {
             case .text, .autoText:
                 if !mentionedUsers.isEmpty {
-                    let replyMessage = message.editedTextContent.isEmpty ? message.messageTextContent : message.editedTextContent
+                    let replyMessage = message.messageTextContent
                     messageTypeLabel?.text = ChatUtils.getMentionTextContent(message: replyMessage, uiLabel: messageTypeLabel, isMessageSentByMe: isMessageSentByMe, mentionedUsers: mentionedUsers).string
                 } else {
-                    messageTypeLabel?.text = message.editedTextContent.isEmpty ? message.messageTextContent : message.editedTextContent
+                    messageTypeLabel?.text = message.messageTextContent
                 }
                 messageTypeWidthCons?.constant = 0
                 spacierView?.isHidden = true

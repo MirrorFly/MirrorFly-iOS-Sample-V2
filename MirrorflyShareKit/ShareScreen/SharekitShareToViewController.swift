@@ -1440,6 +1440,9 @@ extension SharekitShareToViewController : GroupEventsDelegate {
 
 // MessageEventDelegate
 extension SharekitShareToViewController : MessageEventsDelegate {
+    func onMessageEdited(message: MirrorFlySDK.ChatMessage) {
+        
+    }
     
     func onMediaStatusFailed(error: String, messageId: String) {
 

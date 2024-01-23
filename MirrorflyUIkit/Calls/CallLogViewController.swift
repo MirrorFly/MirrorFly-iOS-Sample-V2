@@ -882,7 +882,7 @@ extension CallLogViewController {
     func deleteCallLogs(isClearAll: Bool) {
         if isClearAll {
             if self.getSelectedLogs().isEmpty {
-                ChatManager.deleteCallLog(isClearAll: true, callLogIds: [self.callLogArray.first?.callLogId ?? emptyString()]) { isSuccess, error, data in
+                ChatManager.deleteCallLog(isClearAll: true) { isSuccess, error, data in
                     self.updateButtons()
                     self.callLogArray = CallLogManager.getAllCallLogs()
                     self.allCallLogArray = self.callLogArray
@@ -1262,7 +1262,7 @@ extension CallLogViewController : CallLogDelegate {
         }
     }
     
-    func callLogUpdate(calllogId : String) {
+    func onCallLogsUpdated() {
         
     }
 }

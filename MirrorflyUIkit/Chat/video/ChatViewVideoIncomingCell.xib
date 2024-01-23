@@ -443,7 +443,7 @@
                                                 <rect key="frame" x="0.0" y="0.0" width="454" height="93"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" ambiguous="YES" text="Caption...." textAlignment="natural" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="w0F-w3-AHu">
-                                                        <rect key="frame" x="12" y="6" width="382" height="96"/>
+                                                        <rect key="frame" x="12" y="6" width="382" height="17"/>
                                                         <fontDescription key="fontDescription" name="SFUIDisplay-Regular" family="SF UI Display" pointSize="14"/>
                                                         <color key="textColor" name="imageCaption"/>
                                                         <nil key="highlightedColor"/>
@@ -454,9 +454,9 @@
                                                 </subviews>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <constraints>
+                                                    <constraint firstAttribute="bottom" secondItem="w0F-w3-AHu" secondAttribute="bottom" constant="10" id="KHA-Mn-e58"/>
                                                     <constraint firstItem="w0F-w3-AHu" firstAttribute="top" secondItem="BVG-lV-riH" secondAttribute="top" constant="6" id="UQQ-2J-B9X"/>
                                                     <constraint firstAttribute="trailing" secondItem="w0F-w3-AHu" secondAttribute="trailing" constant="60" id="b4v-yL-yoq"/>
-                                                    <constraint firstAttribute="height" secondItem="w0F-w3-AHu" secondAttribute="height" id="ga9-Rb-fJ7"/>
                                                     <constraint firstItem="w0F-w3-AHu" firstAttribute="leading" secondItem="BVG-lV-riH" secondAttribute="leading" constant="12" id="oeT-Se-k3c"/>
                                                 </constraints>
                                             </view>

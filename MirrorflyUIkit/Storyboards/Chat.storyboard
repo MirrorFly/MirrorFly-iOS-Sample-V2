@@ -814,7 +814,7 @@
                                     <constraint firstItem="ghc-YN-afB" firstAttribute="centerX" secondItem="TJE-oY-ibn" secondAttribute="centerX" id="zIB-XC-dM3"/>
                                 </constraints>
                             </view>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="YjC-07-9YX">
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="YjC-07-9YX" customClass="GMSMapView">
                                 <rect key="frame" x="0.0" y="109" width="393" height="643.33333333333337"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                             </view>
@@ -898,7 +898,7 @@
                     <connections>
                         <outlet property="address1Label" destination="m4g-Ct-PSv" id="ILe-C8-VId"/>
                         <outlet property="bottomView" destination="tVC-5G-yyV" id="1Hw-EF-Xca"/>
-                        <outlet property="googleMapView" destination="YjC-07-9YX" id="iMR-WK-HUF"/>
+                        <outlet property="googleMapView" destination="YjC-07-9YX" id="5ie-3B-awI"/>
                         <outlet property="navigationView" destination="TJE-oY-ibn" id="NgI-8Q-CIe"/>
                         <outlet property="sendButton" destination="sdh-uk-ieH" id="5j2-9k-1IH"/>
                         <outlet property="sendThisLocationLabel" destination="wsi-Th-CyT" id="Ex5-Fq-81l"/>
