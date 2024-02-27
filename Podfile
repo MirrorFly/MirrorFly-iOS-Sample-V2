@@ -7,7 +7,7 @@ use_frameworks!
 def uikit_pods
 
   pod 'PhoneNumberKit', :git => 'https://github.com/marmelroy/PhoneNumberKit.git', :commit => '6edd6e38a30aec087cb97f7377edf876c29a427e'
-  pod 'IQKeyboardManagerSwift'
+  pod 'IQKeyboardManagerSwift','6.5.16'
   pod 'Firebase/Auth'
   pod 'Firebase/Crashlytics'
   pod 'Firebase/Analytics'
@@ -28,17 +28,19 @@ def uikit_pods
   pod 'RxSwift', '6.5.0'
   pod 'RxCocoa', '6.5.0'
   pod 'SwiftLinkPreview'
-  pod 'lottie-ios'
+  pod 'lottie-ios', '4.4.0'
   pod 'BottomSheet', :git => 'https://github.com/joomcode/BottomSheet'
   
-  pod 'MirrorFlySDK', '5.15.1'
+  #submodule dependency pods
+  pod 'MirrorFlySDK', '5.15.5'
 
 end
 
 def notification_pods
 
-  pod 'MirrorFlySDK', '5.15.1'
-
+  #submodule dependency pods
+  pod 'MirrorFlySDK', '5.15.5'
+  
 end
 
 target 'UiKitQa' do
@@ -49,19 +51,7 @@ target 'UiKitQaNotificationExtention' do
   notification_pods
 end
 
-target 'Mirrorfly' do
-  uikit_pods
-end
-
-target 'MirrorflyNotificationExtention' do
-  notification_pods
-end
-
 target 'UikitQaShareKit' do
-  uikit_pods
-end
-
-target 'MirrorflyShareKit' do
   uikit_pods
 end
 
@@ -73,6 +63,7 @@ post_install do |installer|
       config.build_settings['APPLICATION_EXTENSION_API_ONLY'] = 'No'
       config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
       config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'YES'
+      config.build_settings['ONLY_ACTIVE_ARCH'] = 'NO'
       shell_script_path = "Pods/Target Support Files/#{target.name}/#{target.name}-frameworks.sh"
       xcconfig_path = config.base_configuration_reference.real_path
       xcconfig = File.read(xcconfig_path)

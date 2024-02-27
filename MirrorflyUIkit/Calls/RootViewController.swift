@@ -67,7 +67,7 @@ extension RootViewController : CallManagerDelegate {
             
             switch callStatus {
             case .ATTENDED:
-
+                CallManager.callUiDelegate?.uiPresented()
                 if (CommonDefaults.appLockenable || CommonDefaults.appFingerprintenable) {
                     let secondsDifference = Calendar.current.dateComponents([.minute, .second], from: CommonDefaults.appBackgroundTime, to: Date())
                     if secondsDifference.second ?? 0 > 32 || secondsDifference.minute ?? 0 > 0 {
@@ -88,10 +88,10 @@ extension RootViewController : CallManagerDelegate {
                 if  let navigationController = window?.rootViewController as? UINavigationController {
                     if CallManager.getCallDirection() == .Incoming &&  (navigationController.presentedViewController?.isKind(of: CallUIViewController.self) == false || navigationController.presentedViewController == nil){
                         if let callController = self?.callViewController {
-                            callController.modalPresentationStyle = .overFullScreen
+                            callController.modalPresentationStyle = .fullScreen
                             let navigationStack = UINavigationController(rootViewController: callController)
-                            navigationStack.setNavigationBarHidden(true, animated: true)
-                            navigationStack.modalPresentationStyle = .overFullScreen
+                            navigationStack.setNavigationBarHidden(true, animated: false)
+                            navigationStack.modalPresentationStyle = .fullScreen
                             window?.rootViewController?.present(navigationStack, animated: true, completion: {
                             })
                         }

@@ -47,9 +47,12 @@ class TileCell: UICollectionViewCell {
     }
     
     func setupDataForTileCell(tileCell: TileCell, indexPath: IndexPath, members: [CallMember], member: CallMember, isBackCamera: Bool, showGridView: Bool, callStatus: CallStatus) {
-    
-        let isLastRow = (CallManager.getCallMode() == .MEET && (members.count == 1 || members.count == 2) && !showGridView) ? true : (CallManager.isOneToOneCall() && !showGridView) ? true : members[members.count - 2].callStatus != .connected ? (indexPath.item == members.count - 2) : (indexPath.item == members.count - 1)
-       
+        var isLastRow = false
+        if showGridView{
+            isLastRow = indexPath.row == (members.count - 1)
+        }else{
+            isLastRow = (CallManager.getCallMode() == .MEET && (members.count == 1 || members.count == 2) && !showGridView) ? true : (CallManager.isOneToOneCall() && !showGridView) ? true : members[members.count - 2].callStatus != .connected ? (indexPath.item == members.count - 2) : (indexPath.item == members.count - 1)
+        }
         if isLastRow {
             tileCell.profileName.text = members.count == 1 ? "" : "You"
             tileCell.foreGroundView.isHidden = true
@@ -131,7 +134,7 @@ class TileCell: UICollectionViewCell {
         
         print("member ==>\(String(describing: member.jid)) and video Status ==>\(member.isVideoMuted)")
         
-        if CallManager.getCallType() == .Video && !member.isVideoMuted  && member.callStatus == .connected {
+        if CallManager.getCallType() == .Video && !member.isVideoMuted  && (member.callStatus == .connected || (member.jid == AppUtils.getMyJid())) {
             
             #if arch(arm64)
             let localRen = RTCMTLVideoView(frame: .zero)

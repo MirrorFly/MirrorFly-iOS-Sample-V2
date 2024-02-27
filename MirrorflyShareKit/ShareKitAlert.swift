@@ -18,7 +18,7 @@ class ShareKitAlert {
     var alert : UIAlertController? = nil
 
     //Simple Alert view
-    func showToast(controller : UIViewController, message : String){
+    func showToast(controller : UIViewController, message : String, position: MFToastPosition = .bottom){
         //let toast = Toast(text: message)
         //toast.show()
         let toastLabel = UILabel()
@@ -38,7 +38,7 @@ class ShareKitAlert {
             toastLabel.leftAnchor.constraint(greaterThanOrEqualTo: controller.view.leftAnchor, constant: 15),
             toastLabel.rightAnchor.constraint(lessThanOrEqualTo: controller.view.rightAnchor, constant: -15),
             toastLabel.centerXAnchor.constraint(equalTo: controller.view.centerXAnchor),
-            toastLabel.bottomAnchor.constraint(equalTo: controller.view.safeAreaLayoutGuide.bottomAnchor, constant: -20)
+            toastLabel.bottomAnchor.constraint(equalTo: controller.view.safeAreaLayoutGuide.bottomAnchor, constant: position == .bottom ?  -20 : -(UIScreen.main.bounds.height/2))
         ])
         UIView.animate(withDuration: 5.0, delay: 0.1, options: .curveEaseOut, animations: {
             toastLabel.alpha = 0.0

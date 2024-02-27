@@ -119,6 +119,9 @@ class RecentChatTableViewCell: UITableViewCell {
     func setLastContentTextColor(searchText: String,recentChat: RecentChat, caption : String = "", searchMessage: ChatMessage? = nil) {
         let editMesssage = ChatManager.getMessageOfId(messageId: recentChat.lastMessageId)?.messageTextContent ?? emptyString()
         var recentMessage = editMesssage.isEmpty ? recentChat.lastMessageContent.trim() : editMesssage.trim()
+        if recentChat.lastMessageType == .notification {
+            recentMessage = emptyString()
+        }
         var captionText = caption
         if !recentChat.mentionedUsersIds.isEmpty && searchText.isNotEmpty {
             recentMessage = ChatUtils.convertNormalMentionUser(message: recentMessage, mentionedUsersIds: recentChat.mentionedUsersIds)

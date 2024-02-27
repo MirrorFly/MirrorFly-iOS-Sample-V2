@@ -1440,7 +1440,7 @@ extension RecentChatViewController : UITableViewDataSource ,UITableViewDelegate 
             } else if isSearchEnabled == true {
                 if !ENABLE_CONTACT_SYNC {
                     if filteredContactList.count != 0 {
-                        if filteredContactList.count >= indexPath.row{
+                        if filteredContactList.count > indexPath.row{
                             ContactManager.shared.saveUser(profileDetails: filteredContactList[indexPath.row])
                         }
                     }
@@ -1940,16 +1940,17 @@ extension RecentChatViewController: UISearchBarDelegate {
         if ENABLE_CONTACT_SYNC{
             showHideEmptyMessage()
         }
-        
+        processSearchMessage()
+    }
     
+    func processSearchMessage() {
         DispatchQueue.global(qos: .userInitiated).async {
             DispatchQueue.main.async {[weak self] in
-                self?.searchedMessages = ChatManager.shared.searchMessage(text: searchText.trim()).filter { !ChatManager.isPrivateChat(jid: $0.chatUserJid) }
+                self?.searchedMessages = ChatManager.shared.searchMessage(text: (self?.searchBar?.text?.trim() ?? "")).filter { !ChatManager.isPrivateChat(jid: $0.chatUserJid) }
                 self?.recentChatTableView?.reloadData()
                 self?.showHideEmptyMessage()
             }
         }
-
     }
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
@@ -2320,6 +2321,7 @@ extension RecentChatViewController : MessageEventsDelegate {
     
     func onMessagesDeletedforEveryone(messageIds: Array<String>) {
         getRecentChatList()
+        processSearchMessage()
     }
     
     func showOrUpdateOrCancelNotification() {}
@@ -2355,7 +2357,9 @@ extension RecentChatViewController : MessageEventsDelegate {
     
     func onMessageReceived(message: ChatMessage, chatJid: String) {
         print("onMessageReceived \(message.messageId) \(chatJid)")
-        if isSearchEnabled == false {
+        if isSearchEnabled {
+            getRecentChatList()
+        } else {
             refreshRecentChatMessages()
         }
     }
@@ -2866,13 +2870,13 @@ extension RecentChatViewController : UIScrollViewDelegate {
     
     public func getUsersList(pageNo : Int = 1, pageSize : Int =  40, searchTerm : String){
         print("#fetch request \(pageNo) \(pageSize) \(searchTerm) ")
-        if pageNo == 1 {
-            recentChatTableView?.tableFooterView = createTableFooterView()
-            noNewMsgText?.isHidden = true
-        }
         if !NetStatus.shared.isConnected{
             AppAlert.shared.showToast(message: ErrorMessage.noInternet)
             return
+        }
+        if pageNo == 1 {
+            recentChatTableView?.tableFooterView = createTableFooterView()
+            noNewMsgText?.isHidden = true
         }
         isLoadingInProgress = true
         ContactManager.shared.getUsersList(pageNo: pageNo, pageSize: pageSize, search: searchTerm) { [weak self] isSuccess, flyError, flyData in
@@ -2941,9 +2945,8 @@ extension RecentChatViewController : UIScrollViewDelegate {
             [weak self] in
             guard let self else{return}
             self.recentChatTableView?.reloadData()
+            self.getUsersList(pageNo: 1, pageSize: 20, searchTerm: self.searchTerm)
         }
-        
-        getUsersList(pageNo: 1, pageSize: 20, searchTerm: searchTerm)
     }
     
     public func resetParams(){

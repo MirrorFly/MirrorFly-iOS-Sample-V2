@@ -50,7 +50,7 @@ class SharekitShareToViewController: ShareKitBaseViewController {
     var attachments: [NSItemProvider] = [NSItemProvider]()
     var mediaFiles: [MediaData] = []
     var shareKitViewModel = ShareKitViewModel.shared
-
+    var keyboardShown = false
 //    let documentShareDispatchGroup = DispatchGroup()
 //    let documentProfileShareDispatchGroup = DispatchGroup()
 //    let contactShareDispatchGroup = DispatchGroup()
@@ -129,12 +129,14 @@ class SharekitShareToViewController: ShareKitBaseViewController {
     }
     
     @objc override func keyboardWillShow(notification: NSNotification) {
+        keyboardShown = true
         if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
             shareToTableView?.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: keyboardSize.height + (shareToTableView?.rowHeight ?? 0.0) + 30, right: 0)
         }
     }
     
     @objc override func keyboardWillHide(notification: NSNotification) {
+        keyboardShown = false
         shareToTableView?.contentInset = .zero
     }
     
@@ -795,7 +797,7 @@ extension SharekitShareToViewController : UITableViewDelegate, UITableViewDataSo
                             }
                         })
                     } else {
-                        ShareKitAlert.shared.showToast(controller: self, message: ErrorMessage.restrictedShareUsers)
+                        ShareKitAlert.shared.showToast(controller: self, message: ErrorMessage.restrictedShareUsers, position: keyboardShown ? .center : .bottom)
                     }
                     let cell: ShareKitParticipantCell = tableView.cellForRow(at: indexPath) as! ShareKitParticipantCell
                     tableView.beginUpdates()
@@ -838,7 +840,7 @@ extension SharekitShareToViewController : UITableViewDelegate, UITableViewDataSo
                             }
                         })
                     } else {
-                        ShareKitAlert.shared.showToast(controller: self, message: ErrorMessage.restrictedShareUsers)
+                        ShareKitAlert.shared.showToast(controller: self, message: ErrorMessage.restrictedShareUsers, position: keyboardShown ? .center : .bottom)
                     }
                     let cell: ShareKitParticipantCell = tableView.cellForRow(at: indexPath) as! ShareKitParticipantCell
                     tableView.beginUpdates()
@@ -875,7 +877,7 @@ extension SharekitShareToViewController : UITableViewDelegate, UITableViewDataSo
                             }
                         })
                     } else {
-                        ShareKitAlert.shared.showToast(controller: self, message: ErrorMessage.restrictedShareUsers)
+                        ShareKitAlert.shared.showToast(controller: self, message: ErrorMessage.restrictedShareUsers, position: keyboardShown ? .center : .bottom)
                     }
                     let cell: ShareKitParticipantCell = tableView.cellForRow(at: indexPath) as! ShareKitParticipantCell
                     tableView.beginUpdates()
@@ -909,7 +911,7 @@ extension SharekitShareToViewController : UITableViewDelegate, UITableViewDataSo
                             }
                         })
                     } else {
-                        ShareKitAlert.shared.showToast(controller: self, message: ErrorMessage.restrictedShareUsers)
+                        ShareKitAlert.shared.showToast(controller: self, message: ErrorMessage.restrictedShareUsers, position: keyboardShown ? .center : .bottom)
                     }
                     let cell: ShareKitParticipantCell = tableView.cellForRow(at: indexPath) as! ShareKitParticipantCell
                     tableView.beginUpdates()
@@ -962,7 +964,7 @@ extension SharekitShareToViewController : UITableViewDelegate, UITableViewDataSo
                             }
                         })
                     } else {
-                        ShareKitAlert.shared.showToast(controller: self, message: ErrorMessage.restrictedShareUsers)
+                        ShareKitAlert.shared.showToast(controller: self, message: ErrorMessage.restrictedShareUsers, position: keyboardShown ? .center : .bottom)
                     }
                     let cell: ShareKitParticipantCell = tableView.cellForRow(at: indexPath) as! ShareKitParticipantCell
                     tableView.beginUpdates()
@@ -1008,7 +1010,7 @@ extension SharekitShareToViewController : UITableViewDelegate, UITableViewDataSo
                             }
                         })
                     } else {
-                        ShareKitAlert.shared.showToast(controller: self, message: ErrorMessage.restrictedShareUsers)
+                        ShareKitAlert.shared.showToast(controller: self, message: ErrorMessage.restrictedShareUsers, position: keyboardShown ? .center : .bottom)
                     }
                     let cell: ShareKitParticipantCell = tableView.cellForRow(at: indexPath) as! ShareKitParticipantCell
                     tableView.beginUpdates()
