@@ -120,7 +120,6 @@ class JoinCallViaLinkViewController: BaseViewController, CallUIDelegate {
         super.viewDidDisappear(animated)
         localRenderer.removeFromSuperview()
         CallManager.cleanUpJoinCallViaLink()
-        CallManager.callUiDelegate = nil
         isVideoMuted = false
 
         NotificationCenter.default.removeObserver(self, name: UIApplication.willEnterForegroundNotification, object: nil)
@@ -169,7 +168,12 @@ class JoinCallViaLinkViewController: BaseViewController, CallUIDelegate {
     
     func initJoinLink() {
         CallManager.setJoinCallDelegate(delegate: self)
-        CallManager.setupJoinCallViaLink()
+        CallManager.callUiDelegate = self
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(750)){
+            if !CallManager.isConnectedToLinkServer(){
+                CallManager.setupJoinCallViaLink()
+            }
+        }
         subsCribeToCallEvents()
     }
     
@@ -191,6 +195,7 @@ class JoinCallViaLinkViewController: BaseViewController, CallUIDelegate {
     
     @objc func didEnterBackground() {
         CallManager.cleanUpJoinCallViaLink()
+        CallManager.callUiDelegate = nil
     }
     
     @IBAction func backButtonAction(_ sender: UIButton) {
@@ -407,20 +412,26 @@ class JoinCallViaLinkViewController: BaseViewController, CallUIDelegate {
     }
     
     func uiPresented() {
+        CallManager.callUiDelegate = nil
         navigationController?.popViewController(animated: false)
+        print("#UI_ uiPresented ")
     }
     
     func callReceived(id: String) {
-        
+        print("#UI_ callReceived \(id)")
     }
     
     func callAttended(id: String) {
-        
+        print("#UI_ callAttended \(id)")
     }
     
     func callDisconnected(id: String) {
-        
+        print("#UI_ callDisconnected \(id)")
+        joinButton.isEnabled = false
+        joinButton.alpha = 0.5
+        initJoinLink()
     }
+    
 }
 extension JoinCallViaLinkViewController: JoinCallDelegate {
     

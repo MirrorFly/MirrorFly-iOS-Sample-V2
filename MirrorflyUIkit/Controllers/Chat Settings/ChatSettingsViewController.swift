@@ -292,7 +292,7 @@ extension ChatSettingsViewController : UITableViewDelegate,UITableViewDataSource
                 AppAlert.shared.showToast(message: ErrorMessage.noInternet)
             }
         case .exportCallLog:
-            if let logFileUrl = try? FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false).appendingPathComponent(FlyLogWriter.sharedInstance.callsLog) {
+            if let logFileUrl = try? FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false).appendingPathComponent(FlyLogWriter.sharedInstance.flyLog) {
                 let vc = UIActivityViewController(activityItems: [logFileUrl], applicationActivities: [])
                 self.present(vc, animated: true)
             }

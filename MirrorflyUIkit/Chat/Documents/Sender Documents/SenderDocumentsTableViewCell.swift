@@ -132,7 +132,7 @@ class SenderDocumentsTableViewCell: BaseTableViewCell {
         currentIndexPath = indexPath
         let mediaUrl = message?.mediaChatMessage?.mediaFileUrl
         checkFileType(urlExtension: ((mediaUrl?.isEmpty ?? false ? (message?.mediaChatMessage?.mediaLocalStoragePath.components(separatedBy: ".").last as? String) : mediaUrl?.components(separatedBy: ".").last) ?? ""), typeImageView: documetTypeImage)
-        viewDocumentButton?.isHidden = message?.mediaChatMessage?.mediaUploadStatus == .uploaded && isShowForwardView == false ? false : true
+        viewDocumentButton?.isHidden = message?.mediaChatMessage?.mediaUploadStatus == .uploaded && isShowForwardView == false && self.isDocumentExist(fileName: message?.mediaChatMessage?.mediaLocalStoragePath ?? "") ? false : true
         showHideForwardView(message: message, isShowForwardView: isShowForwardView, isDeletedMessageSelected: isDeletedMessageSelected)
         
         if selectedForwardMessage?.filter({$0.chatMessage.messageId == message?.messageId}).first?.isSelected == true {
@@ -487,6 +487,15 @@ class SenderDocumentsTableViewCell: BaseTableViewCell {
         uploadCancelImage?.image = UIImage(named: "Download")
         nicoProgressBar.isHidden = true
         newProgressBar.removeFromSuperview()
+    }
+    
+    func isDocumentExist(fileName: String) -> Bool {
+        
+        if FileManager.default.fileExists(atPath: fileName) {
+            return true
+        }
+        
+        return false
     }
 }
 

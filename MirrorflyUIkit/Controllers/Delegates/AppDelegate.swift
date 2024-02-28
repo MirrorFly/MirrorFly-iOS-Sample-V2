@@ -449,6 +449,7 @@ extension AppDelegate {
                         navigationController.popViewController(animated: false)
                     }
                     navigationController.removeViewController(ChatViewParentController.self)
+                    chatViewController.isFromLocalPush = true
                     navigationController.pushViewController(chatViewController, animated: !dismisLastViewController)
                 }
                 completionHandler()
