@@ -32,14 +32,14 @@ def uikit_pods
   pod 'BottomSheet', :git => 'https://github.com/joomcode/BottomSheet'
   
   #submodule dependency pods
-  pod 'MirrorFlySDK', '5.15.5'
+  pod 'MirrorFlySDK', '5.15.7'
 
 end
 
 def notification_pods
 
   #submodule dependency pods
-  pod 'MirrorFlySDK', '5.15.5'
+  pod 'MirrorFlySDK', '5.15.7'
   
 end
 
