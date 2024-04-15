@@ -20,11 +20,13 @@ class AppAlert: NSObject {
 
     //Simple Alert view
     func showToast(message : String){
-        UIApplication.shared.windows.last?.makeToast(message: message, duration: 2, position: .bottom)
+        ToastManager.shared.isQueueEnabled = true
+        UIApplication.shared.windows.last?.makeToast(message, duration: 2, position: .bottom)
     }
     
     func showToastWithDuration(message : String, duration: Double){
-        UIApplication.shared.windows.last?.makeToast(message: message, duration: duration, position: .bottom)
+        ToastManager.shared.isQueueEnabled = true
+        UIApplication.shared.windows.last?.makeToast(message, duration: duration, position: .bottom)
     }
     func showAlert(view: UIViewController, buttonTitle: String) {
 

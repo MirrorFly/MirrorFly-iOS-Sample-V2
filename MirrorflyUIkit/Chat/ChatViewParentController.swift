@@ -449,8 +449,6 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
             
             //MARK: Function call for the Message Translation
 
-           // translateIncomingMessage()
-            
             // translateIncomingMessage()
             checkUserBlocked()
             checkUserBlockedByAdmin()
@@ -715,7 +713,7 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
 //                if recent.isPrivateChat {
 //                    showLockScreen()
 //                }
-//            }
+//            } 
 //        }
 
         pushChatId = nil
@@ -810,7 +808,7 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
                     chatMessage.enumerated().forEach { (row,message) in
                         if message.messageId == replyMessageObj?.messageId {
                             replyView.isHidden = false
-                            replyMessage(indexPath: IndexPath(row: row, section: section), isMessageDeleted: false, isKeyBoardEnabled: UIApplication.shared.isKeyboardPresented ? true : false, isSwipe: false)
+                            replyMessage(indexPath: IndexPath(row: row, section: section), isMessageDeleted: false, isKeyBoardEnabled: UIApplication.shared.isKeyboardPresented ? true : false, isSwipe: true)
                         }
                     }
                 }
@@ -1832,13 +1830,11 @@ extension ChatViewParentController {
     
     
     private func groupInitialMessages(messages: [ChatMessage], completion : (() -> Void)? = nil){
-        print("#scrui #top \(messages.count)")
         chatMessages.removeAll()
         getAllMessages.removeAll()
         getAllMessages.append(contentsOf: messages)
         let values = groupMessages(messages: getAllMessages)
         chatMessages.append(contentsOf: values)
-        print("#scrui #top after \(chatMessages.count) \(chatMessages.reduce(0) { $0 + $1.count })")
         executeOnMainThread { [weak self] in
             UIView.performWithoutAnimation {
                 self?.chatTableView?.reloadData()
@@ -1853,10 +1849,8 @@ extension ChatViewParentController {
         }
         print("#loss groupLatestMessages \(messages.count)")
         
-        print("#scrui #bottom after \(chatMessages.count) \(chatMessages.reduce(0) { $0 + $1.count })")
         executeOnMainThread { [self] in
             chatMessages.removeAll()
-            print("#check #scrui #bottom \(messages.count) \(messages.first?.messageTextContent)  \(messages.last?.messageTextContent)")
             getAllMessages.append(contentsOf: messages)
             let values = groupMessages(messages: getAllMessages)
             chatMessages.append(contentsOf: values)
@@ -8883,7 +8877,6 @@ extension ChatViewParentController : UIScrollViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         if !isStarredMessagePage {
             let position  = scrollView.contentOffset.y
-            print("#scroll previousMessagesLoadingDone y \(position) \(chatTableView.contentSize.height) || \(scrollView.frame.size.height) \(chatTableView.contentSize.height * 0.7)")
             
             if position > (chatTableView.contentSize.height/5) {
                 DispatchQueue.main.async { [weak self] in
@@ -8904,7 +8897,6 @@ extension ChatViewParentController : UIScrollViewDelegate {
             
             if position < (chatTableView.contentSize.height * 0.7) {
                 
-                print("#scroll #load #bottom  \(position)  \(scrollView.frame.size.height)")
                 DispatchQueue.main.async { [weak self] in
                     self?.handleUnreadMessageWhileScrolling()
                 }
@@ -8928,7 +8920,6 @@ extension ChatViewParentController : UIScrollViewDelegate {
             guard let self else {return}
             var result = data
             if isSuccess{
-                print("#scroll loadPreviousMessages success")
                 if let chatMessages = result.getData() as? [ChatMessage]{
                     self.groupOldMessages(messages: chatMessages)
                     if self.availableFeatures.isChatHistoryEnabled && CommonDefaults.chatHistoryEnabled {
@@ -8954,7 +8945,7 @@ extension ChatViewParentController : UIScrollViewDelegate {
         fetchMessageListQuery?.loadNextMessages(completionHandler: {[weak self] isSuccess, error, data in
             var result = data
             if isSuccess{
-                print("#scroll loadNextMessages success")
+        
                 if let chatMessages = result.getData() as? [ChatMessage]{
                     self?.groupLatestMessages(messages: chatMessages)
                 }
@@ -9662,7 +9653,7 @@ extension ChatViewParentController: UISearchBarDelegate {
         executeOnMainThread { [self] in
             if foundedIndex.count == (currentHighlightedIndex ?? 0)+1 || foundedIndex.count == 0 {
                 if !previousMessagesLoadingDone && !isPreviousMessagesLoadingInProgress{
-                    print("#scroll #load started")
+                   
                     isPreviousMessagesLoadingInProgress = true
                     previousMessagesLoadingDone = false
                     backgroundQueue.async { [weak self] in
@@ -9742,7 +9733,7 @@ extension ChatViewParentController: UISearchBarDelegate {
         }
         if currentHighlightedIndex == 0 {
             if !nextMessagesLoadingDone && !isNextMessagesLoadingInProgress{
-                print("#scroll  #bottom #load started")
+                
                 isNextMessagesLoadingInProgress = true
                 nextMessagesLoadingDone = false
                 backgroundQueue.async { [weak self] in

@@ -702,8 +702,12 @@ extension ContactViewController: CallStatusContactDelegate {
     func onCallStatusUpdated(callStatus: CALLSTATUS, userId: String) {
         switch callStatus {
         case .DISCONNECTED,.USER_LEFT,.CALL_TIME_OUT,.INVITE_CALL_TIME_OUT:
-            callUsers.removeAll { user in
-                user == userId
+            if userId == AppUtils.getMyJid() {
+                callUsers.removeAll()
+            }else {
+                callUsers.removeAll { user in
+                    user == userId
+                }
             }
             if isInvite && !groupJid.isEmpty {
                 executeOnMainThread {
@@ -913,6 +917,7 @@ extension ContactViewController :  UITableViewDelegate, UITableViewDataSource {
             cell.checkBox.tag = indexPath.row
             cell.checkBox.isSelected = selectedProfilesJid.contains(profile.jid ?? "")
             cell.checkBox.isHidden = !isMultiSelect
+            cell.checkBox.isUserInteractionEnabled = false
             cell.setTextColorWhileSearch(searchText: (searchTxt.text ?? "").trim(), profile: profile)
             cell.setLastContentTextColor(searchText: "", profile: profile)
             return cell

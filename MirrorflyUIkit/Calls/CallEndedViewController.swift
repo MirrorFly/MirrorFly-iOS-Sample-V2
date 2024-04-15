@@ -17,7 +17,11 @@ class CallEndedViewController: UIViewController {
     
     @IBOutlet weak var returnChatButton: UIButton!
     
+    var errorMessage = ""
+    
     var isInvalidLink = false
+    
+    var isFromCallLog = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -31,6 +35,7 @@ class CallEndedViewController: UIViewController {
         logoImage.image = isInvalidLink ? UIImage(named: "icon_invalid_link") :  UIImage(named: "icon_call_ended")
         titleLabel.text = isInvalidLink ? "Invalid link" : "Call Ended!"
         subTitleLabel.isHidden = isInvalidLink ? true : false
+        subTitleLabel.text = errorMessage
         returnChatButton.isHidden = isInvalidLink ? false : true
     
     }
@@ -38,7 +43,7 @@ class CallEndedViewController: UIViewController {
     @IBAction func backButtonAction(_ sender: Any) {
         
         for controller in self.navigationController!.viewControllers as Array {
-            if controller.isKind(of: ChatViewParentController.self) {
+            if controller.isKind(of: ChatViewParentController.self) || (controller.isKind(of: MainTabBarController.self)  && isFromCallLog){
                 self.navigationController!.popToViewController(controller, animated: true)
                 break
             }
