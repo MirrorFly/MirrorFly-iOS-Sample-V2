@@ -73,7 +73,7 @@ class EditStatusViewController: UIViewController {
         statusArray =   getStatus()
         busyStatusArray = getBusyStatus()
         setupUI()
-        if(  statusArray.count > 0) {
+        if( statusArray.count > 0) {
             scrolltoRow()
         }
         else {
@@ -225,7 +225,7 @@ extension EditStatusViewController {
     }
     
     @IBAction func onBackButton(_ sender: Any) {
-        navigationController?.popViewController(animated: true)
+        navigationController?.popViewController(animated: false)
     }
 
     @IBAction func onDeleteBackButton(_ sender: Any) {
@@ -334,7 +334,7 @@ extension EditStatusViewController: UITableViewDelegate, UITableViewDataSource {
         cell.selectImage.image = UIImage(named: "ic_tickmark")
 
         if isUserBusyStatus {
-            cell.statusLabel.text =   busyStatusArray[indexPath.row].status
+            cell.statusLabel.text = busyStatusArray[indexPath.row].status
             if(busyStatusArray[indexPath.row].isCurrentStatus) {
                 cell.selectImage.isHidden = false
                 cell.statusLabel.textColor = .black
@@ -344,7 +344,7 @@ extension EditStatusViewController: UITableViewDelegate, UITableViewDataSource {
                 cell.selectImage.isHidden = true
             }
         } else {
-            cell.statusLabel.text =   statusArray[indexPath.row].status
+            cell.statusLabel.text = statusArray[indexPath.row].status
             if(statusArray[indexPath.row].isCurrentStatus) {
                 cell.selectImage.isHidden = false
                 cell.statusLabel.textColor = .black
@@ -375,14 +375,14 @@ extension EditStatusViewController: UITableViewDelegate, UITableViewDataSource {
 //MARK: Tableview action
 extension EditStatusViewController {
     @objc private func handleLongPress(sender: UILongPressGestureRecognizer) {
-        if sender.state == .began {
-            let touchPoint = sender.location(in:   editStatusTableView)
-            if let indexPath =   editStatusTableView.indexPathForRow(at: touchPoint) {
-                isLongPress = true
-                deleteIndexPath = indexPath
-                editStatusTableView.reloadRows(at: [indexPath], with: .none)
-                //showDelete(indexPath: indexPath)
-                
+        if sender.state == .began && !isLongPress {
+            let touchPoint = sender.location(in: editStatusTableView)
+            if let indexPath = editStatusTableView.indexPathForRow(at: touchPoint) {
+                if self.busyStatusArray[indexPath.row].isCurrentStatus == false {
+                    isLongPress = true
+                    deleteIndexPath = indexPath
+                    editStatusTableView.reloadRows(at: [indexPath], with: .none)
+                }
             }
         }
     }
@@ -429,8 +429,7 @@ extension EditStatusViewController {
         ChatManager.shared.deleteBusyStatus(statusId:status.id)
     }
     
-    @objc func alertControllerBackgroundTapped()
-    {
+    @objc func alertControllerBackgroundTapped() {
         dismiss(animated: true, completion: nil)
     }
     
@@ -438,6 +437,10 @@ extension EditStatusViewController {
 
         if isLongPress {
             deleteIndexPath = IndexPath(row: sender.tag, section: 0)
+            if self.busyStatusArray[deleteIndexPath?.row ?? 0].isCurrentStatus == true {
+                updateDeleteHeaderView()
+                return
+            }
             editStatusTableView.reloadData()
         } else {
             if isUserBusyStatus {
@@ -465,13 +468,13 @@ extension EditStatusViewController {
                     }
                     statusArray[indexRow].isCurrentStatus = true
                     editStatusTableView.reloadData()
-                    statusTextview.text =   statusArray[indexRow].status
+                    statusTextview.text = statusArray[indexRow].status
 
                     var getAllStatus: [ProfileStatus] = []
-                    getAllStatus =   getStatus()
-                    for getAllStatus in   statusArray {
-                        if(getAllStatus.id ==   statusArray[indexRow].id) {
-                            ChatManager.updateStatus(statusId:   statusArray[indexRow].id ,statusText:   statusArray[indexRow].status,currentStatus: true)
+                    getAllStatus = getStatus()
+                    for getAllStatus in  statusArray {
+                        if(getAllStatus.id == statusArray[indexRow].id) {
+                            ChatManager.updateStatus(statusId: statusArray[indexRow].id ,statusText: statusArray[indexRow].status,currentStatus: true)
                         }
                         else{
                             ChatManager.updateStatus(statusId: getAllStatus.id, statusText: getAllStatus.status, currentStatus: false)

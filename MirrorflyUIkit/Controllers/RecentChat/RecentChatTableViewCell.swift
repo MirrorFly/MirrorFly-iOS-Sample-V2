@@ -300,7 +300,11 @@ class RecentChatTableViewCell: UITableViewCell {
                     statusImage?.image = UIImage(named: ImageConstant.ic_delivered)
                     break
                 default:
-                    statusImage?.image = UIImage(named: ImageConstant.ic_hour)
+                    if recentChatMessage.lastMessageStatus == nil {
+                        statusImage?.isHidden = true
+                    } else {
+                        statusImage?.image = UIImage(named: ImageConstant.ic_hour)
+                    }
                     break
                 }
                 case false:
@@ -349,6 +353,8 @@ class RecentChatTableViewCell: UITableViewCell {
             } else {
                 userMessageLabel?.text = "Scheduled on " + (((chatMessage?.meetChatMessage?.scheduledDateTime != 0) ? DateFormatterUtility.shared.getSchduleMeetingDate(date: chatMessage?.meetChatMessage?.scheduledDateTime ?? 0) : recentChatMessage.lastMessageType?.rawValue.capitalized) ?? "")
             }
+        case .notification:
+            userMessageLabel?.text = recentChatMessage.lastMessageContent
         default:
             break
         }

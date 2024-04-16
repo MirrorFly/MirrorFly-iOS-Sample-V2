@@ -21,7 +21,7 @@ import AVFoundation
 import MirrorFlySDK
 
 let BASE_URL = "https://api-preprod-sandbox.mirrorfly.com/api/v1/"
-let LICENSE_KEY = "XXXXXXXXXXXXXXXXXXXXXXXXXXX"
+let LICENSE_KEY = "xxxxxxxxxxxxxxxxxxx"
 let XMPP_DOMAIN = "xmpp-preprod-sandbox.mirrorfly.com"
 let XMPP_PORT = 5222
 let SOCKETIO_SERVER_HOST = "https://signal-preprod-sandbox.mirrorfly.com"
@@ -34,6 +34,8 @@ let WEB_LOGIN_URL = "https://webchat-preprod-sandbox.mirrorfly.com/"
 let IS_MOBILE_NUMBER_LOGIN = false
 let APP_NAME = "UiKitQa"
 let ICLOUD_CONTAINER_ID = "iCloud.com.mirrorfly.qa"
+
+
 
 
 let isMigrationDone = "isMigrationDone"
@@ -153,6 +155,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
         FlyUtils.setAppName(appName: APP_NAME)
         VOIPManager.sharedInstance.updateDeviceToken()
         networkMonitor()
+        CallManager.enableDebugLogs(enable : true)
         return true
     }
     
@@ -316,7 +319,7 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
             if ContactManager.isBlockedByAdmin() {
                 navigateToBlockedScreen()
             } else {
-                let messageId = response.notification.request.content.userInfo["message_id"] as? String ?? ""
+                let messageId = response.notification.request.content.userInfo["message_id"] as? String ?? response.notification.request.content.userInfo["notify_id"] as? String ?? ""
                 let message = FlyMessenger.getMessageOfId(messageId: messageId)
                 if response.notification.request.trigger is UNPushNotificationTrigger {
 
@@ -730,6 +733,8 @@ extension AppDelegate : MissedCallNotificationDelegate {
         }
         
         var callMode = ""
+        var title = ""
+        
         if CallManager.getTempRoomID() == nil {
             callMode = (userList.count > 1) ? "group " : ""
         }else{
@@ -737,8 +742,19 @@ extension AppDelegate : MissedCallNotificationDelegate {
         }
         let conjuction =  (callMode == "group " || callType == "video call") ? " a " : " an "
         
+        
+        if !(groupId?.isEmpty ?? false){
+            if let profileDetail = ContactManager.shared.getUserProfileDetails(for: groupId ?? "") {
+                title = profileDetail.name
+            }else{
+                title = CallManager.getNameString()
+            }
+        }else {
+            title = CallManager.getNameString()
+        }
+        
         DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
-            self.showCustomNotificationView(title: CallManager.getNameString() , message: "You missed" +  conjuction + callMode + callType, chatMessage: "media-call")
+            self.showCustomNotificationView(title: title , message: "You missed" +  conjuction + callMode + callType, chatMessage: "media-call")
         })
     }
 }

@@ -1335,6 +1335,7 @@ extension CallLogViewController: refreshCallLogDelegate, CallLinkDelegate {
         let storyboard = UIStoryboard(name: "Call", bundle: nil)
         let joinCall = storyboard.instantiateViewController(withIdentifier: "JoinCallViaLinkViewController") as! JoinCallViaLinkViewController
         joinCall.callLink = callLinkID
+        joinCall.isFromCallLog = true
         self.navigationController?.pushViewController(joinCall, animated: true)
     }
 }

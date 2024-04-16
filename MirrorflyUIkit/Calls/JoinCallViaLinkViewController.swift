@@ -45,6 +45,8 @@ class JoinCallViaLinkViewController: BaseViewController, CallUIDelegate {
     
     var isVideoMuted = false
     
+    var isFromCallLog = false
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         localRenderer.frame = CGRect(x: 0, y: 0, width: videoView.bounds.width, height: videoView.bounds.height)
@@ -274,6 +276,7 @@ class JoinCallViaLinkViewController: BaseViewController, CallUIDelegate {
             let storyboard = UIStoryboard(name: "Call", bundle: nil)
             let callEndedView = storyboard.instantiateViewController(withIdentifier: "CallEndedViewController") as! CallEndedViewController
             callEndedView.isInvalidLink = false
+            callEndedView.isFromCallLog = isFromCallLog
             self.navigationController?.pushViewController(callEndedView, animated: true)
             
         }else if usersList.count == 0 && callMode == .MEET{
@@ -376,14 +379,21 @@ class JoinCallViaLinkViewController: BaseViewController, CallUIDelegate {
             let storyboard = UIStoryboard(name: "Call", bundle: nil)
             let callEndedView = storyboard.instantiateViewController(withIdentifier: "CallEndedViewController") as! CallEndedViewController
             callEndedView.isInvalidLink = true
+            callEndedView.isFromCallLog = isFromCallLog
             self.navigationController?.pushViewController(callEndedView, animated: false)
             
-        }else if errorMessage.contains("100602"){
+        }else if errorMessage.contains("100602") || errorMessage.contains("100620")  || errorMessage.contains("100610"){
             
             CallManager.cleanUpJoinCallViaLink()
             let storyboard = UIStoryboard(name: "Call", bundle: nil)
             let callEndedView = storyboard.instantiateViewController(withIdentifier: "CallEndedViewController") as! CallEndedViewController
             callEndedView.isInvalidLink = false
+            callEndedView.isFromCallLog = isFromCallLog
+            if errorMessage.contains("100620") || errorMessage.contains("100610") {
+                callEndedView.errorMessage = errorMessage.components(separatedBy: "ErrorCode").first ?? emptyString()
+            }else{
+                callEndedView.errorMessage = "No one else is here"
+            }
             self.navigationController?.pushViewController(callEndedView, animated: false)
             
         }else if errorMessage.contains("100603"){

@@ -18,7 +18,7 @@ class ShareKitAlert {
     var alert : UIAlertController? = nil
 
     //Simple Alert view
-    func showToast(controller : UIViewController, message : String, position: MFToastPosition = .bottom){
+    func showToast(controller : UIViewController, message : String, position: ToastPosition = .bottom){
         //let toast = Toast(text: message)
         //toast.show()
         let toastLabel = UILabel()

@@ -54,8 +54,6 @@ class ProfileViewController: UIViewController,ProfileViewControllerProtocol {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-         setupUI()
-        
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(ProfileViewController.onProfileImage(_:)))
         profileImage.isUserInteractionEnabled = true
         profileImage.addGestureRecognizer(tapGesture)
@@ -81,17 +79,13 @@ class ProfileViewController: UIViewController,ProfileViewControllerProtocol {
         nameTextField.adjustsFontSizeToFitWidth = false
         hideKeyboardWhenTappedAround()
         print(getMobileNumber)
-        mobileNumberLabel.text = ContactManager.getMyProfile().mobileNumber
         statusLabel.text = inMirrorfly.localized
         profileImage.layer.masksToBounds = false
         profileImage.layer.cornerRadius = profileImage.frame.height/2
         profileImage?.layer.borderWidth = 0.5
         profileImage.layer.borderColor = Color.groupIconBackgroundGray?.cgColor
         profileImage.clipsToBounds = true
-        startLoading(withText: pleaseWait)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-           self.getProfile()
-        }
+        self.getProfile()
         isSaveButtonTapped = false
         mobileNumberLabel.delegate = self
     }
@@ -153,6 +147,7 @@ class ProfileViewController: UIViewController,ProfileViewControllerProtocol {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        setupUI()
         print("ProfileViewController ABCXYZ viewWillAppear")
          navigationController?.setNavigationBarHidden(true, animated: animated)
         handleBackgroundAndForground()
@@ -202,9 +197,7 @@ extension ProfileViewController {
 //                            FlyDefaults.myImageToken = self?.profileDetails?.image ?? ""
                             if(self?.profileDetails?.image != "") {
                                 self?.setImage(imageURL: self?.profileDetails?.image ?? "", completionHandler: { _ in
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                                        self?.stopLoading()
-                                    }
+                                    self?.stopLoading()
                                 })
                                 self?.isImagePicked = true
                             } else {

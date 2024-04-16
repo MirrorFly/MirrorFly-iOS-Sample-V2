@@ -155,26 +155,6 @@ extension RootViewController {
         if callViewController == nil {
             callViewController = UIStoryboard(name: "Call", bundle: nil).instantiateViewController(withIdentifier: "CallUIViewController") as? CallUIViewController
         }
-        
-        do {
-            try CallManager.initCallSDK()
-        }
-        catch(let error ) {
-            var iceServerList = [RTCIceServer]()
-            let iceServer = RTCIceServer.init(urlStrings: ["turn:stun.contus.us:3478"], username: "contus", credential: "SAE@admin")
-            iceServerList.append(iceServer)
-            let iceServer1 = RTCIceServer.init(urlStrings: ["stun:stun.l.google.com:19302"], username: "", credential: "")
-            iceServerList.append(iceServer1)
-            try? CallSDK.Builder.setUserId(id: AppUtils.getMyJid())
-                .setDomainBaseUrl(baseUrl: "https://api-beta.mirrorfly.com/api/v1/")
-                .setSignalSeverUrl(url: "https://signal-beta.mirrorfly.com/")
-                .setJanusSeverUrl(url: "wss://janus.mirrorfly.com")
-                .setAppGroupContainerID(containerID: CONTAINER_ID)
-                .setICEServersList(iceServers: iceServerList)
-                .setCallDelegate(delegate: RootViewController.sharedInstance)
-                .setCallViewController(viewController: callViewController!)
-                .buildAndInitialize()
-        }
         CallManager.setMyInfo(name: ContactManager.getMyProfile().name, imageUrl: ContactManager.getMyProfile().image)
         if let callViewController = callViewController {
             CallManager.setCallViewController(callViewController)
