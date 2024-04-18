@@ -20,8 +20,10 @@ import FirebaseRemoteConfig
 import AVFoundation
 import MirrorFlySDK
 
+
+
 let BASE_URL = "https://api-preprod-sandbox.mirrorfly.com/api/v1/"
-let LICENSE_KEY = "xxxxxxxxxxxxxxxxxxx"
+let LICENSE_KEY = "xxxxxxxxxxxxxxx"
 let XMPP_DOMAIN = "xmpp-preprod-sandbox.mirrorfly.com"
 let XMPP_PORT = 5222
 let SOCKETIO_SERVER_HOST = "https://signal-preprod-sandbox.mirrorfly.com"
@@ -34,8 +36,6 @@ let WEB_LOGIN_URL = "https://webchat-preprod-sandbox.mirrorfly.com/"
 let IS_MOBILE_NUMBER_LOGIN = false
 let APP_NAME = "UiKitQa"
 let ICLOUD_CONTAINER_ID = "iCloud.com.mirrorfly.qa"
-
-
 
 
 let isMigrationDone = "isMigrationDone"
@@ -750,7 +750,17 @@ extension AppDelegate : MissedCallNotificationDelegate {
                 title = CallManager.getNameString()
             }
         }else {
-            title = CallManager.getNameString()
+            if let profileDetail = ContactManager.shared.getUserProfileDetails(for: userJid) {
+                
+                if userList.count > 1 {
+                    title = "\(profileDetail.name) and (+\(userList.contains(userJid) ? userList.count - 1 : userList.count))"
+                } else {
+                    title = (userList.contains(userJid) || isOneToOneCall) ? profileDetail.name : "\(profileDetail.name) and (+\(userList.count))"
+                }
+               
+            }else{
+                title = CallManager.getNameString()
+            }
         }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {

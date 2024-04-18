@@ -201,13 +201,14 @@ class CallUIViewController: UIViewController, UIAdaptivePresentationControllerDe
                     self.addlocalTrackToView(videoTrack: track)
                 }
             }else{
-                showHideCallBackgroundProfiles(hide: showGridView ? true : false)
+               let remoteVideoMuted = (((members.count == 1) ? members.first?.isVideoMuted : (members.count == 2) ? members.first?.isVideoMuted : members[members.count - 2].isVideoMuted) ?? false)
+                showHideCallBackgroundProfiles(hide: showGridView ? true : remoteVideoMuted ? false : true)
             }
         }else if CallManager.isOneToOneCall(){
             
             showHideCallBackgroundProfiles(hide: showGridView ? true : false)
             if CallManager.getCallType() == .Video {
-                showHideCallBackgroundProfiles(hide: CallManager.getRemoteVideoTrack(jid: AppUtils.getMyJid()) != nil)
+                showHideCallBackgroundProfiles(hide: showGridView ? true : CallManager.getRemoteVideoTrack(jid: AppUtils.getMyJid()) != nil)
             }
             
             updateCallStatus(status: getStatusOfOneToOneCall())
@@ -215,6 +216,7 @@ class CallUIViewController: UIViewController, UIAdaptivePresentationControllerDe
             if CallManager.getCallType() == .Video && CallManager.isCallConnected() {
                 showConnectedVideoCallOneToOneUI()
             }
+            self.outgoingCallView?.cameraButton.isHidden = isVideoMuted
         }else{
             
             updateCallStatus(status: getCurrentCallStatusAsString())
@@ -227,6 +229,7 @@ class CallUIViewController: UIViewController, UIAdaptivePresentationControllerDe
             if isOnCall && self.checkIfGroupCallUiIsVisible() {
                 showGroupCallUI()
             }
+            self.outgoingCallView?.cameraButton.isHidden = isVideoMuted
         }
         
         if isOnCall && CallManager.isCallConnected(){
@@ -951,7 +954,36 @@ extension CallUIViewController {
             }
         } else {
             
-            AppPermissions.shared.presentSettingsForPermission(permission: .camera, instance: self as Any)
+            
+            AppPermissions.shared.checkCameraPermissionAccess(permissionCallBack: { [weak self] authorizationStatus in
+                switch authorizationStatus {
+                case .denied:
+                    AppPermissions.shared.presentSettingsForPermission(permission: .camera, instance: self as Any)
+                    break
+                case .restricted:
+                    AppPermissions.shared.presentSettingsForPermission(permission: .camera, instance: self as Any)
+                    break
+                case .authorized:
+                    AppPermissions.shared.presentSettingsForPermission(permission: .camera, instance: self as Any)
+                    break
+                case .notDetermined:
+                    AVCaptureDevice.requestAccess(for: .video, completionHandler: { granted in
+                        if granted {
+                            executeOnMainThread { [weak self] in
+                                self?.isVideoPermissionEnabled = true
+                                self?.videoButtonTapped(sender: UIButton())
+                                self?.setMuteStatusText()
+                            }
+                        } else {
+                        }
+                    })
+                    break
+                @unknown default:
+                    print("Permission failed")
+                    AppPermissions.shared.presentSettingsForPermission(permission: .camera, instance: self as Any)
+                   
+                }
+            })
         }
     }
     
@@ -1308,6 +1340,11 @@ extension CallUIViewController {
         callViewOverlay.removeFromSuperview()
         getContactNames()
         outgoingCallView?.tileCollectionView.reloadData()
+        
+        for member in members.map({$0.jid!}) {
+            addGroupTracks(jid: member)
+        }
+        
         let window = UIApplication.shared.windows.filter {$0.isKeyWindow}.first
         if let rootVC = window?.rootViewController {
             let navigationStack = UINavigationController(rootViewController: self)
@@ -1460,6 +1497,13 @@ extension CallUIViewController {
             }
             audioPlayer = nil
         }
+        
+            isTapped = false
+            let top = CGAffineTransform(translationX: 0, y: showGridView ? 0 : -20)
+            UIView.animate(withDuration: 0.4, delay: 0.0, options: [], animations: {
+                self.outgoingCallView?.AttendingBottomView.transform = top
+                self.outgoingCallView?.tileCollectionView.transform = top
+            }, completion: nil)
     }
 }
 
@@ -2006,6 +2050,7 @@ extension CallUIViewController : CallManagerDelegate {
             }else {
                 if members.count > 2 {
                     self.members[members.count - 2].videoTrack = videoTrack
+                    self.fullScreenUser = self.members[members.count - 2]
                 }
             }
             
@@ -2224,7 +2269,9 @@ extension CallUIViewController : CallManagerDelegate {
                         }
                         
                     }else{
-                        self?.showGroupCallUI()
+                        if CallManager.getCallMode() != .MEET {
+                            self?.showGroupCallUI()
+                        }
                     }
 //                    self?.outgoingCallView?.tileCollectionView.isHidden = false
 //                    self?.outgoingCallView?.tileCollectionView.reloadData()
@@ -2531,6 +2578,7 @@ extension CallUIViewController : CallManagerDelegate {
                         if self?.members.last?.isVideoMuted ?? false{
                             //self?.onVideoMute(status:true)
                         }
+                        self?.setMuteStatusText()
                         self?.outgoingCallView?.tileCollectionView.reloadData()
                     }
                     
@@ -2539,17 +2587,12 @@ extension CallUIViewController : CallManagerDelegate {
                     self?.addRemoteTrackToView()
 
                     
-                    self?.showHideCallBackgroundProfiles(hide: self?.showGridView ?? false ? true : false)
-                    
                     let remoteVideoMuted =  self?.members[(self?.members.count ?? 0) - 2].isVideoMuted
                     self?.outgoingCallView?.remoteUserVideoView.isHidden = remoteVideoMuted ?? false ? true : false
                     
-//                    if !(remoteVideoMuted ?? false) {
-//                        self?.showHideCallBackgroundProfiles(hide: true)
-//                    }else {
-//                        self?.showHideCallBackgroundProfiles(hide: false)
-//                    }
-//                    self?.setMuteStatusText()
+                    self?.showHideCallBackgroundProfiles(hide: self?.showGridView ?? false ? true : remoteVideoMuted ?? false ? false : true)
+                    
+                    self?.setMuteStatusText()
                     
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
                         self?.outgoingCallView?.tileCollectionView.reloadData()
@@ -3285,7 +3328,7 @@ extension CallUIViewController {
                     if CallManager.getCallType() == .Audio{
                         if let first = members.first, let last = members.last{
                             if !first.isVideoMuted || !last.isVideoMuted {
-                                //CallManager.setCallType(callType: .Video)
+                                CallManager.setCallType(callType: .Video)
                             }
                         }
                     }
@@ -3296,7 +3339,7 @@ extension CallUIViewController {
 //                        showConnectedVideoCallOneToOneUI()
 //                    }
                     
-                    if CallManager.getCallType() == .Audio || (members.first?.isVideoMuted ?? true && members.last?.isVideoMuted ?? true) {
+                    if CallManager.getCallType() == .Audio && (members.first?.isVideoMuted ?? true && members.last?.isVideoMuted ?? true) {
                         CallManager.muteVideo(true)
                         showOneToOneAudioCallUI()
                         if isTapped{
@@ -3318,6 +3361,8 @@ extension CallUIViewController {
                         if members.first?.isVideoMuted ?? false {
                             setupTopViewConstraints()
                             showHideCallBackgroundProfiles(hide: showGridView ? true : false)
+                        }else{
+                            showHideCallBackgroundProfiles(hide: true)
                         }
                         
                         if CallManager.getCallType() == .Video && !(AudioManager.shared().getAllAvailableAudioInput().contains(where: {$0.type == .bluetooth || $0.type == .headset})) {
@@ -3355,6 +3400,7 @@ extension CallUIViewController {
                 else if CallManager.getAllCallUsersList().count <= 1 && CallManager.getCallMode() == .MEET  {
                     if !isVideoMuted {
                         if let track = members.first?.videoTrack {
+                            showHideCallBackgroundProfiles(hide: true)
                             self.addlocalTrackToView(videoTrack: track)
                         }
                     }else{
@@ -4182,7 +4228,7 @@ extension CallUIViewController {
                 self?.isVideoPermissionEnabled = true
                 break
             case .notDetermined:
-                self?.isVideoPermissionEnabled = true
+                self?.isVideoPermissionEnabled = false
                 break
             @unknown default:
                 print("Permission failed")
