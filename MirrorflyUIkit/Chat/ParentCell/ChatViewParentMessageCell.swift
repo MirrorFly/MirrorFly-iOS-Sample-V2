@@ -12,13 +12,21 @@ import Alamofire
 import SDWebImage
 import MirrorFlySDK
 
-protocol RefreshBubbleImageViewDelegate {
+protocol RefreshBubbleImageViewDelegate: class {
     func refreshBubbleImageView(indexPath: IndexPath,isSelected: Bool,title: String?)
 }
 
-protocol LinkDelegate {
+protocol LinkDelegate: class {
     func pushToJoinCallView(callLink: String)
     func showAlreadyInCallAlert(callLink: String)
+}
+
+
+protocol GestureDelegate: class {
+    func replyGesture(_ sender: UITapGestureRecognizer?)
+    func translateGesture(_ sender: UITapGestureRecognizer?)
+    func locationGesture(_ sender: UITapGestureRecognizer)
+    func contactSaveGesture(_ sender: UITapGestureRecognizer)
 }
 
 class ChatViewParentMessageCell: BaseTableViewCell {
@@ -102,14 +110,15 @@ class ChatViewParentMessageCell: BaseTableViewCell {
     //Scheduled meeting
     @IBOutlet weak var scheduledMeetingTimeLabel: UILabel?
 
-    var refreshDelegate: RefreshBubbleImageViewDelegate? = nil
+    weak var refreshDelegate: RefreshBubbleImageViewDelegate? = nil
     var selectedForwardMessage: [SelectedMessages]? = []
     var isDeleteSelected: Bool = false
     var isStarredMessagePage: Bool = false
     var searchText: String?
     
-    var linkDelegate: LinkDelegate? = nil
-       
+    weak var linkDelegate: LinkDelegate? = nil
+    weak var gestureDelegate: GestureDelegate? = nil
+
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
@@ -135,7 +144,55 @@ class ChatViewParentMessageCell: BaseTableViewCell {
         groupMsgNameView?.isHidden = true
         groupMsgSenderName?.text = ""
     }
-    
+
+    func setupReplyGesture() {
+        //Reply tap gesture
+        let  textReplyTap = UITapGestureRecognizer(target: self, action: #selector(self.replyViewTapGesture(_:)))
+        replyView?.addGestureRecognizer(textReplyTap)
+        textReplyTap.delegate = self
+    }
+
+    func setupTranslateGesture() {
+        //Translate tap gesture
+        if CommonDefaults.isTranlationEnabled {
+            let  tap = UITapGestureRecognizer(target: self, action: #selector(self.translationLanguage(_:)))
+            tap.numberOfTapsRequired = 2
+            self.addGestureRecognizer(tap)
+        }
+    }
+
+    func setupLocationGesture() {
+        //Location tap gesture
+        let senderGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.onLocationMessage(sender:)))
+        locationOutgoingView?.isUserInteractionEnabled = true
+        locationOutgoingView?.addGestureRecognizer(senderGestureRecognizer)
+        let receiverGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.onLocationMessage(sender:)))
+        locationImageView?.isUserInteractionEnabled = true
+        locationImageView?.addGestureRecognizer(receiverGestureRecognizer)
+    }
+
+    func setupContactGesture() {
+        //Contact save gesture
+        let gestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(onsaveContact(sender:)))
+        saveContactButton?.addGestureRecognizer(gestureRecognizer)
+    }
+
+    @objc func replyViewTapGesture(_ sender: UITapGestureRecognizer? = nil) {
+        gestureDelegate?.replyGesture(sender)
+    }
+
+    @objc func translationLanguage(_ sender: UITapGestureRecognizer? = nil) {
+        gestureDelegate?.translateGesture(sender)
+    }
+
+    @objc func onLocationMessage(sender: UITapGestureRecognizer) {
+        gestureDelegate?.locationGesture(sender)
+    }
+
+    @objc func onsaveContact(sender: UITapGestureRecognizer) {
+        gestureDelegate?.contactSaveGesture(sender)
+    }
+
     func setUserProfileInfo(message: ChatMessage?,isBlocked: Bool) {
         let getProfileDetails = ChatManager.profileDetaisFor(jid: message?.chatUserJid ?? "")
         let senderProfileDetails = ChatManager.profileDetaisFor(jid: message?.senderUserJid ?? "")

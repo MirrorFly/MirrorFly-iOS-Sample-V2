@@ -79,7 +79,8 @@ class ChatViewVideoIncomingCell: BaseTableViewCell {
     var videoGesture: UITapGestureRecognizer!
     var message : ChatMessage?
     var selectedForwardMessage: [SelectedMessages]? = []
-    var refreshDelegate: RefreshBubbleImageViewDelegate? = nil
+    weak var refreshDelegate: RefreshBubbleImageViewDelegate? = nil
+    weak var gestureDelegate: GestureDelegate? = nil
     var isStarredMessagePage: Bool? = false
     var newProgressBar: ProgressBar!
     override func awakeFromNib() {
@@ -111,7 +112,32 @@ class ChatViewVideoIncomingCell: BaseTableViewCell {
         super.setSelected(selected, animated: animated)
         // Configure the view for the selected state
     }
-    
+
+    func setupReplyGesture() {
+        //Reply tap gesture
+        let  textReplyTap = UITapGestureRecognizer(target: self, action: #selector(self.replyViewTapGesture(_:)))
+        replyView?.addGestureRecognizer(textReplyTap)
+        textReplyTap.delegate = self
+    }
+
+    @objc func replyViewTapGesture(_ sender: UITapGestureRecognizer? = nil) {
+        gestureDelegate?.replyGesture(sender)
+    }
+
+    func setupTranslateGesture() {
+        //Translate tap gesture
+        if CommonDefaults.isTranlationEnabled {
+            let  tapVideoCaption = UITapGestureRecognizer(target: self, action: #selector(self.translationLanguage(_:)))
+            tapVideoCaption.numberOfTapsRequired = 2
+            captionView.isUserInteractionEnabled = true
+            captionView.addGestureRecognizer(tapVideoCaption)
+        }
+    }
+
+    @objc func translationLanguage(_ sender: UITapGestureRecognizer? = nil) {
+        gestureDelegate?.translateGesture(sender)
+    }
+
     func setSelectView(selected: Bool) {
          if selected {
          self.backgroundColor = .lightGray

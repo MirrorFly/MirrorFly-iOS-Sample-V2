@@ -76,9 +76,9 @@ class ReceiverDocumentsTableViewCell: BaseTableViewCell {
     var message: ChatMessage?
     var isStarredMessagePage: Bool? = false
     
-    var refreshDelegate: RefreshBubbleImageViewDelegate? = nil
-    
-    override func awakeFromNib() { 
+    weak var refreshDelegate: RefreshBubbleImageViewDelegate? = nil
+    weak var gestureDelegate: GestureDelegate? = nil
+    override func awakeFromNib() {
         super.awakeFromNib()
         setupUI()
     }
@@ -88,7 +88,18 @@ class ReceiverDocumentsTableViewCell: BaseTableViewCell {
         forwardView?.makeCircleView(borderColor: Color.forwardCircleBorderColor.cgColor, borderWidth: 1.5)
         // Configure the view for the selected state
     }
-    
+
+    func setupReplyGesture() {
+        //Reply tap gesture
+        let  textReplyTap = UITapGestureRecognizer(target: self, action: #selector(self.replyViewTapGesture(_:)))
+        replyView?.addGestureRecognizer(textReplyTap)
+        textReplyTap.delegate = self
+    }
+
+    @objc func replyViewTapGesture(_ sender: UITapGestureRecognizer? = nil) {
+        gestureDelegate?.replyGesture(sender)
+    }
+
     func setupUI() {
         bubbleImageView?.roundCorners(corners: [.topLeft, .bottomRight, .topRight], radius: 5.0)
         documenTypeView?.roundCorners(corners: [.topLeft, .topRight, .bottomLeft, .bottomRight], radius: 5.0)

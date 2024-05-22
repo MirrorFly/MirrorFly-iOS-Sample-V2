@@ -9,7 +9,7 @@ import UIKit
 
 
 class BaseTableViewCell: UITableViewCell {
-    var delegate: TableViewCellDelegate?
+    weak var delegate: TableViewCellDelegate?
     var currentIndexPath: IndexPath?
     var isAllowSwipe: Bool? = false
     var swiperight : UISwipeGestureRecognizer?
