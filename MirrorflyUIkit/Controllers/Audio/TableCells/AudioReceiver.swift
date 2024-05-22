@@ -63,7 +63,8 @@ class AudioReceiver: BaseTableViewCell, AVAudioPlayerDelegate {
     
     var selectedForwardMessage: [SelectedMessages]? = []
     var message : ChatMessage?
-    var refreshDelegate: RefreshBubbleImageViewDelegate?
+    weak var refreshDelegate: RefreshBubbleImageViewDelegate?
+    weak var gestureDelegate: GestureDelegate? = nil
     var audioPlayer:AVAudioPlayer?
     var updater : CADisplayLink! = nil
     typealias AudioCallBack = (_ sliderValue : Float) -> Void
@@ -76,7 +77,17 @@ class AudioReceiver: BaseTableViewCell, AVAudioPlayerDelegate {
         setupUI()
     }
 
-    
+    func setupReplyGesture() {
+        //Reply tap gesture
+        let  textReplyTap = UITapGestureRecognizer(target: self, action: #selector(self.replyViewTapGesture(_:)))
+        replyView?.addGestureRecognizer(textReplyTap)
+        textReplyTap.delegate = self
+    }
+
+    @objc func replyViewTapGesture(_ sender: UITapGestureRecognizer? = nil) {
+        gestureDelegate?.replyGesture(sender)
+    }
+
     func setupUI() {
         recvTime?.font = UIFont.font9px_appLight()
         audioDuration?.font = UIFont.font8px_appLight()

@@ -39,7 +39,7 @@ public protocol ShareReloadDelegate {
     func reloadTable()
 }
 
-protocol TableViewCellDelegate {
+protocol TableViewCellDelegate: class {
     func openBottomView(indexPath: IndexPath)
 }
 
@@ -324,6 +324,8 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
     var isMessageEditing = false
     var editMessageId:String = emptyString()
     var editMessageType: MessageType = .text
+    var toShowEditMessageAction = false
+    var tempEditMessageText = ""
 
     @IBOutlet weak var mentionBaseView: UIView!
     @IBOutlet weak var mentionBottom: NSLayoutConstraint!
@@ -877,6 +879,10 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
             }
         }
         lockScreenShown = false
+        if toShowEditMessageAction {
+            editSelectedMessage()
+            toShowEditMessageAction = false
+        }
     }
 
     @objc func willEnterForeground() {
@@ -984,6 +990,10 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
         isFromForward = false
         pushNotificationSelected = false
         self.view.removeLaunchSubview()
+        toShowEditMessageAction = self.isMessageEditing
+        if toShowEditMessageAction {
+            tempEditMessageText = messageTextView.text
+        }
     }
     
     @IBAction func cancelButtonTapped(_ sender: UIButton) {
@@ -1326,8 +1336,14 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
                 }
             }
             resetGroupMention()
+            
             if isMessageEditing {
                 CM.closeMenu()
+                if toShowEditMessageAction {
+                    CM.closeOnlyMenu()
+                } else {
+                    CM.closeMenu()
+                }
             }
         }
     }
@@ -1504,6 +1520,10 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
                     dataArray.append(editMessage.mentionedUsersIds.joined(separator: ","))
                     self.messageTextView.text = ""
                     self.messageTextView.convertAndInsert(to: dataArray, with: self.messageTextView.selectedRange)
+                }
+                if self.tempEditMessageText.isNotEmpty {
+                    self.messageTextView.text = self.tempEditMessageText
+                    self.tempEditMessageText = ""
                 }
                 self.growingTextViewHandler?.resizeTextView(true)
                 self.resizeMessageTextView()
@@ -1727,7 +1747,7 @@ extension ChatViewParentController: ContextMenuDelegate {
         self.isMessageEditing = false
         self.isMention = false
         self.currentSelectedIndexPath = nil
-        self.editMessageId = emptyString()
+        self.editMessageId = toShowEditMessageAction ? editMessageId : emptyString()
         self.messageTextView?.resignFirstResponder()
         self.messageTextView.text = FlyMessenger.getUnsentMessageOf(id: getProfileDetails.jid).textContent
         self.resetMessageTextView()
@@ -4288,6 +4308,7 @@ extension ChatViewParentController : UITableViewDataSource ,UITableViewDelegate,
                     }
                     cell?.refreshDelegate = self
                     cell?.linkDelegate = self
+                    cell?.setupReplyGesture()
                     cell.selectedForwardMessage = selectedMessages
                     cell.isStarredMessagePage = isStarredMessagePage
                     cell.searchText = searchBar?.text ?? ""
@@ -4298,7 +4319,7 @@ extension ChatViewParentController : UITableViewDataSource ,UITableViewDelegate,
                     }
                     
                     cell = cell?.getCellFor(message, at: indexPath, isShowForwardView: isShowForwardView, fromChat: true, isMessageSearch: messageSearchEnabled, searchText: isStarredMessagePage == true && isStarredSearchEnabled == true ? searchBar?.text ?? "" : messageSearchBar?.text ?? "", profileDetails: getProfileDetails)
-                    cell.replyView?.addGestureRecognizer(textReplyTap)
+                    //cell.replyView?.addGestureRecognizer(textReplyTap)
                 }
                 else {
                     cell = tableView.dequeueReusableCell(withIdentifier: (message?.messageType == .text || message?.messageType == .autoText) ? Identifiers.chatViewTextIncomingCell : Identifiers.scheduledMeetingReceiverCell, for: indexPath) as? ChatViewParentMessageCell
@@ -4307,6 +4328,7 @@ extension ChatViewParentController : UITableViewDataSource ,UITableViewDelegate,
                     }
                     cell?.refreshDelegate = self
                     cell?.linkDelegate = self
+                    cell?.setupReplyGesture()
                     cell?.selectedForwardMessage = selectedMessages
                     cell?.isStarredMessagePage = isStarredMessagePage
                     cell.searchText = searchBar?.text ?? ""
@@ -4317,15 +4339,16 @@ extension ChatViewParentController : UITableViewDataSource ,UITableViewDelegate,
                     }
                     
                     cell = cell?.getCellFor(message, at: indexPath, isShowForwardView: isShowForwardView, fromChat: true, isMessageSearch: messageSearchEnabled, searchText: isStarredMessagePage == true && isStarredSearchEnabled == true ? searchBar?.text ?? "" : messageSearchBar?.text ?? "", profileDetails: getProfileDetails)
-                    cell.replyView?.addGestureRecognizer(textReplyTap)
-                    
+                    //cell.replyView?.addGestureRecognizer(textReplyTap)
+
                     //MARK: - Adding Double Tap Gesture for the Incoming Messages
                     
-                    if CommonDefaults.isTranlationEnabled {
-                        let  tap = UITapGestureRecognizer(target: self, action: #selector(self.translationLanguage(_:)))
-                        tap.numberOfTapsRequired = 2
-                        cell.addGestureRecognizer(tap)
-                    }
+//                    if CommonDefaults.isTranlationEnabled {
+//                        let  tap = UITapGestureRecognizer(target: self, action: #selector(self.translationLanguage(_:)))
+//                        tap.numberOfTapsRequired = 2
+//                        cell.addGestureRecognizer(tap)
+//                    }
+                    cell?.setupTranslateGesture()
                     if !isStarredMessagePage {
                         if getProfileDetails.profileChatType == .groupChat {
                             if hideSenderNameToGroup(indexPath: indexPath) {
@@ -4357,14 +4380,15 @@ extension ChatViewParentController : UITableViewDataSource ,UITableViewDelegate,
                 cell?.contentView.accessibilityIdentifier = "\(indexPath.section)_\(indexPath.row)"
                 configureGesture(view: cell?.contentView ?? UIView())
                 cell?.refreshDelegate = self
-                cell.delegate = self
+                cell?.delegate = self
+                cell?.gestureDelegate = self
                 cell.selectionStyle = .none
                 cell?.backgroundColor = .clear
                 cell?.contentView.backgroundColor = .clear
                 return cell
                 
             case.location:
-                let gestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(onLocationMessage(sender:)))
+                //let gestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(onLocationMessage(sender:)))
                 if(message?.isMessageSentByMe == true) {
                     cell = tableView.dequeueReusableCell(withIdentifier: Identifiers.chatViewLocationOutgoingCell, for: indexPath) as? ChatViewParentMessageCell
                     if !isStarredMessagePage && !(isStarredSearchEnabled ?? false) {
@@ -4380,8 +4404,9 @@ extension ChatViewParentController : UITableViewDataSource ,UITableViewDelegate,
                     }
                     cell = cell.getCellFor(message, at: indexPath, isShowForwardView: isShowForwardView, fromChat: true, isMessageSearch: messageSearchEnabled, searchText: messageSearchBar?.text ?? "", profileDetails: getProfileDetails)
                     
-                    cell.locationOutgoingView?.isUserInteractionEnabled = true
-                    cell.locationOutgoingView?.addGestureRecognizer(gestureRecognizer)
+//                    cell.locationOutgoingView?.isUserInteractionEnabled = true
+//                    cell.locationOutgoingView?.addGestureRecognizer(gestureRecognizer)
+                    cell?.setupLocationGesture()
                     cell?.contentView.accessibilityIdentifier = "\(indexPath.section)_\(indexPath.row)"
                     configureGesture(view: cell?.contentView ?? UIView())
                 }
@@ -4415,7 +4440,8 @@ extension ChatViewParentController : UITableViewDataSource ,UITableViewDelegate,
                             cell.hideGroupMsgNameView()
                         }
                     }
-                    cell.locationImageView?.addGestureRecognizer(gestureRecognizer)
+                    //cell.locationImageView?.addGestureRecognizer(gestureRecognizer)
+                    cell?.setupLocationGesture()
                     cell.contentView.accessibilityIdentifier = "\(indexPath.section)_\(indexPath.row)"
                     configureGesture(view: cell?.contentView ?? UIView())
                 }
@@ -4430,12 +4456,14 @@ extension ChatViewParentController : UITableViewDataSource ,UITableViewDelegate,
                     view.tag = 10024
                 }
                 cell?.forwardButton?.addTarget(self, action: #selector(forwardAction(sender:)), for: .touchUpInside)
-                cell.delegate = self
+                cell?.delegate = self
                 cell?.refreshDelegate = self
                 cell.selectionStyle = .none
                 cell?.backgroundColor = .clear
                 cell?.contentView.backgroundColor = .clear
-                cell?.replyView?.addGestureRecognizer(textReplyTap)
+                cell?.setupReplyGesture()
+                cell?.gestureDelegate = self
+                //cell?.replyView?.addGestureRecognizer(textReplyTap)
                 return cell
                 
             case .contact:
@@ -4470,9 +4498,10 @@ extension ChatViewParentController : UITableViewDataSource ,UITableViewDelegate,
                         cell.setUserProfileInfo(message: message, isBlocked: false)
                     }
                     cell = cell.getCellFor(message, at: indexPath, isShowForwardView: isShowForwardView, fromChat: true, isMessageSearch: isStarredMessagePage ? isStarredSearchEnabled ?? false : messageSearchEnabled, searchText: isStarredMessagePage ? searchBar?.text ?? "" : messageSearchBar?.text ?? "", profileDetails: getProfileDetails)!
-                    let gestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(onsaveContact(sender:)))
-                    cell.saveContactButton?.addGestureRecognizer(gestureRecognizer)
-                    cell.saveContactButton?.addGestureRecognizer(gestureRecognizer)
+//                    let gestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(onsaveContact(sender:)))
+//                    cell.saveContactButton?.addGestureRecognizer(gestureRecognizer)
+//                    cell.saveContactButton?.addGestureRecognizer(gestureRecognizer)
+                    cell?.setupContactGesture()
                     if !isStarredMessagePage {
                         if getProfileDetails.profileChatType == .groupChat {
                             if hideSenderNameToGroup(indexPath: indexPath) {
@@ -4507,7 +4536,9 @@ extension ChatViewParentController : UITableViewDataSource ,UITableViewDelegate,
                 cell?.delegate = self
                 cell?.backgroundColor = .clear
                 cell?.contentView.backgroundColor = .clear
-                cell?.replyView?.addGestureRecognizer(textReplyTap)
+                cell?.setupReplyGesture()
+                cell?.gestureDelegate = self
+                //cell?.replyView?.addGestureRecognizer(textReplyTap)
                 return cell
                 
             case .audio:
@@ -4555,7 +4586,9 @@ extension ChatViewParentController : UITableViewDataSource ,UITableViewDelegate,
                     cell?.selectionStyle = .none
                     cell?.backgroundColor = .clear
                     cell?.contentView.backgroundColor = .clear
-                    cell?.replyView?.addGestureRecognizer(textReplyTap)
+                    //cell?.replyView?.addGestureRecognizer(textReplyTap)
+                    cell?.setupReplyGesture()
+                    cell?.gestureDelegate = self
                     cell?.contentView.accessibilityIdentifier = "\(indexPath.section)_\(indexPath.row)"
                     configureGesture(view: cell?.contentView ?? UIView())
                     return cell ?? UITableViewCell()
@@ -4615,7 +4648,9 @@ extension ChatViewParentController : UITableViewDataSource ,UITableViewDelegate,
                     }
                     cell?.slider?.addTarget(self, action: #selector(audioPlaySliderAction(sender:)), for: .valueChanged)
                     cell?.contentView.backgroundColor = .clear
-                    cell?.replyView?.addGestureRecognizer(textReplyTap)
+                    //cell?.replyView?.addGestureRecognizer(textReplyTap)
+                    cell?.setupReplyGesture()
+                    cell?.gestureDelegate = self
                     cell?.contentView.accessibilityIdentifier = "\(indexPath.section)_\(indexPath.row)"
                     configureGesture(view: cell?.contentView ?? UIView())
                     cell?.backgroundColor = .clear
@@ -4681,7 +4716,9 @@ extension ChatViewParentController : UITableViewDataSource ,UITableViewDelegate,
                     cell.selectionStyle = .none
                     cell.backgroundColor = .clear
                     cell.contentView.backgroundColor = .clear
-                    cell.replyView?.addGestureRecognizer(textReplyTap)
+                    //cell.replyView?.addGestureRecognizer(textReplyTap)
+                    cell.setupReplyGesture()
+                    cell.gestureDelegate = self
                     cell.contentView.accessibilityIdentifier = "\(indexPath.section)_\(indexPath.row)"
                     configureGesture(view: cell.contentView)
                     return cell
@@ -4701,12 +4738,13 @@ extension ChatViewParentController : UITableViewDataSource ,UITableViewDelegate,
                     cell = cell.getCellFor(message, at: indexPath, isShowForwardView: isShowForwardView, isDeleteMessageSelected: isStarredMessageSelected ? true : isDeleteSelected, fromChat: true, isMessageSearch: isStarredMessagePage == true && isStarredSearchEnabled == true ? true : messageSearchEnabled, searchText: isStarredSearchEnabled == true ? searchBar?.text ?? "" : messageSearchBar?.text ?? "", profileDetails: getProfileDetails)!
                     
                     //MARK: - Double tap gesture for VideoIncomingCel
-                    if CommonDefaults.isTranlationEnabled {
-                        let  tapVideoCaption = UITapGestureRecognizer(target: self, action: #selector(self.translationLanguage(_:)))
-                        tapVideoCaption.numberOfTapsRequired = 2
-                        cell.captionView.isUserInteractionEnabled = true
-                        cell.captionView.addGestureRecognizer(tapVideoCaption)
-                    }
+//                    if CommonDefaults.isTranlationEnabled {
+//                        let  tapVideoCaption = UITapGestureRecognizer(target: self, action: #selector(self.translationLanguage(_:)))
+//                        tapVideoCaption.numberOfTapsRequired = 2
+//                        cell.captionView.isUserInteractionEnabled = true
+//                        cell.captionView.addGestureRecognizer(tapVideoCaption)
+//                    }
+                    cell.setupTranslateGesture()
                     cell.downloadButton.tag = (indexPath.section * 1000) + indexPath.row
                     cell.downloadButton.addTarget(self, action: #selector(videoDownload(sender:)), for: .touchUpInside)
                     cell.playButton.addTarget(self, action: #selector(playVideoGestureAction(sender:)), for: .touchUpInside)
@@ -4739,7 +4777,9 @@ extension ChatViewParentController : UITableViewDataSource ,UITableViewDelegate,
                     } else {
                         cell.senderNameView.isHidden = true
                     }
-                    cell.replyView?.addGestureRecognizer(textReplyTap)
+                    //cell.replyView?.addGestureRecognizer(textReplyTap)
+                    cell.setupReplyGesture()
+                    cell.gestureDelegate = self
                     cell.backgroundColor = .clear
                     cell.contentView.backgroundColor = .clear
                     cell.contentView.accessibilityIdentifier = "\(indexPath.section)_\(indexPath.row)"
@@ -4777,7 +4817,9 @@ extension ChatViewParentController : UITableViewDataSource ,UITableViewDelegate,
                     cell.uploadButton?.addTarget(self, action: #selector(uploadDownloadDocuments(sender: )), for: .touchUpInside)
                     cell.fwdButton?.addTarget(self, action: #selector(quickForwardAction(sender:)), for: .touchUpInside)
                     cell.viewDocumentButton?.addTarget(self, action: #selector(viewDocument(sender:)), for: .touchUpInside)
-                    cell.replyView?.addGestureRecognizer(textReplyTap)
+                    //cell.replyView?.addGestureRecognizer(textReplyTap)
+                    cell.setupReplyGesture()
+                    cell.gestureDelegate = self
                     cell.contentView.accessibilityIdentifier = "\(indexPath.section)_\(indexPath.row)"
                     cell.backgroundColor = .clear
                     cell.contentView.backgroundColor = .clear
@@ -4825,7 +4867,9 @@ extension ChatViewParentController : UITableViewDataSource ,UITableViewDelegate,
                     } else {
                         cell.groupSenderNameView?.isHidden = true
                     }
-                    cell.replyView?.addGestureRecognizer(textReplyTap)
+                    //cell.replyView?.addGestureRecognizer(textReplyTap)
+                    cell.setupReplyGesture()
+                    cell.gestureDelegate = self
                     cell.contentView.accessibilityIdentifier = "\(indexPath.section)_\(indexPath.row)"
                     configureGesture(view: cell.contentView)
                     cell.backgroundColor = .clear
@@ -4959,7 +5003,7 @@ extension ChatViewParentController : UITableViewDataSource ,UITableViewDelegate,
 //// Location Sharing Methods
 
 extension ChatViewParentController {
-    @objc func onLocationMessage(sender: UIGestureRecognizer) {
+    @objc func onLocationMessage(sender: UITapGestureRecognizer) {
         if !NetworkReachability.shared.isConnected {
             AppAlert.shared.showToast(message: ErrorMessage.checkYourInternet)
             return
@@ -4980,7 +5024,7 @@ extension ChatViewParentController {
         goToMap()
     }
     
-    @objc func onsaveContact(sender: UIGestureRecognizer) {
+    @objc func onsaveContact(sender: UITapGestureRecognizer) {
         guard let indexPath =  chatTableView.indexPathForRow(at: sender.location(in:  chatTableView)) else {
             return
         }
@@ -10234,4 +10278,23 @@ extension ChatViewParentController: SendMeetLinkMessage {
         return isStarredMessagePage ? (isStarredSearchEnabled == true ? (starredSearchMessages?.count ?? 0) > row : starredMessages.count > row) : (chatMessages.count > section && chatMessages[section].count > row)
     }
 
+}
+
+
+extension ChatViewParentController: GestureDelegate {
+    func contactSaveGesture(_ sender: UITapGestureRecognizer) {
+        onsaveContact(sender: sender)
+    }
+    
+    func locationGesture(_ sender: UITapGestureRecognizer) {
+        onLocationMessage(sender: sender)
+    }
+
+    func replyGesture(_ sender: UITapGestureRecognizer?) {
+        replyViewTapGesture(sender)
+    }
+
+    func translateGesture(_ sender: UITapGestureRecognizer?) {
+        translationLanguage(sender)
+    }
 }

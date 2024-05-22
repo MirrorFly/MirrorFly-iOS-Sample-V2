@@ -65,8 +65,8 @@ class SenderDocumentsTableViewCell: BaseTableViewCell {
     //MARK: StarredMessage local variable
     var isStarredMessagePage: Bool? = false
     
-    var refreshDelegate: RefreshBubbleImageViewDelegate? = nil
-    
+    weak var refreshDelegate: RefreshBubbleImageViewDelegate? = nil
+    weak var gestureDelegate: GestureDelegate? = nil
     override func awakeFromNib() {
         super.awakeFromNib()
         setupUI()
@@ -75,7 +75,18 @@ class SenderDocumentsTableViewCell: BaseTableViewCell {
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
     }
-    
+
+    func setupReplyGesture() {
+        //Reply tap gesture
+        let  textReplyTap = UITapGestureRecognizer(target: self, action: #selector(self.replyViewTapGesture(_:)))
+        replyView?.addGestureRecognizer(textReplyTap)
+        textReplyTap.delegate = self
+    }
+
+    @objc func replyViewTapGesture(_ sender: UITapGestureRecognizer? = nil) {
+        gestureDelegate?.replyGesture(sender)
+    }
+
     func setupUI() {
         sentTimeLabel?.font = UIFont.font9px_appLight()
         replyView?.roundCorners(corners: [.topLeft, .topRight], radius: 5.0)

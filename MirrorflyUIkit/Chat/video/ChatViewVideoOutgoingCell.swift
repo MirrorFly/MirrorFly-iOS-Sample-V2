@@ -69,7 +69,8 @@ class ChatViewVideoOutgoingCell: BaseTableViewCell {
     @IBOutlet weak var videoTimeStackView: UIStackView!
     @IBOutlet weak var captionHolder: UIView!
     var message : ChatMessage?
-    var refreshDelegate: RefreshBubbleImageViewDelegate? = nil
+    weak var refreshDelegate: RefreshBubbleImageViewDelegate? = nil
+    weak var gestureDelegate: GestureDelegate? = nil
     var selectedForwardMessage: [SelectedMessages]? = []
     var imageGeasture: UITapGestureRecognizer!
     
@@ -85,6 +86,18 @@ class ChatViewVideoOutgoingCell: BaseTableViewCell {
         // Initialization code
         setupUI()
     }
+
+    func setupReplyGesture() {
+        //Reply tap gesture
+        let  textReplyTap = UITapGestureRecognizer(target: self, action: #selector(self.replyViewTapGesture(_:)))
+        replyView?.addGestureRecognizer(textReplyTap)
+        textReplyTap.delegate = self
+    }
+
+    @objc func replyViewTapGesture(_ sender: UITapGestureRecognizer? = nil) {
+        gestureDelegate?.replyGesture(sender)
+    }
+
     func setupUI() {
         retryLabel.text = retry
         uploadView.isHidden = true
