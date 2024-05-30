@@ -13,11 +13,10 @@ import Social
 import CoreServices
 import Contacts
 
-let BASE_URL =  "https://api-preprod-sandbox.mirrorfly.com/api/v1/"
+let LICENSE_KEY = "****************"
 let CONTAINER_ID = "group.com.mirrorfly.qa"
-let LICENSE_KEY = "xxxxxxxxx"
 let IS_LIVE = false
-let APP_NAME = "UiKit"
+let APP_NAME = "UiKitQa"
 let ENABLE_CONTACT_SYNC = false
 
 protocol ShareKitDelegate {

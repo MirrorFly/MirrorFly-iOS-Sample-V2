@@ -53,6 +53,8 @@ class CallUIViewController: UIViewController, UIAdaptivePresentationControllerDe
     var showHideMenu = true
     var showGridView = false
     var isScrolledToEnd = false
+    var qualityToastShown = false
+    static var isQualityToastShowing = false
     
     var isAudioMuted = false {
         willSet {
@@ -79,6 +81,7 @@ class CallUIViewController: UIViewController, UIAdaptivePresentationControllerDe
 
     //var panGesture  = UIPanGestureRecognizer()
     var tapGesture  = UITapGestureRecognizer()
+    var closeGesture = UITapGestureRecognizer()
     var videoTapGesture  = UITapGestureRecognizer()
     
     var callType : CallType = .Audio
@@ -89,6 +92,7 @@ class CallUIViewController: UIViewController, UIAdaptivePresentationControllerDe
     static var sharedInstance = CallUIViewController()
     
     var callDurationTimer : Timer?
+    var qualityTimer : Timer?
     var seconds = -1
    
     var alertController : UIAlertController?
@@ -164,6 +168,7 @@ class CallUIViewController: UIViewController, UIAdaptivePresentationControllerDe
         UIDevice.current.endGeneratingDeviceOrientationNotifications()
         ChatManager.shared.connectionDelegate = self
         CallManager.delegate = self
+        CallManager.connectionQuality = self
         AudioManager.shared().audioManagerDelegate = self
         AudioManager.shared().getCurrentAudioInput()
         dismissCalled = false
@@ -1432,6 +1437,9 @@ extension CallUIViewController {
         speakingDictionary.removeAll()
         callAgainMembers.removeAll()
         members.removeAll()
+        qualityTimer?.invalidate()
+        qualityTimer = nil
+        qualityToastShown = false
     }
     
     func dismissCallUI(){
@@ -1450,6 +1458,9 @@ extension CallUIViewController {
         showHideDuration(hide: true)
         myCallStatus = .calling
         currentCallStatus = .CALLING
+        outgoingCallView?.qualityView?.isHidden = true
+        outgoingCallView?.qualityIcon?.isHidden = true
+        CallUIViewController.isQualityToastShowing = false
         let window = UIApplication.shared.windows.filter {$0.isKeyWindow}.first
         if let navigationController = window?.rootViewController as? UINavigationController,let presented = navigationController.presentedViewController {
             window?.rootViewController?.dismiss(animated: true)
@@ -1504,6 +1515,7 @@ extension CallUIViewController {
                 self.outgoingCallView?.AttendingBottomView.transform = top
                 self.outgoingCallView?.tileCollectionView.transform = top
             }, completion: nil)
+        showHideQualityView(show: false)
     }
 }
 
@@ -2348,6 +2360,11 @@ extension CallUIViewController : CallManagerDelegate {
                     ocv.removeGestureRecognizer(self!.tapGesture)
                     ocv.addGestureRecognizer(self!.tapGesture)
                 }
+                if !(self?.isOnCall ?? true){
+                    if CallManager.getCallConnectionQuality() == .poor{
+                        self?.didQualityUpdated(quality: .poor)
+                    }
+                }
                 if CallManager.isCallConnected(){
                     self?.isOnCall = true
                     self?.updateCallTimerDuration()
@@ -2469,6 +2486,9 @@ extension CallUIViewController : CallManagerDelegate {
                 FlyLogWriter.sharedInstance.writeText("#call UI .ON_RESUME => \(userId) \(self?.members.count) videoMute => \(CallManager.getMuteStatus(jid: userId, isAudioStatus: false))")
             case .USER_JOINED:
                 if CallManager.getCallMode() == .MEET {
+                    if (self?.members.count ?? 0) > 1{
+                        self?.outgoingCallView?.qualityIcon.isHidden = true
+                    }
                     if let index = self?.findIndexOfUser(jid: userId) {
                         return
                     }
@@ -2488,6 +2508,9 @@ extension CallUIViewController : CallManagerDelegate {
                 self?.getContactNames()
                 if CallManager.getCallMode() == .MEET && self?.members.count ?? 0 > 1 {
                     self?.outgoingCallView?.tileCollectionView.reloadData()
+                }
+                if CallManager.getCallMode() == .MEET && (self?.members.count ?? 0) == 1 {
+                    self?.outgoingCallView?.qualityIcon.isHidden = CallManager.getCallConnectionQuality() != .poor
                 }
             case .INVITE_CALL_TIME_OUT:
                 print("")
@@ -2541,6 +2564,9 @@ extension CallUIViewController : CallManagerDelegate {
                     self?.updateCallStatus(jid: userId, status: .reconnecting)
                 }
                 self?.validateReconnectingStatus()
+                if userId == AppUtils.getMyJid(){
+                    self?.showHideQualityView(show: false)
+                }
             case .RECONNECTED:
                 print("#STA= #callStatus onCallStatus ====  .RECONNECTED \(userId) \(CallManager.getCallStatus(userId: userId)?.rawValue) 1-1 => \(CallManager.isOneToOneCall())  \((self?.isOnCall ?? false))")
                 if !CallManager.isCallConnected(){
@@ -2612,6 +2638,9 @@ extension CallUIViewController : CallManagerDelegate {
                 self?.showHideParticipantButton(hide: !CallManager.isCallConnected())
                 self?.showHideMenuButton(hide: !CallManager.isCallConnected())
                 self?.validateReconnectingStatus()
+                if CallManager.getCallConnectionQuality() == .poor && CallManager.isCallConnected(){
+                    self?.didQualityUpdated(quality: .poor)
+                }
             case .CALLING_10S:
                 print("")
             case .CALLING_AFTER_10S:
@@ -2691,7 +2720,7 @@ extension CallUIViewController : CallManagerDelegate {
             case .RINGING:
                 _ = self.validateAndAddMember(jid: userId, with: .ringing)
             case .ATTENDED:
-                _ = self.validateAndAddMember(jid: userId, with: .attended)
+                _ = self.validateAndAddMember(jid: userId, with: .connecting)
             case .CONNECTED:
                 _ = self.validateAndAddMember(jid: userId, with: .connected)
             case .DISCONNECTED:
@@ -3564,6 +3593,8 @@ extension CallUIViewController {
         outgoingCallView?.cancelButton.addTarget(self, action: #selector(cancelBtnTapped(sender:)), for: .touchUpInside)
         outgoingCallView?.CallAgainButton.addTarget(self, action: #selector(callAgainBtnTapped(sender:)), for: .touchUpInside)
         tapGesture = UITapGestureRecognizer(target: self, action: #selector(SingleTapGesturTapped(_:)))
+        closeGesture = UITapGestureRecognizer(target: self, action: #selector(qualityViewCloseTapped(_:)))
+        outgoingCallView?.qualityView.closeView.addGestureRecognizer(closeGesture)
         outgoingCallView?.backBtn.addTarget(self, action: #selector(backAction(sender:)), for: .touchUpInside)
     }
     
@@ -3902,7 +3933,7 @@ extension CallUIViewController {
     }
     
     func addGroupTracks(jid: String) {
-        if let index = self.findIndexOfUser(jid: jid) {
+        if let index = self.findIndexOfUser(jid: jid), !((members.count - 2) < 0 ) {
             if (members[members.count - 2].callStatus != .connected && !showGridView){ return }
             let member = self.members[index]
             if let collectionView = self.outgoingCallView?.tileCollectionView {
@@ -3948,6 +3979,8 @@ extension CallUIViewController {
                     }
                 }
             }
+        }else{
+            print("#crash issue fixed")
         }
     }
     
@@ -4256,6 +4289,7 @@ extension CallUIViewController {
             if (status == "Trying to connect" || status == "Unavailable, Try again later" || status == "Ringing" || status == "Disconnected" || status == "User Seems to be Offline, Trying to Connect" || status == "Connecting") {
                 outgoingCallView?.OutgoingRingingStatusLabel?.isHidden = false
                 getContactNames()
+                outgoingCallView?.OutGoingPersonLabel.isHidden = false
                 outgoingCallView?.OutGoingPersonLabel.text  =  status == "User Seems to be Offline, Trying to Connect" ? "User Seems to be Offline,\n Trying to Connect\n" : status
                 outgoingCallView?.OutGoingPersonLabel.numberOfLines = 0
                 showHideDuration(hide:true)
@@ -4477,4 +4511,78 @@ extension CallUIViewController : MobileCallActionDelegate {
     }
     
 
+}
+
+extension CallUIViewController : ConnectionQualityDelegate{
+    
+    func didQualityUpdated(quality: ConnectionQuality) {
+        print("#quality #sl \(quality.rawValue) ")
+        if !CallManager.isCallConnected(){
+            return
+        }
+        if qualityToastShown && quality != .poor{
+            qualityToastShown = false
+        }
+        self.showHideQualityView(show: quality == .poor)
+    }
+    
+    func showHideQualityView(show : Bool, fromTimer : Bool = false) {
+        if qualityTimer == nil && show && !qualityToastShown {
+            outgoingCallView?.qualityView?.closeView.addGestureRecognizer(closeGesture)
+            qualityTimer = Timer.scheduledTimer(timeInterval: 5, target: self, selector: #selector(qualityViewCloseTapped(_:)), userInfo: nil, repeats: false)
+            outgoingCallView?.timerLable.isHidden = false
+            qualityToastShown = true
+            CallUIViewController.isQualityToastShowing = true
+            executeOnMainThread {
+                self.outgoingCallView?.qualityView?.isHidden = false
+            }
+        }else if show{
+            executeOnMainThread {
+                self.updateQualityInCollectionView()
+                if CallManager.getCallMode() == .MEET && self.members.count == 1 && CallManager.getCallConnectionQuality() == .poor{
+                    self.outgoingCallView?.qualityIcon.isHidden = false
+                }
+            }
+        }else if !show{
+            executeOnMainThread { 
+                CallUIViewController.isQualityToastShowing = false
+                let index = self.getLastIndexInCollectionView()
+                if let myCell = self.outgoingCallView?.tileCollectionView?.cellForItem(at: IndexPath(item: index, section: 0)) as? TileCell, CallManager.isCallConnected() {
+                    if !fromTimer || CallManager.getCallStatus(userId: AppUtils.getMyJid()) == .RECONNECTING{
+                        myCell.qualityView.isHidden = true
+                    }else if CallManager.getCallConnectionQuality() == .poor{
+                        myCell.qualityView.isHidden = false
+                    }
+                }
+                self.outgoingCallView?.qualityView?.isHidden = true
+                CallUIViewController.isQualityToastShowing = false
+                if CallManager.getCallMode() == .MEET && self.members.count == 1 {
+                    self.outgoingCallView?.qualityIcon.isHidden = CallManager.getCallConnectionQuality() != .poor
+                }
+            }
+        }
+    }
+    
+    func updateQualityInCollectionView(){
+        let index = self.getLastIndexInCollectionView()
+        if let myCell = self.outgoingCallView?.tileCollectionView?.cellForItem(at: IndexPath(item: index, section: 0)) as? TileCell, CallManager.isCallConnected(){
+            myCell.qualityView.isHidden = false
+            print("#sl CELL :\(myCell.profileName.text)  INDEX : \(index)")
+        }
+    }
+    
+    @objc func qualityViewCloseTapped(_ sender: UITapGestureRecognizer) {
+        outgoingCallView?.qualityView?.closeView.removeGestureRecognizer(closeGesture)
+        qualityTimer?.invalidate()
+        qualityTimer = nil
+        self.showHideQualityView(show: false, fromTimer: true)
+        
+    }
+    
+    func getLastIndexInCollectionView() -> Int {
+        if let items = self.outgoingCallView?.tileCollectionView?.numberOfItems(inSection: 0){
+            return items - 1
+        }
+        return 0
+    }
 }

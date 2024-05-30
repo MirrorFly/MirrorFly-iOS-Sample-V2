@@ -19,9 +19,9 @@ class TileCell: UICollectionViewCell {
     @IBOutlet var audioIconImageView: UIImageView!
     @IBOutlet weak var callActionsView: UIView!
     @IBOutlet weak var videoBaseView: UIImageView!
-    
-    
+    @IBOutlet weak var qualityBars: UIImageView!
     @IBOutlet weak var profileImageView: UIImageView!
+    @IBOutlet weak var qualityView: UIView!
     
     override func prepareForReuse() {
 //        executeOnMainThread {
@@ -70,10 +70,12 @@ class TileCell: UICollectionViewCell {
                 // groupCell.profileImage.isHidden = false
                 tileCell.videoBaseView.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
             }
+            tileCell.qualityView.isHidden = !((CallManager.getCallConnectionQuality() == .poor) && member.jid == AppUtils.getMyJid() && member.callStatus != .reconnecting) || CallUIViewController.isQualityToastShowing
         } else {
             tileCell.profileName.text = member.name
             tileCell.videoBaseView.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
             tileCell.audioIconImageView.image = member.isAudioMuted ? UIImage(systemName: "mic.slash.fill") : UIImage(named: "audio_lvl_one")
+            tileCell.qualityView.isHidden = true
         }
         if (isLastRow  && member.callStatus == .reconnecting) || (!isLastRow && member.callStatus != .connected) || member.callStatus == .onHold || (isLastRow && CallManager.isCallOnHold()){
             tileCell.foreGroundView.isHidden = (CallManager.isOneToOneCall() && !showGridView) || (CallManager.getCallMode() == .MEET && (members.count == 1 || members.count == 2) && !showGridView) ? true : false

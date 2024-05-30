@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="22154" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22130"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <customFonts key="customFonts">
+        <array key="SF-UI-Display-Medium.otf">
+            <string>SFUIDisplay-Medium</string>
+        </array>
+        <array key="SF-UI-Display-Regular.otf">
+            <string>SFUIDisplay-Regular</string>
+        </array>
+    </customFonts>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="PoorQualityView" customModule="Mirrorfly" customModuleProvider="target">
+            <connections>
+                <outlet property="closeButton" destination="ecI-Bi-B5p" id="p32-3X-JqZ"/>
+                <outlet property="closeView" destination="qXa-v1-JXF" id="osN-2e-QdZ"/>
+                <outlet property="mainView" destination="iN0-l3-epB" id="t5A-Tl-ONH"/>
+                <outlet property="parentStackView" destination="kUS-lB-Pft" id="kUm-or-ZVp"/>
+                <outlet property="qualityImageView" destination="BvE-VI-Ji8" id="Zbs-Ns-9vO"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="iN0-l3-epB">
+            <rect key="frame" x="0.0" y="0.0" width="495" height="89"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="kUS-lB-Pft">
+                    <rect key="frame" x="8" y="2" width="479" height="83"/>
+                    <subviews>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="EZN-CP-2Y3">
+                            <rect key="frame" x="0.0" y="24.666666666666671" width="34" height="34"/>
+                            <subviews>
+                                <imageView clipsSubviews="YES" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="bars" translatesAutoresizingMaskIntoConstraints="NO" id="BvE-VI-Ji8">
+                                    <rect key="frame" x="10" y="9.9999999999999964" width="14" height="14"/>
+                                    <constraints>
+                                        <constraint firstAttribute="height" constant="14" id="58b-cd-PNx"/>
+                                        <constraint firstAttribute="width" constant="14" id="te9-ej-gUj"/>
+                                    </constraints>
+                                </imageView>
+                            </subviews>
+                            <color key="backgroundColor" name="color_333333"/>
+                            <color key="tintColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <constraints>
+                                <constraint firstAttribute="width" constant="34" id="6Qm-k8-BtQ"/>
+                                <constraint firstItem="BvE-VI-Ji8" firstAttribute="centerX" secondItem="EZN-CP-2Y3" secondAttribute="centerX" id="DhL-el-DeG"/>
+                                <constraint firstItem="BvE-VI-Ji8" firstAttribute="centerY" secondItem="EZN-CP-2Y3" secondAttribute="centerY" id="uwA-hR-Cvr"/>
+                                <constraint firstAttribute="height" constant="34" id="y6k-aY-Ewa"/>
+                            </constraints>
+                            <userDefinedRuntimeAttributes>
+                                <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                    <integer key="value" value="17"/>
+                                </userDefinedRuntimeAttribute>
+                            </userDefinedRuntimeAttributes>
+                        </view>
+                        <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" spacing="4" translatesAutoresizingMaskIntoConstraints="NO" id="fUN-sp-epD">
+                            <rect key="frame" x="50" y="23.333333333333332" width="373" height="36.333333333333343"/>
+                            <subviews>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Poor Connection" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mnG-mD-SMS">
+                                    <rect key="frame" x="0.0" y="0.0" width="111.33333333333333" height="18"/>
+                                    <fontDescription key="fontDescription" name="SFUIDisplay-Medium" family="SF UI Display" pointSize="15"/>
+                                    <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Try moving to get better signal" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KRF-fR-IV9">
+                                    <rect key="frame" x="0.0" y="22.000000000000004" width="156.66666666666666" height="14.333333333333332"/>
+                                    <fontDescription key="fontDescription" name="SFUIDisplay-Regular" family="SF UI Display" pointSize="12"/>
+                                    <color key="textColor" name="color_B3B3B3"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                            </subviews>
+                        </stackView>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="qXa-v1-JXF">
+                            <rect key="frame" x="439" y="21.666666666666671" width="40" height="40"/>
+                            <subviews>
+                                <imageView clipsSubviews="YES" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="close_quality" translatesAutoresizingMaskIntoConstraints="NO" id="ecI-Bi-B5p">
+                                    <rect key="frame" x="16" y="0.0" width="24" height="24"/>
+                                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                    <color key="tintColor" name="SecondaryAppColor"/>
+                                    <constraints>
+                                        <constraint firstAttribute="height" constant="24" id="9Bx-WX-qG8"/>
+                                        <constraint firstAttribute="width" constant="24" id="lGH-5P-RdL"/>
+                                    </constraints>
+                                    <preferredSymbolConfiguration key="preferredSymbolConfiguration" scale="default"/>
+                                </imageView>
+                            </subviews>
+                            <color key="backgroundColor" name="color_1D1C1C"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="40" id="HFt-64-seg"/>
+                                <constraint firstItem="ecI-Bi-B5p" firstAttribute="top" secondItem="qXa-v1-JXF" secondAttribute="top" id="K6R-PM-etR"/>
+                                <constraint firstAttribute="width" constant="40" id="m84-NE-c1f"/>
+                                <constraint firstAttribute="trailing" secondItem="ecI-Bi-B5p" secondAttribute="trailing" id="qN0-VY-AzX"/>
+                            </constraints>
+                        </view>
+                    </subviews>
+                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                </stackView>
+            </subviews>
+            <viewLayoutGuide key="safeArea" id="vUN-kp-3ea"/>
+            <color key="backgroundColor" name="color_1D1C1C"/>
+            <constraints>
+                <constraint firstItem="kUS-lB-Pft" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" constant="2" id="5A7-Vu-gcO"/>
+                <constraint firstAttribute="bottom" secondItem="kUS-lB-Pft" secondAttribute="bottom" constant="4" id="60Z-sU-OyT"/>
+                <constraint firstItem="kUS-lB-Pft" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" constant="8" id="fan-0k-0xv"/>
+                <constraint firstAttribute="trailing" secondItem="kUS-lB-Pft" secondAttribute="trailing" constant="8" id="iKb-jD-7y5"/>
+            </constraints>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <point key="canvasLocation" x="206.87022900763358" y="-191.19718309859155"/>
+        </view>
+    </objects>
+    <resources>
+        <image name="bars" width="12" height="12"/>
+        <image name="close_quality" width="20" height="20"/>
+        <namedColor name="SecondaryAppColor">
+            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="color_1D1C1C">
+            <color red="0.11372549019607843" green="0.10980392156862745" blue="0.10980392156862745" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="color_333333">
+            <color red="0.20000000298023224" green="0.20000000298023224" blue="0.20000000298023224" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="color_B3B3B3">
+            <color red="0.70196078431372544" green="0.70196078431372544" blue="0.70196078431372544" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+    </resources>
+</document>

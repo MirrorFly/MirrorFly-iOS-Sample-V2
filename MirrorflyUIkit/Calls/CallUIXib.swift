@@ -96,6 +96,10 @@ class CallUIXib: UIView {
     
     @IBOutlet weak var countLabel: UILabel!
     
+    @IBOutlet weak var qualityView: PoorQualityView!
+    
+    @IBOutlet weak var qualityIcon: UIView!
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         commonInit()
