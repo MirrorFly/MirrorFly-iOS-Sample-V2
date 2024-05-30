@@ -30,17 +30,15 @@ def uikit_pods
   pod 'SwiftLinkPreview'
   pod 'lottie-ios', '4.4.0'
   pod 'BottomSheet', :git => 'https://github.com/joomcode/BottomSheet'
-  
-  #submodule dependency pods
-  pod 'MirrorFlySDK', '5.16.7'
+
+  pod 'MirrorFlySDK', '5.17.0'
 
 end
 
 def notification_pods
 
-  #submodule dependency pods
-  pod 'MirrorFlySDK', '5.16.7'
-  
+  pod 'MirrorFlySDK', '5.17.0'
+
 end
 
 target 'UiKitQa' do

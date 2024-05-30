@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="22154" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22130"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="collection view cell content view" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -19,14 +20,14 @@
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
         <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="TileCell" id="yc3-1v-QbG" customClass="TileCell" customModule="Mirrorfly" customModuleProvider="target">
-            <rect key="frame" x="0.0" y="0.0" width="165" height="147"/>
+            <rect key="frame" x="0.0" y="0.0" width="283" height="158"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
             <collectionViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="20n-HI-hle">
-                <rect key="frame" x="0.0" y="0.0" width="165" height="147"/>
+                <rect key="frame" x="0.0" y="0.0" width="283" height="158"/>
                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                 <subviews>
                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_profile_placeholder" translatesAutoresizingMaskIntoConstraints="NO" id="od5-DR-A5S" userLabel="videoBaseView">
-                        <rect key="frame" x="47.666666666666657" y="38.666666666666657" width="70" height="70"/>
+                        <rect key="frame" x="106.66666666666669" y="44" width="70" height="70"/>
                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
                             <constraint firstAttribute="width" constant="70" id="Haa-sV-8wJ"/>
@@ -39,16 +40,16 @@
                         </userDefinedRuntimeAttributes>
                     </imageView>
                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="KMU-xh-arT">
-                        <rect key="frame" x="0.0" y="0.0" width="165" height="147"/>
+                        <rect key="frame" x="0.0" y="0.0" width="283" height="158"/>
                     </imageView>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="nGA-9b-MBm" userLabel="actionsView">
-                        <rect key="frame" x="0.0" y="0.0" width="165" height="147"/>
+                        <rect key="frame" x="0.0" y="0.0" width="283" height="158"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="0jn-Lr-9sK">
-                                <rect key="frame" x="8" y="119" width="149" height="24"/>
+                                <rect key="frame" x="8" y="130" width="267" height="24"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Stacy" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="GQg-zQ-ept">
-                                        <rect key="frame" x="0.0" y="0.0" width="149" height="24"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="267" height="24"/>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <fontDescription key="fontDescription" name="SFUIDisplay-Medium" family="SF UI Display" pointSize="14"/>
                                         <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -69,10 +70,10 @@
                         </constraints>
                     </view>
                     <view alpha="0.5" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="vv1-Ea-ZcW">
-                        <rect key="frame" x="0.0" y="0.0" width="165" height="147"/>
+                        <rect key="frame" x="0.0" y="0.0" width="283" height="158"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Calling..." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sKt-Zv-7Ju">
-                                <rect key="frame" x="32.666666666666657" y="64" width="100" height="19.333333333333329"/>
+                                <rect key="frame" x="91.666666666666686" y="69.333333333333329" width="100" height="19.333333333333329"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="100" id="JXt-XE-RwY"/>
                                 </constraints>
@@ -88,7 +89,7 @@
                         </constraints>
                     </view>
                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="audio_lvl_one" translatesAutoresizingMaskIntoConstraints="NO" id="6b9-J4-704">
-                        <rect key="frame" x="141" y="0.0" width="24" height="24"/>
+                        <rect key="frame" x="259" y="0.0" width="24" height="24"/>
                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
@@ -96,14 +97,42 @@
                             <constraint firstAttribute="height" constant="24" id="yG0-3Z-6ps"/>
                         </constraints>
                     </imageView>
+                    <view clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="rko-TI-9YX" userLabel="quality_view">
+                        <rect key="frame" x="4" y="3" width="28" height="20"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="bars" translatesAutoresizingMaskIntoConstraints="NO" id="YRi-5i-Luv">
+                                <rect key="frame" x="8" y="4" width="12" height="12"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="12" id="Kzf-GE-fJh"/>
+                                    <constraint firstAttribute="width" constant="12" id="ce6-IA-V9R"/>
+                                </constraints>
+                            </imageView>
+                        </subviews>
+                        <color key="backgroundColor" name="color_333333"/>
+                        <constraints>
+                            <constraint firstItem="YRi-5i-Luv" firstAttribute="centerX" secondItem="rko-TI-9YX" secondAttribute="centerX" id="7Ub-2m-W2z"/>
+                            <constraint firstAttribute="width" constant="28" id="KUy-yC-TlE"/>
+                            <constraint firstItem="YRi-5i-Luv" firstAttribute="centerY" secondItem="rko-TI-9YX" secondAttribute="centerY" id="Lza-W3-Z1X"/>
+                            <constraint firstAttribute="height" constant="20" id="wy3-T0-kk7"/>
+                        </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                <integer key="value" value="8"/>
+                            </userDefinedRuntimeAttribute>
+                        </userDefinedRuntimeAttributes>
+                    </view>
                 </subviews>
                 <color key="backgroundColor" red="0.082352941176470587" green="0.12156862745098039" blue="0.19607843137254902" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                 <constraints>
+                    <constraint firstItem="rko-TI-9YX" firstAttribute="leading" secondItem="20n-HI-hle" secondAttribute="leading" constant="4" id="5l6-CQ-Icb"/>
                     <constraint firstItem="nGA-9b-MBm" firstAttribute="top" secondItem="20n-HI-hle" secondAttribute="top" id="B8z-sE-Hjz"/>
                     <constraint firstItem="KMU-xh-arT" firstAttribute="top" secondItem="20n-HI-hle" secondAttribute="top" id="BPY-TL-G9B"/>
                     <constraint firstItem="vv1-Ea-ZcW" firstAttribute="leading" secondItem="20n-HI-hle" secondAttribute="leading" id="BUX-ER-EJ0"/>
                     <constraint firstAttribute="bottom" secondItem="nGA-9b-MBm" secondAttribute="bottom" id="K3q-fd-w7F"/>
                     <constraint firstAttribute="trailing" secondItem="KMU-xh-arT" secondAttribute="trailing" id="NoX-Hq-FCm"/>
+                    <constraint firstItem="rko-TI-9YX" firstAttribute="top" secondItem="20n-HI-hle" secondAttribute="top" constant="3" id="Tsp-Sp-PxU"/>
                     <constraint firstItem="od5-DR-A5S" firstAttribute="centerY" secondItem="20n-HI-hle" secondAttribute="centerY" id="U2f-xm-l1B"/>
                     <constraint firstAttribute="trailing" secondItem="vv1-Ea-ZcW" secondAttribute="trailing" id="XdE-jL-UKZ"/>
                     <constraint firstAttribute="bottom" secondItem="KMU-xh-arT" secondAttribute="bottom" id="bHd-pP-lBb"/>
@@ -122,7 +151,7 @@
                     </userDefinedRuntimeAttribute>
                 </userDefinedRuntimeAttributes>
             </collectionViewCellContentView>
-            <size key="customSize" width="165" height="147"/>
+            <size key="customSize" width="283" height="158"/>
             <connections>
                 <outlet property="audioIconImageView" destination="6b9-J4-704" id="0U8-ee-tlQ"/>
                 <outlet property="callActionsView" destination="nGA-9b-MBm" id="rBC-jL-duY"/>
@@ -130,14 +159,20 @@
                 <outlet property="foreGroundView" destination="vv1-Ea-ZcW" id="YIq-nP-Ogj"/>
                 <outlet property="profileImageView" destination="od5-DR-A5S" id="IRK-yo-EYW"/>
                 <outlet property="profileName" destination="GQg-zQ-ept" id="otY-oA-Hmr"/>
+                <outlet property="qualityBars" destination="YRi-5i-Luv" id="L3y-b9-DEb"/>
+                <outlet property="qualityView" destination="rko-TI-9YX" id="crz-DO-1I5"/>
                 <outlet property="statusLable" destination="sKt-Zv-7Ju" id="uav-fS-JMR"/>
                 <outlet property="videoBaseView" destination="KMU-xh-arT" id="g25-Kq-J5y"/>
             </connections>
-            <point key="canvasLocation" x="91" y="-95"/>
+            <point key="canvasLocation" x="180.91603053435114" y="-91.549295774647888"/>
         </collectionViewCell>
     </objects>
     <resources>
         <image name="audio_lvl_one" width="20" height="20.333333969116211"/>
+        <image name="bars" width="12" height="12"/>
         <image name="ic_profile_placeholder" width="139" height="139"/>
+        <namedColor name="color_333333">
+            <color red="0.20000000298023224" green="0.20000000298023224" blue="0.20000000298023224" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
     </resources>
 </document>
