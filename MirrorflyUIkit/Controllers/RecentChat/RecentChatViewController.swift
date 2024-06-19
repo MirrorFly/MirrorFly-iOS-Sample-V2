@@ -1740,6 +1740,9 @@ extension RecentChatViewController {
                         self?.getArchiveChat.filter({$0.jid == selectedRecentChat.jid}).first?.isSelected = selectedRecentChat.isSelected
                     }
                     self?.showHideEmptyMessage()
+                    executeOnMainThread {
+                        self?.recentChatTableView?.reloadData()
+                    }
                 }
             }
 
@@ -1834,6 +1837,9 @@ extension RecentChatViewController {
                         self?.getArchiveChat.filter({$0.jid == selectedRecentChat.jid}).first?.isSelected = selectedRecentChat.isSelected
                     }
                     self?.showHideEmptyMessage()
+                    executeOnMainThread { [weak self] in
+                        self?.recentChatTableView?.reloadData()
+                    }
                 }
             }
 
@@ -2785,7 +2791,7 @@ extension RecentChatViewController : UIScrollViewDelegate {
         if !isSearchEnabled{
             
             if (position > (recentChatTableView!.contentSize.height/5)){
-                if isRecentLoadingDone || selectedTagIndex != 0 {
+                if selectedTagIndex != 0 {
                     print("#scroll #load recentChatList loading done ")
                     return
                 }
@@ -2840,31 +2846,30 @@ extension RecentChatViewController : UIScrollViewDelegate {
         if showArchivedChat == false && showPrivateChat == false {
             print("#scroll loadNextSetOfData")
             recentChatListBuilder?.changeLimit(limit: 40)
-            recentChatListBuilder?.nextSetOfData(completionHandler: {  [weak self] isSuccess, error, data in
+            //            executeInBackground { [weak self] in
+            self.recentChatListBuilder?.nextSetOfData(completionHandler: {  [weak self] isSuccess, error, data in
                 var result = data
-                if  let weakSelf = self, let recentChatList = result.getData() as? [RecentChat], isSuccess, !recentChatList.isEmpty{
-                    weakSelf.getAllRecentChat.append(contentsOf: recentChatList)
-                    weakSelf.getRecentChat.append(contentsOf: recentChatList)
-                    if !(weakSelf.recentChatListBuilder?.hasNextRecentChatData() ?? true){
-                        weakSelf.isRecentLoadingDone = true
-                    }
-                    DispatchQueue.main.async { [weak self] in
-                        self?.isRecentLoadingInProgress = false
+                DispatchQueue.main.async { [weak self] in
+                    self?.isRecentLoadingInProgress = false
+                    if  let weakSelf = self, let recentChatList = result.getData() as? [RecentChat], isSuccess, !recentChatList.isEmpty{
+                        weakSelf.getAllRecentChat.append(contentsOf: recentChatList)
+                        weakSelf.getRecentChat.append(contentsOf: recentChatList)
                         if self?.isSearchEnabled == false {
-                            var indexPaths = [IndexPath]()
-                            let section = ChatManager.isArchivedSettingsEnabled() && (self?.getArchiveChat.count ?? 0 > 0) ? 1 : 0
-                            let numberOfRows = (self?.recentChatTableView?.numberOfRows(inSection: section) ?? 0)
-                            for item in numberOfRows...(numberOfRows + recentChatList.count - 1){
-                                indexPaths.append(IndexPath(row: item, section: section))
-                            }
-                            self?.recentChatTableView?.beginUpdates()
-                            self?.recentChatTableView?.insertRows(at: indexPaths, with: .none)
-                            self?.recentChatTableView?.endUpdates()
+                            //                                var indexPaths = [IndexPath]()
+                            //                                let section = ChatManager.isArchivedSettingsEnabled() && (self?.getArchiveChat.count ?? 0 > 0) ? 1 : 0
+                            //                                let numberOfRows = (self?.recentChatTableView?.numberOfRows(inSection: section) ?? 0)
+                            //                                for item in numberOfRows...(numberOfRows + recentChatList.count - 1){
+                            //                                    indexPaths.append(IndexPath(row: item, section: section))
+                            //                                }
+                            //                                self?.recentChatTableView?.beginUpdates()
+                            //                                self?.recentChatTableView?.insertRows(at: indexPaths, with: .none)
+                            self?.recentChatTableView?.reloadData()
                         }
                         self?.getOverallUnreadCount()
                     }
                 }
             })
+            //            }
         }
     }
     
@@ -3075,9 +3080,78 @@ extension RecentChatViewController: ArchiveEventsDelegate {
     //handle when chat archived/Unarchived
     func updateArchiveUnArchiveChats(toUser: String, archiveStatus: Bool) {
         executeOnMainThread { [ weak self] in
-            self?.getAllChatTags()
-            self?.getRecentChatList()
-        }
+                   guard let weakSelf = self else { return }
+                   weakSelf.getAllChatTags()
+                   if weakSelf.showArchivedChat {
+                       if archiveStatus == false {
+                           if let index = weakSelf.getArchiveChat.firstIndex(where: { pd in pd.jid == toUser }) {
+                               weakSelf.getArchiveChat.remove(at: index)
+                               weakSelf.recentChatTableView?.reloadData()
+                           }
+                           if let recent = ChatManager.getRechtChat(jid: toUser) {
+                               var isRecentNotExist = true
+                               let tempGetRecent = self?.getRecentChat.filter({$0.jid == recent.jid})
+                               if tempGetRecent?.count ?? 0 == 0 {
+                                   self?.getRecentChat.append(recent)
+                               }
+                               let tempGetAllRecent = self?.getAllRecentChat.filter({$0.jid == recent.jid})
+                               if tempGetAllRecent?.count ?? 0 == 0 {
+                                   self?.getAllRecentChat.append(recent)
+                               }
+                               if let tempRecentList = self?.getRecentChat.sorted(by: { $0.lastMessageTime > $1.lastMessageTime }) {
+                                   self?.getRecentChat = tempRecentList
+                               }
+                               if let tempRecentList = self?.getRecentChat.sorted(by: { $0.isChatPinned && !$1.isChatPinned }) {
+                                   self?.getRecentChat = tempRecentList
+                               }
+                               weakSelf.recentChatTableView?.reloadData()
+                           }
+                       } else {
+                           if let recent = ChatManager.getRechtChat(jid: toUser) {
+                               if let index = self?.getArchiveChat.firstIndex(where: {$0.lastMessageTime < recent.lastMessageTime }) {
+                                   weakSelf.getArchiveChat.insert(recent, at: index)
+                                   weakSelf.recentChatTableView?.reloadData()
+                               }
+                           }
+                           if let index = weakSelf.getRecentChat.firstIndex(where: { pd in pd.jid == toUser }) {
+                               weakSelf.getRecentChat.remove(at: index)
+                               weakSelf.getAllRecentChat.remove(at: index)
+                               weakSelf.recentChatTableView?.reloadData()
+                           }
+                       }
+                   } else {
+                       if archiveStatus {
+                           if let index = weakSelf.getRecentChat.firstIndex(where: { pd in pd.jid == toUser }) {
+                               weakSelf.getRecentChat.remove(at: index)
+                               if let allIndex = weakSelf.getAllRecentChat.firstIndex(where: {pd in pd.jid == toUser}) {
+                                   weakSelf.getAllRecentChat.remove(at: allIndex)
+                               }
+                               weakSelf.recentChatTableView?.reloadData()
+                           }
+                       } else {
+                           if let index = weakSelf.getRecentChat.firstIndex(where: {$0.jid == toUser}) {
+                           } else {
+                               if let recent = ChatManager.getRechtChat(jid: toUser) {
+                                   let tempGetRecent = self?.getRecentChat.filter({$0.jid == recent.jid})
+                                   if tempGetRecent?.count ?? 0 == 0 {
+                                       self?.getRecentChat.append(recent)
+                                   }
+                                   let tempGetAllRecent = self?.getAllRecentChat.filter({$0.jid == recent.jid})
+                                   if tempGetAllRecent?.count ?? 0 == 0 {
+                                       self?.getAllRecentChat.append(recent)
+                                   }
+                                   if let tempRecentList = self?.getRecentChat.sorted(by: { $0.lastMessageTime > $1.lastMessageTime }) {
+                                       self?.getRecentChat = tempRecentList
+                                   }
+                                   if let tempRecentList = self?.getRecentChat.sorted(by: { $0.isChatPinned && !$1.isChatPinned }) {
+                                       self?.getRecentChat = tempRecentList
+                                   }
+                                   weakSelf.recentChatTableView?.reloadData()
+                               }
+                           }
+                       }
+                   }
+               }
     }
 
     //handle when archived settings changed

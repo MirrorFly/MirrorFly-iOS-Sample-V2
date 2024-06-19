@@ -7,7 +7,7 @@ use_frameworks!
 def uikit_pods
 
   pod 'PhoneNumberKit', :git => 'https://github.com/marmelroy/PhoneNumberKit.git', :commit => '6edd6e38a30aec087cb97f7377edf876c29a427e'
-  pod 'IQKeyboardManagerSwift','6.5.16'
+  pod 'IQKeyboardManagerSwift','7.0.3'
   pod 'Firebase/Auth'
   pod 'Firebase/Crashlytics'
   pod 'Firebase/Analytics'
@@ -25,19 +25,19 @@ def uikit_pods
   pod "PulsingHalo"
   pod 'MenuItemKit', '~> 4.0.0'
   pod 'MarqueeLabel'
-  pod 'RxSwift', '6.5.0'
-  pod 'RxCocoa', '6.5.0'
+  pod 'RxSwift', '6.7.1'
+  pod 'RxCocoa', '6.7.1'
   pod 'SwiftLinkPreview'
-  pod 'lottie-ios', '4.4.0'
+  pod 'lottie-ios', '4.4.3'
   pod 'BottomSheet', :git => 'https://github.com/joomcode/BottomSheet'
 
-  pod 'MirrorFlySDK', '5.17.0'
+  pod 'MirrorFlySDK', '5.17.2'
 
 end
 
 def notification_pods
 
-  pod 'MirrorFlySDK', '5.17.0'
+  pod 'MirrorFlySDK', '5.17.2'
 
 end
 
@@ -49,14 +49,26 @@ target 'UiKitQaNotificationExtention' do
   notification_pods
 end
 
+target 'Mirrorfly' do
+  uikit_pods
+end
+
+target 'MirrorflyNotificationExtention' do
+  notification_pods
+end
+
 target 'UikitQaShareKit' do
+  uikit_pods
+end
+
+target 'MirrorflyShareKit' do
   uikit_pods
 end
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     target.build_configurations.each do |config|
-      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '12.1'
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
       config.build_settings['ENABLE_BITCODE'] = 'NO'
       config.build_settings['APPLICATION_EXTENSION_API_ONLY'] = 'No'
       config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
