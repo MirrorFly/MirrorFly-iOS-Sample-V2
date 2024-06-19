@@ -75,7 +75,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
         }
         IQKeyboardManager.shared.enable = true
         GMSServices.provideAPIKey(googleApiKey)
-        IQKeyboardManager.shared.shouldResignOnTouchOutside = true
+        IQKeyboardManager.shared.resignOnTouchOutside = true
         IQKeyboardManager.shared.disabledDistanceHandlingClasses.append(ChatViewParentController.self)
         IQKeyboardManager.shared.disabledTouchResignedClasses.append(ChatViewParentController.self)
         IQKeyboardManager.shared.disabledTouchResignedClasses.append(ImageEditController.self)

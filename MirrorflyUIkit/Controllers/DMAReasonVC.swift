@@ -32,7 +32,7 @@ class DMAReasonVC: UIViewController {
         feedbackField.attributedPlaceholder = NSAttributedString(string: "Tell us how we can improve", attributes: [NSAttributedString.Key.foregroundColor : UIColor(named: "PrimaryTextColor2") ?? UIColor.lightGray])
         dmaBtn.isHidden = true
         dmaBtn.titleLabel?.font =  AppFont.Medium.size(15)
-        reasonField.addDoneOnKeyboardWithTarget(self, action: #selector(doneButtonClicked))
+        reasonField.iq.addDone(target: self, action: #selector(doneButtonClicked))
     }
     
 
