@@ -1393,6 +1393,8 @@ extension CallUIViewController {
                 self.outgoingCallView?.audioWaveView.isHidden = true
                 self.outgoingCallView?.AttendingBottomView.isHidden = true
                 self.outgoingCallView?.callAgainView.isHidden = false
+                self.showHideParticipantButton(hide:  true)
+                self.showHideMenuButton(hide: true)
                 
                 if callType == .Audio {
                     self.outgoingCallView?.CallAgainButton.setImage(UIImage(named: "callAgain"), for: .normal)
@@ -2159,7 +2161,7 @@ extension CallUIViewController : CallManagerDelegate {
         
     }
     
-    func getDisplayName(IncomingUser :[String], incomingUserName: String) {
+    func getDisplayName(IncomingUser :[String], incomingUserName: String, metaData: [CallMetadata]) -> [String] {
         var userString = [String]()
         if isHideNotificationContent {
             userString.append(APP_NAME)
@@ -2183,7 +2185,7 @@ extension CallUIViewController : CallManagerDelegate {
             }
             print("#names \(userString)")
         }
-        CallManager.getContactNames(IncomingUserName: userString)
+            return userString
     }
     
     func getGroupName(_ groupId : String) {
@@ -2544,8 +2546,10 @@ extension CallUIViewController : CallManagerDelegate {
                 }
             case .RECONNECTING:
                 print("#STA= #callStatus onCallStatus ====  .RECONNECTING \(userId)  \(self?.members.compactMap({$0.jid})) ||  \(self?.outgoingCallView?.tileCollectionView.numberOfItems(inSection: 0))")
-                self?.showHideParticipantButton(hide:  false)
-                self?.showHideMenuButton(hide: false)
+                if CallManager.isCallConnected() {
+                    self?.showHideParticipantButton(hide:  userId == AppUtils.getMyJid())
+                    self?.showHideMenuButton(hide: userId == AppUtils.getMyJid())
+                }
                 self?.outgoingCallView?.OutgoingRingingStatusLabel?.isHidden = !CallManager.isOneToOneCall()
                 self?.updateCallStatus(jid: userId, status : .reconnecting)
                 if CallManager.isOneToOneCall() || (CallManager.getCallMode() == .MEET && (self?.members.count == 1 || self?.members.count == 2)) {

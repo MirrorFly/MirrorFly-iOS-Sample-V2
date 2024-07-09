@@ -10,7 +10,7 @@ import AVFoundation
 import AudioToolbox
 import MirrorFlySDK
 
-let LICENSE_KEY = "****************"
+let LICENSE_KEY = "*************************"
 let CONTAINER_ID = "group.com.mirrorfly.qa"
 let IS_LIVE = false
 let APP_NAME = "UiKitQa"
