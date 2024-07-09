@@ -21,7 +21,7 @@ import AVFoundation
 import MirrorFlySDK
 
 let BASE_URL = "https://api-preprod-sandbox.mirrorfly.com/api/v1/"
-let LICENSE_KEY = "****************"
+let LICENSE_KEY = "*************************"
 let CONTAINER_ID = "group.com.mirrorfly.qa"
 let ENABLE_CONTACT_SYNC = false
 let ENABLE_CHAT_HISTORY = true
@@ -30,6 +30,8 @@ let WEB_LOGIN_URL = "https://webchat-preprod-sandbox.mirrorfly.com/"
 let IS_MOBILE_NUMBER_LOGIN = false
 let APP_NAME = "UiKitQa"
 let ICLOUD_CONTAINER_ID = "iCloud.com.mirrorfly.qa"
+
+
 
 
 let isMigrationDone = "isMigrationDone"
@@ -713,7 +715,7 @@ extension AppDelegate : LocalNotificationDelegate {
 
 extension AppDelegate : MissedCallNotificationDelegate {
     
-    func onMissedCall(isOneToOneCall: Bool, userJid: String, groupId: String?, callType: String, userList: [String]) {
+    func onMissedCall(isOneToOneCall: Bool, userJid: String, groupId: String?, callType: String, userList: [String], metaData: [CallMetadata]) {
         
         let current = UIApplication.shared.keyWindow?.getTopViewController()
         if (current is CallLogViewController) {

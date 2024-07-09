@@ -776,7 +776,7 @@ extension CallLogViewController : UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         seletedCallLog = callLogArray[indexPath.row]
-        
+
         if isGroupOrUserBlocked(callLog: seletedCallLog) {
             return
         }

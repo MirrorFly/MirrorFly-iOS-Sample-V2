@@ -48,11 +48,8 @@ extension RootViewController : CallManagerDelegate {
         
     }
     
-    func getDisplayName(IncomingUser :[String], incomingUserName: String) {
-        DispatchQueue.main.async { [weak self] in
-            self?.callViewController?.getDisplayName(IncomingUser: IncomingUser, incomingUserName: incomingUserName)
-        }
-        
+    func getDisplayName(IncomingUser :[String], incomingUserName: String, metaData: [CallMetadata]) -> [String] {
+        return self.callViewController?.getDisplayName(IncomingUser: IncomingUser, incomingUserName: incomingUserName, metaData: metaData) ?? []
     }
     
     func socketConnectionEstablished() {
