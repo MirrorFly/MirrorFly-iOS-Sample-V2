@@ -387,12 +387,10 @@ extension UIImageView {
                     url = URL(string: "")
                 } else {
                     let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
-//                    executeOnMainThread {
                         let ipimage = IPImage(text: trimmedName, radius: Double(self.frame.size.height), font: UIFont.font32px_appBold(),
                                               textColor: nil, color: getColor(userName: name))
                         placeholder = ipimage.generateInitialImage()
                         self.backgroundColor = ChatUtils.getColorForUser(userName: name)
-//                    }
                 }
             }
         } else {
@@ -419,7 +417,7 @@ extension UIImageView {
         if isBlockedByAdmin {
             url = URL(string: "")
         }
-        self.sd_setImage(with: url, placeholderImage: placeholder, options: [.continueInBackground,.decodeFirstFrameOnly,.lowPriority], progress: nil){ (image, responseError, isFromCache, imageUrl) in
+        self.sd_setImage(with: url, placeholderImage: placeholder, options: [.continueInBackground,.decodeFirstFrameOnly,.highPriority, .refreshCached], progress: nil){ (image, responseError, isFromCache, imageUrl) in
             if let error =  responseError as? NSError{
                 if let errorCode = error.userInfo[SDWebImageErrorDownloadStatusCodeKey] as? Int {
                     if errorCode == 401{
@@ -432,6 +430,31 @@ extension UIImageView {
                         }
                     }else{
                         self.image = placeholder
+                    }
+                }
+            }else{
+                self.image = image
+            }
+        }
+    }
+    
+    func loadProfileImage(placeholderImg : String?,imageURL: String) {
+        let placeHolderImg = UIImage(named: placeholderImg ?? "")
+        let urlString = ChatManager.getImageUrl(imageName: imageURL)
+        let url = URL(string: urlString)
+        self.sd_setImage(with: url, placeholderImage: placeHolderImg, options: [.continueInBackground]){ (image, responseError, isFromCache, imageUrl) in
+            if let error =  responseError as? NSError{
+                if let errorCode = error.userInfo[SDWebImageErrorDownloadStatusCodeKey] as? Int {
+                    if errorCode == 401{
+                        ChatManager.refreshToken { [weak self] isSuccess, error, data in
+                            if isSuccess{
+                                self?.loadProfileImage(placeholderImg: placeholderImg, imageURL: imageURL)
+                            }else{
+                                self?.image = placeHolderImg
+                            }
+                        }
+                    }else{
+                        self.image = placeHolderImg
                     }
                 }
             }else{

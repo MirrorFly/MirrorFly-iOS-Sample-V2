@@ -89,6 +89,7 @@ class CallLogViewController: UIViewController {
         let tap = UITapGestureRecognizer(target: self, action: #selector(callLinkViewTapped(sender:)))
         callLinkView.addGestureRecognizer(tap)
         callLogTableView.tableFooterView = createTableFooterView()
+        ChatManager.shared.connectionDelegate = self
     }
    
     override func viewWillAppear(_ animated: Bool) {
@@ -98,7 +99,9 @@ class CallLogViewController: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(networkChange(_:)),
                                                name: Notification.Name(NetStatus.networkNotificationObserver), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(self.methodOfReceivedPrivateChatNotification(notification:)), name: Notification.Name("PrivateChatAlertView"), object: nil)
-        
+        NotificationCenter.default.addObserver(self, selector: #selector(willEnterForeground),
+                                                       name: NSNotification.Name(didBecomeActive), object: nil)
+
         if let lastPageNumber = Int(Utility.getStringFromPreference(key: "clLastPageNumber")), let logsTotalPages = Int(Utility.getStringFromPreference(key: "clLastTotalPages")), let logsTotalRecords = Int(Utility.getStringFromPreference(key: "clLastTotalRecords"))  {
             
             pageNumber = lastPageNumber
@@ -147,6 +150,10 @@ class CallLogViewController: UIViewController {
             view.addSubview(floaty)
         }
         callLogTableView.reloadData()
+    }
+
+    @objc func willEnterForeground() {
+        ChatManager.shared.connectionDelegate = self
     }
 
     @objc func methodOfReceivedPrivateChatNotification(notification: Notification) {
@@ -1253,8 +1260,8 @@ extension CallLogViewController : CallLogDelegate {
     func deleteCallLogs(callLogId : String) {
         if let index = callLogArray.firstIndex(where: {$0.callLogId == callLogId}), !callLogArray.isEmpty {
             executeOnMainThread {
-//                self.callLogArray.remove(at: index)
-//                self.allCallLogArray.remove(at: index)
+//              self.callLogArray.remove(at: index)
+//              self.allCallLogArray.remove(at: index)
                 self.callLogTableView.reloadData()
                 self.updateButtons()
                 self.noCallLogView.isHidden = !self.callLogArray.isEmpty
@@ -1263,7 +1270,23 @@ extension CallLogViewController : CallLogDelegate {
     }
     
     func onCallLogsUpdated() {
-        
+        self.callLogArray = CallLogManager.getAllCallLogs()
+        self.allCallLogArray = self.callLogArray
+        executeOnMainThread {
+            self.noCallLogView.isHidden = !self.callLogArray.isEmpty
+            self.deleteAllBtn.isHidden = self.callLogArray.isEmpty
+            self.updateButtons()
+            self.callLogTableView.reloadData()
+            self.callLogTableView.tableFooterView = nil
+        }
+        if self.callLogArray.isEmpty {
+            if NetworkReachability.shared.isConnected {
+                executeInBackground { [weak self] in
+                    guard let self else {return}
+                    self.fetchCallLogsFromServer()
+                }
+            }
+        }
     }
 }
 
@@ -1337,5 +1360,24 @@ extension CallLogViewController: refreshCallLogDelegate, CallLinkDelegate {
         joinCall.callLink = callLinkID
         joinCall.isFromCallLog = true
         self.navigationController?.pushViewController(joinCall, animated: true)
+    }
+}
+
+extension CallLogViewController: ConnectionEventDelegate {
+    func onConnected() {
+        callLogManager.getCallLogs(pageNumber: 1) { isSuccess, error, data in
+            if isSuccess {
+                self.callLogTableView.reloadData()
+            }
+        }
+    }
+    
+    func onDisconnected() {
+    }
+    
+    func onConnectionFailed(error: MirrorFlySDK.FlyError) {
+    }
+    
+    func onReconnecting() {
     }
 }

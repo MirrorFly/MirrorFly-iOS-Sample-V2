@@ -44,7 +44,6 @@ class RecentChatTableViewCell: UITableViewCell {
     }
     override func prepareForReuse() {
         super.prepareForReuse()
-        profileImageView?.image = nil
         userMessageLabel?.attributedText = NSMutableAttributedString(string: "", attributes: [:])
     }
     
@@ -116,8 +115,8 @@ class RecentChatTableViewCell: UITableViewCell {
         }
     }
     
-    func setLastContentTextColor(searchText: String,recentChat: RecentChat, caption : String = "", searchMessage: ChatMessage? = nil) {
-        let editMesssage = ChatManager.getMessageOfId(messageId: recentChat.lastMessageId)?.messageTextContent ?? emptyString()
+    func setLastContentTextColor(searchText: String,recentChat: RecentChat, caption : String = "", searchMessage: ChatMessage? = nil, message: ChatMessage? = nil) {
+        let editMesssage = message?.messageTextContent ?? emptyString()
         var recentMessage = editMesssage.isEmpty ? recentChat.lastMessageContent.trim() : editMesssage.trim()
         if recentChat.lastMessageType == .notification {
             recentMessage = emptyString()
@@ -216,19 +215,21 @@ class RecentChatTableViewCell: UITableViewCell {
 //        if fromArchive {
 //            muteImageView.isHidden = true
 //        }
-        let profileImage = ((recentChatMessage.profileThumbImage?.isEmpty ?? true) ? recentChatMessage.profileImage : recentChatMessage.profileThumbImage) ?? ""
+        let profileImage = recentChatMessage.profileThumbImage == "" ? recentChatMessage.profileImage : recentChatMessage.profileThumbImage
         let userName = getUserName(jid: recentChatMessage.jid,name: recentChatMessage.profileName, nickName: recentChatMessage.nickName, contactType: recentChatMessage.isItSavedContact ? .live : .unknown)
-        if profileImage.isEmpty && recentChatMessage.profileType == .singleChat {
-            profileImageView?.image = getPlaceholder(name: userName, color: getColor(userName: userName))
-        } else {
-            profileImageView?.loadFlyImage(imageURL: profileImage, name: userName,
-                                           chatType: recentChatMessage.profileType, jid: recentChatMessage.jid, isBlockedByAdmin: recentChatMessage.isBlockedByAdmin, validateBlock: false)
-        }
-        
-        if recentChatMessage.isBlockedMe || getisBlockedMe(jid: recentChatMessage.jid) || recentChatMessage.isBlockedByAdmin || (IS_LIVE && ENABLE_CONTACT_SYNC) && recentChatMessage.isItSavedContact == false {
+        let blockedMeJid = getisBlockedMe(jid: recentChatMessage.jid)
+        if recentChatMessage.isBlockedMe || blockedMeJid || recentChatMessage.isBlockedByAdmin || (IS_LIVE && ENABLE_CONTACT_SYNC) && recentChatMessage.isItSavedContact == false {
             profileImageView?.backgroundColor =  Color.groupIconBackgroundGray
             let placeHolder = recentChatMessage.isGroup ? UIImage(named: "ic_groupPlaceHolder") :  UIImage(named: "ic_profile_placeholder")
             profileImageView?.sd_setImage(with: nil, placeholderImage: placeHolder ?? UIImage())
+        } else {
+            if (profileImage == "" || profileImage == nil) && recentChatMessage.profileType == .singleChat {
+                profileImageView?.image = getPlaceholder(name: userName, color: getColor(userName: userName))
+            } else if (profileImage == "" || profileImage == nil) && recentChatMessage.profileType == .groupChat {
+                profileImageView?.image = UIImage(named: "smallGroupPlaceHolder")
+            } else {
+                profileImageView?.loadProfileImage(placeholderImg: recentChatMessage.profileType == .singleChat ? "ic_profile_placeholder" : "smallGroupPlaceHolder", imageURL: profileImage ?? "")
+            }
         }
         
         let messageTime = recentChatMessage.lastMessageTime
@@ -239,38 +240,40 @@ class RecentChatTableViewCell: UITableViewCell {
         chatTimeLabel?.isHidden = false
         countView?.isHidden = (recentChatMessage.unreadMessageCount > 0) ? false : true
         //Update for Chat Read/Unread
-        countView?.isHidden = !recentChatMessage.isConversationUnRead
+        countView?.isHidden = !recentChatMessage.isConversationUnRead 
         countLabel?.isHidden = !recentChatMessage.isConversationUnRead || recentChatMessage.unreadMessageCount == 0
 
         statusImage?.isHidden = (recentChatMessage.isLastMessageSentByMe == true) ? false : true
         statusView?.isHidden = (recentChatMessage.isLastMessageSentByMe == true) ? false : true
         receiverMessageTypeView?.isHidden = false
         contentView.backgroundColor = recentChatMessage.isSelected == true ? Color.recentChatSelectionColor : .clear
-        
-            switch recentChatMessage.lastMessageType {
-            case .text:
-                receiverMessageTypeView?.isHidden = true
-            case .contact:
-                receiverMessageTypeImageView?.image = UIImage(named: ImageConstant.ic_rccontact)
-            case .image:
-                receiverMessageTypeImageView?.image = UIImage(named: ImageConstant.ic_rcimage)
-            case .location:
-                receiverMessageTypeImageView?.image = UIImage(named: ImageConstant.ic_rclocation)
-            case .audio:
-                if chatMessage?.mediaChatMessage?.audioType == AudioType.recording {
-                    ChatUtils.setIconForAudio(imageView: receiverMessageTypeImageView, chatMessage: chatMessage)
-                } else {
-                    receiverMessageTypeImageView?.image = UIImage(named: ImageConstant.ic_rcaudio)
-                }
-            case .video:
-                receiverMessageTypeImageView?.image = UIImage(named: ImageConstant.ic_rcvideo)
-            case .document:
-                receiverMessageTypeImageView?.image = UIImage(named: ImageConstant.ic_rcdocument)
-            case .meet:
-                receiverMessageTypeImageView?.image = UIImage(named: ImageConstant.ic_rcmeet)
-            default:
-                receiverMessageTypeView?.isHidden = true
+    }
+    
+    func setLastMessageContent(recentChatMessage: RecentChat, chatMessage: ChatMessage?) {
+        switch recentChatMessage.lastMessageType {
+        case .text:
+            receiverMessageTypeView?.isHidden = true
+        case .contact:
+            receiverMessageTypeImageView?.image = UIImage(named: ImageConstant.ic_rccontact)
+        case .image:
+            receiverMessageTypeImageView?.image = UIImage(named: ImageConstant.ic_rcimage)
+        case .location:
+            receiverMessageTypeImageView?.image = UIImage(named: ImageConstant.ic_rclocation)
+        case .audio:
+            if chatMessage?.mediaChatMessage?.audioType == AudioType.recording {
+                ChatUtils.setIconForAudio(imageView: receiverMessageTypeImageView, chatMessage: chatMessage)
+            } else {
+                receiverMessageTypeImageView?.image = UIImage(named: ImageConstant.ic_rcaudio)
             }
+        case .video:
+            receiverMessageTypeImageView?.image = UIImage(named: ImageConstant.ic_rcvideo)
+        case .document:
+            receiverMessageTypeImageView?.image = UIImage(named: ImageConstant.ic_rcdocument)
+        case .meet:
+            receiverMessageTypeImageView?.image = UIImage(named: ImageConstant.ic_rcmeet)
+        default:
+            receiverMessageTypeView?.isHidden = true
+        }
         if recentChatMessage.lastMessageType != .notification {
             switch recentChatMessage.isLastMessageSentByMe {
             case true:
@@ -336,6 +339,8 @@ class RecentChatTableViewCell: UITableViewCell {
                 } else {
                     userMessageLabel?.text = (captionText.trim().isNotEmpty) ? captionText : recentChatMessage.lastMessageType?.rawValue.capitalized
                 }
+            } else {
+                userMessageLabel?.text = recentChatMessage.lastMessageType?.rawValue.capitalized
             }
            // userMessageLabel?.text = (chatMessage?.mediaChatMessage?.mediaCaptionText.trim().isNotEmpty ?? false) ? chatMessage?.mediaChatMessage?.mediaCaptionText : recentChatMessage.lastMessageType?.rawValue.capitalized
         case .document:

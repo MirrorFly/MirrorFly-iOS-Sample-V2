@@ -9,6 +9,10 @@ import UIKit
 import MirrorFlySDK
 import SDWebImage
 
+protocol ContactInfoDelegate {
+    func didComefromContactInfo()
+}
+
 class ContactInfoViewController: BaseViewController {
     
     @IBOutlet weak var contactInfoTableView: UITableView?
@@ -27,7 +31,7 @@ class ContactInfoViewController: BaseViewController {
 
     var isFromContactInfo: Bool = false
     var lockScreenShown: Bool = false
-    
+    var contactInfoDelegate : ContactInfoDelegate? = nil
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -71,6 +75,8 @@ class ContactInfoViewController: BaseViewController {
         availableFeatures = ChatManager.getAvailableFeatures()
         self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         lockScreenShown = false
+        ChatViewParentController.receiveCallModeDelegate = nil
+        CallUIViewController.pipModeDelegate = nil
     }
     
     override func viewDidDisappear(_ animated: Bool) {
@@ -194,6 +200,7 @@ class ContactInfoViewController: BaseViewController {
    
     
     @objc func didTapBack(sender : Any) {
+        contactInfoDelegate?.didComefromContactInfo()
         if isFromGroupInfo == true {
             navigationController?.navigationBar.isHidden = true
             navigationController?.popViewController(animated: true)

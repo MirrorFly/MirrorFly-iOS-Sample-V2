@@ -211,6 +211,7 @@ let firstTimeSandboxContactSyncDone = "firstTimeSandboxContactSyncDone"
 let senderDeletedMessage = "You deleted this message"
 let receiverDeletedMessage = "This message was deleted"
 let isLocationDenied = "isLocationDenied"
+let isRecentChatLoad = "isRecentChatLoad"
 
 let  enableTranslateMessageToChooseTranslationLanguage = "Enable Translate Message to choose Translation Language"
 let chooseTranslationLaguage = "Choose Translation Language"

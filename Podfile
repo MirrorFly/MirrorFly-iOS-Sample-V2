@@ -8,10 +8,10 @@ def uikit_pods
 
   pod 'PhoneNumberKit', :git => 'https://github.com/marmelroy/PhoneNumberKit.git', :commit => '6edd6e38a30aec087cb97f7377edf876c29a427e'
   pod 'IQKeyboardManagerSwift','7.0.3'
-  pod 'Firebase/Auth'
-  pod 'Firebase/Crashlytics'
-  pod 'Firebase/Analytics'
-  pod 'Firebase/Messaging'
+  pod 'Firebase/Auth','10.23.0'
+  pod 'Firebase/Crashlytics','10.23.0'
+  pod 'Firebase/Analytics','10.23.0'
+  pod 'Firebase/Messaging','10.23.0'
   pod 'SDWebImage'
   pod 'GrowingTextViewHandler-Swift', '1.2'
   pod "BSImagePicker", "~> 3.1"
@@ -20,7 +20,7 @@ def uikit_pods
   pod 'QCropper'
   pod 'KMPlaceholderTextView', '~> 1.4.0'
   pod 'NicoProgress'
-  pod 'Firebase/RemoteConfig'
+  pod 'Firebase/RemoteConfig','10.23.0'
   pod 'Floaty', '~> 4.2.0'
   pod "PulsingHalo"
   pod 'MenuItemKit', '~> 4.0.0'
@@ -31,13 +31,13 @@ def uikit_pods
   pod 'lottie-ios', '4.4.3'
   pod 'BottomSheet', :git => 'https://github.com/joomcode/BottomSheet'
 
-  pod 'MirrorFlySDK', '5.17.4'
+  pod 'MirrorFlySDK', '5.17.10'
 
 end
 
 def notification_pods
 
-  pod 'MirrorFlySDK', '5.17.4'
+  pod 'MirrorFlySDK', '5.17.10'
 
 end
 

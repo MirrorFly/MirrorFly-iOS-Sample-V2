@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21225" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="22154" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21207"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22130"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -64,8 +64,8 @@
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="uz2-nH-mSN">
                                                 <rect key="frame" x="0.0" y="26" width="268" height="24"/>
                                                 <subviews>
-                                                    <stackView opaque="NO" contentMode="left" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="c9S-Nm-bNf">
-                                                        <rect key="frame" x="0.0" y="0.0" width="87.5" height="17"/>
+                                                    <stackView opaque="NO" contentMode="left" translatesAutoresizingMaskIntoConstraints="NO" id="c9S-Nm-bNf">
+                                                        <rect key="frame" x="0.0" y="0.0" width="268" height="17"/>
                                                         <subviews>
                                                             <view contentMode="scaleToFill" horizontalHuggingPriority="2" verticalHuggingPriority="2" horizontalCompressionResistancePriority="2" verticalCompressionResistancePriority="2" translatesAutoresizingMaskIntoConstraints="NO" id="D6x-di-Dl2">
                                                                 <rect key="frame" x="0.0" y="0.0" width="16" height="17"/>
@@ -115,15 +115,24 @@
                                                                 </constraints>
                                                             </view>
                                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Life is beautiful" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="qV9-kg-en5">
-                                                                <rect key="frame" x="16" y="0.0" width="71.5" height="17"/>
+                                                                <rect key="frame" x="16" y="0.0" width="252" height="17"/>
                                                                 <fontDescription key="fontDescription" name="SFUIDisplay-Regular" family="SF UI Display" pointSize="11"/>
                                                                 <color key="textColor" red="0.46274509803921571" green="0.46274509803921571" blue="0.46274509803921571" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                                 <nil key="highlightedColor"/>
                                                             </label>
                                                         </subviews>
+                                                        <constraints>
+                                                            <constraint firstAttribute="trailing" secondItem="qV9-kg-en5" secondAttribute="trailing" id="hyl-bV-1eJ"/>
+                                                        </constraints>
                                                     </stackView>
                                                 </subviews>
                                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                                <constraints>
+                                                    <constraint firstItem="c9S-Nm-bNf" firstAttribute="leading" secondItem="uz2-nH-mSN" secondAttribute="leading" id="1g5-17-4BQ"/>
+                                                    <constraint firstAttribute="bottom" secondItem="c9S-Nm-bNf" secondAttribute="bottom" constant="7" id="EIj-gk-A74"/>
+                                                    <constraint firstAttribute="trailing" secondItem="c9S-Nm-bNf" secondAttribute="trailing" id="lOg-v8-JKI"/>
+                                                    <constraint firstItem="c9S-Nm-bNf" firstAttribute="top" secondItem="uz2-nH-mSN" secondAttribute="top" id="wlO-cJ-nkY"/>
+                                                </constraints>
                                             </view>
                                         </subviews>
                                     </stackView>

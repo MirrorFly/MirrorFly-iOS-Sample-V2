@@ -211,7 +211,7 @@ class VerifyOTPViewController: UIViewController
         self.startLoading(withText: pleaseWait)
         let mobile = Utility.removeCharFromString(string: self.mobileNumber, char: "+")
         verifyOTPViewModel.registration(uniqueIdentifier: mobile, isForceRegister: isForceRegister) { [weak self] (result, error) in
-            
+
             if error != nil {
                 self?.stopLoading()
                 if let errorMsg  = error {
@@ -349,7 +349,7 @@ class VerifyOTPViewController: UIViewController
                         DispatchQueue.main.async { [weak self] in
                             self?.registration(isForceRegister: true)
                         }
-                        
+
                     }
                 }else {
                     AppAlert.shared.showAlert(view: self, title: warning, message: ErrorMessage.noInternet, buttonTitle: okayButton)
@@ -362,8 +362,8 @@ class VerifyOTPViewController: UIViewController
             }
         }
     }
-    
-    
+
+
 }
 
 extension VerifyOTPViewController: UITextFieldDelegate, CustomTextFieldDelegate {

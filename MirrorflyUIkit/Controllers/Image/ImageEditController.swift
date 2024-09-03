@@ -13,11 +13,12 @@ import Tatsi
 import MirrorFlySDK
 import GrowingTextViewHandler_Swift
 
-protocol EditImageDelegate: class {
+protocol EditImageDelegate: AnyObject {
     func sendMedia(media : [MediaData])
+    func goBackImageRefreshData()
 }
 
-class ImageEditController: UIViewController {
+class ImageEditController: BaseViewController {
     @IBOutlet weak var addImage: UIImageView?
     @IBOutlet weak var addMoreButton: UIButton?
     @IBOutlet weak var deleteViw: UIView!
@@ -63,8 +64,8 @@ class ImageEditController: UIViewController {
     var mentionTableView: UITableView!
     var groupMembers = [GroupParticipantDetail]()
     var searchGroupMembers = [GroupParticipantDetail]()
-    var getProfileDetails: ProfileDetails!
-    var isMention = false 
+    var profileDetails: ProfileDetails!
+    var isMention = false
     var mentionSearch = ""
     var mentionRange: NSRange!
     var mentionRanges: [(String, NSRange)] = []
@@ -86,6 +87,7 @@ class ImageEditController: UIViewController {
             _ = self?.getAssetsImageInfo(assets: self!.selectedAssets)
         }
         searchGroupMembers = groupMembers.filter({$0.profileDetail?.isBlockedByAdmin == false || $0.memberJid != AppUtils.getMyJid()}).sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() })
+        handleBackgroundAndForground()
         setupUI()
     }
     
@@ -138,6 +140,8 @@ class ImageEditController: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(notification:)), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)
         self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
+        ChatViewParentController.receiveCallModeDelegate = nil
+        CallUIViewController.pipModeDelegate = nil
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -177,7 +181,7 @@ class ImageEditController: UIViewController {
         }
     }
     
-    @objc func keyboardWillShow(notification: NSNotification) {
+    @objc override func keyboardWillShow(notification: NSNotification) {
         if let value = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
             let newHeight: CGFloat
             if #available(iOS 11.0, *) {
@@ -191,7 +195,7 @@ class ImageEditController: UIViewController {
         }
     }
     
-    @objc func keyboardWillHide(notification: NSNotification) {
+    @objc override func keyboardWillHide(notification: NSNotification) {
         self.captionBottomCons?.constant = 10
         self.captionViewTopCons?.isActive = true
 
@@ -459,6 +463,7 @@ class ImageEditController: UIViewController {
     }
     
     @IBAction func close(_ sender: Any) {
+        self.delegate?.goBackImageRefreshData()
         popView()
     }
     
@@ -845,7 +850,7 @@ extension ImageEditController : UITextViewDelegate {
         if captionTxt?.text.contains(addCaption) == true {
             textView.text = captionTxt?.text.replacingOccurrences(of: addCaption, with: "")
         }
-        if getProfileDetails.profileChatType == .groupChat && textView.text.last == "@" {
+        if profileDetails.profileChatType == .groupChat && textView.text.last == "@" {
             mentionView.isHidden = false
             viewDidLayoutSubviews()
         }
@@ -868,7 +873,7 @@ extension ImageEditController : UITextViewDelegate {
             self.viewDidLayoutSubviews()
             return clipboardCopyAction(textView, shouldChangeTextIn: range, replacementText: text)
         }
-        if getProfileDetails.profileChatType == .groupChat {
+        if profileDetails.profileChatType == .groupChat {
             mentionshouldChangeTextIn(textView, shouldChangeTextIn: range, replacementText: text)
         }
 
@@ -891,9 +896,9 @@ extension ImageEditController : UITextViewDelegate {
     }
     
     func clipboardCopyAction(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
-        if let clipBoardStrings = UIPasteboard.general.strings, !clipBoardStrings.isEmpty, getProfileDetails.profileChatType == .groupChat {
+        if let clipBoardStrings = UIPasteboard.general.strings, !clipBoardStrings.isEmpty, profileDetails.profileChatType == .groupChat {
             if "\(clipBoardStrings.joined(separator: " ").utf16)" != "\(text.trim().utf16)" {
-                if getProfileDetails.profileChatType == .groupChat {
+                if profileDetails.profileChatType == .groupChat {
                     self.captionTxt.shouldChangeTextIn(textView, shouldChangeTextIn: range, replacementText: text)
                 }
                 return true
@@ -907,15 +912,15 @@ extension ImageEditController : UITextViewDelegate {
                     })
                     return false
                 } else {
-                    if getProfileDetails.profileChatType == .groupChat {
+                    if profileDetails.profileChatType == .groupChat {
                         self.captionTxt.shouldChangeTextIn(textView, shouldChangeTextIn: range, replacementText: text)
                     }
                     return true
                 }
             }
-        } else if let clipBoardStrings = UIPasteboard.general.strings, !clipBoardStrings.isEmpty, getProfileDetails.profileChatType == .singleChat {
+        } else if let clipBoardStrings = UIPasteboard.general.strings, !clipBoardStrings.isEmpty, profileDetails.profileChatType == .singleChat {
             if "\(clipBoardStrings.joined(separator: " ").utf16)" != "\(text.trim().utf16)" {
-                if getProfileDetails.profileChatType == .groupChat {
+                if profileDetails.profileChatType == .groupChat {
                     self.captionTxt.shouldChangeTextIn(textView, shouldChangeTextIn: range, replacementText: text)
                 }
                 return true
@@ -923,7 +928,7 @@ extension ImageEditController : UITextViewDelegate {
                 return true
             }
         }
-        if getProfileDetails.profileChatType == .groupChat {
+        if profileDetails.profileChatType == .groupChat {
             self.captionTxt.shouldChangeTextIn(textView, shouldChangeTextIn: range, replacementText: text)
         }
         return true
@@ -959,7 +964,7 @@ extension ImageEditController : UITextViewDelegate {
                 captionTxt?.isScrollEnabled = true
             }
         }
-        if getProfileDetails.profileChatType == .groupChat && !isMention {
+        if profileDetails.profileChatType == .groupChat && !isMention {
             captionTxt?.textDidChange(textView, isCaption: true)
             setMentionedUsers()
         }
@@ -973,7 +978,7 @@ extension ImageEditController : UITextViewDelegate {
                 captionTxt?.text = (captionText?.isNotEmpty ?? false) ? captionText : addCaption
             }else {
                 var imgDetail = imageAray[imageEditIndex]
-                if getProfileDetails.profileChatType == .groupChat {
+                if profileDetails.profileChatType == .groupChat {
                    // setMentionedUsers()
                 } else {
                     imgDetail.caption = textView.text == addCaption ? "" : textView.text.trim()
@@ -1287,9 +1292,9 @@ extension ImageEditController: AdminBlockDelegate {
 
 extension ImageEditController {
     func getGroupMember() {
-        if getProfileDetails.profileChatType == .groupChat {
+        if profileDetails.profileChatType == .groupChat {
             groupMembers = [GroupParticipantDetail]()
-            groupMembers =  GroupManager.shared.getGroupMemebersFromLocal(groupJid: getProfileDetails.jid).participantDetailArray.filter({$0.memberJid != AppUtils.getMyJid()})
+            groupMembers =  GroupManager.shared.getGroupMemebersFromLocal(groupJid: profileDetails.jid).participantDetailArray.filter({$0.memberJid != AppUtils.getMyJid()})
             print("getGrouMember \(groupMembers.count)")
             searchGroupMembers = mentionArrayFilter().sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() })
             mentionTableView.reloadData()
