@@ -10,6 +10,10 @@ import WebRTC
 import MirrorFlySDK
 import RxSwift
 
+protocol JoinCallViaLinkDelegate : NSObjectProtocol {
+    func goBackJoinCallRefreshData()
+}
+
 class JoinCallViaLinkViewController: BaseViewController, CallUIDelegate {
 
     @IBOutlet var profileImage: [UIImageView]!
@@ -46,6 +50,7 @@ class JoinCallViaLinkViewController: BaseViewController, CallUIDelegate {
     var isVideoMuted = false
     
     var isFromCallLog = false
+    weak var joinCallViaLinDelegate: JoinCallViaLinkDelegate?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -110,12 +115,16 @@ class JoinCallViaLinkViewController: BaseViewController, CallUIDelegate {
             }
             
         }.disposed(by: disposeBag)
+        initJoinLink()
+        CallManager.callUiDelegate = self
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         initJoinLink()
         CallManager.callUiDelegate = self
+        ChatViewParentController.receiveCallModeDelegate = nil
+        CallUIViewController.pipModeDelegate = nil
     }
     
     override func viewDidDisappear(_ animated: Bool) {
@@ -201,7 +210,7 @@ class JoinCallViaLinkViewController: BaseViewController, CallUIDelegate {
     }
     
     @IBAction func backButtonAction(_ sender: UIButton) {
-        
+        self.joinCallViaLinDelegate?.goBackJoinCallRefreshData()
         CallManager.cleanUpJoinCallViaLink()
         self.navigationController?.popViewController(animated: true)
         CallManager.callUiDelegate = nil
@@ -253,6 +262,10 @@ class JoinCallViaLinkViewController: BaseViewController, CallUIDelegate {
                         //CallManager.cleanUpJoinCallViaLink()
                         self.localVideTrack?.remove(self.localRenderer)
                         self.localVideTrack = nil
+                        CallManager.callUiDelegate = nil
+                        DispatchQueue.main.async {
+                            self.navigationController?.popViewController(animated: false)
+                        }
                     }
                 }else {
                     let errorMessage = flyError?.description ?? ""
@@ -423,7 +436,9 @@ class JoinCallViaLinkViewController: BaseViewController, CallUIDelegate {
     
     func uiPresented() {
         CallManager.callUiDelegate = nil
-        navigationController?.popViewController(animated: false)
+        DispatchQueue.main.async {
+            self.navigationController?.popViewController(animated: false)
+        }
         print("#UI_ uiPresented ")
     }
     

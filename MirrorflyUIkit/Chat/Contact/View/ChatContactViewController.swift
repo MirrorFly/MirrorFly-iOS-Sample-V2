@@ -27,6 +27,11 @@ class ChatContactViewController: UIViewController {
         contactTableView.backgroundColor = .white
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        ChatViewParentController.receiveCallModeDelegate = nil
+        CallUIViewController.pipModeDelegate = nil
+    }
+    
     func setContactInfo(){
         if let name = getContactDetails?[0].contactName {
             contactName.text = name

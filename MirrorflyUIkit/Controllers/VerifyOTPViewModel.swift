@@ -64,7 +64,7 @@ class VerifyOTPViewModel : NSObject
                                 Utility.saveInPreference(key: "clLastPageNumber", value: "1")
                                 Utility.saveInPreference(key: "clLastTotalPages", value: "0")
                                 Utility.saveInPreference(key: "clLastTotalRecords", value: "0")
-
+                                Utility.saveInPreference(key: isRecentChatLoad, value: false)
                             }
                             completionHandler(data, nil)
                         }else{
@@ -90,7 +90,7 @@ class VerifyOTPViewModel : NSObject
                         Utility.saveInPreference(key: "clLastPageNumber", value: "1")
                         Utility.saveInPreference(key: "clLastTotalPages", value: "0")
                         Utility.saveInPreference(key: "clLastTotalRecords", value: "0")
-
+                        Utility.saveInPreference(key: isRecentChatLoad, value: false)
                     }
                     completionHandler(data, nil)
                 }else{

@@ -847,7 +847,7 @@ extension UserProfileViewController: ConnectionEventDelegate {
     }
     
     func onConnected() {
-        getProfile()
+      //  getProfile()
     }
 
     func onDisconnected() {

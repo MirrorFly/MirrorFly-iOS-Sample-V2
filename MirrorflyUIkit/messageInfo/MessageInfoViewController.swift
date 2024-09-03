@@ -48,6 +48,8 @@ class MessageInfoViewController: BaseViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         self.navigationController?.navigationBar.isHidden = true
+        ChatViewParentController.receiveCallModeDelegate = nil
+        CallUIViewController.pipModeDelegate = nil
     }
     
     private func intializeUI() {

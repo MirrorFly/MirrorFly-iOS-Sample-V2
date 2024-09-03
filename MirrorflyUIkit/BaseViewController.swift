@@ -85,6 +85,9 @@ class BaseViewController : UIViewController {
                 self?.stopLoading()
                 Utility.saveInPreference(key: isProfileSaved, value: false)
                 Utility.saveInPreference(key: isLoggedIn, value: false)
+                if ENABLE_CHAT_HISTORY && CommonDefaults.chatHistoryEnabled {
+                    Utility.saveInPreference(key: isRecentChatLoad, value: false)
+                }
                 ChatManager.disconnect()
                 CallManager.disconnectCall()
                 ChatManager.resetXmppResource()
@@ -241,6 +244,7 @@ extension BaseViewController: MessageEventsDelegate {
     }
     
     func getAllInitialMessages() {
+        return
         guard let jid = getProfileDetails?.jid else {
             return
         }

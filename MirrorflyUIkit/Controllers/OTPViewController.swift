@@ -141,7 +141,7 @@ class OTPViewController: UIViewController {
                                         self?.navigationController?.pushViewController(vc!, animated: true)
                                         self?.mobileNumber.text = ""
                                     }
-                                    
+
                                 }
                             }
                         }else {

@@ -167,13 +167,21 @@ class ShareKitParticipantCell: UITableViewCell {
         }
         removeButton?.isHidden = true
         statusUILabel?.isHidden = false
-        statusImage?.isHidden = (recentChat.isLastMessageSentByMe == true) ? false : true
-        statusView?.isHidden = (recentChat.isLastMessageSentByMe == true) ? false : true
-        receiverMessageTypeView?.isHidden = false
-        
+        //        statusImage?.isHidden = (recentChat.isLastMessageSentByMe == true) ? false : true
+        //        statusView?.isHidden = (recentChat.isLastMessageSentByMe == true) ? false : true
+        if recentChat.lastMessageType == nil || recentChat.lastMessageType == .notification {
+            statusView?.isHidden = true
+            statusImage?.isHidden = true
+            receiverMessageTypeView?.isHidden = true
+            receiverMessageTypeImageView?.isHidden = true
+        } else {
+            receiverMessageTypeView?.isHidden = false
+            receiverMessageTypeImageView?.isHidden = false
+
             switch recentChat.lastMessageType {
             case .text, .autoText:
                 receiverMessageTypeView?.isHidden = true
+                receiverMessageTypeImageView?.isHidden = true
             case .contact:
                 receiverMessageTypeImageView?.image = UIImage(named: ImageConstant.ic_rccontact)
             case .image:
@@ -192,12 +200,17 @@ class ShareKitParticipantCell: UITableViewCell {
                 receiverMessageTypeImageView?.image = UIImage(named: ImageConstant.ic_rcvideo)
             case .document:
                 receiverMessageTypeImageView?.image = UIImage(named: ImageConstant.ic_rcdocument)
+            case .meet:
+                receiverMessageTypeImageView?.image = UIImage(named: ImageConstant.ic_rcmeet)
             default:
                 receiverMessageTypeView?.isHidden = true
+                receiverMessageTypeImageView?.isHidden = true
             }
-    
-        switch recentChat.isLastMessageSentByMe {
-        case true:
+
+            switch recentChat.isLastMessageSentByMe {
+            case true:
+            statusImage?.isHidden = false
+            statusView?.isHidden = false
             // show hide sent and received msg status
             switch recentChat.lastMessageStatus {
             case .notAcknowledged:
@@ -205,7 +218,7 @@ class ShareKitParticipantCell: UITableViewCell {
                 break
             case .sent:
                 switch recentChat.lastMessageType {
-                case .video, .audio, .image,.text,.contact, .autoText:
+                case .video, .audio, .image,.text,.contact , .autoText:
                     statusImage?.image = UIImage(named: ImageConstant.ic_hour)
                 default:
                     statusImage?.image = UIImage(named: ImageConstant.ic_sent)
@@ -224,11 +237,18 @@ class ShareKitParticipantCell: UITableViewCell {
                 statusImage?.image = UIImage(named: ImageConstant.ic_delivered)
                 break
             default:
-                statusImage?.image = UIImage(named: ImageConstant.ic_hour)
+                if recentChat.lastMessageStatus == nil {
+                    statusView?.isHidden = true
+                    statusImage?.isHidden = true
+                } else {
+                    statusImage?.image = UIImage(named: ImageConstant.ic_hour)
+                }
                 break
             }
             case false:
-            statusImage?.isHidden = true
+                statusImage?.isHidden = true
+                statusView?.isHidden = true
+            }
         }
     }
 }

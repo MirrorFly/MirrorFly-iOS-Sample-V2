@@ -48,10 +48,10 @@ RecentChatViewModel  {
         ChatManager.deleteRecentChats(jids: jids, completionHandler: completionHandler)
     }
 
-    func getChatReadUnread(jids: [String], isRead: Bool, completionHandler:  @escaping (Bool?)-> Void) {
+    func getChatReadUnread(jids: [String], isRead: Bool, fullMarkAsRead: Bool, completionHandler:  @escaping (Bool?)-> Void) {
         if jids.count > 0 {
             if isRead {
-                ChatManager.markConversationAsRead(for: jids)
+                ChatManager.markConversationAsRead(for: jids,fullMarkAsRead: fullMarkAsRead)
                 completionHandler(true)
             } else {
                 ChatManager.markConversationAsUnread(for: jids)
@@ -93,6 +93,7 @@ RecentChatViewModel  {
     func getRecentChat(jid : String)-> RecentChat?{
         return ChatManager.getRechtChat(jid: jid)
     }
+
 }
 
 struct SelectedMessages {

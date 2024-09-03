@@ -61,7 +61,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
     var player: AVAudioPlayer?
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        
+        application.applicationIconBadgeNumber = 0
         ChatManager.setAppGroupContainerId(id: CONTAINER_ID)
         ChatManager.initializeSDK(licenseKey: LICENSE_KEY) { _, _, _ in }
         

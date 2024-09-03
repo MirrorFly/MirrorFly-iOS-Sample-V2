@@ -132,6 +132,7 @@ enum ImageConstant {
     static let ic_rccontact = "contact"
     static let ic_rcimage = "imageGallery"
     static let ic_rcdocument = "document"
+    static let ic_rcmeet = "meet"
     static let ic_audio_filled = "ic_audio_filled"
     static let ic_sent = "ic_sent"
     static let ic_seen = "ic_seen"

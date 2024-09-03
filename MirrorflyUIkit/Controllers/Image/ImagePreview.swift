@@ -65,7 +65,8 @@ class ImagePreview: BaseViewController  {
         super.viewWillAppear(true)
         navigationController?.setNavigationBarHidden(false, animated: true)
         self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
-        
+        ChatViewParentController.receiveCallModeDelegate = nil
+        CallUIViewController.pipModeDelegate = nil
         availableFeatures = ChatManager.getAvailableFeatures()
         ChatManager.shared.availableFeaturesDelegate = self
     }
@@ -78,6 +79,7 @@ class ImagePreview: BaseViewController  {
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewDidDisappear(true)
+        self.refreshDataDelegate?.refreshUnReadMessageData()
         navigationController?.setNavigationBarHidden(true, animated: true)
         ChatManager.shared.availableFeaturesDelegate = nil
         ChatManager.shared.messageEventsDelegate = nil
@@ -237,6 +239,9 @@ extension ImagePreview: UICollectionViewDelegate, UICollectionViewDataSource, UI
 }
 
 extension ImagePreview : RefreshMessagesDelegate {
+    func refreshUnReadMessageData() {
+    }
+    
     func refreshMessages(messageIds: Array<String>) {
         messageIds.forEach { messageId in
             if imageAray.count > 0 {

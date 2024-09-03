@@ -88,6 +88,8 @@ class GroupInfoViewController: BaseViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(permissionAlertNotification), name: Notification.Name(FlyConstants.callPermissionAlertShown), object: nil)
         availableFeatures = ChatManager.getAvailableFeatures()
         lockScreenShown = false
+        ChatViewParentController.receiveCallModeDelegate = nil
+        CallUIViewController.pipModeDelegate = nil
     }
     
     override func viewDidAppear(_ animated: Bool) {

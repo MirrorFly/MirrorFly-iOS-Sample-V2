@@ -188,6 +188,8 @@ class ContactViewController: BaseViewController {
             resetDataAndFetchUsersList()
         }
         self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
+        ChatViewParentController.receiveCallModeDelegate = nil
+        CallUIViewController.pipModeDelegate = nil
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -511,7 +513,7 @@ class ContactViewController: BaseViewController {
             userImage.sd_setImage(with: url, placeholderImage: placeholder)
             if userImage?.image == placeholder {
                 userImage?.isUserInteractionEnabled = false
-                profilePopupContainer?.isHidden = false
+//                profilePopupContainer?.isHidden = false
             } else {
                 let tap = UITapGestureRecognizer(target: self, action: #selector(self.openContainerImage(sender:)))
                 userImage?.isUserInteractionEnabled = true

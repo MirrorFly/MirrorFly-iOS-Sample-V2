@@ -197,7 +197,7 @@ extension ProfileViewController {
 //                            FlyDefaults.myImageToken = self?.profileDetails?.image ?? ""
                             if(self?.profileDetails?.image != "") {
                                 self?.setImage(imageURL: self?.profileDetails?.image ?? "", completionHandler: { _ in
-                                    self?.stopLoading()
+//                                    self?.stopLoading()
                                 })
                                 self?.isImagePicked = true
                             } else {
@@ -215,9 +215,9 @@ extension ProfileViewController {
                             }
                             
                             self?.statusLabel.text = self?.profileDetails?.status == "" ? inMirrorfly.localized : self?.profileDetails?.status
-                            DispatchQueue.main.async { [weak self] in
-                                self?.stopLoading()
-                            }
+//                            DispatchQueue.main.async { [weak self] in
+//                                self?.stopLoading()
+//                            }
                         }
                     } else {
                         DispatchQueue.main.async {

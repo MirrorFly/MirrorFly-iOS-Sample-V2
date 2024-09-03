@@ -159,7 +159,7 @@ extension RootViewController {
             CallManager.setCallViewController(callViewController)
         }
         CallManager.setCallEventsDelegate(delegate:  RootViewController.sharedInstance)
-        
+
     }
 }
 
