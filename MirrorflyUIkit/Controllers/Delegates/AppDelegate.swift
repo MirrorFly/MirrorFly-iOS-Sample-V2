@@ -33,14 +33,14 @@ let ICLOUD_CONTAINER_ID = "iCloud.com.mirrorfly.qa"
 
 
 
-
 let isMigrationDone = "isMigrationDone"
 let isHideNotificationContent = false
 
 #if DEBUG
-
+var SKIP_OTP_VERIFICATION = true
 let ISEXPORT = false
 #else
+var SKIP_OTP_VERIFICATION = false
 let ISEXPORT = true
 #endif
 
@@ -212,7 +212,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
         if CommonDefaults.appLockenable || CommonDefaults.appFingerprintenable {
             CommonDefaults.showAppLock = true
         }
-
+        CallManager.disconnectCall()
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.CNContactStoreDidChange, object: nil)
     }
 
@@ -715,7 +715,7 @@ extension AppDelegate : LocalNotificationDelegate {
 
 extension AppDelegate : MissedCallNotificationDelegate {
     
-    func onMissedCall(isOneToOneCall: Bool, userJid: String, groupId: String?, callType: String, userList: [String], metaData: [CallMetadata]) {
+    func onMissedCall(isOneToOneCall: Bool, userJid: String, groupId: String?, callType: String, userList: [String],metaData: [CallMetadata], permissionDenied: Bool) {
         
         let current = UIApplication.shared.keyWindow?.getTopViewController()
         if (current is CallLogViewController) {

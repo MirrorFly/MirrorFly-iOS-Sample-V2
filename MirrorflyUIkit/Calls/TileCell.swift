@@ -18,10 +18,10 @@ class TileCell: UICollectionViewCell {
     @IBOutlet var statusLable: UILabel!
     @IBOutlet var audioIconImageView: UIImageView!
     @IBOutlet weak var callActionsView: UIView!
-    @IBOutlet weak var videoBaseView: UIImageView!
     @IBOutlet weak var qualityBars: UIImageView!
     @IBOutlet weak var profileImageView: UIImageView!
     @IBOutlet weak var qualityView: UIView!
+    @IBOutlet weak var videoBaseView: UIView!
     
     override func prepareForReuse() {
 //        executeOnMainThread {
@@ -46,20 +46,42 @@ class TileCell: UICollectionViewCell {
         }
     }
     
+    func setImageHidden(_ hidden: Bool) {
+        if CallManager.isOneToOneCall() {
+            profileImageView.isHidden = hidden
+        }else{
+            profileImageView.isHidden = false
+        }
+    }
+    
     func setupDataForTileCell(tileCell: TileCell, indexPath: IndexPath, members: [CallMember], member: CallMember, isBackCamera: Bool, showGridView: Bool, callStatus: CallStatus) {
+        self.removeRenderView(tileCell: tileCell)
         var isLastRow = false
+        print(" #STA= #callStatus onCallStatus ====  \(showGridView) showGridView")
         if showGridView{
+            print(" #STA= #callStatus onCallStatus ====  \(indexPath.row) indexPath.row \(members.count) ")
             isLastRow = indexPath.row == (members.count - 1)
+            if member.jid == AppUtils.getMyJid() {
+                isLastRow = true
+            }
         }else{
            // isLastRow = (CallManager.getCallMode() == .MEET && (members.count == 1 || members.count == 2) && !showGridView) ? true : (CallManager.isOneToOneCall() && !showGridView) ? true : members[members.count - 2].callStatus != .connected ? (indexPath.item == members.count - 2) : (indexPath.item == members.count - 1)
             
              isLastRow = (CallManager.getCallMode() == .MEET && (members.count == 1 || members.count == 2) && !showGridView) ? true : (CallManager.isOneToOneCall() && !showGridView) ? true : (indexPath.item == members.count - 1)
         }
         if isLastRow {
-            tileCell.profileName.text = members.count == 1 ? "" : "You"
+            if member.jid == AppUtils.getMyJid() {
+                print("###### MY name YOU")
+                tileCell.profileName.text = members.count == 1 ? "" : "You"
+            }
+            else
+            {
+                tileCell.profileName.text = member.name
+            }
             tileCell.foreGroundView.isHidden = true
             tileCell.audioIconImageView.isHidden = false
-            tileCell.audioIconImageView.image = member.isAudioMuted ? UIImage(systemName: "mic.slash.fill") : UIImage(named: "audio_lvl_one")
+            tileCell.audioIconImageView.image = member.isAudioMuted ? UIImage(systemName: "mic.slash.fill")?.withRenderingMode(.alwaysTemplate) : UIImage(named: "audio_lvl_one")?.withRenderingMode(.alwaysOriginal)
+            tileCell.audioIconImageView.tintColor = .white
             if  CallManager.getCallType() == .Video ||  (member.videoTrack != nil && !member.isVideoMuted){
                 if isBackCamera {
                     tileCell.videoBaseView.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
@@ -74,22 +96,29 @@ class TileCell: UICollectionViewCell {
         } else {
             tileCell.profileName.text = member.name
             tileCell.videoBaseView.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
-            tileCell.audioIconImageView.image = member.isAudioMuted ? UIImage(systemName: "mic.slash.fill") : UIImage(named: "audio_lvl_one")
+            tileCell.audioIconImageView.image = member.isAudioMuted ? UIImage(systemName: "mic.slash.fill")?.withRenderingMode(.alwaysTemplate) : UIImage(named: "audio_lvl_one")?.withRenderingMode(.alwaysOriginal)
+            tileCell.audioIconImageView.tintColor = .white
             tileCell.qualityView.isHidden = true
         }
-        if (isLastRow  && member.callStatus == .reconnecting) || (!isLastRow && member.callStatus != .connected) || member.callStatus == .onHold || (isLastRow && CallManager.isCallOnHold()){
+        //print(" #STA= #callStatus onCallStatus ====  \(isLastRow)")
+        if (isLastRow  && member.callStatus == .reconnecting) || (!isLastRow && member.callStatus != .connected) || member.callStatus == .onHold || (isLastRow && CallManager.isCallOnHold()) {
             tileCell.foreGroundView.isHidden = (CallManager.isOneToOneCall() && !showGridView) || (CallManager.getCallMode() == .MEET && (members.count == 1 || members.count == 2) && !showGridView) ? true : false
             tileCell.statusLable.text = (CallManager.isOneToOneCall() && !showGridView) || (CallManager.getCallMode() == .MEET && (members.count == 1 || members.count == 2) && !showGridView) ? "" : member.callStatus.rawValue.capitalized
-            tileCell.audioIconImageView.isHidden = true
+            print(" #STA= #callStatus onCallStatus ====  \(String(describing: tileCell.statusLable.text)) text")
+            if member.callStatus == .reconnecting || member.callStatus == .ringing || member.callStatus == .onHold || member.callStatus == .connecting || member.callStatus == .calling {
+                tileCell.audioIconImageView.isHidden = true
+            } else {
+                tileCell.audioIconImageView.isHidden = false
+            }
         }else{
             tileCell.foreGroundView.isHidden = true
+            tileCell.statusLable.text = ""
             tileCell.audioIconImageView.isHidden = false
         }
-        
-        self.setupUserProfileImage(tileCell: tileCell, member: member, isLastRow: isLastRow)
-        self.removeRenderView(tileCell: tileCell)
+       // if member.isVideoMuted  == true && member.videoTrack == nil{
+            self.setupUserProfileImage(tileCell: tileCell, member: member, isLastRow: isLastRow)
+       // }
         self.addVideoTrackToCell(tileCell: tileCell, member: member)
-       
     }
     
     func setupUserProfileImage(tileCell: TileCell, member: CallMember, isLastRow: Bool) {
@@ -106,7 +135,11 @@ class TileCell: UICollectionViewCell {
                 Utility.IntialLetter(name: profileDetail.nickName, imageView: tileCell.profileImageView, colorCode: member.color,frameSize: 128,fontSize: 32)
             }
             
-            tileCell.profileName.text = isLastRow ? "You" : profileDetail.nickName
+            if member.jid == AppUtils.getMyJid() {
+                tileCell.profileName.text = "You"
+            }else{
+                tileCell.profileName.text = profileDetail.nickName
+            }
             
         }else {
             
@@ -120,7 +153,11 @@ class TileCell: UICollectionViewCell {
                     print("#profile is fetched")
                 }
             }
-            tileCell.profileName.text = isLastRow ? "You" : userName
+            if member.jid == AppUtils.getMyJid() {
+                tileCell.profileName.text = "You"
+            }else{
+                tileCell.profileName.text = userName
+            }
         }
     }
     
@@ -135,10 +172,8 @@ class TileCell: UICollectionViewCell {
     }
     
     func addVideoTrackToCell(tileCell: TileCell, member: CallMember) {
-        
         print("member ==>\(String(describing: member.jid)) and video Status ==>\(member.isVideoMuted)")
-        
-        if CallManager.getCallType() == .Video && !member.isVideoMuted  && (member.callStatus == .connected || (member.jid == AppUtils.getMyJid())) {
+        if (CallManager.getCallMode() == .ONE_TO_ONE && !member.isVideoMuted && CallManager.getCallType() == .Video) || (CallManager.getCallMode() == .ONE_TO_MANY && !member.isVideoMuted) || (CallManager.getCallType() == .Video && !member.isVideoMuted  && (member.callStatus == .connected)) {
             
             #if arch(arm64)
             let localRen = RTCMTLVideoView(frame: .zero)
@@ -146,7 +181,7 @@ class TileCell: UICollectionViewCell {
             let localRen = RTCEAGLVideoView(frame: .zero)
             #endif
             if let baseView = tileCell.videoBaseView {
-                
+                print("#call addGroupTracks addVideoTrackToCell TileCell")
                 if let videoView = tileCell.videoBaseView, let track = CallManager.getRemoteVideoTrack(jid: member.jid) {
                     
                     track.remove(member.videoTrackView)

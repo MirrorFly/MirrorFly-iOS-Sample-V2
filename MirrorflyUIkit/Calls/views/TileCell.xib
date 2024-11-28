@@ -39,9 +39,11 @@
                             </userDefinedRuntimeAttribute>
                         </userDefinedRuntimeAttributes>
                     </imageView>
-                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="KMU-xh-arT">
+                    <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="47I-qR-zKn">
                         <rect key="frame" x="0.0" y="0.0" width="283" height="158"/>
-                    </imageView>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    </view>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="nGA-9b-MBm" userLabel="actionsView">
                         <rect key="frame" x="0.0" y="0.0" width="283" height="158"/>
                         <subviews>
@@ -128,14 +130,11 @@
                 <constraints>
                     <constraint firstItem="rko-TI-9YX" firstAttribute="leading" secondItem="20n-HI-hle" secondAttribute="leading" constant="4" id="5l6-CQ-Icb"/>
                     <constraint firstItem="nGA-9b-MBm" firstAttribute="top" secondItem="20n-HI-hle" secondAttribute="top" id="B8z-sE-Hjz"/>
-                    <constraint firstItem="KMU-xh-arT" firstAttribute="top" secondItem="20n-HI-hle" secondAttribute="top" id="BPY-TL-G9B"/>
                     <constraint firstItem="vv1-Ea-ZcW" firstAttribute="leading" secondItem="20n-HI-hle" secondAttribute="leading" id="BUX-ER-EJ0"/>
                     <constraint firstAttribute="bottom" secondItem="nGA-9b-MBm" secondAttribute="bottom" id="K3q-fd-w7F"/>
-                    <constraint firstAttribute="trailing" secondItem="KMU-xh-arT" secondAttribute="trailing" id="NoX-Hq-FCm"/>
                     <constraint firstItem="rko-TI-9YX" firstAttribute="top" secondItem="20n-HI-hle" secondAttribute="top" constant="3" id="Tsp-Sp-PxU"/>
                     <constraint firstItem="od5-DR-A5S" firstAttribute="centerY" secondItem="20n-HI-hle" secondAttribute="centerY" id="U2f-xm-l1B"/>
                     <constraint firstAttribute="trailing" secondItem="vv1-Ea-ZcW" secondAttribute="trailing" id="XdE-jL-UKZ"/>
-                    <constraint firstAttribute="bottom" secondItem="KMU-xh-arT" secondAttribute="bottom" id="bHd-pP-lBb"/>
                     <constraint firstItem="vv1-Ea-ZcW" firstAttribute="top" secondItem="20n-HI-hle" secondAttribute="top" id="c92-4E-MeI"/>
                     <constraint firstItem="od5-DR-A5S" firstAttribute="centerX" secondItem="20n-HI-hle" secondAttribute="centerX" id="nhC-zo-KN3"/>
                     <constraint firstAttribute="trailing" secondItem="nGA-9b-MBm" secondAttribute="trailing" id="qjh-Nu-auX"/>
@@ -143,7 +142,6 @@
                     <constraint firstItem="6b9-J4-704" firstAttribute="top" secondItem="20n-HI-hle" secondAttribute="top" id="u98-mK-cAU"/>
                     <constraint firstAttribute="trailing" secondItem="6b9-J4-704" secondAttribute="trailing" id="wXA-sI-j4a"/>
                     <constraint firstAttribute="bottom" secondItem="vv1-Ea-ZcW" secondAttribute="bottom" id="xI0-3z-ZHy"/>
-                    <constraint firstItem="KMU-xh-arT" firstAttribute="leading" secondItem="20n-HI-hle" secondAttribute="leading" id="xmO-9U-YTw"/>
                 </constraints>
                 <userDefinedRuntimeAttributes>
                     <userDefinedRuntimeAttribute type="number" keyPath="cornerRadius">
@@ -162,7 +160,7 @@
                 <outlet property="qualityBars" destination="YRi-5i-Luv" id="L3y-b9-DEb"/>
                 <outlet property="qualityView" destination="rko-TI-9YX" id="crz-DO-1I5"/>
                 <outlet property="statusLable" destination="sKt-Zv-7Ju" id="uav-fS-JMR"/>
-                <outlet property="videoBaseView" destination="KMU-xh-arT" id="g25-Kq-J5y"/>
+                <outlet property="videoBaseView" destination="47I-qR-zKn" id="1Mb-Nl-yNm"/>
             </connections>
             <point key="canvasLocation" x="180.91603053435114" y="-91.549295774647888"/>
         </collectionViewCell>

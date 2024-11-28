@@ -337,7 +337,9 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
     var isFromDeleteMessagefromEveryone = false
     var isFromDeleteMessagefromMe = false
     var isFromNavigatedScreen: Bool = false
-    var currentPage: Int = 0
+    var isForNewMessageWithOutScroll: Bool = false
+    var scrollIndexPath = IndexPath()
+    var isFromScrollNextPage: Bool = false
     @IBOutlet weak var mentionBaseView: UIView!
     @IBOutlet weak var mentionBottom: NSLayoutConstraint!
     @IBOutlet weak var mentionTableView: UITableView!
@@ -1946,29 +1948,21 @@ extension ChatViewParentController {
             }
             let values = groupMessages(messages: getAllMessages)
             chatMessages.append(contentsOf: values)
-            //https://stackoverflow.com/questions/68560400/insert-rows-into-tableview-onto-without-changing-scroll-position
-            //           let previousContentHeight = self.chatTableView.contentSize.height
             UIView.performWithoutAnimation {
                 self.chatTableView.reloadData()
             }
-            //            let newContentHeight = self.chatTableView.contentSize.height
-            //            let heightDifference = newContentHeight - previousContentHeight
-            //
-            //            self.chatTableView.layoutIfNeeded()
-            //            let newOffset = CGPoint(x: 0, y: heightDifference)
-            //            self.chatTableView.setContentOffset(newOffset, animated: false)
             scrollToMessage(withID: messageId)
         }
-        //        getAllMessages.append(contentsOf: messages)
-        //        let values = groupMessages(messages: getAllMessages)
-        //        chatMessages.removeAll()
-        //        chatMessages = values
     }
         func scrollToMessage(withID messageID: String) {
             if let rowIndex = chatMessages.indices(where: {$0.messageId == messageID}){
                 if isValidIndexPath(rowIndex, in: chatMessages){
-                    let indexPath = IndexPath(row: rowIndex.row, section: rowIndex.section)
-                    chatTableView.scrollToRow(at: indexPath, at: .top, animated: false)
+                    if ((chatTableView.indexPathsForVisibleRows?.last) != nil) && !isFromScrollNextPage {
+                        scrollIndexPath = IndexPath(row: 0, section: 0)
+                    } else {
+                        scrollIndexPath = IndexPath(row: rowIndex.row, section: rowIndex.section)
+                    }
+                    chatTableView.scrollToRow(at: scrollIndexPath, at: .top, animated: false)
                 }
             }
         }
@@ -5126,7 +5120,6 @@ extension ChatViewParentController {
             return
         }
         
-        print("indexPath.row: \(indexPath.row)")
        let message = isStarredMessagePage == true ? isStarredSearchEnabled == true ? starredSearchMessages?[indexPath.row] : starredMessages[indexPath.row] : chatMessages[indexPath.section][indexPath.row]
         print("onsaveContact \(message?.contactChatMessage?.contactName) \(message?.contactChatMessage?.contactPhoneNumbers)")
         if let contactNumbers : [String] = message?.contactChatMessage?.contactPhoneNumbers as? [String] {
@@ -5388,42 +5381,43 @@ extension ChatViewParentController  {
     
     func handleWhileRecevingMessage(message: ChatMessage, chatJid: String, markAsRead : Bool = true){
         handleAudioIndexPath()
-//        executeOnMainThread { [weak self] in
-            if (self.getProfileDetails.jid == message.chatUserJid){
-                if markAsRead && scrollToTappedMessage {
-                    markMessagessAsRead()
-                }
-                self.selectedIndexs.removeAll()
-                var messageCount = 0
-                var notificationText = ""
-                var defaultUnreadMessageId = "M_\(try! FlyUtils.getIdFromJid(jid: self.fetchMessageListParams.chatId))"
-                if recentChat.serverUnreadMessageCount > 0 {
-                    let separatedPostion = getMessagePosition(messageId: defaultUnreadMessageId) ?? 0
-                    let unreadMessageCount = recentChatViewModel.getRecentChat(jid: getProfileDetails.jid)?.unreadMessageCount ?? 0
-                    let defaultCount = (getAllMessages.count + unreadMessageCount ) - separatedPostion
-                    notificationText = "\(defaultCount) \((defaultCount == 1) ? "UNREAD MESSAGE" : "UNREAD MESSAGES")"
-                } else {
-                    let messages = ChatManager.shared.getUnreadMessagesWithoutUserStatus(toJid: getProfileDetails.jid, messageId: defaultUnreadMessageId)
-                    messageCount = messages.filter({!$0.isMessageSentByMe && !$0.isMessageDeleted && $0.messageType != .notification && $0.messageType.rawValue != MessageType.notification.rawValue}).count
-                    notificationText = "\(messageCount) \((messageCount == 1) ? "UNREAD MESSAGE" : "UNREAD MESSAGES")"
-                }
-                ChatManager.updateUnReadCountUI(messageId: defaultUnreadMessageId, notificationText: notificationText)
-                if AppUtils.getMyJid() != chatJid {
-                    self.appendNewMessage(message: message)
-                } else if AppUtils.getMyJid() == chatJid && message.chatUserJid == self.getProfileDetails.jid {
-                    if self.getProfileDetails.profileChatType == .singleChat {
-                        self.appendNewMessage(message: message)
-                    } else if self.getProfileDetails.profileChatType == .groupChat {
-                        if !(self.isMessageExist(messageId: message.messageId) ) {
-                            self.appendNewMessage(message: message)
-                        }
-                    }
-                }
+        if (self.getProfileDetails.jid == message.chatUserJid){
+            if markAsRead && scrollToTappedMessage {
+                markMessagessAsRead()
             }
-//            executeOnMainThread { [weak self] in
-//            self.chatTableView.reloadData()
-//            }
-//        }
+            self.selectedIndexs.removeAll()
+            let recentLastMessageId = recentChatViewModel.getRecentChat(jid: getProfileDetails.jid)?.lastMessageId
+            let indexpath = self.chatTableView.indexPathsForVisibleRows?.first
+            nextMessagesLoadingDone = false
+            if self.selectedMessageId == "" && message.messageId == recentLastMessageId && indexpath?.row == 0 && indexpath?.section == 0 {
+                isFromScrollNextPage = false
+                loadNextMessage()
+            }
+            if self.selectedMessageId != "" && indexpath?.row == 0 && indexpath?.section == 0 {
+                isFromScrollNextPage = false
+                loadNextMessage()
+            }
+            var messageCount = 0
+            var notificationText = ""
+            let defaultUnreadMessageId = "M_\(try! FlyUtils.getIdFromJid(jid: self.fetchMessageListParams.chatId))"
+            if recentChat.serverUnreadMessageCount > 0 {
+                let unreadMessageCount = recentChatViewModel.getRecentChat(jid: getProfileDetails.jid)?.unreadMessageCount ?? 0
+                let separatedPostion = getMessagePosition(messageId: defaultUnreadMessageId) ?? 0
+                let defaultCount = (getAllMessages.count + unreadMessageCount) - separatedPostion
+                notificationText = "\(defaultCount) \((defaultCount == 1) ? "UNREAD MESSAGE" : "UNREAD MESSAGES")"
+            } else {
+                let messages = ChatManager.shared.getUnreadMessagesWithoutUserStatus(toJid: getProfileDetails.jid, messageId: defaultUnreadMessageId)
+                messageCount = messages.filter({!$0.isMessageSentByMe && !$0.isMessageDeleted && $0.messageType != .notification && $0.messageType.rawValue != MessageType.notification.rawValue}).count
+                notificationText = "\(messageCount) \((messageCount == 1) ? "UNREAD MESSAGE" : "UNREAD MESSAGES")"
+            }
+            ChatManager.updateUnReadCountUI(messageId: defaultUnreadMessageId, notificationText: notificationText)
+        }
+        if message.messageType != .autoText {
+            updateUnreadMessageCount(messageId: message.messageId)
+        }
+        executeOnMainThread { [weak self] in
+            self?.chatTableView.reloadData()
+        }
     }
     
     func getMessagePosition(messageId: String) -> Int? {
@@ -5467,12 +5461,18 @@ extension ChatViewParentController  {
                     if isValidIndexPath(indexpath, in: chatMessages) {
                         if let message = ChatManager.getMessageOfId(messageId: messageId) {
                             chatMessages[indexpath.section][indexpath.row] = message
-                            self.chatTableView.reloadRows(at: [indexpath], with: .none)
+                            self.chatTableView.performBatchUpdates {
+                                self.chatTableView.reloadRows(at: [indexpath], with: .none)
+                            }
                         }
                     }
                 }
             }
-  
+            if let index = getAllMessages.firstIndex(where: { $0.messageId == messageId}) {
+                if let message = ChatManager.getMessageOfId(messageId: messageId) {
+                    getAllMessages[index] = message
+                }
+            }
 //
 //            if messageId == editMessageId && status == .acknowledged {
 //                ChatManager.isMessageEditable(messageId: messageId, completionHandler: { isSuccess, error, data in
@@ -6154,6 +6154,7 @@ extension ChatViewParentController {
                                 }
                                 if String().fetchMessageDateHeader(for: timeStamp) == "TODAY" {
                                     chatMessages[0].insert(message, at: 0)
+                                    getAllMessages.append(message)
                                     self.chatTableView?.insertRows(at: [IndexPath.init(row: 0, section: 0)], with: .right)
                                     let indexPath = IndexPath(row: 0, section: 0)
                                     self.chatTableView?.scrollToRow(at: indexPath, at: .top, animated: true)
@@ -9108,6 +9109,8 @@ extension ChatViewParentController : UIScrollViewDelegate {
                 
                 if !nextMessagesLoadingDone && !isNextMessagesLoadingInProgress {
                     backgroundQueue.async { [weak self] in
+                        self?.isForNewMessageWithOutScroll = false
+                        self?.isFromScrollNextPage = true
                         self?.loadNextMessage()
                     }
                     isNextMessagesLoadingInProgress = true
@@ -9162,7 +9165,6 @@ extension ChatViewParentController : UIScrollViewDelegate {
             if isSuccess{
                 
                 if let chatMessages = result.getData() as? [ChatMessage]{
-                    self?.currentPage += 1
                     self?.groupLatestMessages(messages: chatMessages)
                 }
                 //                executeInBackground {
@@ -9519,7 +9521,9 @@ extension ChatViewParentController {
     }
     
     private func resetUnreadMessages(isFromMedia: Bool = false, isTapNewMessage: Bool = false){
-        showOrHideUnreadMessageView(hide: true)
+        if self.selectedMessageId == "" {
+            showOrHideUnreadMessageView(hide: true)
+        }
         if isFromMedia {
             deleteUnreadNotificationFromDB()
         }
@@ -9537,6 +9541,9 @@ extension ChatViewParentController {
     private func removeUnreadMessageLabelFromChat() {
         if let indexPath = chatMessages.indexPath(where: {$0.messageId == getUnreadMessageId()}) {
             chatMessages[indexPath.section].remove(at: indexPath.row)
+            if let index = getAllMessages.firstIndex(where: { $0.messageId == getUnreadMessageId()}) {
+                getAllMessages.remove(at: index)
+            }
             chatTableView.deleteRows(at: [indexPath], with: .none)
             deleteUnreadNotificationFromDB()
             UIView.performWithoutAnimation {
@@ -9619,12 +9626,11 @@ extension ChatViewParentController {
             } else if unreadCount == 0 {
                 showOrHideUnreadMessageView(hide: true)
             }
-            
-            if indexPath.row == 0 && indexPath.section == 0 {
+            let recentLastMessageId = recentChatViewModel.getRecentChat(jid: getProfileDetails.jid)?.lastMessageId ?? ""
+            if indexPath.row == 0 && indexPath.section == 0 && getAllMessages.last?.messageId == recentLastMessageId {
                 showOrHideUnreadMessageView(hide: true)
                 unreadMessagesIdOnMessageReceived = []
             }
-            
         }
     }
 }

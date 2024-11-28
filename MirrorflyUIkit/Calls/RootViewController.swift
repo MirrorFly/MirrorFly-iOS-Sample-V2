@@ -9,7 +9,6 @@ import Foundation
 import UIKit
 import MirrorFlySDK
 import LocalAuthentication
-import BottomSheet
 
 @objc class RootViewController : NSObject {
     public static var sharedInstance = RootViewController()
@@ -77,15 +76,14 @@ extension RootViewController : CallManagerDelegate {
                     
                     if let topController = UIApplication.shared.keyWindow?.rootViewController {
                         if let presentedViewController = topController.presentedViewController {
-                            if presentedViewController.isKind(of: UIAlertController.self) || presentedViewController is BottomSheetNavigationController {
-                                presentedViewController.dismiss(animated: false)
-                            }
+                            presentedViewController.dismiss(animated: false)
                         }
                     }
                     let window = UIApplication.shared.windows.filter {$0.isKeyWindow}.first
                     if  let navigationController = window?.rootViewController as? UINavigationController {
                         if CallManager.getCallDirection() == .Incoming &&  (navigationController.presentedViewController?.isKind(of: CallUIViewController.self) == false || navigationController.presentedViewController == nil){
                             if let callController = self?.callViewController {
+                                callController.members.removeAll()
                                 callController.modalPresentationStyle = .fullScreen
                                 let navigationStack = UINavigationController(rootViewController: callController)
                                 navigationStack.setNavigationBarHidden(true, animated: false)
