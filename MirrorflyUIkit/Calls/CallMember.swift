@@ -18,7 +18,7 @@ class CallMember: NSObject {
     
     var color : String = "#20B2AA"
     
-    var callStatus : CallStatus = .calling
+    var callStatus : CallStatus = .connecting
     
     var isVideoMuted : Bool = false
     

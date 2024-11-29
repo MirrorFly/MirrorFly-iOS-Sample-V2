@@ -832,7 +832,7 @@ extension CallLogViewController : UITableViewDataSource, UITableViewDelegate {
                 let time = seletedCallLog.callReceivedTime
                 let todayTimeStamp = FlyCallUtils.generateTimestamp()
                 groupCallViewController?.callTime = self.callLogTime(time, currentTime: todayTimeStamp)!
-                groupCallViewController?.callDuration = self.callLogDuration(seletedCallLog.callReceivedTime, endTime: seletedCallLog.callEndedTime)!
+                groupCallViewController?.callDuration = self.callLogDuration(seletedCallLog.callAttendedTime, endTime: seletedCallLog.callEndedTime)!
                 self.navigationController?.pushViewController(groupCallViewController!, animated: true)
             }
         } else {
@@ -1258,18 +1258,25 @@ extension CallLogViewController : CallLogDelegate {
     }
     
     func deleteCallLogs(callLogId : String) {
-        if let index = callLogArray.firstIndex(where: {$0.callLogId == callLogId}), !callLogArray.isEmpty {
-            executeOnMainThread {
-//              self.callLogArray.remove(at: index)
-//              self.allCallLogArray.remove(at: index)
-                self.callLogTableView.reloadData()
-                self.updateButtons()
-                self.noCallLogView.isHidden = !self.callLogArray.isEmpty
+        //        if let index = callLogArray.firstIndex(where: {$0.callLogId == callLogId}), !callLogArray.isEmpty {
+        executeOnMainThread {
+            self.callLogArray.removeAll { callLog in
+                return callLog.callLogId == callLogId
             }
+            self.allCallLogArray.removeAll { callLog in
+                return callLog.callLogId == callLogId
+            }
+            //                self.callLogArray.remove(at: index)
+            //                self.allCallLogArray.remove(at: index)
+            self.callLogTableView.reloadData()
+            self.updateButtons()
+            self.noCallLogView.isHidden = !self.callLogArray.isEmpty
         }
+        //        }
     }
     
     func onCallLogsUpdated() {
+        self.callLogArray.removeAll()
         self.callLogArray = CallLogManager.getAllCallLogs()
         self.allCallLogArray = self.callLogArray
         executeOnMainThread {

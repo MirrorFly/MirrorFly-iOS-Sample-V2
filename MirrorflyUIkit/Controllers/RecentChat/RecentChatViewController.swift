@@ -2614,6 +2614,7 @@ extension RecentChatViewController : MessageEventsDelegate {
                 getAllRecentChat.removeAll(where: { recent in
                     return recent.jid == jid
                 })
+                self.showHideEmptyMessage()
             } else {
                 if deletedMessageIds.count > 0 {
                     //deletedMessageIds.forEach { msgId in
@@ -2650,6 +2651,7 @@ extension RecentChatViewController : MessageEventsDelegate {
                 getAllRecentChat.removeAll(where: { recent in
                     return recent.jid == jid
                 })
+                self.showHideEmptyMessage()
             } else {
                 if deletedMessageIds.count > 0 {
                     //deletedMessageIds.forEach { msgId in
@@ -2686,6 +2688,7 @@ extension RecentChatViewController : MessageEventsDelegate {
                 getAllRecentChat.removeAll(where: { recent in
                     return recent.jid == jid
                 })
+                self.showHideEmptyMessage()
             } else {
                 if deletedMessageIds.count > 0 {
                     //deletedMessageIds.forEach { msgId in
@@ -2699,7 +2702,9 @@ extension RecentChatViewController : MessageEventsDelegate {
                     //}
                 } else {
                     if let index = getRecentChat.firstIndex(where: {$0.jid == jid}), let recent = recentChat {
-                        getAllRecentChat[index] = recent
+                        if index >= 0 && index < getAllRecentChat.count {
+                            getAllRecentChat[index] = recent
+                        }
                         if moveRecent {
                             if ChatManager.recentChatPinnedCount() > 0 {
                                 getRecentChat.enumerated().forEach{ (indexValue,item) in
@@ -2729,14 +2734,22 @@ extension RecentChatViewController : MessageEventsDelegate {
                                         }
                                     }
                                 } else {
+                                    getAllRecentChat.insert(recent, at: 0 + ChatManager.recentChatPinnedCount())
                                     getRecentChat.insert(recent, at: 0 + ChatManager.recentChatPinnedCount())
                                 }
                             }
                         }
                     }
+                    if getRecentChat.count > 0 {
+                        emptyMessageView?.isHidden = true
+                        emptyImage?.isHidden = true
+                        noNewMsgText?.isHidden = true
+                        descriptionMessageText?.isHidden = true
+                    }
                 }
             }
         }
+        self.getOverallUnreadCount()
         recentChatTableView?.reloadData()
     }
 }
@@ -3138,6 +3151,7 @@ extension RecentChatViewController {
                 }
             }
         }
+        showHideEmptyMessage()
     }
     
     func getGroupAndRecent(groupJid : String) -> (groupProfile : ProfileDetails? , recentChat : RecentChat?) {

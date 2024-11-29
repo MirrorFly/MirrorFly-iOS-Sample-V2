@@ -27,6 +27,10 @@ class OTPViewController: UIViewController {
     let chatmanager = ChatManager.shared
     var countryRegion = ""
     
+    private var verifyOTPViewModel : VerifyOTPViewModel!
+    let chatManager = ChatManager.shared
+    var isAuthorizedSuccess: Bool = false
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
@@ -88,6 +92,7 @@ class OTPViewController: UIViewController {
                 }
             }
         })
+        verifyOTPViewModel =  VerifyOTPViewModel()
     }
     
     // MARK:- Button Actions
@@ -116,32 +121,36 @@ class OTPViewController: UIViewController {
                         if NetworkReachability.shared.isConnected {
                             startLoading(withText: pleaseWait)
                             //Request SMS
-                            otpViewModel.requestOtp(phoneNumber: phoneNumber) {
-                                (verificationID, error) in
-                                if let error = error {
-                                    self.stopLoading()
-                                    DispatchQueue.main.async {
-                                        let authError = error as NSError?
-                                        if (authError?.code == AuthErrorCode.tooManyRequests.rawValue) {
-                                            AppAlert.shared.showToast(message: ErrorMessage.otpAttempts)
-                                        }else if (authError?.code == AuthErrorCode.invalidPhoneNumber.rawValue) {
-                                            AppAlert.shared.showToast(message: ErrorMessage.validphoneNumber)
+                            if SKIP_OTP_VERIFICATION {
+                                registration(isForceRegister: true, phoneNumber: phoneNumber)
+                            } else {
+                                otpViewModel.requestOtp(phoneNumber: phoneNumber) {
+                                    (verificationID, error) in
+                                    if let error = error {
+                                        self.stopLoading()
+                                        DispatchQueue.main.async {
+                                            let authError = error as NSError?
+                                            if (authError?.code == AuthErrorCode.tooManyRequests.rawValue) {
+                                                AppAlert.shared.showToast(message: ErrorMessage.otpAttempts)
+                                            }else if (authError?.code == AuthErrorCode.invalidPhoneNumber.rawValue) {
+                                                AppAlert.shared.showToast(message: ErrorMessage.validphoneNumber)
+                                            }
                                         }
+                                        return
                                     }
-                                    return
-                                }
-                                if let verificationId = verificationID {
-                                    DispatchQueue.main.async { [weak self] in
-                                        self?.stopLoading()
-                                        AppAlert.shared.showToast(message: SuccessMessage.successOTP)
-                                        let vc = UIStoryboard.init(name: Storyboards.main, bundle: Bundle.main).instantiateViewController(withIdentifier: Identifiers.verifyOTPViewController) as? VerifyOTPViewController
-                                        vc?.verificationId = verificationId
-                                        vc?.mobileNumber = phoneNumber
-                                        vc?.getMobileNumber = countryCode + " " + mobileNumber
-                                        self?.navigationController?.pushViewController(vc!, animated: true)
-                                        self?.mobileNumber.text = ""
+                                    if let verificationId = verificationID {
+                                        DispatchQueue.main.async { [weak self] in
+                                            self?.stopLoading()
+                                            AppAlert.shared.showToast(message: SuccessMessage.successOTP)
+                                            let vc = UIStoryboard.init(name: Storyboards.main, bundle: Bundle.main).instantiateViewController(withIdentifier: Identifiers.verifyOTPViewController) as? VerifyOTPViewController
+                                            vc?.verificationId = verificationId
+                                            vc?.mobileNumber = phoneNumber
+                                            vc?.getMobileNumber = countryCode + " " + mobileNumber
+                                            self?.navigationController?.pushViewController(vc!, animated: true)
+                                            self?.mobileNumber.text = ""
+                                        }
+                                        
                                     }
-
                                 }
                             }
                         }else {
@@ -218,3 +227,101 @@ extension OTPViewController: CountryPickerDelegate {
         countryCode.text = country.dial_code
     }
 }
+
+/**
+ To skip otp verification
+ */
+extension OTPViewController {
+    func registration(isForceRegister: Bool, phoneNumber : String) {
+        self.startLoading(withText: pleaseWait)
+        let mobile = Utility.removeCharFromString(string: phoneNumber, char: "+")
+        verifyOTPViewModel.registration(uniqueIdentifier: mobile, isForceRegister: isForceRegister) { [weak self] (result, error) in
+            
+            if error != nil {
+                self?.stopLoading()
+                if let errorMsg  = error {
+                    if errorMsg == userBlocked {
+                        self?.navigateToBlockedScreen()
+                    }
+                    else if errorMsg.contains("405") {
+                        
+                        let message = AppUtils.shared.getErrorMessage(description: errorMsg)
+                        
+                        AppAlert.shared.showAlert(view: self!, title: alert, message: message, buttonOneTitle: cancel, buttonTwoTitle: continueButton)
+                        
+                        AppAlert.shared.onAlertAction = { [weak self] (result) ->
+                            Void in
+                            if result == 1 {
+                                self?.registration(isForceRegister: true, phoneNumber: phoneNumber)
+                            } else if result == 0{
+                               // self?.popView()
+                            }
+                        }
+                    }
+                    else {
+                         AppAlert.shared.showToast(message: errorMsg)
+                    }
+                    
+                }
+            } else {
+                self?.stopLoading()
+                guard let userPassword = result?["password"] as? String else{
+                    return
+                }
+                guard let userName = result?["username"] as? String else{
+                    return
+                }
+                guard let profileUpdateStatus = result?["isProfileUpdated"] as? Int else{
+                    return
+                }
+                ChatManager.updateAppLoggedIn(isLoggedin: true)
+                Utility.saveInPreference(key: isLoggedIn, value: true)
+                Utility.saveInPreference(key: username, value: userName)
+                Utility.saveInPreference(key: password, value: userPassword)
+//                FlyDefaults.myXmppPassword = userPassword
+//                FlyDefaults.myXmppUsername = userName
+//                FlyDefaults.myMobileNumber = self?.getMobileNumber ?? ""
+                CommonDefaults.isProfileUpdated = profileUpdateStatus == 1
+                AppAlert.shared.showToast(message: SuccessMessage.successAuth)
+                self?.isAuthorizedSuccess = true
+                self?.chatManager.connectionDelegate = self
+                self?.verifyOTPViewModel.initializeChatCredentials()
+                self?.startLoading(withText: pleaseWait)
+            }
+        }
+    }
+    
+    func navigateToBlockedScreen() {
+        let storyboard = UIStoryboard(name: "Profile", bundle: nil)
+        let initialViewController = storyboard.instantiateViewController(withIdentifier: "BlockedByAdminViewController") as! BlockedByAdminViewController
+        UIApplication.shared.keyWindow?.rootViewController =  UINavigationController(rootViewController: initialViewController)
+        UIApplication.shared.keyWindow?.makeKeyAndVisible()
+    }
+}
+
+extension OTPViewController : ConnectionEventDelegate {
+    func onConnected() {
+        if isAuthorizedSuccess == true {
+            //            self.performSegue(withIdentifier: Identifiers.otpNextToProfile, sender: nil)
+            chatManager.connectionDelegate = nil
+            if let vc = UIStoryboard.init(name: Storyboards.backupRestore, bundle: Bundle.main).instantiateViewController(withIdentifier: Identifiers.restoreViewController) as? RestoreViewController {
+                self.navigationController?.pushViewController(vc, animated: true)
+            }
+        }
+    }
+    
+    func onDisconnected() {
+        
+    }
+    
+    func onConnectionFailed(error: FlyError) {
+        
+    }
+    
+    func onReconnecting() {
+        
+    }
+    
+
+}
+

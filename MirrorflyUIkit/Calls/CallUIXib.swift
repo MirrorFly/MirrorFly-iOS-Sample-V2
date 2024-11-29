@@ -100,6 +100,8 @@ class CallUIXib: UIView {
     
     @IBOutlet weak var qualityIcon: UIView!
     
+    @IBOutlet weak var profileImageStackView: UIStackView!
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         commonInit()

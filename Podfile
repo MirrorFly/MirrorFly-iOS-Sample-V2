@@ -30,14 +30,39 @@ def uikit_pods
   pod 'SwiftLinkPreview'
   pod 'lottie-ios', '4.4.3'
   pod 'BottomSheet', :git => 'https://github.com/joomcode/BottomSheet'
+  
+  #submodule dependency pods
 
-  pod 'MirrorFlySDK', '5.17.10'
+  pod 'Alamofire', '5.9.1'
+  pod 'XMPPFramework/Swift'
+  pod 'libPhoneNumber-iOS', '0.9.15'
+  pod 'RealmSwift', '~> 10.49.2'
+  pod 'SocketRocket'
+  pod 'Socket.IO-Client-Swift', '16.0.1'
+  pod 'Starscream', '4.0.4'
+  pod 'GoogleWebRTC'
+  pod 'IDZSwiftCommonCrypto', '~> 0.16'
+  
+  pod 'MirrorFlySDK', '~> 5.18.2'
 
 end
 
 def notification_pods
 
-  pod 'MirrorFlySDK', '5.17.10'
+  #submodule dependency pods
+
+
+  pod 'Alamofire', '5.9.1'
+  pod 'XMPPFramework/Swift'
+  pod 'libPhoneNumber-iOS', '0.9.15'
+  pod 'RealmSwift', '~> 10.49.2'
+  pod 'SocketRocket'
+  pod 'Socket.IO-Client-Swift', '16.0.1'
+  pod 'Starscream', '4.0.4'
+  pod 'GoogleWebRTC'
+  pod 'IDZSwiftCommonCrypto', '~> 0.16'
+  
+  pod 'MirrorFlySDK', '~> 5.18.2'
 
 end
 
@@ -49,7 +74,19 @@ target 'UiKitQaNotificationExtention' do
   notification_pods
 end
 
+target 'Mirrorfly' do
+  uikit_pods
+end
+
+target 'MirrorflyNotificationExtention' do
+  notification_pods
+end
+
 target 'UikitQaShareKit' do
+  uikit_pods
+end
+
+target 'MirrorflyShareKit' do
   uikit_pods
 end
 

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="22155" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="22154" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina5_5" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22131"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22130"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -48,6 +48,7 @@
                 <outlet property="menuButton" destination="4PY-0o-Mcr" id="YmQ-XN-eah"/>
                 <outlet property="nameTop" destination="1QA-93-zuN" id="F5E-av-mNs"/>
                 <outlet property="outGoingAudioCallImageView" destination="iBB-Vj-B3c" id="fI1-p6-A5R"/>
+                <outlet property="profileImageStackView" destination="DTi-mf-Eau" id="EOZ-I9-bRV"/>
                 <outlet property="qualityIcon" destination="tSV-Eq-ulv" id="dk6-mp-c9O"/>
                 <outlet property="qualityView" destination="4yD-2N-rPz" id="l9a-lo-CXp"/>
                 <outlet property="reconnectingLable" destination="VWB-63-kbh" id="ete-ah-BOq"/>
@@ -252,10 +253,10 @@
                             <state key="normal" image="pipDownArrow"/>
                         </button>
                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4PY-0o-Mcr">
-                            <rect key="frame" x="382" y="20.666666666666671" width="30" height="35"/>
+                            <rect key="frame" x="412" y="20.666666666666671" width="0.0" height="35"/>
                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <constraints>
-                                <constraint firstAttribute="width" constant="30" id="q8s-6M-XAy"/>
+                                <constraint firstAttribute="width" id="q8s-6M-XAy"/>
                                 <constraint firstAttribute="height" constant="35" id="z6W-t1-s8S"/>
                             </constraints>
                             <fontDescription key="fontDescription" type="system" pointSize="18"/>
@@ -263,7 +264,7 @@
                             <state key="normal" title=" " image="icon_menu"/>
                         </button>
                         <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Tpd-vb-8SM">
-                            <rect key="frame" x="345" y="20" width="35" height="35"/>
+                            <rect key="frame" x="375" y="20" width="35" height="35"/>
                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <constraints>
                                 <constraint firstAttribute="height" constant="35" id="OL1-pL-GKU"/>
@@ -274,7 +275,7 @@
                             </state>
                         </button>
                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Bethany,Robert,Sarah and (+3)" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Si8-7Y-ZUr">
-                            <rect key="frame" x="71" y="25" width="272" height="25"/>
+                            <rect key="frame" x="41" y="25" width="332" height="25"/>
                             <constraints>
                                 <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="25" id="taO-gx-MzP"/>
                             </constraints>
