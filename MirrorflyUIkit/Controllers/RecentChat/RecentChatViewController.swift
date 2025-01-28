@@ -295,6 +295,7 @@ class RecentChatViewController: UIViewController, UIGestureRecognizerDelegate {
         GroupManager.shared.groupDelegate = self
         ChatManager.shared.adminBlockDelegate = self
         chatManager.archiveEventsDelegate = self
+        chatManager.muteEventDelegate = self
     }
     
     @objc private func keyboardWillShow(notification: NSNotification) {
@@ -354,6 +355,7 @@ class RecentChatViewController: UIViewController, UIGestureRecognizerDelegate {
         ChatManager.shared.adminBlockDelegate = nil
         ChatManager.shared.availableFeaturesDelegate = nil
         chatManager.archiveEventsDelegate = nil
+        chatManager.muteEventDelegate = nil
         self.recentChatTableView?.tableHeaderView = nil
         NotificationCenter.default.removeObserver(self, name: Notification.Name(NetStatus.networkNotificationObserver), object: nil)
     }
@@ -493,14 +495,30 @@ class RecentChatViewController: UIViewController, UIGestureRecognizerDelegate {
                             recentChatTableView?.selectRow(at: indexPath, animated: true, scrollPosition: .none)
                             showHideDeleteButton()
                             if showArchivedChat {
+                                if ChatManager.isArchivedSettingsEnabled() && showArchivedChat {
+                                    self.muteChatButton.isHidden = true
+                                } else {
+                                    self.muteChatButton.isHidden = false
+                                }
                                 getArchiveChat[indexPath.row].isSelected = !getArchiveChat[indexPath.row].isSelected
                                 selectionRecentChatList.insert(getArchiveChat[indexPath.row], at: 0)
                             } else if showPrivateChat {
+                                self.muteChatButton.isHidden = false
                                 getPrivateChats[indexPath.row].isSelected = !getPrivateChats[indexPath.row].isSelected
                                 selectionRecentChatList.insert(getPrivateChats[indexPath.row], at: 0)
+                                if getRecentChat[indexPath.row].profileType == .groupChat {
+                                    showMuteButton()
+                                } else {
+                                    self.muteChatButton.isHidden = false
+                                }
                             } else {
                                 getRecentChat[indexPath.row].isSelected = !getRecentChat[indexPath.row].isSelected
                                 selectionRecentChatList.insert(getRecentChat[indexPath.row], at: 0)
+                                if getRecentChat[indexPath.row].profileType == .groupChat {
+                                    showMuteButton()
+                                } else {
+                                    self.muteChatButton.isHidden = false
+                                }
                             }
                             longPressCount += 1
                             hideHeaderView()
@@ -1058,29 +1076,32 @@ class RecentChatViewController: UIViewController, UIGestureRecognizerDelegate {
         let isMute = isMute()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: { [weak self] in
             self?.dismiss(animated: true) {
+                var testJidList = [String]()
                 self?.selectionRecentChatList.forEach { pinRecentChat in
-                    self?.recentChatViewModel?.getMuteChat(jid: pinRecentChat.jid, isMute: isMute, completionHandler: { isSuccess in
-                    })
+                    testJidList.append(pinRecentChat.jid)
                 }
+                
+                ChatManager.updateChatMuteStatus(jidList: testJidList, mute: isMute)
+                
                 let jids = self?.selectionRecentChatList.compactMap{$0.jid} ?? []
                 if self?.showArchivedChat == true {
                     jids.forEach { jid in
                         if let index = self?.getArchiveChat.firstIndex(where: {$0.jid == jid}) {
-                            self?.getArchiveChat[index].isMuted = isMute
+//                            self?.getArchiveChat[index].isMuted = isMute
                             self?.getArchiveChat[index].isSelected = false
                         }
                     }
                 } else if self?.showPrivateChat == true {
                     jids.forEach { jid in
                         if let index = self?.getPrivateChats.firstIndex(where: {$0.jid == jid}) {
-                            self?.getPrivateChats[index].isMuted = isMute
+//                            self?.getPrivateChats[index].isMuted = isMute
                             self?.getPrivateChats[index].isSelected = false
                         }
                     }
                 } else {
                     jids.forEach { jid in
                         if let index = self?.getRecentChat.firstIndex(where: {$0.jid == jid}) {
-                            self?.getRecentChat[index].isMuted = isMute
+//                            self?.getRecentChat[index].isMuted = isMute
                             self?.getRecentChat[index].isSelected = false
                         }
                     }
@@ -1546,9 +1567,15 @@ extension RecentChatViewController : UITableViewDataSource ,UITableViewDelegate 
                         } else if showPrivateChat {
                             getPrivateChats[indexPath.row].isSelected = !getPrivateChats[indexPath.row].isSelected
                             selectionRecentChatList.insert(getPrivateChats[indexPath.row], at: 0)
+                            if getRecentChat[indexPath.row].profileType == .groupChat {
+                                showMuteButton()
+                            }
                         } else {
                             getRecentChat[indexPath.row].isSelected = !getRecentChat[indexPath.row].isSelected
                             selectionRecentChatList.insert(getRecentChat[indexPath.row], at: 0)
+                            if getRecentChat[indexPath.row].profileType == .groupChat {
+                                showMuteButton()
+                            }
                         }
                         selectionCountLabel?.text = String(longPressCount)
                         updatePinIcon()
@@ -1605,9 +1632,15 @@ extension RecentChatViewController : UITableViewDataSource ,UITableViewDelegate 
                                     } else if showPrivateChat {
                                         getPrivateChats[indexPath.row].isSelected = !getPrivateChats[indexPath.row].isSelected
                                         selectionRecentChatList.remove(at: index)
+                                        if getRecentChat[indexPath.row].profileType == .groupChat {
+                                            showMuteButton()
+                                        }
                                     } else {
                                         getRecentChat[indexPath.row].isSelected = !getRecentChat[indexPath.row].isSelected
                                         selectionRecentChatList.remove(at: index)
+                                        if getRecentChat[indexPath.row].profileType == .groupChat {
+                                            showMuteButton()
+                                        }
                                     }
                                     selectionCountLabel?.text = String(longPressCount)
                                     if selectionRecentChatList.count == 0 {
@@ -2312,6 +2345,29 @@ extension RecentChatViewController {
         }
     }
     
+    private func showMuteButton() {
+        let groups = selectionRecentChatList.filter({$0.profileType == .groupChat})
+        if groups.count == 1 {
+            let result = isParticipantExist(groupJid: groups.first?.jid ?? "")
+            if !result.doesExist {
+                muteChatButton?.isHidden = true
+            } else {
+                muteChatButton?.isHidden = false
+            }
+            return
+        }
+        if groups.count > 0 {
+            for group in groups {
+                let result = isParticipantExist(groupJid: group.jid)
+                if !result.doesExist {
+                    muteChatButton?.isHidden = true
+                }
+            }
+        } else {
+            muteChatButton?.isHidden = false
+        }
+    }
+    
     func isParticipantExist(groupJid: String) -> (doesExist : Bool, message : String) {
        return GroupManager.shared.isParticiapntExistingIn(groupJid: groupJid, participantJid: AppUtils.getMyJid())
     }
@@ -2966,12 +3022,14 @@ extension RecentChatViewController : GroupEventsDelegate {
     func didAddNewMemeberToGroup(groupJid: String, newMemberJid: String, addedByMemberJid: String) {
         DispatchQueue.main.async { [weak self] in
             self?.updateGroupInRecentChat(groupJid: groupJid)
+            self?.hideMultipleSelectionView()
         }
     }
     
     func didRemoveMemberFromGroup(groupJid: String, removedMemberJid: String, removedByMemberJid: String) {
         DispatchQueue.main.async { [weak self] in
             self?.updateGroupInRecentChat(groupJid: groupJid)
+            self?.hideMultipleSelectionView()
         }
     }
     
@@ -2994,6 +3052,7 @@ extension RecentChatViewController : GroupEventsDelegate {
     func didLeftFromGroup(groupJid: String, leftUserJid: String) {
         DispatchQueue.main.async { [weak self] in
             self?.updateGroupInRecentChat(groupJid: groupJid)
+            self?.hideMultipleSelectionView()
         }
     }
     
@@ -3556,6 +3615,9 @@ extension RecentChatViewController: ArchiveEventsDelegate {
                             if let tempRecentList = self?.getRecentChat.sorted(by: { $0.isChatPinned && !$1.isChatPinned }) {
                                 self?.getRecentChat = tempRecentList
                             }
+                            if let index = weakSelf.getArchiveChat.firstIndex(where: { pd in pd.jid == toUser }) {
+                                weakSelf.getArchiveChat.remove(at: index)
+                            }
                             weakSelf.recentChatTableView?.reloadData()
                         }
                     }
@@ -3722,4 +3784,68 @@ extension RecentChatViewController: PrivateChatDelegate {
         updatePrivateChatView()
         recentChatTableView?.reloadData()
     }
+}
+
+extension RecentChatViewController: MuteEventDelegate {
+    func onMuteStatusUpdated(isSuccess: Bool, message: String, jidList: [String]) {
+        if isSuccess {
+            print("#muteChat RecentChatViewController \(isSuccess) \(message) \(jidList)")
+            jidList.forEach { jid in
+                executeOnMainThread { [weak self] in
+                    
+                    if let recentChats = self?.getArchiveChat {
+                        for (index, recent) in recentChats.enumerated() {
+                            if recent.jid == jid {
+                                if let muteRecent = ChatManager.getRecentChatOf(jid: jid) {
+                                    self?.getArchiveChat[index] = muteRecent
+                                    if self?.showArchivedChat ?? false {
+                                        self?.recentChatTableView?.reloadRows(at: [IndexPath(row: index, section: 0)], with: .none)
+                                    }
+                                }
+                                break
+                            }
+                        }
+                    }
+                    
+                    if (self?.showArchivedChat ?? false) {
+                        
+                    }  else {
+                        if let recentChats = self?.getRecentChat {
+                            for (index, recent) in recentChats.enumerated() {
+                                if recent.jid == jid {
+                                    if let muteRecent = ChatManager.getRecentChatOf(jid: jid) {
+                                        self?.getRecentChat[index] = muteRecent
+                                        self?.getAllRecentChat[index] = muteRecent
+                                        self?.recentChatTableView?.reloadRows(at: [IndexPath(row: index, section: 0)], with: .none)
+                                    }
+                                    break
+                                }
+                            }
+                        }
+                    }
+                    
+                    if let recentChats = self?.getPrivateChats {
+                        for (index, recent) in recentChats.enumerated() {
+                            if recent.jid == jid {
+                                if let muteRecent = ChatManager.getRecentChatOf(jid: jid) {
+                                    self?.getPrivateChats[index] = muteRecent
+                                    if self?.showPrivateChat ?? false {
+                                        self?.recentChatTableView?.reloadRows(at: [IndexPath(row: index, section: 0)], with: .none)
+                                    }
+                                }
+                                break
+                            }
+                        }
+                    }
+                    self?.closeButtonTapped(UIButton())
+                }
+            }
+        }
+    }
+    
+    func didUpdateMuteSettings(isSuccess: Bool, message: String, isMuteStatus: Bool) {
+        
+    }
+    
+    
 }

@@ -21,7 +21,7 @@ class GroupInfoViewModel: NSObject {
     }
     
     func muteNotification(jid : String, mute : Bool) {
-        ChatManager.updateChatMuteStatus(jid: jid, muteStatus: mute)
+        ChatManager.updateChatMuteStatus(jidList: [jid], mute: mute)
     }
     
     func updateGroupName(groupID: String, groupName: String,

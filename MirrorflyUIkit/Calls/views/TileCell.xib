@@ -39,9 +39,8 @@
                             </userDefinedRuntimeAttribute>
                         </userDefinedRuntimeAttributes>
                     </imageView>
-                    <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="47I-qR-zKn">
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="47I-qR-zKn">
                         <rect key="frame" x="0.0" y="0.0" width="283" height="158"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     </view>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="nGA-9b-MBm" userLabel="actionsView">
@@ -75,7 +74,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="283" height="158"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Calling..." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sKt-Zv-7Ju">
-                                <rect key="frame" x="91.666666666666686" y="69.333333333333329" width="100" height="19.333333333333329"/>
+                                <rect key="frame" x="91.666666666666686" y="69.666666666666671" width="100" height="18.666666666666671"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="100" id="JXt-XE-RwY"/>
                                 </constraints>
@@ -131,15 +130,19 @@
                     <constraint firstItem="rko-TI-9YX" firstAttribute="leading" secondItem="20n-HI-hle" secondAttribute="leading" constant="4" id="5l6-CQ-Icb"/>
                     <constraint firstItem="nGA-9b-MBm" firstAttribute="top" secondItem="20n-HI-hle" secondAttribute="top" id="B8z-sE-Hjz"/>
                     <constraint firstItem="vv1-Ea-ZcW" firstAttribute="leading" secondItem="20n-HI-hle" secondAttribute="leading" id="BUX-ER-EJ0"/>
+                    <constraint firstAttribute="bottom" secondItem="47I-qR-zKn" secondAttribute="bottom" id="GUZ-Z3-f9C"/>
                     <constraint firstAttribute="bottom" secondItem="nGA-9b-MBm" secondAttribute="bottom" id="K3q-fd-w7F"/>
+                    <constraint firstItem="47I-qR-zKn" firstAttribute="leading" secondItem="20n-HI-hle" secondAttribute="leading" id="PTU-e6-Asa"/>
                     <constraint firstItem="rko-TI-9YX" firstAttribute="top" secondItem="20n-HI-hle" secondAttribute="top" constant="3" id="Tsp-Sp-PxU"/>
                     <constraint firstItem="od5-DR-A5S" firstAttribute="centerY" secondItem="20n-HI-hle" secondAttribute="centerY" id="U2f-xm-l1B"/>
                     <constraint firstAttribute="trailing" secondItem="vv1-Ea-ZcW" secondAttribute="trailing" id="XdE-jL-UKZ"/>
                     <constraint firstItem="vv1-Ea-ZcW" firstAttribute="top" secondItem="20n-HI-hle" secondAttribute="top" id="c92-4E-MeI"/>
                     <constraint firstItem="od5-DR-A5S" firstAttribute="centerX" secondItem="20n-HI-hle" secondAttribute="centerX" id="nhC-zo-KN3"/>
+                    <constraint firstItem="47I-qR-zKn" firstAttribute="top" secondItem="20n-HI-hle" secondAttribute="top" id="pyY-xh-OD0"/>
                     <constraint firstAttribute="trailing" secondItem="nGA-9b-MBm" secondAttribute="trailing" id="qjh-Nu-auX"/>
                     <constraint firstItem="nGA-9b-MBm" firstAttribute="leading" secondItem="20n-HI-hle" secondAttribute="leading" id="t3W-wg-vDA"/>
                     <constraint firstItem="6b9-J4-704" firstAttribute="top" secondItem="20n-HI-hle" secondAttribute="top" id="u98-mK-cAU"/>
+                    <constraint firstAttribute="trailing" secondItem="47I-qR-zKn" secondAttribute="trailing" id="uFN-zI-XuZ"/>
                     <constraint firstAttribute="trailing" secondItem="6b9-J4-704" secondAttribute="trailing" id="wXA-sI-j4a"/>
                     <constraint firstAttribute="bottom" secondItem="vv1-Ea-ZcW" secondAttribute="bottom" id="xI0-3z-ZHy"/>
                 </constraints>

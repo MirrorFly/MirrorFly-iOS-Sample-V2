@@ -60,6 +60,10 @@ class PrivateChatEnableController: BaseViewController {
     override func viewDidLayoutSubviews() {
         setupUI()
     }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        ChatManager.shared.muteEventDelegate = self
+    }
 
     override func viewDidDisappear(_ animated: Bool) {
     }
@@ -227,4 +231,15 @@ extension PrivateChatEnableController: PrivateChatDelegate {
         }
         selectSwitch.isOn = ChatManager.isPrivateChat(jid: chatJid)
     }
+}
+
+extension PrivateChatEnableController : MuteEventDelegate {
+    func onMuteStatusUpdated(isSuccess: Bool, message: String, jidList: [String]) {
+        
+    }
+    
+    func didUpdateMuteSettings(isSuccess: Bool, message: String, isMuteStatus: Bool) {
+        
+    }
+  
 }

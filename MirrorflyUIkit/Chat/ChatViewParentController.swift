@@ -309,7 +309,7 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
     
     var isMention = false
     var mentionSearch = ""
-    var mentionRange: NSRange!
+    var mentionRange: NSRange?
     var mentionUsersList: [String] = []
     var mentionRanges: [(String, NSRange)] = []
     var searchGroupMembers = [GroupParticipantDetail]()
@@ -492,14 +492,9 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
                         messageTextView?.textViewEnd()
                     } else {
                         messageText = unsentMessage.textContent
-                        mentionSearch = unsentMessage.mentionSearch.joined(separator: "")
-                        searchGroupMembers = groupMembers.filter{ $0.displayName.lowercased().contains(mentionSearch.lowercased())}.sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() })
-                        mentionTableView.reloadData()
+                        let getmentionRangelocation = (unsentMessage.textContent as NSString).range(of: "@")
+                        mentionRange = NSRange(location: getmentionRangelocation.location, length: 0)
                         isMention = true
-                        mentionRange = NSRange(location: 0, length: 0)
-                        self.view.bringSubviewToFront(mentionBaseView)
-                        self.viewDidLayoutSubviews()
-                        mentionBaseView.isHidden = false
                     }
                 }
             }
@@ -890,18 +885,24 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
         NotificationCenter.default.addObserver(self, selector: #selector(permissionAlertNotification), name: Notification.Name(FlyConstants.callPermissionAlertShown), object: nil)
         if !isStarredMessagePage {
             let unsentMessage = FlyMessenger.getUnsentMessageOf(id: getProfileDetails.jid)
-            if !unsentMessage.mentionSearch.isEmpty {
-                for i in 0..<unsentMessage.mentionLocation.count {
-                    mentionRanges.append((unsentMessage.mentionSearch[i], NSRange(location: unsentMessage.mentionLocation[i], length: unsentMessage.mentionLength[i])))
+            if unsentMessage.mentionedUsers.count > 0 {
+                let attributedString = NSMutableAttributedString(string: unsentMessage.textContent)
+                for user in unsentMessage.mentionedUsers {
+                    let JID = user + "@" + ChatManager.getXMPPDetails().XMPPDomain
+                    if let profileDetail = ContactManager.shared.getUserProfileDetails(for: JID) {
+                        let userName = "@\(FlyUtils.getGroupUserName(profile: profileDetail)) "
+                        let messageString: String = attributedString.string
+                        let setMentionRange = (messageString as NSString).range(of: "@[?]")
+                        if setMentionRange.location < attributedString.string.utf16.count {
+                            attributedString.replaceCharacters(in: setMentionRange, with: userName)
+                        }
+                    }
                 }
+                let textContent = attributedString.string
                 mentionSearch = unsentMessage.mentionSearch.joined(separator: "")
-                searchGroupMembers = groupMembers.filter{ $0.displayName.lowercased().contains(mentionSearch.lowercased())}.sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() })
-                mentionTableView.reloadData()
+                let mentionSearchlocation = (textContent as NSString).range(of: "@\(mentionSearch)")
+                mentionRange = NSRange(location: mentionSearchlocation.location, length: 0)
                 isMention = true
-                mentionRange = NSRange(location: 0, length: 0)
-                self.view.bringSubviewToFront(mentionBaseView)
-                self.viewDidLayoutSubviews()
-                mentionBaseView.isHidden = false
             }
         }
         if isFromSearchSelect || isFromNotificationSelect {
@@ -1382,18 +1383,7 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
             if let messageText = messageTextView, let message = messageText.text {
                 messageText.textViewEnd()
                 if self.getProfileDetails.profileChatType == .groupChat, let mentionMessage = messageText.mentionText {
-                    let mentions = mentionRanges.compactMap({$0.1})
-                    var length = [Int]()
-                    var location = [Int]()
-                    if mentions.isEmpty {
-                        FlyMessenger.saveUnsentMessage(id: getProfileDetails.jid, message: mentionMessage.isEmpty ? emptyString() : mentionMessage, mentionedUsers: messageText.mentionedUsers, mentionSearch: mentionRanges.compactMap({$0.0}), mentionLocation: location, mentionLength: length)
-                    } else {
-                        for mention in mentions {
-                            location.append(mention.location)
-                            length.append(mention.length)
-                        }
-                        FlyMessenger.saveUnsentMessage(id: getProfileDetails.jid, message: mentionMessage.isEmpty ? emptyString() : mentionMessage, mentionedUsers: messageText.mentionedUsers, mentionSearch: mentionRanges.compactMap({$0.0}), mentionLocation: location, mentionLength: length)
-                    }
+                    FlyMessenger.saveUnsentMessage(id: getProfileDetails.jid, message: mentionMessage.isEmpty ? emptyString() : mentionMessage, mentionedUsers: messageText.mentionedUsers, mentionSearch: mentionRanges.compactMap({$0.0}))
                 } else {
                     FlyMessenger.saveUnsentMessage(id: getProfileDetails.jid, message: message.isEmpty ? emptyString() : message, mentionedUsers: messageText.mentionedUsers, mentionSearch: [])
                 }
@@ -2778,7 +2768,7 @@ extension ChatViewParentController : QLPreviewControllerDataSource {
     
     func textViewDidChangeSelection(_ textView: UITextView) {
         if textView.text.utf16.count > textView.selectedRange.location && isMention {
-            textView.selectedRange = NSRange(location: (mentionRange.location+mentionRanges.count+1), length: 0)
+            textView.selectedRange = NSRange(location: ((mentionRange?.location ?? 0)+mentionRanges.count+1), length: 0)
         }
     }
     
@@ -5066,11 +5056,10 @@ extension ChatViewParentController : UITableViewDataSource ,UITableViewDelegate,
     
     func mentionDidSelect(userId: String, profileDetail: ProfileDetails) {
         let selected = FlyUtils.getGroupUserName(profile: profileDetail)
-
         if let lastRange = mentionRanges.last {
-            messageTextView.text = messageTextView.text.replacing("", range: NSRange(location: mentionRange.location, length: ((lastRange.1.location+1) - mentionRange.location)))
+            messageTextView.text = messageTextView.text.replacing("", range: NSRange(location: mentionRange?.location ?? 0, length: ((lastRange.1.location+1) - (mentionRange?.location ?? 0))))
         } else {
-            messageTextView.text = messageTextView.text.replacing("", range: NSRange(location: mentionRange.location, length: 1))
+            messageTextView.text = messageTextView.text.replacing("", range: NSRange(location: mentionRange?.location ?? 0, length: 1))
         }
         messageTextView.insert(to: selected, with: mentionRange ,userId: userId)
 
@@ -6589,6 +6578,10 @@ extension ChatViewParentController {
                     self?.showContactPicker()
                 }
             }
+        case .limited:
+            break
+        @unknown default:
+            break
         }
     }
     
@@ -7383,6 +7376,9 @@ extension ChatViewParentController {
         print("#callopt \(FlyUtils.printTime()) makeCall from \(AppUtils.getMyJid())")
         if CallManager.isAlreadyOnAnotherCall(){
             AppAlert.shared.showToast(message: "You’re already on call, can't make new MirrorFly call")
+            return
+        }
+        if getProfileDetails.contactType == .deleted || getProfileDetails.isBlockedByAdmin || getBlocked() || getisBlockedMe() {
             return
         }
         if !NetworkReachability.shared.isConnected {

@@ -120,7 +120,9 @@ class EditStatusViewController: UIViewController {
             StatusModel(userStatus: inMirrorfly.localized, isSelected: true)
         ]
         for status in   setstatusArray {
-            ChatManager.saveProfileStatus(statusText: status.userStatus,currentStatus: status.isSelected)
+            ChatManager.saveProfileStatus(statusText: status.userStatus,currentStatus: status.isSelected,completion: { isSuccess, error, data in
+                
+            })
         }
         
         statusArray =   getStatus()
@@ -284,7 +286,9 @@ extension EditStatusViewController {
                     let trimmedStatus = statusTextview.text.trimmingCharacters(in: .whitespacesAndNewlines)
 
                     if(isStatusChanged) {
-                        ChatManager.saveProfileStatus(statusText: trimmedStatus, currentStatus: true)
+                        ChatManager.saveProfileStatus(statusText: trimmedStatus, currentStatus: true, completion: { isSuccess, error, data in
+                            
+                        })
                     }
 
                     navigationController?.popViewController(animated: true)
@@ -474,10 +478,20 @@ extension EditStatusViewController {
                     getAllStatus = getStatus()
                     for getAllStatus in  statusArray {
                         if(getAllStatus.id == statusArray[indexRow].id) {
-                            ChatManager.updateStatus(statusId: statusArray[indexRow].id ,statusText: statusArray[indexRow].status,currentStatus: true)
+                            ChatManager.updateStatus(statusId: statusArray[indexRow].id ,statusText: statusArray[indexRow].status,currentStatus: true, completion: { isSuccess, error, data in
+                                if isSuccess {
+                                    let statusMessage = data["message"] as? String ?? ""
+                                    AppAlert.shared.showToast(message: statusMessage)
+                                } else {
+                                    let statusMessage = data["message"] as? String ?? ""
+                                    AppAlert.shared.showToast(message: statusMessage)
+                                }
+                            })
                         }
                         else{
-                            ChatManager.updateStatus(statusId: getAllStatus.id, statusText: getAllStatus.status, currentStatus: false)
+                            ChatManager.updateStatus(statusId: getAllStatus.id, statusText: getAllStatus.status, currentStatus: false,completion: { isSuccess, error, data in
+                                
+                            })
                         }
                     }
                 }

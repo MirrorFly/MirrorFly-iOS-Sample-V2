@@ -31,6 +31,14 @@ class NotificationAlertViewController: UIViewController {
         self.notificationAlertTable.dataSource = self
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        ChatManager.shared.muteEventDelegate = self
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        ChatManager.shared.muteEventDelegate = nil
+    }
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
@@ -96,19 +104,21 @@ extension NotificationAlertViewController : UITableViewDelegate,UITableViewDataS
             if CommonDefaults.notificationSoundEnable == true  {
                 CommonDefaults.muteNotificationEnable = false
                 CommonDefaults.notificationPopUPEnable = true
+                muteSetting()
             }
             break
         case .NotificationPopUP:
             CommonDefaults.notificationPopUPEnable = !CommonDefaults.notificationPopUPEnable
             if CommonDefaults.notificationPopUPEnable == false {
-                CommonDefaults.vibrationEnable = false
                 CommonDefaults.notificationSoundEnable = false
-                CommonDefaults.muteNotificationEnable = false
+                CommonDefaults.muteNotificationEnable = true
             }
             else if CommonDefaults.notificationPopUPEnable == true {
-                
+                CommonDefaults.notificationSoundEnable = true
+                CommonDefaults.muteNotificationEnable = false
             }
-            
+            CommonDefaults.vibrationEnable = false
+            muteSetting()
             break
         case .Vibration:
             //AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
@@ -116,23 +126,56 @@ extension NotificationAlertViewController : UITableViewDelegate,UITableViewDataS
             if CommonDefaults.vibrationEnable == true {
                 CommonDefaults.muteNotificationEnable = false
                 CommonDefaults.notificationPopUPEnable = true
+                muteSetting()
             }
         case .MuteNotification:
             CommonDefaults.muteNotificationEnable = !CommonDefaults.muteNotificationEnable
             if CommonDefaults.muteNotificationEnable == true {
                 CommonDefaults.vibrationEnable = false
                 CommonDefaults.notificationSoundEnable = false
-                CommonDefaults.notificationPopUPEnable = true
+                CommonDefaults.notificationPopUPEnable = false
             }
             else {
                 CommonDefaults.notificationSoundEnable = true
                 CommonDefaults.notificationPopUPEnable = true
             }
+            muteSetting()
+            
             break
             
         }
         self.notificationAlertTable.reloadData()
     }
     
+    
+}
+
+extension NotificationAlertViewController : MuteEventDelegate {
+    func onMuteStatusUpdated(isSuccess: Bool, message: String, jidList: [String]) {
+        
+    }
+    
+    func didUpdateMuteSettings(isSuccess: Bool, message: String, isMuteStatus: Bool) {
+        if isSuccess {
+            CommonDefaults.muteNotificationEnable = isMuteStatus
+            if CommonDefaults.muteNotificationEnable == true {
+                CommonDefaults.vibrationEnable = false
+                CommonDefaults.notificationSoundEnable = false
+                CommonDefaults.notificationPopUPEnable = false
+            }
+            else {
+                CommonDefaults.notificationSoundEnable = true
+                CommonDefaults.notificationPopUPEnable = true
+                CommonDefaults.vibrationEnable = true
+            }
+            executeOnMainThread { [weak self] in
+                self?.notificationAlertTable.reloadData()
+            }
+        }
+    }
+    
+    private func muteSetting() {
+        ChatManager.updateMuteSettingStatus(muteStatus: CommonDefaults.muteNotificationEnable)
+    }
     
 }
