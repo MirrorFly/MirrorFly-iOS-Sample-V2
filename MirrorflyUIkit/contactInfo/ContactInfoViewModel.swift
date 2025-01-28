@@ -46,7 +46,7 @@ class ContactInfoViewModel : NSObject {
     }
     
     func muteNotification(jid : String, mute : Bool) {
-        ChatManager.updateChatMuteStatus(jid: jid, muteStatus: mute)
+        ChatManager.updateChatMuteStatus(jidList: [jid], mute: mute)
     }
     
 }

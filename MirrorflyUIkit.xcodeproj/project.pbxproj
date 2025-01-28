@@ -7,10 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1BEC5107761CDE209A294BE4 /* Pods_UiKitQaNotificationExtention.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BB9090FAC5AFE4A43B2332D8 /* Pods_UiKitQaNotificationExtention.framework */; };
-		265E41C3486865BC5DC4171C /* Pods_UiKitQa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 153D4A2CBDEA83C3F745437C /* Pods_UiKitQa.framework */; };
-		2A33D20945BA289EC2D2A4CC /* Pods_MirrorflyShareKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0401F2C81027B6595D7E95FA /* Pods_MirrorflyShareKit.framework */; };
-		38C369FDA4D537D4B44DFDC6 /* (null) in Frameworks */ = {isa = PBXBuildFile; };
+		38C369FDA4D537D4B44DFDC6 /* BuildFile in Frameworks */ = {isa = PBXBuildFile; };
 		3D12788F27A7AC6D00A34436 /* UserProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D12788E27A7AC6D00A34436 /* UserProfileViewController.swift */; };
 		3D3C47DC28E5315D001F2520 /* DeleteForEveryOneViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D3C47DA28E5315D001F2520 /* DeleteForEveryOneViewCell.swift */; };
 		3D3C47DD28E5315D001F2520 /* DeleteForEveryOneViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3D3C47DB28E5315D001F2520 /* DeleteForEveryOneViewCell.xib */; };
@@ -31,11 +28,11 @@
 		3DF9C9A728E6E69300154BBE /* DeleteMessageForEveryOneAlertController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DF9C9A528E6E69300154BBE /* DeleteMessageForEveryOneAlertController.swift */; };
 		3DF9C9A928E6E6A300154BBE /* DeleteMessageForEveryOneAlertController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3DF9C9A828E6E6A300154BBE /* DeleteMessageForEveryOneAlertController.xib */; };
 		3DF9C9AA28E6E6A300154BBE /* DeleteMessageForEveryOneAlertController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3DF9C9A828E6E6A300154BBE /* DeleteMessageForEveryOneAlertController.xib */; };
-		4539207F786BA9399FD59C93 /* (null) in Frameworks */ = {isa = PBXBuildFile; };
-		665E0DEE062DDC9B783209D5 /* Pods_MirrorflyNotificationExtention.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 77BC726BF8298C6EF401B7CB /* Pods_MirrorflyNotificationExtention.framework */; };
-		6D22A420B2564247AE9FF889 /* (null) in Frameworks */ = {isa = PBXBuildFile; };
-		8356D98B5656C5FACFDD2D63 /* (null) in Frameworks */ = {isa = PBXBuildFile; };
-		BFE0A207F73E415AE784F25B /* Pods_UikitQaShareKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5254B393182CDAD5DBDDE38 /* Pods_UikitQaShareKit.framework */; };
+		4539207F786BA9399FD59C93 /* BuildFile in Frameworks */ = {isa = PBXBuildFile; };
+		6D22A420B2564247AE9FF889 /* BuildFile in Frameworks */ = {isa = PBXBuildFile; };
+		733009362D195CD0002882C6 /* fly_call_ringtone.wav in Resources */ = {isa = PBXBuildFile; fileRef = 733009352D195CD0002882C6 /* fly_call_ringtone.wav */; };
+		733009372D195CD0002882C6 /* fly_call_ringtone.wav in Resources */ = {isa = PBXBuildFile; fileRef = 733009352D195CD0002882C6 /* fly_call_ringtone.wav */; };
+		8356D98B5656C5FACFDD2D63 /* BuildFile in Frameworks */ = {isa = PBXBuildFile; };
 		CE005CA729C9D431009BE471 /* AuthenticationExtenison.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE46746A29C9799400169A96 /* AuthenticationExtenison.swift */; };
 		CE0140B0298943F7002CE0F8 /* AppLockDescriptionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE0140AE298943F6002CE0F8 /* AppLockDescriptionCell.swift */; };
 		CE0140B1298943F7002CE0F8 /* AppLockDescriptionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE0140AE298943F6002CE0F8 /* AppLockDescriptionCell.swift */; };
@@ -81,7 +78,7 @@
 		CE2A390B29227862005F7AF0 /* AppLockPasswordViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE2A390929227862005F7AF0 /* AppLockPasswordViewController.swift */; };
 		CE2A390C29227862005F7AF0 /* AppLockTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = CE2A390A29227862005F7AF0 /* AppLockTableViewCell.xib */; };
 		CE2A391429227C1C005F7AF0 /* AppLockTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE2A391329227C1C005F7AF0 /* AppLockTableViewCell.swift */; };
-		CE2E474829091DB000A5F7AA /* (null) in Sources */ = {isa = PBXBuildFile; };
+		CE2E474829091DB000A5F7AA /* BuildFile in Sources */ = {isa = PBXBuildFile; };
 		CE2E474929091DBD00A5F7AA /* NotificationsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE5BB09B29000F3400D16A49 /* NotificationsViewController.swift */; };
 		CE2E474A29091DC900A5F7AA /* SenderDocumentsTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEAF527E28337075001165A4 /* SenderDocumentsTableViewCell.swift */; };
 		CE2E474B29091DD400A5F7AA /* ReceiverDocumentsTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEAF5284283370B9001165A4 /* ReceiverDocumentsTableViewCell.swift */; };
@@ -113,7 +110,6 @@
 		CE41E8592A90ABA2002A0654 /* TileCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = CE41E8572A90ABA2002A0654 /* TileCell.xib */; };
 		CE4361A7290EC528003CC840 /* NotificationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE4361A6290EC528003CC840 /* NotificationViewModel.swift */; };
 		CE4361A8290EC528003CC840 /* NotificationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE4361A6290EC528003CC840 /* NotificationViewModel.swift */; };
-		CE448B6F27883692002774DD /* fly_call_ringtone.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = CE448B6E27883692002774DD /* fly_call_ringtone.mp3 */; };
 		CE448B712788426F002774DD /* fly_reconnecting_tone.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = CE448B702788426F002774DD /* fly_reconnecting_tone.mp3 */; };
 		CE4549FB2907C2350041212C /* NotDeliveredCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE4549F92907C2350041212C /* NotDeliveredCell.swift */; };
 		CE4549FC2907C2350041212C /* NotDeliveredCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE4549F92907C2350041212C /* NotDeliveredCell.swift */; };
@@ -750,7 +746,6 @@
 		CEC08B4E27E23B0D005E48C5 /* ChatViewContactOutgoingCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = CE56256D26E2B4850020BDD3 /* ChatViewContactOutgoingCell.xib */; };
 		CEC08B4F27E23B0D005E48C5 /* ContactInfoCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = CE0B4FBE27A414E3005349EB /* ContactInfoCell.xib */; };
 		CEC08B5027E23B0D005E48C5 /* MuteNotificationCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = CE0B4FB627A407A3005349EB /* MuteNotificationCell.xib */; };
-		CEC08B5127E23B0D005E48C5 /* fly_call_ringtone.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = CE448B6E27883692002774DD /* fly_call_ringtone.mp3 */; };
 		CEC08B5227E23B0D005E48C5 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = CE94E80326D9FA9800F2E3A7 /* GoogleService-Info.plist */; };
 		CEC08B6527E23B9F005E48C5 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEF43746273BCA77008D0F39 /* NotificationService.swift */; };
 		CEC08B7527E24ADC005E48C5 /* MirrorflyNotificationExtention.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = CEC08B7127E23B9F005E48C5 /* MirrorflyNotificationExtention.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -865,8 +860,7 @@
 		CEFB2D9429A4DFCE00FF6649 /* ShareComposeVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = CEFB2D9029A4DF4200FF6649 /* ShareComposeVC.xib */; };
 		CEFD043026CD25B90017287F /* countries.json in Resources */ = {isa = PBXBuildFile; fileRef = CEFD042F26CD25B90017287F /* countries.json */; };
 		CEFD043226CD3D4B0017287F /* CountryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEFD043126CD3D4B0017287F /* CountryModel.swift */; };
-		DA46D6FEEED529FC66C6087D /* (null) in Frameworks */ = {isa = PBXBuildFile; };
-		FB636E2AD04249FB3479FEAC /* Pods_Mirrorfly.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA97ADC59FE76DE5769FD108 /* Pods_Mirrorfly.framework */; };
+		DA46D6FEEED529FC66C6087D /* BuildFile in Frameworks */ = {isa = PBXBuildFile; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -948,8 +942,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		0401F2C81027B6595D7E95FA /* Pods_MirrorflyShareKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MirrorflyShareKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		153D4A2CBDEA83C3F745437C /* Pods_UiKitQa.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_UiKitQa.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3D12788E27A7AC6D00A34436 /* UserProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfileViewController.swift; sourceTree = "<group>"; };
 		3D3C47DA28E5315D001F2520 /* DeleteForEveryOneViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteForEveryOneViewCell.swift; sourceTree = "<group>"; };
 		3D3C47DB28E5315D001F2520 /* DeleteForEveryOneViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = DeleteForEveryOneViewCell.xib; sourceTree = "<group>"; };
@@ -960,9 +952,7 @@
 		3DF9C99828E6A7FA00154BBE /* DeleteForEveryOneReceiverCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = DeleteForEveryOneReceiverCell.xib; sourceTree = "<group>"; };
 		3DF9C9A528E6E69300154BBE /* DeleteMessageForEveryOneAlertController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteMessageForEveryOneAlertController.swift; sourceTree = "<group>"; };
 		3DF9C9A828E6E6A300154BBE /* DeleteMessageForEveryOneAlertController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = DeleteMessageForEveryOneAlertController.xib; sourceTree = "<group>"; };
-		77BC726BF8298C6EF401B7CB /* Pods_MirrorflyNotificationExtention.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MirrorflyNotificationExtention.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		BB9090FAC5AFE4A43B2332D8 /* Pods_UiKitQaNotificationExtention.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_UiKitQaNotificationExtention.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		CA97ADC59FE76DE5769FD108 /* Pods_Mirrorfly.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Mirrorfly.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		733009352D195CD0002882C6 /* fly_call_ringtone.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = fly_call_ringtone.wav; sourceTree = "<group>"; };
 		CE0140AE298943F6002CE0F8 /* AppLockDescriptionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLockDescriptionCell.swift; sourceTree = "<group>"; };
 		CE0140AF298943F7002CE0F8 /* AppLockDescriptionCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = AppLockDescriptionCell.xib; sourceTree = "<group>"; };
 		CE0755B3290067E1008F6C37 /* NotificationWebViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationWebViewController.swift; sourceTree = "<group>"; };
@@ -1012,7 +1002,6 @@
 		CE40C5C326DDC0B5001F829F /* OTPViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OTPViewModel.swift; sourceTree = "<group>"; };
 		CE41E8572A90ABA2002A0654 /* TileCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TileCell.xib; sourceTree = "<group>"; };
 		CE4361A6290EC528003CC840 /* NotificationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationViewModel.swift; sourceTree = "<group>"; };
-		CE448B6E27883692002774DD /* fly_call_ringtone.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = fly_call_ringtone.mp3; sourceTree = "<group>"; };
 		CE448B702788426F002774DD /* fly_reconnecting_tone.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = fly_reconnecting_tone.mp3; sourceTree = "<group>"; };
 		CE4549F92907C2350041212C /* NotDeliveredCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotDeliveredCell.swift; sourceTree = "<group>"; };
 		CE4549FA2907C2350041212C /* NotDeliveredCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = NotDeliveredCell.xib; sourceTree = "<group>"; };
@@ -1325,6 +1314,7 @@
 		CEB66AC929AE2DC90084559C /* ShareKitShareViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareKitShareViewModel.swift; sourceTree = "<group>"; };
 		CEBE3BD82959CF1F004E7C49 /* FooterSectionCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FooterSectionCell.xib; sourceTree = "<group>"; };
 		CEC08B6027E23B0D005E48C5 /* Mirrorfly.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Mirrorfly.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CEC08B6127E23B0D005E48C5 /* Mirrorfly-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Mirrorfly-Info.plist"; path = "/Users/user/Desktop/UiKit/Mirrorfly-Info.plist"; sourceTree = "<absolute>"; };
 		CEC08B7127E23B9F005E48C5 /* MirrorflyNotificationExtention.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MirrorflyNotificationExtention.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEC08B7427E243D9005E48C5 /* MirrorflyNotificationextention.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = MirrorflyNotificationextention.entitlements; sourceTree = "<group>"; };
 		CEC08B7E27E24F41005E48C5 /* GoogleService-Qa-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Qa-Info.plist"; sourceTree = "<group>"; };
@@ -1411,7 +1401,6 @@
 		CEFB2D9029A4DF4200FF6649 /* ShareComposeVC.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ShareComposeVC.xib; sourceTree = "<group>"; };
 		CEFD042F26CD25B90017287F /* countries.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = countries.json; sourceTree = "<group>"; };
 		CEFD043126CD3D4B0017287F /* CountryModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountryModel.swift; sourceTree = "<group>"; };
-		F5254B393182CDAD5DBDDE38 /* Pods_UikitQaShareKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_UikitQaShareKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1419,8 +1408,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4539207F786BA9399FD59C93 /* (null) in Frameworks */,
-				265E41C3486865BC5DC4171C /* Pods_UiKitQa.framework in Frameworks */,
+				4539207F786BA9399FD59C93 /* BuildFile in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1428,8 +1416,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				38C369FDA4D537D4B44DFDC6 /* (null) in Frameworks */,
-				FB636E2AD04249FB3479FEAC /* Pods_Mirrorfly.framework in Frameworks */,
+				38C369FDA4D537D4B44DFDC6 /* BuildFile in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1437,8 +1424,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DA46D6FEEED529FC66C6087D /* (null) in Frameworks */,
-				665E0DEE062DDC9B783209D5 /* Pods_MirrorflyNotificationExtention.framework in Frameworks */,
+				DA46D6FEEED529FC66C6087D /* BuildFile in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1446,8 +1432,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6D22A420B2564247AE9FF889 /* (null) in Frameworks */,
-				2A33D20945BA289EC2D2A4CC /* Pods_MirrorflyShareKit.framework in Frameworks */,
+				6D22A420B2564247AE9FF889 /* BuildFile in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1455,8 +1440,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8356D98B5656C5FACFDD2D63 /* (null) in Frameworks */,
-				BFE0A207F73E415AE784F25B /* Pods_UikitQaShareKit.framework in Frameworks */,
+				8356D98B5656C5FACFDD2D63 /* BuildFile in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1464,7 +1448,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1BEC5107761CDE209A294BE4 /* Pods_UiKitQaNotificationExtention.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1541,12 +1524,6 @@
 				CE8BC8E6280EB466007FF8C3 /* FlyTranslate.framework */,
 				CEA178D4274F8ABC00EAD2A3 /* FlyCall.framework */,
 				CEA178D3274F8ABC00EAD2A3 /* FlyCommon.framework */,
-				CA97ADC59FE76DE5769FD108 /* Pods_Mirrorfly.framework */,
-				77BC726BF8298C6EF401B7CB /* Pods_MirrorflyNotificationExtention.framework */,
-				0401F2C81027B6595D7E95FA /* Pods_MirrorflyShareKit.framework */,
-				153D4A2CBDEA83C3F745437C /* Pods_UiKitQa.framework */,
-				BB9090FAC5AFE4A43B2332D8 /* Pods_UiKitQaNotificationExtention.framework */,
-				F5254B393182CDAD5DBDDE38 /* Pods_UikitQaShareKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -2501,7 +2478,7 @@
 			isa = PBXGroup;
 			children = (
 				CEA2F92726569C590013F5E8 /* MirrorflyUIkit */,
-				CE448B6E27883692002774DD /* fly_call_ringtone.mp3 */,
+				733009352D195CD0002882C6 /* fly_call_ringtone.wav */,
 				CE448B702788426F002774DD /* fly_reconnecting_tone.mp3 */,
 				CEF43745273BCA77008D0F39 /* NotificationExtention */,
 				CEE7C59E299F6505002F22FA /* MirrorflyShareKit */,
@@ -2568,6 +2545,7 @@
 		CEA2F93D26569D8B0013F5E8 /* Plist */ = {
 			isa = PBXGroup;
 			children = (
+				CEC08B6127E23B0D005E48C5 /* Mirrorfly-Info.plist */,
 				CEA2F93626569C5C0013F5E8 /* MirrorflyUIkit-info.plist */,
 			);
 			path = Plist;
@@ -3230,7 +3208,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = CEA2F93926569C5C0013F5E8 /* Build configuration list for PBXNativeTarget "UiKitQa" */;
 			buildPhases = (
-				D3658830D8555A2E9C04F01A /* [CP] Check Pods Manifest.lock */,
 				CEA2F92126569C590013F5E8 /* Sources */,
 				CEA2F92226569C590013F5E8 /* Frameworks */,
 				CEA2F92326569C590013F5E8 /* Resources */,
@@ -3238,8 +3215,6 @@
 				CED4FB5C277DE60D008FAF15 /* ShellScript */,
 				CEC08B8327E25037005E48C5 /* Google Plist */,
 				CEF9F50229E52E5700492772 /* Embed Frameworks */,
-				30CEAC0D72F645C4EB2EF370 /* [CP] Embed Pods Frameworks */,
-				FAE0055CB916E1D450CFB65E /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -3256,7 +3231,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = CEC08B5927E23B0D005E48C5 /* Build configuration list for PBXNativeTarget "Mirrorfly" */;
 			buildPhases = (
-				2A7F870A4C8FF5FAFA7EEFAF /* [CP] Check Pods Manifest.lock */,
 				CEC08AA027E23B0D005E48C5 /* Sources */,
 				CEC08B2027E23B0D005E48C5 /* Frameworks */,
 				CEC08B2227E23B0D005E48C5 /* Resources */,
@@ -3264,8 +3238,6 @@
 				CEC08B7827E24ADC005E48C5 /* Embed App Extensions */,
 				CEC08B7B27E24EEF005E48C5 /* Google Plist */,
 				CE8BC8CC280E8A3E007FF8C3 /* Embed Frameworks */,
-				11B5221DDBA8BFE3DA7077D0 /* [CP] Embed Pods Frameworks */,
-				F8C0803CE84F70531237BD54 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -3282,7 +3254,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = CEC08B6A27E23B9F005E48C5 /* Build configuration list for PBXNativeTarget "MirrorflyNotificationExtention" */;
 			buildPhases = (
-				9CFBB3BE453DFB4D97BDBE19 /* [CP] Check Pods Manifest.lock */,
 				CEC08B6427E23B9F005E48C5 /* Sources */,
 				CEC08B6627E23B9F005E48C5 /* Frameworks */,
 				CEC08B6827E23B9F005E48C5 /* Resources */,
@@ -3300,11 +3271,9 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = CEE7C5AA299F6505002F22FA /* Build configuration list for PBXNativeTarget "MirrorflyShareKit" */;
 			buildPhases = (
-				E0E8D62EC560C07D9780066F /* [CP] Check Pods Manifest.lock */,
 				CEE7C599299F6505002F22FA /* Sources */,
 				CEE7C59A299F6505002F22FA /* Frameworks */,
 				CEE7C59B299F6505002F22FA /* Resources */,
-				07A2BEE1EE765F73953B93E9 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -3319,11 +3288,9 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = CEE7C5BA299F651E002F22FA /* Build configuration list for PBXNativeTarget "UikitQaShareKit" */;
 			buildPhases = (
-				4E18914FEF8CB6F9C2759EFF /* [CP] Check Pods Manifest.lock */,
 				CEE7C5AB299F651D002F22FA /* Sources */,
 				CEE7C5AC299F651D002F22FA /* Frameworks */,
 				CEE7C5AD299F651D002F22FA /* Resources */,
-				7261A20763431059C34B85A8 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -3338,7 +3305,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = CEF4374F273BCA77008D0F39 /* Build configuration list for PBXNativeTarget "UiKitQaNotificationExtention" */;
 			buildPhases = (
-				0A7303DBACF8006CA09A0BC5 /* [CP] Check Pods Manifest.lock */,
 				CEF43740273BCA76008D0F39 /* Sources */,
 				CEF43741273BCA76008D0F39 /* Frameworks */,
 				CEF43742273BCA76008D0F39 /* Resources */,
@@ -3507,6 +3473,7 @@
 				CE6E5F122A696F5600CB2257 /* PrivateChatCell.xib in Resources */,
 				CEC3E77029E6C6850073705C /* ChatTags.storyboard in Resources */,
 				CE46745229BAF39900169A96 /* CustomChatTagsCell.xib in Resources */,
+				733009362D195CD0002882C6 /* fly_call_ringtone.wav in Resources */,
 				CE9705BD294C5E7B007246A8 /* BackupRestore.storyboard in Resources */,
 				CEA2F93226569C5C0013F5E8 /* Assets.xcassets in Resources */,
 				CEE7126C291A7B0800C16387 /* ChangeAppLockViewController.xib in Resources */,
@@ -3528,7 +3495,6 @@
 				CEEE5F68290FD9AA0008255B /* ArchiveChatTableViewCell.xib in Resources */,
 				CE0140B2298943F7002CE0F8 /* AppLockDescriptionCell.xib in Resources */,
 				CE5B82CE27F7340100E2F8D8 /* ChatTextView.xib in Resources */,
-				CE448B6F27883692002774DD /* fly_call_ringtone.mp3 in Resources */,
 				CEF8A4CE2959CD5100D669B6 /* DocumentTableViewCell.xib in Resources */,
 				CE6C986A28047807009D508E /* LanguageSelectionTableViewCell.xib in Resources */,
 				CE94E80426D9FA9800F2E3A7 /* GoogleService-Info.plist in Resources */,
@@ -3590,6 +3556,7 @@
 				CEAB42D0298799A50061429A /* ForceUpdateAlert.xib in Resources */,
 				CE5CEF6C28F8317600A08D81 /* LanguageSelectionTableViewCell.xib in Resources */,
 				CEF8A4DD2959CD6200D669B6 /* HeaderSectionCell.xib in Resources */,
+				733009372D195CD0002882C6 /* fly_call_ringtone.wav in Resources */,
 				CEC08B3B27E23B0D005E48C5 /* MirrorflyUIkit-info.plist in Resources */,
 				CE09F27E2A8F9B6900B03452 /* CallUIXib.xib in Resources */,
 				CE0E051A295EC56E006CD708 /* BackupProgressViewController.xib in Resources */,
@@ -3647,7 +3614,6 @@
 				CEA3D8BF27F4283200C9BE92 /* SettingsTableViewCell.xib in Resources */,
 				CE9B7FD32A00D47D000349B2 /* GroupMentionView.xib in Resources */,
 				CE5B82CF27F7340100E2F8D8 /* ChatTextView.xib in Resources */,
-				CEC08B5127E23B0D005E48C5 /* fly_call_ringtone.mp3 in Resources */,
 				CEC08B5227E23B0D005E48C5 /* GoogleService-Info.plist in Resources */,
 				CE955ADD295EFD75006525EA /* input.mp3 in Resources */,
 				CE955ADB295EFD75006525EA /* hello.mp3 in Resources */,
@@ -3728,162 +3694,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		07A2BEE1EE765F73953B93E9 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-MirrorflyShareKit/Pods-MirrorflyShareKit-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-MirrorflyShareKit/Pods-MirrorflyShareKit-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-MirrorflyShareKit/Pods-MirrorflyShareKit-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		0A7303DBACF8006CA09A0BC5 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-UiKitQaNotificationExtention-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		11B5221DDBA8BFE3DA7077D0 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Mirrorfly/Pods-Mirrorfly-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Mirrorfly/Pods-Mirrorfly-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Mirrorfly/Pods-Mirrorfly-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		2A7F870A4C8FF5FAFA7EEFAF /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-Mirrorfly-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		30CEAC0D72F645C4EB2EF370 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-UiKitQa/Pods-UiKitQa-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-UiKitQa/Pods-UiKitQa-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-UiKitQa/Pods-UiKitQa-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		4E18914FEF8CB6F9C2759EFF /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-UikitQaShareKit-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		7261A20763431059C34B85A8 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-UikitQaShareKit/Pods-UikitQaShareKit-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-UikitQaShareKit/Pods-UikitQaShareKit-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-UikitQaShareKit/Pods-UikitQaShareKit-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		9CFBB3BE453DFB4D97BDBE19 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-MirrorflyNotificationExtention-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
 		CEC08B5627E23B0D005E48C5 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -3957,84 +3767,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/FirebaseCrashlytics/run\"\n";
-		};
-		D3658830D8555A2E9C04F01A /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-UiKitQa-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		E0E8D62EC560C07D9780066F /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-MirrorflyShareKit-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		F8C0803CE84F70531237BD54 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Mirrorfly/Pods-Mirrorfly-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Mirrorfly/Pods-Mirrorfly-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Mirrorfly/Pods-Mirrorfly-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		FAE0055CB916E1D450CFB65E /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-UiKitQa/Pods-UiKitQa-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-UiKitQa/Pods-UiKitQa-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-UiKitQa/Pods-UiKitQa-resources.sh\"\n";
-			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -4518,7 +4250,7 @@
 				CEEFC6F928AE7485009943DE /* DeleteMyAccountVC.swift in Sources */,
 				CE613AF0293A18F900995C9B /* ClearAllChatTableViewCell.swift in Sources */,
 				CEC08B1627E23B0D005E48C5 /* ChatUtils.swift in Sources */,
-				CE2E474829091DB000A5F7AA /* (null) in Sources */,
+				CE2E474829091DB000A5F7AA /* BuildFile in Sources */,
 				CEC08B1727E23B0D005E48C5 /* ProfileViewModel.swift in Sources */,
 				CEC08B1827E23B0D005E48C5 /* ChatViewParentMessageCell.swift in Sources */,
 				CEC08B1927E23B0D005E48C5 /* SceneDelegate.swift in Sources */,
@@ -4846,7 +4578,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 414;
+				CURRENT_PROJECT_VERSION = 420;
 				DEVELOPMENT_TEAM = G44VFA67ZG;
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = G44VFA67ZG;
 				ENABLE_BITCODE = NO;
@@ -5073,7 +4805,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 414;
+				CURRENT_PROJECT_VERSION = 420;
 				DEVELOPMENT_TEAM = G44VFA67ZG;
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = G44VFA67ZG;
 				ENABLE_BITCODE = NO;

@@ -21,6 +21,28 @@ import LocalAuthentication
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
+    
+    func addCallUIVC() {
+        if let topController = UIApplication.shared.keyWindow?.rootViewController {
+            if let presentedViewController = topController.presentedViewController {
+                presentedViewController.dismiss(animated: false)
+            }
+        }
+        let window = UIApplication.shared.windows.filter {$0.isKeyWindow}.first
+        if  let navigationController = window?.rootViewController as? UINavigationController {
+            if CallManager.getCallDirection() == .Incoming &&  (navigationController.presentedViewController?.isKind(of: CallUIViewController.self) == false || navigationController.presentedViewController == nil){
+                if let callController = self.callViewController {
+                    callController.members.removeAll()
+                    callController.modalPresentationStyle = .fullScreen
+                    let navigationStack = UINavigationController(rootViewController: callController)
+                    navigationStack.setNavigationBarHidden(true, animated: false)
+                    navigationStack.modalPresentationStyle = .fullScreen
+                    window?.rootViewController?.present(navigationStack, animated: true, completion: {
+                    })
+                }
+            }
+        }
+    }
 }
 
 extension RootViewController : CallManagerDelegate {
@@ -74,22 +96,24 @@ extension RootViewController : CallManagerDelegate {
                         }
                     }
                     
-                    if let topController = UIApplication.shared.keyWindow?.rootViewController {
-                        if let presentedViewController = topController.presentedViewController {
-                            presentedViewController.dismiss(animated: false)
+                    if CallManager.userCallLinkViaJoined() == false {
+                        if let topController = UIApplication.shared.keyWindow?.rootViewController {
+                            if let presentedViewController = topController.presentedViewController {
+                                presentedViewController.dismiss(animated: false)
+                            }
                         }
-                    }
-                    let window = UIApplication.shared.windows.filter {$0.isKeyWindow}.first
-                    if  let navigationController = window?.rootViewController as? UINavigationController {
-                        if CallManager.getCallDirection() == .Incoming &&  (navigationController.presentedViewController?.isKind(of: CallUIViewController.self) == false || navigationController.presentedViewController == nil){
-                            if let callController = self?.callViewController {
-                                callController.members.removeAll()
-                                callController.modalPresentationStyle = .fullScreen
-                                let navigationStack = UINavigationController(rootViewController: callController)
-                                navigationStack.setNavigationBarHidden(true, animated: false)
-                                navigationStack.modalPresentationStyle = .fullScreen
-                                window?.rootViewController?.present(navigationStack, animated: true, completion: {
-                                })
+                        let window = UIApplication.shared.windows.filter {$0.isKeyWindow}.first
+                        if  let navigationController = window?.rootViewController as? UINavigationController {
+                            if CallManager.getCallDirection() == .Incoming &&  (navigationController.presentedViewController?.isKind(of: CallUIViewController.self) == false || navigationController.presentedViewController == nil){
+                                if let callController = self?.callViewController {
+                                    callController.members.removeAll()
+                                    callController.modalPresentationStyle = .fullScreen
+                                    let navigationStack = UINavigationController(rootViewController: callController)
+                                    navigationStack.setNavigationBarHidden(true, animated: false)
+                                    navigationStack.modalPresentationStyle = .fullScreen
+                                    window?.rootViewController?.present(navigationStack, animated: true, completion: {
+                                    })
+                                }
                             }
                         }
                     }

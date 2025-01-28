@@ -56,8 +56,10 @@ class ContactInfoViewController: BaseViewController {
         ChatManager.shared.adminBlockDelegate = self
         ChatManager.shared.connectionDelegate = self
         ChatManager.shared.availableFeaturesDelegate = self
+        ChatManager.shared.archiveEventsDelegate = self
         NotificationCenter.default.addObserver(self, selector: #selector(willEnterForeground),
                                                        name: NSNotification.Name(didBecomeActive), object: nil)
+        ChatManager.shared.muteEventDelegate = self
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -66,11 +68,14 @@ class ContactInfoViewController: BaseViewController {
         ChatManager.shared.adminBlockDelegate = nil
         ChatManager.shared.connectionDelegate = nil
         ChatManager.shared.availableFeaturesDelegate = nil
+        ChatManager.shared.muteEventDelegate = nil
+        ChatManager.shared.archiveEventsDelegate = nil
         delegate = nil
         self.view.removeLaunchSubview()
     }
     
     override func viewWillAppear(_ animated: Bool) {
+        setMuteConfiguration()
         handleBackgroundAndForground()
         availableFeatures = ChatManager.getAvailableFeatures()
         self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
@@ -260,6 +265,11 @@ class ContactInfoViewController: BaseViewController {
             getLastSeen()
         }
     }
+    
+    func setMuteConfiguration() {
+        setConfiguration()
+        contactInfoTableView?.reloadData()
+    }
 }
 
 extension ContactInfoViewController : UITableViewDelegate, UITableViewDataSource {
@@ -307,7 +317,11 @@ extension ContactInfoViewController : UITableViewDelegate, UITableViewDataSource
             let cell = (tableView.dequeueReusableCell(withIdentifier: Identifiers.muteNotificationCell, for: indexPath) as? MuteNotificationCell)!
             cell.muteSwitch?.addTarget(self, action: #selector(stateChanged), for: .valueChanged)
             cell.muteSwitch?.setOn(profileDetails?.isMuted ?? false, animated: true)
-            cell.muteSwitch?.isEnabled = ChatManager.shared.isUserUnArchived(jid: profileDetails?.jid ?? "")
+            if ChatManager.isArchivedSettingsEnabled() && !ChatManager.shared.isUserUnArchived(jid: profileDetails?.jid ?? "") {
+                cell.muteSwitch?.isEnabled = false
+            } else {
+                cell.muteSwitch?.isEnabled = true
+            }
             return cell
         } else if indexPath.section == 2 {
             let cell = (tableView.dequeueReusableCell(withIdentifier: Identifiers.privateChatCell, for: indexPath) as? PrivateChatCell)!
@@ -649,4 +663,38 @@ extension ContactInfoViewController : AvailableFeaturesDelegate {
         
         refreshData()
     }
+}
+
+extension ContactInfoViewController : MuteEventDelegate {
+    func onMuteStatusUpdated(isSuccess: Bool, message: String, jidList: [String]) {
+        if isSuccess {
+            if let mJid = jidList.filter({$0 == profileDetails?.jid}).first {
+                profileDetails = ContactManager.shared.getUserProfileDetails(for: mJid)
+                executeOnMainThread { [weak self] in
+                    self?.refreshData()
+                }
+            }
+        }
+    }
+    
+    func didUpdateMuteSettings(isSuccess: Bool, message: String, isMuteStatus: Bool) {
+        
+    }
+}
+
+extension ContactInfoViewController: ArchiveEventsDelegate {
+    func updateArchiveUnArchiveChats(toUser: String, archiveStatus: Bool) {
+        profileDetails = ContactManager.shared.getUserProfileDetails(for: toUser)
+        executeOnMainThread { [weak self] in
+            self?.refreshData()
+        }
+    }
+    
+    func updateArchivedSettings(archivedSettingsStatus: Bool) {
+        executeOnMainThread { [weak self] in
+            self?.refreshData()
+        }
+    }
+    
+    
 }

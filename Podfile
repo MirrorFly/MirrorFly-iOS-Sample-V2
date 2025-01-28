@@ -43,7 +43,7 @@ def uikit_pods
   pod 'GoogleWebRTC'
   pod 'IDZSwiftCommonCrypto', '~> 0.16'
   
-  pod 'MirrorFlySDK', '~> 5.18.2'
+  pod 'MirrorFlySDK', '5.18.4'
 
 end
 
@@ -62,7 +62,7 @@ def notification_pods
   pod 'GoogleWebRTC'
   pod 'IDZSwiftCommonCrypto', '~> 0.16'
   
-  pod 'MirrorFlySDK', '~> 5.18.2'
+  pod 'MirrorFlySDK', '5.18.4'
 
 end
 

@@ -209,7 +209,13 @@ class RecentChatTableViewCell: UITableViewCell {
             senderNameLabel?.isHidden = true
         }
         pinImageView.isHidden = !recentChatMessage.isChatPinned
-        muteImageView.isHidden = !recentChatMessage.isMuted
+        
+        if ChatManager.isArchivedSettingsEnabled() && fromArchive {
+            muteImageView.isHidden = true
+        } else {
+            muteImageView.isHidden = !recentChatMessage.isMuted
+        }
+        
         archivedStatusLabel.isHidden = !recentChatMessage.isChatArchived
 
 //        if fromArchive {

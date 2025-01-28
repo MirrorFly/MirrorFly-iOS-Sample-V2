@@ -694,6 +694,7 @@ extension ContactViewController: CallStatusContactDelegate {
                     self.contacts.removeAll { pd in
                         pd.jid == userId
                     }
+                    self.updateBottomButton()
                     self.contactList.reloadData()
                 }
             }

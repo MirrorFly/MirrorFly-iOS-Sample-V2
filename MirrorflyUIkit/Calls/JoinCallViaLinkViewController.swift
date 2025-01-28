@@ -59,8 +59,8 @@ class JoinCallViaLinkViewController: BaseViewController, CallUIDelegate {
         CallManager.setJoinCallDelegate(delegate: self)
         videoMuteTap.throttle(.milliseconds(310), scheduler: MainScheduler.instance).subscribe { [weak self] term in
             if self?.isVideoMuted ?? false{
-                CallManager.startVideoCapture()
                 CallManager.muteVideo(false)
+                CallManager.startVideoCapture()
                 self?.isVideoMuted = false
                 self?.videoButton.isSelected = false
                 self?.userProfileImage.isHidden = true
@@ -115,7 +115,7 @@ class JoinCallViaLinkViewController: BaseViewController, CallUIDelegate {
             }
             
         }.disposed(by: disposeBag)
-        initJoinLink()
+      //  initJoinLink()
         CallManager.callUiDelegate = self
     }
     
@@ -439,7 +439,6 @@ class JoinCallViaLinkViewController: BaseViewController, CallUIDelegate {
         DispatchQueue.main.async {
             self.navigationController?.popViewController(animated: false)
         }
-        print("#UI_ uiPresented ")
     }
     
     func callReceived(id: String) {
@@ -568,7 +567,6 @@ extension JoinCallViaLinkViewController {
                 self.videoView.bringSubviewToFront(self.userProfileImage)
             }
             if !self.isVideoMuted{
-                CallManager.muteVideo(false)
                 CallManager.startVideoCapture()
             }
         }

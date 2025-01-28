@@ -212,7 +212,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
         if CommonDefaults.appLockenable || CommonDefaults.appFingerprintenable {
             CommonDefaults.showAppLock = true
         }
-        CallManager.disconnectCall()
+        if CallManager.isOneToOneCall() {
+            CallManager.disconnectCall()
+        }
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.CNContactStoreDidChange, object: nil)
     }
 
@@ -738,27 +740,38 @@ extension AppDelegate : MissedCallNotificationDelegate {
         }
         let conjuction =  (callMode == "group " || callType == "video call") ? " a " : " an "
         
-        
-        if !(groupId?.isEmpty ?? false){
-            if let profileDetail = ContactManager.shared.getUserProfileDetails(for: groupId ?? "") {
-                title = profileDetail.name
-            }else{
+        if isOneToOneCall == true {
+            if userJid == "" {
                 title = CallManager.getNameString()
-            }
-        }else {
-            if let profileDetail = ContactManager.shared.getUserProfileDetails(for: userJid) {
-                
-                if userList.count > 1 {
-                    title = "\(profileDetail.name) and (+\(userList.contains(userJid) ? userList.count - 1 : userList.count))"
-                } else {
-                    title = (userList.contains(userJid) || isOneToOneCall) ? profileDetail.name : "\(profileDetail.name) and (+\(userList.count))"
+            }else {
+                if let profileDetail = ContactManager.shared.getUserProfileDetails(for: userJid) {
+                    title = profileDetail.name
+                }else{
+                    let (userName, _) = CallManager.getUserNameAndImage(userId: userJid)
+                    title = userName
                 }
-               
-            }else{
-                title = CallManager.getNameString()
+            }
+        }else{
+            if !(groupId?.isEmpty ?? false){
+                if let profileDetail = ContactManager.shared.getUserProfileDetails(for: groupId ?? "") {
+                    title = profileDetail.name
+                }else{
+                    title = CallManager.getNameString()
+                }
+            }else {
+                if let profileDetail = ContactManager.shared.getUserProfileDetails(for: userJid) {
+                    
+                    if userList.count > 1 {
+                        title = "\(profileDetail.name) and (+\(userList.contains(userJid) ? userList.count - 1 : userList.count))"
+                    } else {
+                        title = (userList.contains(userJid) || isOneToOneCall) ? profileDetail.name : "\(profileDetail.name) and (+\(userList.count))"
+                    }
+                   
+                }else{
+                    title = CallManager.getNameString()
+                }
             }
         }
-        
         DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
             self.showCustomNotificationView(title: title , message: "You missed" +  conjuction + callMode + callType, chatMessage: "media-call")
         })

@@ -75,6 +75,7 @@ class GroupInfoViewController: BaseViewController {
     }
     
     override func viewWillAppear(_ animated: Bool) {
+        setMuteConfiguration()
         handleBackgroundAndForground()
         self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         isGroupInfoUpdated = false
@@ -98,6 +99,8 @@ class GroupInfoViewController: BaseViewController {
         ContactManager.shared.profileDelegate = self
         ChatManager.shared.adminBlockDelegate = self
         ChatManager.shared.availableFeaturesDelegate = self
+        ChatManager.shared.muteEventDelegate = self
+        ChatManager.shared.archiveEventsDelegate = self
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -106,6 +109,8 @@ class GroupInfoViewController: BaseViewController {
         ContactManager.shared.profileDelegate = nil
         ChatManager.shared.adminBlockDelegate = nil
         ChatManager.shared.availableFeaturesDelegate = nil
+        ChatManager.shared.muteEventDelegate = nil
+        ChatManager.shared.archiveEventsDelegate = nil
     }
 
     override func viewDidDisappear(_ animated: Bool) {
@@ -326,6 +331,11 @@ class GroupInfoViewController: BaseViewController {
             AppAlert.shared.showToast(message: ErrorMessage.noInternet)
         }
     }
+    
+    func setMuteConfiguration() {
+        setupConfiguration()
+        refreshData()
+    }
 }
 
 extension GroupInfoViewController: UITableViewDelegate, UITableViewDataSource {
@@ -413,7 +423,11 @@ extension GroupInfoViewController: UITableViewDelegate, UITableViewDataSource {
             let cell = (tableView.dequeueReusableCell(withIdentifier: Identifiers.muteNotificationCell, for: indexPath) as? MuteNotificationCell)!
             cell.muteSwitch?.addTarget(self, action: #selector(stateChanged), for: .valueChanged)
             cell.muteSwitch?.setOn(profileDetails?.isMuted ?? false, animated: true)
-            cell.muteSwitch?.isEnabled = ChatManager.shared.isUserUnArchived(jid: profileDetails?.jid ?? "")
+            if ChatManager.isArchivedSettingsEnabled() && !ChatManager.shared.isUserUnArchived(jid: profileDetails?.jid ?? "") {
+                cell.muteSwitch?.isEnabled = false
+            } else {
+                cell.muteSwitch?.isEnabled = true
+            }
             return cell
         } else if indexPath.section == 2 {
             let cell = (tableView.dequeueReusableCell(withIdentifier: Identifiers.privateChatCell, for: indexPath) as? PrivateChatCell)!
@@ -1371,6 +1385,41 @@ extension GroupInfoViewController : AvailableFeaturesDelegate {
         }
         tableView?.reloadSections([1,2,4,5,6], with: .none)
     }
+}
+
+extension GroupInfoViewController : MuteEventDelegate {
+    func onMuteStatusUpdated(isSuccess: Bool, message: String, jidList: [String]) {
+        if isSuccess {
+            if let mJid = jidList.filter({$0 == profileDetails?.jid}).first {
+                profileDetails = ContactManager.shared.getUserProfileDetails(for: mJid)
+                executeOnMainThread { [weak self] in
+                    self?.refreshData()
+                }
+            }
+        }
+    }
+    
+    func didUpdateMuteSettings(isSuccess: Bool, message: String, isMuteStatus: Bool) {
+        
+    }
+    
+    
+}
+
+extension GroupInfoViewController: ArchiveEventsDelegate {
+    func updateArchiveUnArchiveChats(toUser: String, archiveStatus: Bool) {
+        profileDetails = ContactManager.shared.getUserProfileDetails(for: toUser)
+        executeOnMainThread { [weak self] in
+            self?.refreshData()
+        }
+    }
+    
+    func updateArchivedSettings(archivedSettingsStatus: Bool) {
+        executeOnMainThread { [weak self] in
+            self?.refreshData()
+        }
+    }
+    
 }
 
 
