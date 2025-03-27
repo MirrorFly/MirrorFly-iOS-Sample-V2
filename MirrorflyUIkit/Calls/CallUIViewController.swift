@@ -203,7 +203,7 @@ class CallUIViewController: UIViewController, UIAdaptivePresentationControllerDe
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        self.layoutSetBool = true
+        layoutSetBool = true
         if CallManager.getCallType() == .Audio {
             shouldHideProfile = false
         }
@@ -211,6 +211,7 @@ class CallUIViewController: UIViewController, UIAdaptivePresentationControllerDe
             audioReRouteFirstTimeOnly = false
             AudioManager.shared().autoReRoute()
         }
+        outgoingCallView?.speakerButton.isHidden = false
         print("#CallUII ====> #lifecycle viewWillAppear")
         NotificationCenter.default.addObserver(self, selector: #selector(willEnterForeground), name: UIApplication.willEnterForegroundNotification
                     , object: nil)
@@ -274,7 +275,9 @@ class CallUIViewController: UIViewController, UIAdaptivePresentationControllerDe
             }
         }else if CallManager.isOneToOneCall(){
             
-            showHideCallBackgroundProfiles(hide: showGridView ? true : false)
+            if CallManager.getCallType() == .Audio {
+                showHideCallBackgroundProfiles(hide: false)
+            }
             if CallManager.getCallType() == .Video {
                 let remoteVideoTrack = CallManager.getRemoteVideoTrack(jid: AppUtils.getMyJid()) != nil
                 let isVideoMuted = CallManager.isRemoteVideoMuted(members.first?.jid ?? "")
@@ -358,10 +361,13 @@ class CallUIViewController: UIViewController, UIAdaptivePresentationControllerDe
             self.showGridView = false
             self.transformTileAndGridConstraints()
         }
+        if members.last?.isVideoMuted ?? false == true {
+            outgoingCallView?.OutGoingCallBG.isHidden = false
+            outgoingCallView?.OutGoingCallBG.image = UIImage(named: "AudioCallBG")
+        }
     }
     
     override func viewDidAppear(_ animated: Bool) {
-        print("#CallUII ====> #lifecycle viewDidAppear \(CallManager.getCallMode().rawValue) || \(CallManager.isOneToOneCall()) || \(CallManager.getAllCallUsersList()) || \(CallManager.getCallType().rawValue) ||  \(members.first?.isVideoMuted) || \(members.first?.videoTrack)")
         outgoingCallView?.tileCollectionView.scrollIndicatorInsets = .zero
         ContactManager.shared.profileDelegate = self
         if reloadForInVite{
@@ -398,7 +404,7 @@ class CallUIViewController: UIViewController, UIAdaptivePresentationControllerDe
         print("#CallUII ====> #lifecycle viewDidDisappear")
         CallManager.delegate = RootViewController .sharedInstance
         ChatManager.shared.connectionDelegate = nil
-        AudioManager.shared().audioManagerDelegate = nil
+        //AudioManager.shared().audioManagerDelegate = nil
         NotificationCenter.default.removeObserver(self, name: UIApplication.willEnterForegroundNotification, object: nil)
     }
     
@@ -415,8 +421,8 @@ class CallUIViewController: UIViewController, UIAdaptivePresentationControllerDe
                     executeOnMainThread {
                         UIView.performWithoutAnimation {
                             self.outgoingCallView?.tileCollectionView.scrollToItem(at: IndexPath(item: 1, section: 0), at: .centeredHorizontally, animated: false)
+                            self.layoutSetBool = false
                         }
-                        self.layoutSetBool = false
                     }
                 }
             }
@@ -791,14 +797,14 @@ class CallUIViewController: UIViewController, UIAdaptivePresentationControllerDe
                             self?.showOrHideAudioWaveView(hide: true)
                         }
                         
-                        if remoteVideoMuted == true {
+                        if self?.members.last?.isVideoMuted ?? false == true {
                             self?.outgoingCallView?.audioMuteStackView.isHidden = true
                             self?.outgoingCallView?.audioMutedIcon.isHidden = true
                             self?.outgoingCallView?.audioCallMutedIcon.isHidden = !remoteAudioMuted
                             self?.showHideCallBackgroundProfiles(hide: false)
                             self?.showOrHideAudioWaveView(hide: remoteAudioMuted)
                         }
-                        if remoteVideoMuted == false {
+                        if self?.members.last?.isVideoMuted ?? false == false {
                             self?.outgoingCallView?.audioMuteStackView.isHidden = !remoteAudioMuted
                             self?.outgoingCallView?.audioMutedIcon.isHidden = !remoteAudioMuted
                             self?.outgoingCallView?.audioCallMutedIcon.isHidden = true
@@ -1322,6 +1328,9 @@ extension CallUIViewController {
             AudioManager.shared().autoReRoute()
         }else {
             alertController?.dismiss(animated: true)
+            if self.members.count > 2 {
+                return
+            }
             alertController = UIAlertController.init(title: "Requesting to switch to video call." , message: "", preferredStyle: .alert)
             
             let cancelAction = UIAlertAction(title: "Cancel", style: .default) { [weak self] (action) in
@@ -1735,6 +1744,7 @@ extension CallUIViewController {
             self.resetVariables()
             self.enableDisableUserInteractionFor(view: outgoingCallView?.AttendingBottomView, isDisable: true)
             CallManager.incomingUserJidArr.removeAll()
+            AudioManager.shared().audioManagerDelegate = nil
             self.callDurationTimer = nil
             self.VideoCallConversionTimer = nil
             self.videoCallRequstTimer = nil
@@ -1961,25 +1971,9 @@ extension CallUIViewController : CallViewControllerDelegate {
             }
         }
 
-        if CallManager.isOneToOneCall() || (CallManager.getCallMode() == .MEET && members.count == 2) {
+        if CallManager.isOneToOneCall() || (CallManager.getCallMode() == .MEET && (members.count == 2 || members.count == 1)) {
             setVideoBtnIcon()
             outgoingCallView?.cameraButton.isHidden = isVideoMuted
-            if CallManager.getCallType() == .Video && !(AudioManager.shared().getAllAvailableAudioInput().contains(where: {$0.type == .bluetooth || $0.type == .headset})) {
-                if members.last?.isVideoMuted ?? false == false {
-                    let audioOUtput = AudioManager.shared().currentAudioOutput()
-                    if audioOUtput.0 == .headset || audioOUtput.0 == .bluetooth {
-                        outgoingCallView?.speakerButton.isHidden = false
-                    }else{
-                        outgoingCallView?.speakerButton.isHidden = false // true
-                        AudioManager.shared().routeToSpeaker()
-                    }
-                }else{
-                    self.outgoingCallView?.speakerButton.isHidden = false
-                    outgoingCallView?.speakerButton.setImage(UIImage(named: "IconSpeakerOn" ), for: .normal)
-                }
-            } else {
-                self.outgoingCallView?.speakerButton.isHidden = false
-            }
             setMuteStatusText()
             
             if status {
@@ -2027,13 +2021,6 @@ extension CallUIViewController : CallViewControllerDelegate {
             if isVideoMuted == true {
                 outgoingCallView?.speakerButton.isHidden = false
                 outgoingCallView?.speakerButton.setImage(UIImage(named: "IconSpeakerOn" ), for: .normal)
-            }else{
-                let audioOUtput = AudioManager.shared().currentAudioOutput()
-                if audioOUtput.0 == .headset || audioOUtput.0 == .bluetooth {
-                    outgoingCallView?.speakerButton.isHidden = false
-                }else{
-                    outgoingCallView?.speakerButton.isHidden = false // true
-                }
             }
         }
     }
@@ -2056,22 +2043,6 @@ extension CallUIViewController : CallViewControllerDelegate {
         isAudioMuted = CallManager.isAudioMuted()
         isBackCamera = members.last?.isOnBackCamera ?? false
         isVideoMuted = CallManager.isVideoMuted()
-        if CallManager.getCallType() == .Audio {
-            self.outgoingCallView?.speakerButton.isHidden = false
-        } else {
-            let audioOUtput = AudioManager.shared().currentAudioOutput()
-            let availableDevices = AudioManager.shared().getAllAvailableAudioInput()
-            if audioOUtput.0 == .headset || audioOUtput.0 == .bluetooth || (availableDevices.count > 1 && availableDevices.contains(where: {$0.type == .bluetooth || $0.type == .headset})) {
-                outgoingCallView?.speakerButton.isHidden = false
-            } else {
-                if members.last?.isVideoMuted == true {
-                    outgoingCallView?.speakerButton.isHidden = false
-                }else {
-                    outgoingCallView?.speakerButton.isHidden = false // true
-                }
-            }
-        }
-        //AudioManager.shared().getCurrentAudioInput()
     }
     
     func onSwitchCamera(completion: @escaping () -> Void) {
@@ -2561,6 +2532,10 @@ extension CallUIViewController : CallManagerDelegate {
     }
     
     private func showOrHideGroupImage() {
+        if CallManager.isOneToOneCall() && CallManager.getCallType() == .Audio {
+            self.outgoingCallView?.outGoingAudioCallImageView.isHidden = false
+            self.showOrHideAudioWaveView(hide: false)
+        }
         if !CallManager.isOneToOneCall() && CallManager.getCallMode() != .MEET && CallManager.getCallType() == .Audio && !CallManager.isCallConnected() && groupId.isNotEmpty {
             self.outgoingCallView?.outGoingAudioCallImageView.isHidden = false
         } else if !CallManager.isOneToOneCall() && CallManager.getCallType() == .Video {
@@ -2612,7 +2587,6 @@ extension CallUIViewController : CallManagerDelegate {
         }
         if members.count > 2 {
             if alertController != nil {
-                self.resetConversionTimer()
                 if CallManager.getCallStatus(userId: AppUtils.getMyJid()) != .RECONNECTING{
                     AudioManager.shared().stopPlayingTone()
                 }
@@ -2660,11 +2634,15 @@ extension CallUIViewController : CallManagerDelegate {
                     self?.showOrHideAudioWaveView(hide: true)
                     self?.showGridView = true
                     self?.transformTileAndGridConstraints()
+                    self?.outgoingCallView?.reconnectingLable.isHidden = true
                 }else{
                     self?.showGridView = false
                     self?.transformTileAndGridConstraints()
                     self?.showOrHideGroupImage()
                 }
+            }
+            if CallManager.getCallType() == .Audio && self?.members.last?.isVideoMuted ?? false == true {
+                self?.showHideCallBackgroundProfiles(hide: false)
             }
             switch callStatus {
             case .CALLING:
@@ -2680,6 +2658,7 @@ extension CallUIViewController : CallManagerDelegate {
                 self?.showOrHideGroupImage()
                 self?.inviteReloadCells(userId: userId)
             case .RINGING:
+                self?.alertController?.dismiss(animated: true)
                 if !(self?.isOnCall ?? true) {
                     self?.myCallStatus = .ringing
                 }
@@ -2954,6 +2933,7 @@ extension CallUIViewController : CallManagerDelegate {
                         }
                     }else{
                         self?.myCallStatus = .tryagain
+                        self?.audioDevicesAlertController?.dismiss(animated: true)
                         self?.showHideCallAgainView(show: true, status: "Unavailable, Try again later")
                     }
                 }
@@ -3520,8 +3500,6 @@ extension CallUIViewController : CallManagerDelegate {
             }else{
                 AudioManager.shared().autoReRoute()
                 let audioOUtput = AudioManager.shared().currentAudioOutput()
-                print("audioOUtput.0 \(audioOUtput.0)")
-                print("audioOUtput.1 \(audioOUtput.1)")
                 if audioOUtput.0 == .headset || audioOUtput.0 == .bluetooth {
                     outgoingCallView?.speakerButton.isHidden = false
                 }
@@ -3540,6 +3518,7 @@ extension CallUIViewController : CallManagerDelegate {
             }
         }
         else if callAction == CallAction.ACTION_INVITE_USERS {
+            self.resetConversionTimer()
             print("#UI menmenersCount before \(members.count) \(userId)")
             outgoingCallView?.remoteUserVideoView.willRemoveSubview(self.remoteRenderer)
             self.remoteHangUpUserList.removeAll()
@@ -3564,42 +3543,16 @@ extension CallUIViewController : CallManagerDelegate {
             updateActionsUI()
             updatePipProfileImage()
             outgoingCallView?.outGoingAudioCallImageView.isHidden = true
+            if CallManager.isCallConversionRequestAvailable() == false {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
+                    self.resetConversionTimer()
+                })
+            }
             self.outgoingCallView?.cameraButton.isHidden = isVideoMuted
             if self.members.count > 2 {
                 self.outgoingCallView?.audioCallMutedIcon.isHidden = true
                 self.outgoingCallView?.audioMutedIcon.isHidden = true
             }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0, execute: {
-                if self.members.count > 2 {
-                    if CallManager.getCallType() != .Video {
-                        if self.isCallConversionRequestedByRemote == true {
-                            CallManager.declineVideoCallSwitchRequest()
-                            self.isCallConversionRequestedByMe = false
-                            self.isCallConversionRequestedByRemote = false
-                            self.resetConversionTimer()
-                            self.isVideoMuted = true
-                            self.updateActionsUI()
-                            if CallManager.getCallStatus(userId: AppUtils.getMyJid()) != .RECONNECTING {
-                                AudioManager.shared().stopPlayingTone()
-                            }
-                        }
-                        if self.isCallConversionRequestedByMe == true {
-                            CallManager.cancelVideoCallSwitch()
-                            self.isCallConversionRequestedByMe = false
-                            self.isCallConversionRequestedByRemote = false
-                            self.resetConversionTimer()
-                            self.isVideoMuted = true
-                            self.updateActionsUI()
-                            if CallManager.getCallStatus(userId: AppUtils.getMyJid()) != .RECONNECTING {
-                                AudioManager.shared().stopPlayingTone()
-                            }
-                            UIView.performWithoutAnimation {
-                                self.outgoingCallView?.tileCollectionView.reloadData()
-                            }
-                        }
-                    }
-                }
-            })
         }
         else if callAction == CallAction.ACTION_REMOTE_ENGAGED {
             self.itemToInsert.removeAll()
@@ -3726,7 +3679,7 @@ extension CallUIViewController : CallManagerDelegate {
                    
                     if showGridView { reloadCell(userId: userId) }
                         getContactNames()
-                    showHideCallBackgroundProfiles(hide: showGridView ? true : false)
+                    showHideCallBackgroundProfiles(hide: false)
                         setupTopViewConstraints()
                     if members.count == 2 {
                         if members[0].isVideoMuted && members[1].isVideoMuted {
@@ -3850,18 +3803,6 @@ extension CallUIViewController {
     
     func updateConnectedUIStatus()
     {
-        print("#CallUII ====> #updateConnectedUIStatus")
-        if CallManager.getCallType() == .Video && !(AudioManager.shared().getAllAvailableAudioInput().contains(where: {$0.type == .bluetooth || $0.type == .headset})) {
-            let audioOUtput = AudioManager.shared().currentAudioOutput()
-            if audioOUtput.0 == .headset || audioOUtput.0 == .bluetooth {
-                outgoingCallView?.speakerButton.isHidden = false
-            }else{
-                outgoingCallView?.speakerButton.isHidden = false // true
-            }
-        } else {
-            outgoingCallView?.speakerButton.isHidden = false
-        }
-       
         if ((self.audioPlayer) != nil) {
             if ((self.audioPlayer?.isPlaying) != nil) {
                 self.audioPlayer?.stop()
@@ -4168,17 +4109,6 @@ extension CallUIViewController {
                 self.showHideCallBackgroundProfiles(hide: self.showGridView ? true : false)
             }else{
                 self.showHideCallBackgroundProfiles(hide: true)
-            }
-            
-            if CallManager.getCallType() == .Video && !(AudioManager.shared().getAllAvailableAudioInput().contains(where: {$0.type == .bluetooth || $0.type == .headset})) {
-                let audioOUtput = AudioManager.shared().currentAudioOutput()
-                if audioOUtput.0 == .headset || audioOUtput.0 == .bluetooth {
-                    self.outgoingCallView?.speakerButton.isHidden = false
-                }else{
-                    self.outgoingCallView?.speakerButton.isHidden = false // true
-                }
-            } else {
-                self.outgoingCallView?.speakerButton.isHidden = false
             }
             self.outgoingCallView?.tileCollectionView.collectionViewLayout.invalidateLayout()
             self.outgoingCallView?.tileCollectionView.layoutSubviews()
@@ -4495,24 +4425,6 @@ extension CallUIViewController : ConnectionEventDelegate{
 extension CallUIViewController : AudioManagerDelegate {
     
     func audioRoutedTo(deviceName: String, audioDeviceType: OutputType) {
-        print("#CallUII ====> #audioRoutedTo \(audioDeviceType)")
-        if (callType == .Video || CallManager.getCallType() == .Video) && !(AudioManager.shared().getAllAvailableAudioInput().contains(where: {$0.type == .bluetooth || $0.type == .headset})) {
-            let audioOUtput = AudioManager.shared().currentAudioOutput()
-            if audioOUtput.0 == .headset || audioOUtput.0 == .bluetooth || self.members.last?.isVideoMuted ?? false {
-                outgoingCallView?.speakerButton.isHidden = false
-            }else{
-                if CallManager.getCallType() == .Video {
-                    if audioOUtput.0 == .receiver {
-                        AudioManager.shared().routeToSpeaker()
-                    }
-                }
-                outgoingCallView?.speakerButton.isHidden =  false //true
-            }
-        } else {
-            executeOnMainThread {
-                self.outgoingCallView?.speakerButton.isHidden = false
-            }
-        }
         switch audioDeviceType {
         case .receiver:
             currentOutputDevice = .receiver

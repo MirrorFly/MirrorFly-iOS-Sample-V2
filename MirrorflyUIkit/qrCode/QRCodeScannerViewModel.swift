@@ -46,8 +46,8 @@ class QRCodeScannerViewModel : NSObject{
         WebLoginsManager.shared.reset()
     }
     
-    func logoutFromAllDevice() {
-        WebLoginsManager.shared.logoutFromDevices()
+    func logoutFromAllDevice(completionHandler: @escaping FlyCompletionHandler) {
+        WebLoginsManager.shared.logoutWebSessions(completionHandler: completionHandler)
     }
     
 }

@@ -666,7 +666,7 @@ extension ContactInfoViewController : AvailableFeaturesDelegate {
 }
 
 extension ContactInfoViewController : MuteEventDelegate {
-    func onMuteStatusUpdated(isSuccess: Bool, message: String, jidList: [String]) {
+    func onMuteStatusUpdated(isSuccess: Bool, message: String, jidList: [String], muteStatus: Bool) {
         if isSuccess {
             if let mJid = jidList.filter({$0 == profileDetails?.jid}).first {
                 profileDetails = ContactManager.shared.getUserProfileDetails(for: mJid)

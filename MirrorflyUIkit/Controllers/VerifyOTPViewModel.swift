@@ -105,8 +105,11 @@ class VerifyOTPViewModel : NSObject
     }
     
     func initializeChatCredentials() {
-        ChatManager.updateAppLoggedIn(isLoggedin: true)
-        RootViewController.sharedInstance.initCallSDK()
-        VOIPManager.sharedInstance.updateDeviceToken()
-    }
+            ChatManager.updateAppLoggedIn(isLoggedin: true)
+            RootViewController.sharedInstance.initCallSDK()
+            let updatedTokenAPNS = FlyCallUtils.sharedInstance.getConfigUserDefault(forKey: FlyCallUtils.klUpdatedTokenAPNS) ?? ""
+            let updatedTokenVOIP = FlyCallUtils.sharedInstance.getConfigUserDefault(forKey: FlyCallUtils.klUpdatedTokenVOIP) ?? ""
+            VOIPManager.sharedInstance.newUpdateDeviceToken(apnsToken: updatedTokenAPNS, voipToken: updatedTokenVOIP)
+           // VOIPManager.sharedInstance.updateDeviceToken()
+        }
 }

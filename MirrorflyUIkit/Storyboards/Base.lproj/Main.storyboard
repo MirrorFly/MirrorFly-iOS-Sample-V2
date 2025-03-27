@@ -72,7 +72,7 @@
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Bf6-jm-zLG">
-                                                <rect key="frame" x="51.333333333333329" y="326.66666666666669" width="222.33333333333343" height="40"/>
+                                                <rect key="frame" x="51.333333333333329" y="326.66666666666669" width="222.33333333333337" height="40"/>
                                                 <subviews>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="egw-Hn-Wef">
                                                         <rect key="frame" x="0.0" y="0.0" width="45.333333333333336" height="40"/>
@@ -2676,6 +2676,7 @@
                     <connections>
                         <outlet property="addDeviceButton" destination="M7h-ez-rwm" id="VdT-Jb-ZiG"/>
                         <outlet property="blackView" destination="y2l-Ei-HEq" id="z0y-SB-J5f"/>
+                        <outlet property="bottomLinkLabel" destination="lcd-XR-TsU" id="QuR-00-Amh"/>
                         <outlet property="headerTitle" destination="fYD-pJ-laU" id="v7q-Pe-exm"/>
                         <outlet property="linkLabel" destination="d9o-h6-Jn9" id="PxQ-Gp-Akn"/>
                         <outlet property="logoutImage" destination="y61-Du-sH2" id="ml7-AB-S0W"/>
@@ -5438,7 +5439,7 @@
                                         <rect key="frame" x="0.0" y="20" width="414" height="50"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Notifications Not Working?" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="MvZ-16-zX2">
-                                                <rect key="frame" x="81.333333333333329" y="11.666666666666668" width="251.33333333333343" height="25.000000000000004"/>
+                                                <rect key="frame" x="81.333333333333329" y="11.666666666666668" width="251.33333333333337" height="25.000000000000004"/>
                                                 <fontDescription key="fontDescription" name="SFUIDisplay-Bold" family="SF UI Display" pointSize="21"/>
                                                 <color key="textColor" name="PrimaryTextColor"/>
                                                 <nil key="highlightedColor"/>
@@ -5656,7 +5657,7 @@
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemGray5Color">
-            <color red="0.8980392157" green="0.8980392157" blue="0.91764705879999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.89803921568627454" green="0.89803921568627454" blue="0.91764705882352937" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

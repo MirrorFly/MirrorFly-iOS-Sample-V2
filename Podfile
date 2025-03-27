@@ -38,12 +38,12 @@ def uikit_pods
   pod 'libPhoneNumber-iOS', '0.9.15'
   pod 'RealmSwift', '~> 10.49.2'
   pod 'SocketRocket'
-  pod 'Socket.IO-Client-Swift', '16.0.1'
-  pod 'Starscream', '4.0.4'
+  pod 'Socket.IO-Client-Swift', '16.1.1'
+  pod 'Starscream', '4.0.8'
   pod 'GoogleWebRTC'
   pod 'IDZSwiftCommonCrypto', '~> 0.16'
   
-  pod 'MirrorFlySDK', '5.18.4'
+  pod 'MirrorFlySDK', '~> 5.18.9'
 
 end
 
@@ -57,12 +57,12 @@ def notification_pods
   pod 'libPhoneNumber-iOS', '0.9.15'
   pod 'RealmSwift', '~> 10.49.2'
   pod 'SocketRocket'
-  pod 'Socket.IO-Client-Swift', '16.0.1'
-  pod 'Starscream', '4.0.4'
+  pod 'Socket.IO-Client-Swift', '16.1.1'
+  pod 'Starscream', '4.0.8'
   pod 'GoogleWebRTC'
   pod 'IDZSwiftCommonCrypto', '~> 0.16'
   
-  pod 'MirrorFlySDK', '5.18.4'
+  pod 'MirrorFlySDK', '~> 5.18.9'
 
 end
 

@@ -139,6 +139,18 @@ extension BaseViewController : MobileCallActionDelegate {
 
 // Base view to update message and message details from other views with inherite base view controller
 extension BaseViewController: MessageEventsDelegate {
+    func onChatCleared(toJid: String, chatClearType: ChatClearType) {
+        
+    }
+    
+    func onMessageDeleted(toJid: String, messageIds: [String], messageDeleteType: MessageDeleteType) {
+        
+    }
+    
+    func onAllChatsCleared() {
+        
+    }
+    
     func onMessageReceived(message: MirrorFlySDK.ChatMessage, chatJid: String) {
         if let profileDerails = self.getProfileDetails, (profileDerails.jid == message.chatUserJid) {
             self.appendMessage(message: message)
