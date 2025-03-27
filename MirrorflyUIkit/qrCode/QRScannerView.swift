@@ -49,8 +49,8 @@ extension QRScannerView {
     }
     
     func startScanning() {
-        executeInBackground { [weak self] in
-            self?.captureSession?.startRunning()
+        executeInBackground {
+            self.captureSession?.startRunning()
         }
     }
     
@@ -94,9 +94,8 @@ extension QRScannerView {
         
         self.layer.session = captureSession
         self.layer.videoGravity = .resizeAspectFill
-        
-        executeInBackground { [weak self] in
-            self?.captureSession?.startRunning()
+        executeInBackground {
+            self.captureSession?.startRunning()
         }
     }
     func scanningDidFail() {

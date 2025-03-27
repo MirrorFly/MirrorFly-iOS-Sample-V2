@@ -2535,6 +2535,18 @@ extension RecentChatViewController : ConnectionEventDelegate {
 
 // MessageEventDelegate
 extension RecentChatViewController : MessageEventsDelegate {
+    func onChatCleared(toJid: String, chatClearType: ChatClearType) {
+       
+    }
+    
+    func onMessageDeleted(toJid: String, messageIds: [String], messageDeleteType: MessageDeleteType) {
+       
+    }
+    
+    func onAllChatsCleared() {
+       
+    }
+    
     
     func onMessageTranslated(message: ChatMessage, jid: String) {
         
@@ -3787,7 +3799,7 @@ extension RecentChatViewController: PrivateChatDelegate {
 }
 
 extension RecentChatViewController: MuteEventDelegate {
-    func onMuteStatusUpdated(isSuccess: Bool, message: String, jidList: [String]) {
+    func onMuteStatusUpdated(isSuccess: Bool, message: String, jidList: [String], muteStatus: Bool) {
         if isSuccess {
             print("#muteChat RecentChatViewController \(isSuccess) \(message) \(jidList)")
             jidList.forEach { jid in

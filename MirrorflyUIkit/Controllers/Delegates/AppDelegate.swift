@@ -40,7 +40,7 @@ let isHideNotificationContent = false
 var SKIP_OTP_VERIFICATION = true
 let ISEXPORT = false
 #else
-var SKIP_OTP_VERIFICATION = false
+var SKIP_OTP_VERIFICATION = true
 let ISEXPORT = true
 #endif
 
@@ -128,7 +128,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
         
         if Utility.getBoolFromPreference(key: isLoggedIn) {
 //            FlyDefaults.isNewLoggedIn = false
-            VOIPManager.sharedInstance.updateDeviceToken()
+            // VOIPManager.sharedInstance.updateDeviceToken()
             RootViewController.sharedInstance.initCallSDK()
         }else {
 //            FlyDefaults.isNewLoggedIn = true
@@ -149,7 +149,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
         ChatManager.setMediaEncryption(isEnable: true)
         ChatManager.hideNotificationContent(hide: isHideNotificationContent)
         FlyUtils.setAppName(appName: APP_NAME)
-        VOIPManager.sharedInstance.updateDeviceToken()
+       // VOIPManager.sharedInstance.updateDeviceToken()
         networkMonitor()
         CallManager.enableDebugLogs(enable : true)
         return true
@@ -299,7 +299,8 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
         print("#token application DT => \(token)")
         VOIPManager.sharedInstance.savePushToken(token: token)
         Utility.saveInPreference(key: googleToken, value: token)
-        VOIPManager.sharedInstance.updateDeviceToken()
+        //VOIPManager.sharedInstance.updateDeviceToken()
+        VOIPManager.sharedInstance.newUpdateDeviceToken(apnsToken: token)
     }
     
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
@@ -380,13 +381,15 @@ extension AppDelegate : PKPushRegistryDelegate {
     func pushRegistry(_ registry: PKPushRegistry, didUpdate pushCredentials: PKPushCredentials, for type: PKPushType) {
         
         //print out the VoIP token. We will use this to test the nofications.
-        NSLog("VoIP Token: \(pushCredentials)")
-        let deviceTokenString = pushCredentials.token.reduce("") { $0 + String(format: "%02X", $1) }
-        print("#token pushRegistry VT => \(deviceTokenString)")
-        print(deviceTokenString)
-        VOIPManager.sharedInstance.saveVOIPToken(token: deviceTokenString)
-        Utility.saveInPreference(key: voipToken, value: deviceTokenString)
-        VOIPManager.sharedInstance.updateDeviceToken()
+              let deviceTokenString = pushCredentials.token.reduce("") { $0 + String(format: "%02X", $1) }
+              VOIPManager.sharedInstance.saveVOIPToken(token: deviceTokenString)
+              FlyLogWriter.sharedInstance.writeText("#VOIP TOKEN:@@@@@@@@@@@@@__________@@@@@@@@@@@@@@ \(deviceTokenString)")
+              // VOIPManager.sharedInstance.saveVOIPToken(token: deviceTokenString)
+              Utility.saveInPreference(key: voipToken, value: deviceTokenString)
+              //  VOIPManager.sharedInstance.updateDeviceToken()
+              let updatedTokenAPNS = FlyCallUtils.sharedInstance.getConfigUserDefault(forKey: FlyCallUtils.klUpdatedTokenAPNS) ?? ""
+              VOIPManager.sharedInstance.newUpdateDeviceToken(voipToken: deviceTokenString)
+        
     }
     func pushRegistry(_ registry: PKPushRegistry, didReceiveIncomingPushWith payload: PKPushPayload, for type: PKPushType, completion: @escaping () -> Void) {
         NSLog("Push VOIP Received with Payload - %@",payload.dictionaryPayload)
@@ -395,6 +398,16 @@ extension AppDelegate : PKPushRegistryDelegate {
         VOIPManager.sharedInstance.processPayload(payload.dictionaryPayload)
         completion()
     }
+    func pushRegistry(_ registry: PKPushRegistry, didInvalidatePushTokenFor type: PKPushType) {
+           guard type == .voIP else {
+               FlyLogWriter.sharedInstance.writeText("VOIP token invalidated for unknown type: \(type)")
+               return
+           }
+           // Log the invalidation event
+           FlyLogWriter.sharedInstance.writeText("VoIP push token invalidated didInvalidatePushTokenFor called.")
+           // Re-register for a new VoIP token
+           registerForVOIPNotifications()
+       }
 }
 
 

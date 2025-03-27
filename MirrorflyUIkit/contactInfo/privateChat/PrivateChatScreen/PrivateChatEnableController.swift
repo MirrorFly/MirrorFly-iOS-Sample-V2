@@ -234,7 +234,7 @@ extension PrivateChatEnableController: PrivateChatDelegate {
 }
 
 extension PrivateChatEnableController : MuteEventDelegate {
-    func onMuteStatusUpdated(isSuccess: Bool, message: String, jidList: [String]) {
+    func onMuteStatusUpdated(isSuccess: Bool, message: String, jidList: [String], muteStatus: Bool) {
         
     }
     

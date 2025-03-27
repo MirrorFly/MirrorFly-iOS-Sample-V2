@@ -265,17 +265,16 @@ class DateFormatterUtility: NSObject {
         return nil
     }
     
-    func convertMillisecondsToWebLoginTime(milliSeconds: Double)  -> String {
-        // Date
-        let timeStamp = milliSeconds / 1000
-        let date2 = Date(timeIntervalSince1970: Double(timeStamp/1000))
+    // Function to convert milliseconds to a formatted local time string
+    func convertMillisToFormattedString(_ milliSeconds: Double) -> String {
+        let date = Date(timeIntervalSince1970: milliSeconds / 1000) // Convert to Date object
+
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "EEE, dd MMM yyyy"
-        dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
-        
-        let time = convertMillisecondsToTime(milliSeconds: milliSeconds).getTimeFormat()
- 
-        return  dateFormatter.string(from: date2) + " " + time
+        dateFormatter.dateFormat = "EEE, dd MMM yyyy HH:mm:ss a" // Desired format
+        dateFormatter.timeZone = TimeZone.current // Use LOCAL TIME instead of UTC
+        dateFormatter.locale = Locale(identifier: "en_US")
+
+        return dateFormatter.string(from: date)
     }
     
     func convertMillisecondsToSentTime(milliSeconds: Double)  -> String {

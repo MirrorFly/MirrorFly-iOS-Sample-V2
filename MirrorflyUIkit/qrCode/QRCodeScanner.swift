@@ -25,6 +25,7 @@ class QRCodeScanner: UIViewController {
     var qrCodeScannerModel : QRCodeScannerViewModel?
     @IBOutlet weak var blackView: UIView!
     @IBOutlet weak var linkLabel: UILabel!
+    @IBOutlet weak var bottomLinkLabel: UILabel!
     
     @IBOutlet weak var headerTitle: UILabel!
     @IBOutlet weak var addDeviceButton: UIButton!
@@ -43,7 +44,15 @@ class QRCodeScanner: UIViewController {
     }
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         configure()
+        
+        if !NetworkReachability.shared.isConnected && getWebLogins().isEmpty {
+            AppAlert.shared.showToast(message: "Please check your internet connection")
+            navigateBack()
+            return
+        }
+        
         setUpUI()
         checkForLogin()
     }
@@ -68,11 +77,16 @@ class QRCodeScanner: UIViewController {
         logoutImage.addGestureRecognizer(UITapGestureRecognizer(target: self,action: #selector(logoutWebLogin(_:))))
         
         linkLabel.text = "Visit "+WEB_LOGIN_URL+" on \n your computer and scan the QR code"
+        bottomLinkLabel.text = "Visit "+WEB_LOGIN_URL
+    }
+    
+    private func getWebLogins() -> [WebLoginInfo?] {
+        return qrCodeScannerModel?.getWebLogins() ?? []
     }
     
     func checkForLogin() {
-        let webLogingsInfo = qrCodeScannerModel?.getRecentWebLogin()
-        let isEmpty = webLogingsInfo?.isEmpty ?? false
+        let webLogingsInfo = getWebLogins()
+        let isEmpty = webLogingsInfo.isEmpty
         if isEmpty {
             showScannerView(show: true)
             scannerView?.startScanning()
@@ -92,6 +106,9 @@ class QRCodeScanner: UIViewController {
     func removeLoginFromTable(socketId : String) {
         webLoginList = webLoginList.filter{$0?.token != socketId}
         resetTable()
+        if scannerView?.isRunning ?? false {
+            return
+        }
         if webLoginList.isEmpty {
             navigateBack()
         }
@@ -106,6 +123,7 @@ class QRCodeScanner: UIViewController {
     
     private func navigateBack() {
         scannerView?.stopScanning()
+        self.dismiss(animated: true)
         navigationController?.popViewController(animated: true)
     }
     
@@ -129,7 +147,16 @@ class QRCodeScanner: UIViewController {
             AppAlert.shared.onAlertAction = { [weak self] (result)  ->
                 Void in
                 if result == 1 {
-                    self?.qrCodeScannerModel?.logoutFromAllDevice()
+                    self?.qrCodeScannerModel?.logoutFromAllDevice(completionHandler: { isSuccess, error, data in
+                        print("#QrcodeScanner #logoutWebLogin #AllDevice isSuccess : \(isSuccess), error : \(error), data : \(data)")
+                        if isSuccess {
+                            if let status = data["status"] as? Int, status == 200 {
+                                AppAlert.shared.showToast(message: "User device sessions removed and logged out successfully")
+                            } else {
+                                print("Failed to parse response or status is not 200")
+                            }
+                        }
+                    })
                 }else {
                     
                 }
@@ -203,13 +230,11 @@ extension QRCodeScanner: QRScannerViewDelegate {
         print("QRCodeScanner qrScanningSucceededWithCode \(str)")
         qrCodeScannerModel?.decryptQRCodeData(qrData: str ?? "", completionHandler: {  [weak self] isSuccess, message in
             print("QRCodeScanner qrScanningSucceededWithCode decryptQRCodeData \(isSuccess) \(message)")
-            if isSuccess {
-                self?.navigateBack()
-            } else {
-                AppAlert.shared.showToastWithDuration(message: invalidQRMessage, duration: 1.0)
-                self?.checkForLogin()
-            }
             self?.stopLoading()
+            if !isSuccess {
+                AppAlert.shared.showToastWithDuration(message: message.isEmpty ? invalidQRMessage : message, duration: 1.0)
+            }
+            self?.navigateBack()
         })
     }
     
@@ -217,9 +242,11 @@ extension QRCodeScanner: QRScannerViewDelegate {
 }
 
 extension QRCodeScanner : WebLogoutDelegate {
-    func didLogoutWeb(socketId: String) {
-        print("QRCodeScanner didGetLogoutMessage \(socketId)")
-        removeLoginFromTable(socketId: socketId)
+    func didLogoutWeb(socketIds: [String]) {
+        print("#QRCodeScanner didLogoutWeb(socketIds:) \(socketIds)")
+        socketIds.forEach { socketId in
+            removeLoginFromTable(socketId: socketId)
+        }
     }
 }
 
@@ -255,7 +282,7 @@ extension QRCodeScanner : UITableViewDelegate, UITableViewDataSource {
             cell.browserIcon?.image = UIImage(named: ImageConstant.ic_web_login_internetExp)
         }
         
-        cell.loginTime?.text =  DateFormatterUtility.shared.convertMillisecondsToWebLoginTime(milliSeconds: webLoginInfo?.loginTime ?? 0)
+        cell.loginTime?.text =  DateFormatterUtility.shared.convertMillisToFormattedString(webLoginInfo?.loginTime ?? 0)
         
         if indexPath.row != 0 {
             cell.topDividerHeight.constant = 0

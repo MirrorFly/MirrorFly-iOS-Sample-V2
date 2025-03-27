@@ -25,7 +25,7 @@ public class iCloudmanager {
     private var fileSize: Int64?
     let networkManager = NetworkReachabilityManager.default
     var isUpload = false
-    
+    var isFileEncryptionEnabled = false
     private static let operationQueue: OperationQueue = {
         let operationQueue = OperationQueue()
         operationQueue.name = "com.mirrorfly.qa"
@@ -36,7 +36,7 @@ public class iCloudmanager {
     
     public init() {
         backgroundQueue = DispatchQueue.init(label: "iCloudBackgroundQueue")
-        initialiseQuery(filename: "Backup_\(ChatManager.getXMPPDetails().XMPPUsername).txt")
+        initialiseQuery(filename: generateBackupFileName())
         addNotificationObservers()
        // BackupManager.shared.backupDelegate = self
     }
@@ -91,6 +91,7 @@ public class iCloudmanager {
         if !cancelUpload {
             isUpload = true
             backgroundQueue.async { [weak self] in
+                print("#backupDidFinish progressFinished uploadBackupFile \(fileUrl)")
                 if let backupUrl = URL(string: fileUrl) {
                     guard let containerURL = FileManager.default.url(forUbiquityContainerIdentifier: ICLOUD_CONTAINER_ID) else {
                         self?.iCloudDelegate?.fileUploadDownloadError(error: containerError)
@@ -99,39 +100,22 @@ public class iCloudmanager {
                     do {
                         self?.getFileSize(fileURL: backupUrl)
                         var backupCloudFileURL = containerURL.appendingPathComponent("Documents")
-
+                        
                         if !FileManager.default.fileExists(atPath: containerURL.path) {
                             try FileManager.default.createDirectory(at: containerURL, withIntermediateDirectories: true, attributes: nil)
                         }
+                        print("#BackupIcloud #uploadBackupFile backupUrl \(backupUrl)")
                         
-                        backupCloudFileURL = backupCloudFileURL.appendingPathComponent("Backup_\(ChatManager.getXMPPDetails().XMPPUsername).txt")
+                        backupCloudFileURL = backupCloudFileURL.appendingPathComponent(self?.generateBackupFileName() ?? "")
+                        print("#BackupIcloud #uploadBackupFile backupCloudFileURL \(backupCloudFileURL)")
                         CommonDefaults.isBackupCompleted = false
-                            let data = try Data(contentsOf: backupUrl)
-                            try data.write(to: backupCloudFileURL)
-//                        if FileManager.default.fileExists(atPath: backupCloudFileURL.path) {
-//                            FileManager.default.removeItem(at: backupCloudFileURL) { isSuccess, error in
-//                                if isSuccess {
-//                                    do {
-//                                        let data = try Data(contentsOf: backupUrl)
-//                                        try data.write(to: backupCloudFileURL)
-//                                        //try FileManager.default.copyItem(at: backupUrl, to: backupCloudFileURL)
-//                                    } catch let error {
-//                                        print("Failed to move file dir : \(error)")
-//                                    }
-//                                }
-//                            }
-//                            //try FileManager.default.removeItem(at: backupCloudFileURL)
-//                        } else {
-//                            //try FileManager.default.copyItem(at: backupUrl, to: backupCloudFileURL)
-//                            let data = try Data(contentsOf: backupUrl)
-//                            try data.write(to: backupCloudFileURL)
-//                        }
+                        self?.uploadFileToiCloud(dataFile: backupUrl, fileToUpload: backupCloudFileURL)
                         self?.query.operationQueue?.addOperation({
                             _ = self?.query.start()
                             self?.query.enableUpdates()
                         })
                     } catch let error {
-                        print("Failed to move file dir : \(error)")
+                        print("#BackupIcloud Failed to move file dir : \(error)")
                     }
                 }
             }
@@ -140,11 +124,39 @@ public class iCloudmanager {
         }
     }
     
+    func uploadFileToiCloud(dataFile: URL, fileToUpload: URL) {
+        guard let iCloudURL = getiCloudUrl() else {
+            print("#BackupIcloud #uploadFileToiCloud iCloud is not available")
+            return
+        }
+
+        let fileManager = FileManager.default
+
+        // Check if the file exists in iCloud, and remove it if it does
+        if fileManager.fileExists(atPath: iCloudURL.path) {
+            do {
+                try fileManager.removeItem(at: iCloudURL)
+                print("#BackupIcloud #uploadFileToiCloud Existing file removed successfully")
+            } catch {
+                print("#BackupIcloud #uploadFileToiCloud Failed to remove existing file: \(error.localizedDescription)")
+                return
+            }
+        }
+
+        // Copy the new file to iCloud
+        do {
+            try fileManager.copyItem(at: dataFile, to: iCloudURL)
+            print("#BackupIcloud #uploadFileToiCloud File uploaded successfully")
+        } catch {
+            print("#BackupIcloud #uploadFileToiCloud Upload failed: \(error.localizedDescription)")
+        }
+    }
+    
     public func deleteiCloudBackupFile() {
         guard let containerURL = FileManager.default.url(forUbiquityContainerIdentifier: ICLOUD_CONTAINER_ID) else {
             return
         }
-        let backupCloudFileURL = containerURL.appendingPathComponent("Documents").appendingPathComponent("Backup_\(ChatManager.getXMPPDetails().XMPPUsername).txt")
+        let backupCloudFileURL = containerURL.appendingPathComponent("Documents").appendingPathComponent(generateBackupFileName())
         if FileManager.default.fileExists(atPath: backupCloudFileURL.path) {
             do {
                 try FileManager.default.removeItem(at: backupCloudFileURL)
@@ -163,7 +175,7 @@ public class iCloudmanager {
             backgroundQueue.async { [weak self] in
                 guard let backupCloudFileURL = FileManager.default.url(forUbiquityContainerIdentifier: ICLOUD_CONTAINER_ID) else { return }
                 var containerURL = backupCloudFileURL.appendingPathComponent("Documents")
-                containerURL = containerURL.appendingPathComponent("Backup_\(ChatManager.getXMPPDetails().XMPPUsername).txt")
+                containerURL = containerURL.appendingPathComponent(self?.generateBackupFileName() ?? "")
                 do {
                     self?.query.operationQueue?.addOperation({
                         self?.query.start()
@@ -177,7 +189,7 @@ public class iCloudmanager {
                         self?.checkLastBackupDetails()
                     }
                 } catch let error as NSError {
-                    print("Failed to download iCloud file : \(error)")
+                    print("#BackupIcloud Failed to download iCloud file : \(error)")
                 }
             }
         } else {
@@ -188,24 +200,51 @@ public class iCloudmanager {
     public func movetoLocalFile(iCloudUrl: URL) {
         do {
             if let backupUrl = getLocalBackupUrl() {
-                if FileManager.default.fileExists(atPath: backupUrl.path) {
-                    try FileManager.default.removeItem(atPath: backupUrl.path)
+                print("#BackupIcloud #movetoLocalFile backupUrl \(backupUrl)")
+                print("#BackupIcloud #movetoLocalFile iCloudUrl \(iCloudUrl)")
+
+                let fileManager = FileManager.default
+
+                // Check if the destination (backupUrl) exists
+                if fileManager.fileExists(atPath: backupUrl.path) {
+                    print("#BackupIcloud #movetoLocalFile fileExists, removing existing file")
+                    do {
+                        try fileManager.removeItem(at: backupUrl)
+                    } catch {
+                        print("#BackupIcloud ❌ Failed to remove existing file: \(error.localizedDescription)")
+                    }
                 } else {
-                    try FileManager.default.createDirectory(atPath: backupUrl.path,
-                                                                                withIntermediateDirectories: true,
-                                                                                attributes: nil)
+                    // Ensure that the parent directory exists before copying
+                    let backupDirectory = backupUrl.deletingLastPathComponent()
+                    if !fileManager.fileExists(atPath: backupDirectory.path) {
+                        do {
+                            try fileManager.createDirectory(at: backupDirectory, withIntermediateDirectories: true, attributes: nil)
+                            print("#BackupIcloud #movetoLocalFile Created backup directory")
+                        } catch {
+                            print("#BackupIcloud ❌ Failed to create directory: \(error.localizedDescription)")
+                        }
+                    }
                 }
-                try FileManager.default.copyItem(at: iCloudUrl, to: backupUrl)
+
+                // Now, copy the iCloud file to the local backup
+                do {
+                    print("#BackupIcloud #movetoLocalFile Copying file...")
+                    try fileManager.copyItem(at: iCloudUrl, to: backupUrl)
+                    print("#BackupIcloud ✅ File copied successfully to \(backupUrl.path)")
+                } catch {
+                    print("#BackupIcloud ❌ movetoLocalFileError: \(error.localizedDescription)")
+                }
             }
+
         } catch let error {
-            print("movetoLocalFileError", error)
+            print("#BackupIcloud movetoLocalFileError", error)
         }
     }
     
     public func getLocalBackupUrl() -> URL? {
         var documentDirectoryUrl = FlyUtils.getGroupContainerIDPath()
         documentDirectoryUrl = documentDirectoryUrl?.appendingPathComponent("iCloudBackup")
-        return documentDirectoryUrl?.appendingPathComponent("Backup_\(ChatManager.getXMPPDetails().XMPPUsername).txt")
+        return documentDirectoryUrl?.appendingPathComponent(generateBackupFileName())
     }
     
     public func deleteLoaclBackup() {
@@ -220,7 +259,7 @@ public class iCloudmanager {
     
     public func getiCloudUrl() -> URL? {
         var backupCloudFileURL = FileManager.default.url(forUbiquityContainerIdentifier: ICLOUD_CONTAINER_ID)
-        backupCloudFileURL = backupCloudFileURL?.appendingPathComponent("Documents").appendingPathComponent("Backup_\(ChatManager.getXMPPDetails().XMPPUsername).txt")
+        backupCloudFileURL = backupCloudFileURL?.appendingPathComponent("Documents").appendingPathComponent(generateBackupFileName())
         return backupCloudFileURL
     }
     
@@ -280,19 +319,15 @@ public class iCloudmanager {
     }
     
     func startSchedulebackup() {
-//        if Utility.getAutoBackupOverIsOn() {
-            let network = Utility.getAutoBackupNetwork()
-            if let isWiFi = networkManager?.isReachableOnEthernetOrWiFi {
-                if network == "Wi-Fi", isWiFi {
-                    BackupManager.shared.startBackup()
-                } else {
-                    BackupManager.shared.startBackup()
-                }
-                Utility.setAutoBackupDate()
+        let network = Utility.getAutoBackupNetwork()
+        if let isWiFi = networkManager?.isReachableOnEthernetOrWiFi {
+            if network == "Wi-Fi", isWiFi {
+                BackupManager.shared.startBackup(enableEncryption: true)
+            } else {
+                BackupManager.shared.startBackup(enableEncryption: true)
             }
-//        } else {
-//            BackupManager.shared.startBackup()
-//        }
+            Utility.setAutoBackupDate()
+        }
     }
     
     public func cancelBackup() {
@@ -315,7 +350,7 @@ public class iCloudmanager {
         for item in query.results {
             guard let item = item as? NSMetadataItem else { continue }
             guard let fileItemURL = item.value(forAttribute: NSMetadataItemURLKey) as? URL else { continue }
-            if fileItemURL.lastPathComponent.contains("Backup_\(ChatManager.getXMPPDetails().XMPPUsername).txt") {
+            if fileItemURL.lastPathComponent.contains(generateBackupFileName()) {
                 fileItem = item
                 fileURL = fileItemURL
             }
@@ -374,5 +409,12 @@ extension iCloudmanager: BackupEventDelegate {
     
     public func backupDidFailed(errorMessage: String) {
         
+    }
+}
+
+extension iCloudmanager {
+    private func generateBackupFileName() -> String {
+        let fileExtension = isFileEncryptionEnabled ? "crypto7" : "txt"
+        return "Backup_\(ChatManager.getXMPPDetails().XMPPUsername).\(fileExtension)"
     }
 }

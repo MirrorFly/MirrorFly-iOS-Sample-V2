@@ -151,7 +151,7 @@ extension NotificationAlertViewController : UITableViewDelegate,UITableViewDataS
 }
 
 extension NotificationAlertViewController : MuteEventDelegate {
-    func onMuteStatusUpdated(isSuccess: Bool, message: String, jidList: [String]) {
+    func onMuteStatusUpdated(isSuccess: Bool, message: String, jidList: [String], muteStatus: Bool) {
         
     }
     

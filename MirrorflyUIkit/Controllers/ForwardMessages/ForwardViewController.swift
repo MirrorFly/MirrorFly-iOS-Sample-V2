@@ -1248,6 +1248,18 @@ extension ForwardViewController : GroupEventsDelegate {
 
 // MessageEventDelegate
 extension ForwardViewController : MessageEventsDelegate {
+    func onChatCleared(toJid: String, chatClearType: ChatClearType) {
+        
+    }
+    
+    func onMessageDeleted(toJid: String, messageIds: [String], messageDeleteType: MessageDeleteType) {
+        
+    }
+    
+    func onAllChatsCleared() {
+        
+    }
+    
   
     func onMessageTranslated(message: ChatMessage, jid: String) {
         

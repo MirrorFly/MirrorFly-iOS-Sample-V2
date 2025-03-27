@@ -230,7 +230,7 @@ class BackupViewController: UIViewController {
     
     func openDocument() {
         executeOnMainThread { [self] in
-            let documentPicker = UIDocumentPickerViewController(documentTypes: [kUTTypeText as String], in: .import)
+            let documentPicker = UIDocumentPickerViewController(documentTypes: [kUTTypeItem as String], in: .import)
             documentPicker.delegate = self
             documentPicker.allowsMultipleSelection = false
             self.present(documentPicker, animated: true, completion: nil)

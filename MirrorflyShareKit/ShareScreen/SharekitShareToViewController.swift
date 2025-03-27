@@ -1442,6 +1442,18 @@ extension SharekitShareToViewController : GroupEventsDelegate {
 
 // MessageEventDelegate
 extension SharekitShareToViewController : MessageEventsDelegate {
+    func onChatCleared(toJid: String, chatClearType: MirrorFlySDK.ChatClearType) {
+        
+    }
+    
+    func onMessageDeleted(toJid: String, messageIds: [String], messageDeleteType: MirrorFlySDK.MessageDeleteType) {
+        
+    }
+    
+    func onAllChatsCleared() {
+        
+    }
+    
     func onMessageEdited(message: MirrorFlySDK.ChatMessage) {
         
     }
