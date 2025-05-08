@@ -13,6 +13,7 @@ protocol SendMeetLinkMessage {
     func ondismissed()
     func isBlocked(userId: String, isBlocked: Bool)
     func userDeleted(userId: String, profile: ProfileDetails)
+    func onSuperAdminDeleteGroup(groupJid : String, groupName : String)
 }
 
 class InstantScheduledMeetingViewController: UIViewController, UIGestureRecognizerDelegate {
@@ -284,6 +285,12 @@ class InstantScheduledMeetingViewController: UIViewController, UIGestureRecogniz
 }
 
 extension InstantScheduledMeetingViewController : GroupEventsDelegate {
+    func didSuperAdminDeleteGroup(groupJid: String, groupName: String) {
+        meetMessageDelegate?.ondismissed()
+        meetMessageDelegate?.onSuperAdminDeleteGroup(groupJid: groupJid, groupName: groupName)
+        self.dismiss(animated: false)
+    }
+    
     func didAddNewMemeberToGroup(groupJid: String, newMemberJid: String, addedByMemberJid: String) {
     }
 

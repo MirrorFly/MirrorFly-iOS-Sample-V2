@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2505D2EAE105EE838A66BD26 /* Pods_MirrorflyNotificationExtention.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3BF6D5DE48C4F0673673D58 /* Pods_MirrorflyNotificationExtention.framework */; };
 		38C369FDA4D537D4B44DFDC6 /* (null) in Frameworks */ = {isa = PBXBuildFile; };
 		3D12788F27A7AC6D00A34436 /* UserProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D12788E27A7AC6D00A34436 /* UserProfileViewController.swift */; };
 		3D3C47DC28E5315D001F2520 /* DeleteForEveryOneViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D3C47DA28E5315D001F2520 /* DeleteForEveryOneViewCell.swift */; };
@@ -29,14 +28,13 @@
 		3DF9C9A728E6E69300154BBE /* DeleteMessageForEveryOneAlertController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DF9C9A528E6E69300154BBE /* DeleteMessageForEveryOneAlertController.swift */; };
 		3DF9C9A928E6E6A300154BBE /* DeleteMessageForEveryOneAlertController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3DF9C9A828E6E6A300154BBE /* DeleteMessageForEveryOneAlertController.xib */; };
 		3DF9C9AA28E6E6A300154BBE /* DeleteMessageForEveryOneAlertController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3DF9C9A828E6E6A300154BBE /* DeleteMessageForEveryOneAlertController.xib */; };
-		3F89CE7068C31307A94BCC83 /* Pods_Mirrorfly.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8609395852C2E619BD48939B /* Pods_Mirrorfly.framework */; };
-		42AF67CA5956D1AF804F323E /* Pods_MirrorflyShareKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CBA86A8E76CBBD469CFBD241 /* Pods_MirrorflyShareKit.framework */; };
 		4539207F786BA9399FD59C93 /* (null) in Frameworks */ = {isa = PBXBuildFile; };
+		512B8BB47B921911C6745C51 /* Pods_MirrorflyNotificationExtention.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B7FFFD3E9EC3D78F6837FAC3 /* Pods_MirrorflyNotificationExtention.framework */; };
 		6D22A420B2564247AE9FF889 /* (null) in Frameworks */ = {isa = PBXBuildFile; };
 		733009362D195CD0002882C6 /* fly_call_ringtone.wav in Resources */ = {isa = PBXBuildFile; fileRef = 733009352D195CD0002882C6 /* fly_call_ringtone.wav */; };
 		733009372D195CD0002882C6 /* fly_call_ringtone.wav in Resources */ = {isa = PBXBuildFile; fileRef = 733009352D195CD0002882C6 /* fly_call_ringtone.wav */; };
 		8356D98B5656C5FACFDD2D63 /* (null) in Frameworks */ = {isa = PBXBuildFile; };
-		C3D6A526AD2601A946CD101E /* Pods_UiKitQa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A113E1FC3C2CED1126C07F71 /* Pods_UiKitQa.framework */; };
+		A16F1535DF56A6348D492CCA /* Pods_MirrorflyShareKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A4D40416673FC9CA7B68770 /* Pods_MirrorflyShareKit.framework */; };
 		CE005CA729C9D431009BE471 /* AuthenticationExtenison.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE46746A29C9799400169A96 /* AuthenticationExtenison.swift */; };
 		CE0140B0298943F7002CE0F8 /* AppLockDescriptionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE0140AE298943F6002CE0F8 /* AppLockDescriptionCell.swift */; };
 		CE0140B1298943F7002CE0F8 /* AppLockDescriptionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE0140AE298943F6002CE0F8 /* AppLockDescriptionCell.swift */; };
@@ -864,9 +862,11 @@
 		CEFB2D9429A4DFCE00FF6649 /* ShareComposeVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = CEFB2D9029A4DF4200FF6649 /* ShareComposeVC.xib */; };
 		CEFD043026CD25B90017287F /* countries.json in Resources */ = {isa = PBXBuildFile; fileRef = CEFD042F26CD25B90017287F /* countries.json */; };
 		CEFD043226CD3D4B0017287F /* CountryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEFD043126CD3D4B0017287F /* CountryModel.swift */; };
-		D9215F4D7EB8F40798DB7389 /* Pods_UikitQaShareKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD8F4EFB7CCDA51A4077C21C /* Pods_UikitQaShareKit.framework */; };
+		D64ABBA31F3C9893F5DF156E /* Pods_UiKitQa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0B1344172B5AD3B1C0F62598 /* Pods_UiKitQa.framework */; };
 		DA46D6FEEED529FC66C6087D /* (null) in Frameworks */ = {isa = PBXBuildFile; };
-		DF59D2FAF875E090AA0C1F91 /* Pods_UiKitQaNotificationExtention.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC61936C106199A2DB2A4945 /* Pods_UiKitQaNotificationExtention.framework */; };
+		DBF9436A41FAA4F804614C61 /* Pods_Mirrorfly.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BD928AB96D761A6B61031B72 /* Pods_Mirrorfly.framework */; };
+		E16B7341F23B08B9FC7D5516 /* Pods_UikitQaShareKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 557D37E142CAA1AB62925B79 /* Pods_UikitQaShareKit.framework */; };
+		FC7CC51948E2D264F2913351 /* Pods_UiKitQaNotificationExtention.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0B04D0DE6EED65A23F61A883 /* Pods_UiKitQaNotificationExtention.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -948,6 +948,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0B04D0DE6EED65A23F61A883 /* Pods_UiKitQaNotificationExtention.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_UiKitQaNotificationExtention.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		0B1344172B5AD3B1C0F62598 /* Pods_UiKitQa.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_UiKitQa.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3D12788E27A7AC6D00A34436 /* UserProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfileViewController.swift; sourceTree = "<group>"; };
 		3D3C47DA28E5315D001F2520 /* DeleteForEveryOneViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteForEveryOneViewCell.swift; sourceTree = "<group>"; };
 		3D3C47DB28E5315D001F2520 /* DeleteForEveryOneViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = DeleteForEveryOneViewCell.xib; sourceTree = "<group>"; };
@@ -958,12 +960,11 @@
 		3DF9C99828E6A7FA00154BBE /* DeleteForEveryOneReceiverCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = DeleteForEveryOneReceiverCell.xib; sourceTree = "<group>"; };
 		3DF9C9A528E6E69300154BBE /* DeleteMessageForEveryOneAlertController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteMessageForEveryOneAlertController.swift; sourceTree = "<group>"; };
 		3DF9C9A828E6E6A300154BBE /* DeleteMessageForEveryOneAlertController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = DeleteMessageForEveryOneAlertController.xib; sourceTree = "<group>"; };
+		4A4D40416673FC9CA7B68770 /* Pods_MirrorflyShareKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MirrorflyShareKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		557D37E142CAA1AB62925B79 /* Pods_UikitQaShareKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_UikitQaShareKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		733009352D195CD0002882C6 /* fly_call_ringtone.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = fly_call_ringtone.wav; sourceTree = "<group>"; };
-		8609395852C2E619BD48939B /* Pods_Mirrorfly.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Mirrorfly.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		A113E1FC3C2CED1126C07F71 /* Pods_UiKitQa.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_UiKitQa.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		C3BF6D5DE48C4F0673673D58 /* Pods_MirrorflyNotificationExtention.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MirrorflyNotificationExtention.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		CBA86A8E76CBBD469CFBD241 /* Pods_MirrorflyShareKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MirrorflyShareKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		CD8F4EFB7CCDA51A4077C21C /* Pods_UikitQaShareKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_UikitQaShareKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B7FFFD3E9EC3D78F6837FAC3 /* Pods_MirrorflyNotificationExtention.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MirrorflyNotificationExtention.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		BD928AB96D761A6B61031B72 /* Pods_Mirrorfly.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Mirrorfly.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE0140AE298943F6002CE0F8 /* AppLockDescriptionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLockDescriptionCell.swift; sourceTree = "<group>"; };
 		CE0140AF298943F7002CE0F8 /* AppLockDescriptionCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = AppLockDescriptionCell.xib; sourceTree = "<group>"; };
 		CE0755B3290067E1008F6C37 /* NotificationWebViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationWebViewController.swift; sourceTree = "<group>"; };
@@ -1325,6 +1326,7 @@
 		CEB66AC929AE2DC90084559C /* ShareKitShareViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareKitShareViewModel.swift; sourceTree = "<group>"; };
 		CEBE3BD82959CF1F004E7C49 /* FooterSectionCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FooterSectionCell.xib; sourceTree = "<group>"; };
 		CEC08B6027E23B0D005E48C5 /* Mirrorfly.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Mirrorfly.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CEC08B6127E23B0D005E48C5 /* Mirrorfly-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Mirrorfly-Info.plist"; path = "/Users/user/Desktop/UiKit/Mirrorfly-Info.plist"; sourceTree = "<absolute>"; };
 		CEC08B7127E23B9F005E48C5 /* MirrorflyNotificationExtention.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MirrorflyNotificationExtention.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEC08B7427E243D9005E48C5 /* MirrorflyNotificationextention.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = MirrorflyNotificationextention.entitlements; sourceTree = "<group>"; };
 		CEC08B7E27E24F41005E48C5 /* GoogleService-Qa-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Qa-Info.plist"; sourceTree = "<group>"; };
@@ -1411,7 +1413,6 @@
 		CEFB2D9029A4DF4200FF6649 /* ShareComposeVC.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ShareComposeVC.xib; sourceTree = "<group>"; };
 		CEFD042F26CD25B90017287F /* countries.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = countries.json; sourceTree = "<group>"; };
 		CEFD043126CD3D4B0017287F /* CountryModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountryModel.swift; sourceTree = "<group>"; };
-		DC61936C106199A2DB2A4945 /* Pods_UiKitQaNotificationExtention.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_UiKitQaNotificationExtention.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1420,7 +1421,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4539207F786BA9399FD59C93 /* (null) in Frameworks */,
-				C3D6A526AD2601A946CD101E /* Pods_UiKitQa.framework in Frameworks */,
+				D64ABBA31F3C9893F5DF156E /* Pods_UiKitQa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1429,7 +1430,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				38C369FDA4D537D4B44DFDC6 /* (null) in Frameworks */,
-				3F89CE7068C31307A94BCC83 /* Pods_Mirrorfly.framework in Frameworks */,
+				DBF9436A41FAA4F804614C61 /* Pods_Mirrorfly.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1438,7 +1439,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DA46D6FEEED529FC66C6087D /* (null) in Frameworks */,
-				2505D2EAE105EE838A66BD26 /* Pods_MirrorflyNotificationExtention.framework in Frameworks */,
+				512B8BB47B921911C6745C51 /* Pods_MirrorflyNotificationExtention.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1447,7 +1448,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6D22A420B2564247AE9FF889 /* (null) in Frameworks */,
-				42AF67CA5956D1AF804F323E /* Pods_MirrorflyShareKit.framework in Frameworks */,
+				A16F1535DF56A6348D492CCA /* Pods_MirrorflyShareKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1456,7 +1457,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8356D98B5656C5FACFDD2D63 /* (null) in Frameworks */,
-				D9215F4D7EB8F40798DB7389 /* Pods_UikitQaShareKit.framework in Frameworks */,
+				E16B7341F23B08B9FC7D5516 /* Pods_UikitQaShareKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1464,7 +1465,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DF59D2FAF875E090AA0C1F91 /* Pods_UiKitQaNotificationExtention.framework in Frameworks */,
+				FC7CC51948E2D264F2913351 /* Pods_UiKitQaNotificationExtention.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1541,12 +1542,12 @@
 				CE8BC8E6280EB466007FF8C3 /* FlyTranslate.framework */,
 				CEA178D4274F8ABC00EAD2A3 /* FlyCall.framework */,
 				CEA178D3274F8ABC00EAD2A3 /* FlyCommon.framework */,
-				8609395852C2E619BD48939B /* Pods_Mirrorfly.framework */,
-				C3BF6D5DE48C4F0673673D58 /* Pods_MirrorflyNotificationExtention.framework */,
-				CBA86A8E76CBBD469CFBD241 /* Pods_MirrorflyShareKit.framework */,
-				A113E1FC3C2CED1126C07F71 /* Pods_UiKitQa.framework */,
-				DC61936C106199A2DB2A4945 /* Pods_UiKitQaNotificationExtention.framework */,
-				CD8F4EFB7CCDA51A4077C21C /* Pods_UikitQaShareKit.framework */,
+				BD928AB96D761A6B61031B72 /* Pods_Mirrorfly.framework */,
+				B7FFFD3E9EC3D78F6837FAC3 /* Pods_MirrorflyNotificationExtention.framework */,
+				4A4D40416673FC9CA7B68770 /* Pods_MirrorflyShareKit.framework */,
+				0B1344172B5AD3B1C0F62598 /* Pods_UiKitQa.framework */,
+				0B04D0DE6EED65A23F61A883 /* Pods_UiKitQaNotificationExtention.framework */,
+				557D37E142CAA1AB62925B79 /* Pods_UikitQaShareKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -2568,6 +2569,7 @@
 		CEA2F93D26569D8B0013F5E8 /* Plist */ = {
 			isa = PBXGroup;
 			children = (
+				CEC08B6127E23B0D005E48C5 /* Mirrorfly-Info.plist */,
 				CEA2F93626569C5C0013F5E8 /* MirrorflyUIkit-info.plist */,
 			);
 			path = Plist;
@@ -3230,7 +3232,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = CEA2F93926569C5C0013F5E8 /* Build configuration list for PBXNativeTarget "UiKitQa" */;
 			buildPhases = (
-				CFFD3283E58F4068D5FD65E4 /* [CP] Check Pods Manifest.lock */,
+				D3F2DA933D6A9FF6FA6C7690 /* [CP] Check Pods Manifest.lock */,
 				CEA2F92126569C590013F5E8 /* Sources */,
 				CEA2F92226569C590013F5E8 /* Frameworks */,
 				CEA2F92326569C590013F5E8 /* Resources */,
@@ -3238,8 +3240,8 @@
 				CED4FB5C277DE60D008FAF15 /* ShellScript */,
 				CEC08B8327E25037005E48C5 /* Google Plist */,
 				CEF9F50229E52E5700492772 /* Embed Frameworks */,
-				21BDA90FA6E51969B230704E /* [CP] Embed Pods Frameworks */,
-				799879EB77AAA0DC746C2431 /* [CP] Copy Pods Resources */,
+				67B2E6B37A3947DF1B4F5106 /* [CP] Embed Pods Frameworks */,
+				5181A34F6DD0B6131E6534DD /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -3256,7 +3258,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = CEC08B5927E23B0D005E48C5 /* Build configuration list for PBXNativeTarget "Mirrorfly" */;
 			buildPhases = (
-				C6F5311AAAA065ADB822BD6A /* [CP] Check Pods Manifest.lock */,
+				639A8159175870A16044DFE1 /* [CP] Check Pods Manifest.lock */,
 				CEC08AA027E23B0D005E48C5 /* Sources */,
 				CEC08B2027E23B0D005E48C5 /* Frameworks */,
 				CEC08B2227E23B0D005E48C5 /* Resources */,
@@ -3264,8 +3266,8 @@
 				CEC08B7827E24ADC005E48C5 /* Embed App Extensions */,
 				CEC08B7B27E24EEF005E48C5 /* Google Plist */,
 				CE8BC8CC280E8A3E007FF8C3 /* Embed Frameworks */,
-				C3B9D3BDF16DC51678D0F274 /* [CP] Embed Pods Frameworks */,
-				52E84701A267A674F86487E1 /* [CP] Copy Pods Resources */,
+				13A84A2C24525F78D59E8F20 /* [CP] Embed Pods Frameworks */,
+				B825DAEFC798DE2F87DE1851 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -3282,7 +3284,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = CEC08B6A27E23B9F005E48C5 /* Build configuration list for PBXNativeTarget "MirrorflyNotificationExtention" */;
 			buildPhases = (
-				F7DA9314F77ABA3D7AC97D5E /* [CP] Check Pods Manifest.lock */,
+				963738660FD1F503CF4E440A /* [CP] Check Pods Manifest.lock */,
 				CEC08B6427E23B9F005E48C5 /* Sources */,
 				CEC08B6627E23B9F005E48C5 /* Frameworks */,
 				CEC08B6827E23B9F005E48C5 /* Resources */,
@@ -3300,11 +3302,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = CEE7C5AA299F6505002F22FA /* Build configuration list for PBXNativeTarget "MirrorflyShareKit" */;
 			buildPhases = (
-				B5088710BC807C0CF8BBE755 /* [CP] Check Pods Manifest.lock */,
+				4DD995EAAF54F84B05D6E5E6 /* [CP] Check Pods Manifest.lock */,
 				CEE7C599299F6505002F22FA /* Sources */,
 				CEE7C59A299F6505002F22FA /* Frameworks */,
 				CEE7C59B299F6505002F22FA /* Resources */,
-				5FC41F49DF9EF5AE7FF98E81 /* [CP] Copy Pods Resources */,
+				15A91A01A9B09D4F697461F1 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -3319,11 +3321,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = CEE7C5BA299F651E002F22FA /* Build configuration list for PBXNativeTarget "UikitQaShareKit" */;
 			buildPhases = (
-				B87611F480A4DAC8AD06AFA8 /* [CP] Check Pods Manifest.lock */,
+				67C32E3A697A0B45520733AD /* [CP] Check Pods Manifest.lock */,
 				CEE7C5AB299F651D002F22FA /* Sources */,
 				CEE7C5AC299F651D002F22FA /* Frameworks */,
 				CEE7C5AD299F651D002F22FA /* Resources */,
-				C26954FAB1D72FD33BE22AF5 /* [CP] Copy Pods Resources */,
+				82EE16EF157058C24FA04B0F /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -3338,7 +3340,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = CEF4374F273BCA77008D0F39 /* Build configuration list for PBXNativeTarget "UiKitQaNotificationExtention" */;
 			buildPhases = (
-				8CBAF134DAE2DA967F9127F8 /* [CP] Check Pods Manifest.lock */,
+				654B34819AF23FB85E053D6B /* [CP] Check Pods Manifest.lock */,
 				CEF43740273BCA76008D0F39 /* Sources */,
 				CEF43741273BCA76008D0F39 /* Frameworks */,
 				CEF43742273BCA76008D0F39 /* Resources */,
@@ -3728,41 +3730,24 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		21BDA90FA6E51969B230704E /* [CP] Embed Pods Frameworks */ = {
+		13A84A2C24525F78D59E8F20 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-UiKitQa/Pods-UiKitQa-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-Mirrorfly/Pods-Mirrorfly-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-UiKitQa/Pods-UiKitQa-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-Mirrorfly/Pods-Mirrorfly-frameworks-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-UiKitQa/Pods-UiKitQa-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Mirrorfly/Pods-Mirrorfly-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		52E84701A267A674F86487E1 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Mirrorfly/Pods-Mirrorfly-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Mirrorfly/Pods-Mirrorfly-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Mirrorfly/Pods-Mirrorfly-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		5FC41F49DF9EF5AE7FF98E81 /* [CP] Copy Pods Resources */ = {
+		15A91A01A9B09D4F697461F1 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -3779,46 +3764,7 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-MirrorflyShareKit/Pods-MirrorflyShareKit-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		799879EB77AAA0DC746C2431 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-UiKitQa/Pods-UiKitQa-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-UiKitQa/Pods-UiKitQa-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-UiKitQa/Pods-UiKitQa-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		8CBAF134DAE2DA967F9127F8 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-UiKitQaNotificationExtention-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		B5088710BC807C0CF8BBE755 /* [CP] Check Pods Manifest.lock */ = {
+		4DD995EAAF54F84B05D6E5E6 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -3840,7 +3786,85 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		B87611F480A4DAC8AD06AFA8 /* [CP] Check Pods Manifest.lock */ = {
+		5181A34F6DD0B6131E6534DD /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-UiKitQa/Pods-UiKitQa-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-UiKitQa/Pods-UiKitQa-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-UiKitQa/Pods-UiKitQa-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		639A8159175870A16044DFE1 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-Mirrorfly-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		654B34819AF23FB85E053D6B /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-UiKitQaNotificationExtention-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		67B2E6B37A3947DF1B4F5106 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-UiKitQa/Pods-UiKitQa-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-UiKitQa/Pods-UiKitQa-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-UiKitQa/Pods-UiKitQa-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		67C32E3A697A0B45520733AD /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -3862,7 +3886,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		C26954FAB1D72FD33BE22AF5 /* [CP] Copy Pods Resources */ = {
+		82EE16EF157058C24FA04B0F /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -3879,24 +3903,7 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-UikitQaShareKit/Pods-UikitQaShareKit-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		C3B9D3BDF16DC51678D0F274 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Mirrorfly/Pods-Mirrorfly-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Mirrorfly/Pods-Mirrorfly-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Mirrorfly/Pods-Mirrorfly-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		C6F5311AAAA065ADB822BD6A /* [CP] Check Pods Manifest.lock */ = {
+		963738660FD1F503CF4E440A /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -3911,11 +3918,28 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-Mirrorfly-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-MirrorflyNotificationExtention-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		B825DAEFC798DE2F87DE1851 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Mirrorfly/Pods-Mirrorfly-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Mirrorfly/Pods-Mirrorfly-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Mirrorfly/Pods-Mirrorfly-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		CEC08B5627E23B0D005E48C5 /* ShellScript */ = {
@@ -3992,7 +4016,7 @@
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/FirebaseCrashlytics/run\"\n";
 		};
-		CFFD3283E58F4068D5FD65E4 /* [CP] Check Pods Manifest.lock */ = {
+		D3F2DA933D6A9FF6FA6C7690 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -4008,28 +4032,6 @@
 			);
 			outputPaths = (
 				"$(DERIVED_FILE_DIR)/Pods-UiKitQa-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		F7DA9314F77ABA3D7AC97D5E /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-MirrorflyNotificationExtention-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;

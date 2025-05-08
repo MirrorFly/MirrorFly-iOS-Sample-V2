@@ -4955,6 +4955,9 @@ extension CallUIViewController : ProfileEventsDelegate{
 
 // MARK:  Refresh Profile Info Delegate Methods
 extension CallUIViewController : RefreshProfileInfo {
+    func didSuperAdminDelete(groupJid: String, groupName: String) {
+        
+    }
     
     func refreshProfileDetails(profileDetails: ProfileDetails?) {
         print("#CallUII ====> #refreshProfileDetails profileDetails: \(profileDetails)")

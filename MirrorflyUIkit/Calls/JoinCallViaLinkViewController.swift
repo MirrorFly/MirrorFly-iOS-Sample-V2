@@ -59,7 +59,6 @@ class JoinCallViaLinkViewController: BaseViewController, CallUIDelegate {
         CallManager.setJoinCallDelegate(delegate: self)
         videoMuteTap.throttle(.milliseconds(310), scheduler: MainScheduler.instance).subscribe { [weak self] term in
             if self?.isVideoMuted ?? false{
-                CallManager.muteVideo(false)
                 CallManager.startVideoCapture()
                 self?.isVideoMuted = false
                 self?.videoButton.isSelected = false
@@ -76,7 +75,8 @@ class JoinCallViaLinkViewController: BaseViewController, CallUIDelegate {
                 self?.localRenderer.isHidden = true
                 self?.videoButton.isSelected = true
                 self?.isVideoMuted = true
-                CallManager.muteVideo(true)
+                CallManager.endVideoCapture()
+               // CallManager.muteVideo(true)
             }
         } onError: { error in } onCompleted: {} onDisposed: {}.disposed(by: disposeBag)
         
@@ -476,6 +476,7 @@ extension JoinCallViaLinkViewController: JoinCallDelegate {
     }
     
     func onLocalTrack(videoTrack: RTCVideoTrack?) {
+        print("#join onLocalTrack \(videoTrack)")
         localVideTrack = videoTrack
         localVideTrack?.add(localRenderer)
     }

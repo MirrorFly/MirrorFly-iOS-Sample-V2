@@ -1150,6 +1150,16 @@ extension ImageEditController: UITableViewDelegate, UITableViewDataSource {
 }
 
 extension ImageEditController: GroupEventsDelegate {
+    func didSuperAdminDeleteGroup(groupJid: String, groupName: String) {
+        if getProfileDetails.profileChatType == .groupChat && getProfileDetails.jid == groupJid {
+            view.endEditing(true)
+            self.dismiss(animated: true)
+            AppAlert.shared.showToast(message: "\(groupName) deleted by Super Admin")
+            navigationController?.popToRootViewController(animated: true)
+        }
+        AppActionSheet.shared.dismissActionSeet(animated: true)
+    }
+    
     func didAddNewMemeberToGroup(groupJid: String, newMemberJid: String, addedByMemberJid: String) {
         getGroupMember()
     }
@@ -1292,7 +1302,7 @@ extension ImageEditController: AdminBlockDelegate {
 
 extension ImageEditController {
     func getGroupMember() {
-        if profileDetails.profileChatType == .groupChat {
+        if profileDetails?.profileChatType == .groupChat {
             groupMembers = [GroupParticipantDetail]()
             groupMembers =  GroupManager.shared.getGroupMemebersFromLocal(groupJid: profileDetails.jid).participantDetailArray.filter({$0.memberJid != AppUtils.getMyJid()})
             print("getGrouMember \(groupMembers.count)")

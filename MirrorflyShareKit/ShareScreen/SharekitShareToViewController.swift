@@ -1370,6 +1370,10 @@ func userUpdatedTheirProfile(for jid: String, profileDetails: ProfileDetails) {
 }
 
 extension SharekitShareToViewController : GroupEventsDelegate {
+    func didSuperAdminDeleteGroup(groupJid: String, groupName: String) {
+        
+    }
+    
     func didRevokedAdminAccess(groupJid: String, revokedAdminMemberJid: String, revokedByMemberJid: String) {
     }
     

@@ -19,6 +19,7 @@ class BackupProgressViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        BackupManager.shared.backupDelegate = self
         startbackup()
         NotificationCenter.default.addObserver(self, selector: #selector(willEnterForeground), name: UIApplication.willEnterForegroundNotification
                     , object: nil)

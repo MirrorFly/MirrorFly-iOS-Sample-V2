@@ -18,6 +18,7 @@ import Contacts
 
 protocol RefreshProfileInfo {
     func refreshProfileDetails(profileDetails:ProfileDetails?)
+    func didSuperAdminDelete(groupJid: String, groupName : String)
 }
 
 protocol GroupInfoDelegate {
@@ -105,7 +106,6 @@ class GroupInfoViewController: BaseViewController {
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        GroupManager.shared.groupDelegate = nil
         ContactManager.shared.profileDelegate = nil
         ChatManager.shared.adminBlockDelegate = nil
         ChatManager.shared.availableFeaturesDelegate = nil
@@ -451,9 +451,11 @@ extension GroupInfoViewController: UITableViewDelegate, UITableViewDataSource {
             return cell
             
         } else if indexPath.section == 4 {
-            let groupMembers = groupMembers[indexPath.row]
             let cell = (tableView.dequeueReusableCell(withIdentifier: Identifiers.groupMembersTableViewCell, for: indexPath) as? GroupMembersTableViewCell)!
-            cell.getGroupInfo(groupInfo: groupMembers)
+            if indexPath.row < groupMembers.count {
+                let member = groupMembers[indexPath.row]
+                cell.getGroupInfo(groupInfo: member)
+            }
             return cell
         } else if indexPath.section == 5 {
             if availableFeatures.isViewAllMediasEnabled {
@@ -959,6 +961,18 @@ extension GroupInfoViewController: ProfileEventsDelegate {
 }
 
 extension GroupInfoViewController : GroupEventsDelegate {
+    func didSuperAdminDeleteGroup(groupJid: String, groupName: String) {
+        if self.profileDetails?.jid == groupJid {
+            optionsController?.dismissView()
+            self.dismiss(animated: true, completion: nil)
+            self.navigationController?.navigationBar.isHidden = false
+            self.navigationController?.popToRootViewController(animated: true)
+            executeOnMainThread { [weak self] in
+                self?.stopLoading()
+                AppAlert.shared.showToast(message: "\(groupName) deleted by Super Admin")
+            }
+        }
+    }
     
     func didAddNewMemeberToGroup(groupJid: String, newMemberJid: String, addedByMemberJid: String) {
         getGroupMembers()

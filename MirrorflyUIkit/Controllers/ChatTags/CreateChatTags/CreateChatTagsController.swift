@@ -69,6 +69,16 @@ class CreateChatTagsController: UIViewController {
         }
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        GroupManager.shared.groupDelegate = self
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        GroupManager.shared.groupDelegate = nil
+    }
+    
     @IBAction func backButtonAction(_ sender: UIButton) {
         self.navigationController?.popViewController(animated: true)
     }
@@ -276,5 +286,70 @@ extension CreateChatTagsController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         self.view.endEditing(true)
         return true
+    }
+}
+
+extension CreateChatTagsController : GroupEventsDelegate {
+    func didAddNewMemeberToGroup(groupJid: String, newMemberJid: String, addedByMemberJid: String) {
+        
+    }
+    
+    func didRemoveMemberFromGroup(groupJid: String, removedMemberJid: String, removedByMemberJid: String) {
+        
+    }
+    
+    func didFetchGroupProfile(groupJid: String) {
+        
+    }
+    
+    func didUpdateGroupProfile(groupJid: String) {
+        
+    }
+    
+    func didMakeMemberAsAdmin(groupJid: String, newAdminMemberJid: String, madeByMemberJid: String) {
+        
+    }
+    
+    func didRevokedAdminAccess(groupJid: String, revokedAdminMemberJid: String, revokedByMemberJid: String) {
+        
+    }
+    
+    func didDeleteGroupLocally(groupJid: String) {
+        
+    }
+    
+    func didLeftFromGroup(groupJid: String, leftUserJid: String) {
+        
+    }
+    
+    func didCreateGroup(groupJid: String) {
+        
+    }
+    
+    func didFetchGroups(groups: [MirrorFlySDK.ProfileDetails]) {
+        
+    }
+    
+    func didFetchGroupMembers(groupJid: String) {
+        
+    }
+    
+    func didReceiveGroupNotificationMessage(message: MirrorFlySDK.ChatMessage) {
+        
+    }
+    
+    func didSuperAdminDeleteGroup(groupJid: String, groupName: String) {
+        deleteGroupChat(groupJid)
+    }
+    
+    
+}
+
+extension CreateChatTagsController {
+    func deleteGroupChat(_ groupJid: String) {
+        DispatchQueue.main.async { [weak self] in
+            self?.selectedUsersArray = self?.selectedUsersArray.filter({ $0.jid != groupJid}) ?? []
+            self?.userListTable.reloadData()
+        }
     }
 }
