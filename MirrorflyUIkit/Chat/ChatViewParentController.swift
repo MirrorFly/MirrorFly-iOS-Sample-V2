@@ -686,7 +686,9 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
     }
     
     func queryInitialMessage(shouldScrollToMessage : Bool = false, messageId : String = emptyString()){
-        
+        guard let profile = ContactManager.shared.getUserProfileDetails(for: getProfileDetails?.jid ?? "") else {
+            return
+        }
         if !shouldScrollToMessage {
             executeOnMainThread {
                 self.startLoading(withText: "")
@@ -767,7 +769,7 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
             self.chatTableView.backgroundView = UIImageView(image: UIImage(named: "chat_background"))
         }
         self.mentionBottom.constant = -((self.chatTextView?.bounds.height ?? 0) + 10)
-        if getProfileDetails.profileChatType == .groupChat {
+        if getProfileDetails?.profileChatType == .groupChat {
             if searchGroupMembers.isEmpty {
                 mentionHeight.constant = 0
             } else {
@@ -977,6 +979,7 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
                 self.chatTableView.endUpdates()
             }
         }
+        GroupManager.shared.groupDelegate = self
         ContactManager.shared.profileDelegate = self
         ChatManager.shared.availableFeaturesDelegate = self
     }
@@ -1010,7 +1013,7 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
                 chatManager.typingStatusDelegate = self
                 recorder.appAudioRecorderDelegate = self
                 ChatManager.shared.availableFeaturesDelegate = self
-            } else if navigationController?.topViewController is ImagePreview || navigationController?.topViewController is ImageEditController{
+            } else if navigationController?.topViewController is ImagePreview || navigationController?.topViewController is ImageEditController {
                 FlyMessenger.shared.messageEventsDelegate = self
                 chatManager.messageEventsDelegate = self
                 ContactManager.shared.profileDelegate = self
@@ -1032,6 +1035,17 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
                 chatManager.typingStatusDelegate = nil
                 recorder.appAudioRecorderDelegate = nil
                 ChatManager.shared.availableFeaturesDelegate = nil
+            }
+            
+            if let topVC = navigationController?.topViewController,
+               [InstantScheduledMeetingViewController.self, JoinCallViaLinkViewController.self, ContactViewController.self, LocationViewController.self, UIImagePickerController.self].contains(where: { topVC.isKind(of: $0) }) {
+                GroupManager.shared.groupDelegate = self
+            }
+            
+            if let presentedVC = self.presentedViewController {
+                if presentedVC is UIImagePickerController || presentedVC is AVPlayerViewController || presentedVC is InstantScheduledMeetingViewController {
+                    GroupManager.shared.groupDelegate = self
+                }
             }
         }
         ChatManager.shared.availableFeaturesDelegate = nil
@@ -1137,7 +1151,6 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
 
     func shareMedia(media: [SelectedMessages],_ controller: UIViewController) {
         var type = String()
-        ChatManager.disconnect()
         
         var activityItems: [Any] = []
         
@@ -1382,10 +1395,10 @@ class ChatViewParentController: BaseViewController, UITextViewDelegate,
             toolTipController.isMenuVisible = false
             if let messageText = messageTextView, let message = messageText.text {
                 messageText.textViewEnd()
-                if self.getProfileDetails.profileChatType == .groupChat, let mentionMessage = messageText.mentionText {
-                    FlyMessenger.saveUnsentMessage(id: getProfileDetails.jid, message: mentionMessage.isEmpty ? emptyString() : mentionMessage, mentionedUsers: messageText.mentionedUsers, mentionSearch: mentionRanges.compactMap({$0.0}))
+                if self.getProfileDetails?.profileChatType == .groupChat, let mentionMessage = messageText.mentionText {
+                    FlyMessenger.saveUnsentMessage(id: getProfileDetails?.jid ?? "", message: mentionMessage.isEmpty ? emptyString() : mentionMessage, mentionedUsers: messageText.mentionedUsers, mentionSearch: mentionRanges.compactMap({$0.0}))
                 } else {
-                    FlyMessenger.saveUnsentMessage(id: getProfileDetails.jid, message: message.isEmpty ? emptyString() : message, mentionedUsers: messageText.mentionedUsers, mentionSearch: [])
+                    FlyMessenger.saveUnsentMessage(id: getProfileDetails?.jid ?? "", message: message.isEmpty ? emptyString() : message, mentionedUsers: messageText.mentionedUsers, mentionSearch: [])
                 }
             }
             resetGroupMention()
@@ -3248,6 +3261,9 @@ extension ChatViewParentController:  UIDocumentPickerDelegate {
     }
     
     func markMessagessAsRead() {
+        guard let jid = getProfileDetails?.jid else {
+            return
+        }
         ChatManager.markConversationAsRead(for: [getProfileDetails.jid])
     }
 }
@@ -7446,6 +7462,23 @@ extension ChatViewParentController : TypingStatusDelegate {
 }
 
 extension ChatViewParentController : GroupEventsDelegate {
+    func didSuperAdminDeleteGroup(groupJid: String, groupName: String) {
+        print("#ChatViewParentController #didSuperAdminDeleteGroups groupJid: \(groupJid)")
+        if isStarredMessagePage {
+            starredMessages.removeAll { $0.chatUserJid == groupJid }
+            chatTableView.reloadData()
+            return
+        }
+        
+        if getProfileDetails.jid == groupJid && getProfileDetails.profileChatType == .groupChat {
+            view.endEditing(true)
+            self.dismiss(animated: true)
+            AppAlert.shared.showToast(message: "\(groupName) deleted by Super Admin")
+            navigationController?.popToRootViewController(animated: true)
+        }
+        AppActionSheet.shared.dismissActionSeet(animated: true)
+    }
+    
     func didAddNewMemeberToGroup(groupJid: String, newMemberJid: String, addedByMemberJid: String) {
         getGroupMember()
         checkMemberOfGroup()
@@ -8694,6 +8727,10 @@ extension ChatViewParentController {
 }
 
 extension ChatViewParentController : RefreshProfileInfo {
+    func didSuperAdminDelete(groupJid: String, groupName: String) {
+        didSuperAdminDeleteGroup(groupJid: groupJid, groupName: groupName)
+    }
+    
     func refreshProfileDetails(profileDetails:ProfileDetails?) {
         if getProfileDetails.jid == profileDetails?.jid{
             getProfileDetails = profileDetails
@@ -9129,6 +9166,9 @@ extension ChatViewParentController : UIScrollViewDelegate {
     }
     
     public func loadPreviousMessage(){
+        guard let profile = ContactManager.shared.getUserProfileDetails(for: getProfileDetails?.jid ?? "") else {
+            return
+        }
         fetchMessageListQuery?.setFirstMessage(messageId: chatMessages.last?.last?.messageId ?? emptyString())
         fetchMessageListQuery?.loadPreviousMessages(completionHandler: {[weak self] isSuccess, error, data in
             guard let self else {return}
@@ -9156,6 +9196,9 @@ extension ChatViewParentController : UIScrollViewDelegate {
     
     
     public func loadNextMessage(){
+        guard let profile = ContactManager.shared.getUserProfileDetails(for: getProfileDetails?.jid ?? "") else {
+            return
+        }
         fetchMessageListQuery?.loadNextMessages(completionHandler: {[weak self] isSuccess, error, data in
             var result = data
             if isSuccess{
@@ -9622,7 +9665,7 @@ extension ChatViewParentController {
             } else if unreadCount == 0 {
                 showOrHideUnreadMessageView(hide: true)
             }
-            let recentLastMessageId = recentChatViewModel.getRecentChat(jid: getProfileDetails.jid)?.lastMessageId ?? ""
+            let recentLastMessageId = recentChatViewModel.getRecentChat(jid: getProfileDetails?.jid ?? "")?.lastMessageId ?? ""
             if indexPath.row == 0 && indexPath.section == 0 && getAllMessages.last?.messageId == recentLastMessageId {
                 showOrHideUnreadMessageView(hide: true)
                 unreadMessagesIdOnMessageReceived = []
@@ -10267,6 +10310,10 @@ extension ChatViewParentController: LinkDelegate, JoinCallViaLinkDelegate {
 //MARK: - Schedule Meeting
 
 extension ChatViewParentController: SendMeetLinkMessage {
+    func onSuperAdminDeleteGroup(groupJid: String, groupName: String) {
+        didSuperAdminDeleteGroup(groupJid: groupJid, groupName: groupName)
+    }
+    
 
     func userDeleted(userId: String, profile: MirrorFlySDK.ProfileDetails) {
         self.view.isUserInteractionEnabled = true

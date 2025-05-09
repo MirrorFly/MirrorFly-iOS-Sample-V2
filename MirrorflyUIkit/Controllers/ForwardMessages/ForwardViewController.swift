@@ -1176,6 +1176,10 @@ func userUpdatedTheirProfile(for jid: String, profileDetails: ProfileDetails) {
 }
 
 extension ForwardViewController : GroupEventsDelegate {
+    func didSuperAdminDeleteGroup(groupJid: String, groupName: String) {
+        refreshProfileDelegate?.didSuperAdminDelete(groupJid: groupJid, groupName: groupName)
+    }
+    
     func didRevokedAdminAccess(groupJid: String, revokedAdminMemberJid: String, revokedByMemberJid: String) {
     }
     

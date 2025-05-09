@@ -164,6 +164,7 @@ class CallLogViewController: UIViewController {
         super.viewDidAppear(animated)
         ContactManager.shared.profileDelegate = self
         ChatManager.shared.adminBlockDelegate = self
+        GroupManager.shared.groupDelegate = self
         ChatManager.shared.availableFeaturesDelegate = self
         CallManager.callLogDelegate = self
         CallUIViewController.refreshDelegate = self
@@ -201,6 +202,7 @@ class CallLogViewController: UIViewController {
         super.viewWillDisappear(animated)
         ContactManager.shared.profileDelegate = nil
         ChatManager.shared.adminBlockDelegate = nil
+        GroupManager.shared.groupDelegate = nil
         NotificationCenter.default.removeObserver(self, name: Notification.Name(NetStatus.networkNotificationObserver), object: nil)
 
         ChatManager.shared.availableFeaturesDelegate = nil
@@ -1387,4 +1389,65 @@ extension CallLogViewController: ConnectionEventDelegate {
     
     func onReconnecting() {
     }
+}
+
+extension CallLogViewController : GroupEventsDelegate {
+    func didSuperAdminDeleteGroup(groupJid: String, groupName: String) {
+        // Filter out the call logs that belong to the deleted group
+        self.callLogArray.removeAll { $0.groupId == groupJid }
+        self.allCallLogArray.removeAll { $0.groupId == groupJid }
+        
+        // Reload the table view to reflect the changes
+        self.callLogTableView.reloadData()
+    }
+    
+    func didAddNewMemeberToGroup(groupJid: String, newMemberJid: String, addedByMemberJid: String) {
+        
+    }
+    
+    func didRemoveMemberFromGroup(groupJid: String, removedMemberJid: String, removedByMemberJid: String) {
+        
+    }
+    
+    func didFetchGroupProfile(groupJid: String) {
+        
+    }
+    
+    func didUpdateGroupProfile(groupJid: String) {
+        
+    }
+    
+    func didMakeMemberAsAdmin(groupJid: String, newAdminMemberJid: String, madeByMemberJid: String) {
+        
+    }
+    
+    func didRevokedAdminAccess(groupJid: String, revokedAdminMemberJid: String, revokedByMemberJid: String) {
+        
+    }
+    
+    func didDeleteGroupLocally(groupJid: String) {
+        
+    }
+    
+    func didLeftFromGroup(groupJid: String, leftUserJid: String) {
+        
+    }
+    
+    func didCreateGroup(groupJid: String) {
+        
+    }
+    
+    func didFetchGroups(groups: [MirrorFlySDK.ProfileDetails]) {
+        
+    }
+    
+    func didFetchGroupMembers(groupJid: String) {
+        
+    }
+    
+    func didReceiveGroupNotificationMessage(message: MirrorFlySDK.ChatMessage) {
+        
+    }
+    
+    
 }

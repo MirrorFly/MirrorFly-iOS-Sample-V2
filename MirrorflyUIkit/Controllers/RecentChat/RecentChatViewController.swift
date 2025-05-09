@@ -3025,6 +3025,16 @@ extension RecentChatViewController : GroupCreationDelegate {
 }
 
 extension RecentChatViewController : GroupEventsDelegate {
+    func didSuperAdminDeleteGroup(groupJid: String, groupName: String) {
+        if getRecentChat.indices.contains(currentIndex),
+           groupJid == getRecentChat[currentIndex].jid {
+            profilePopupContainer?.isHidden = true
+        }
+        
+        deleteGroupChat(groupJid)
+        AppAlert.shared.showToast(message: "\(groupName) deleted by Super Admin")
+    }
+    
     func didRevokedAdminAccess(groupJid: String, revokedAdminMemberJid: String, revokedByMemberJid: String) {
         DispatchQueue.main.async { [weak self] in
             self?.updateGroupInRecentChat(groupJid: groupJid)
@@ -3052,13 +3062,7 @@ extension RecentChatViewController : GroupEventsDelegate {
     }
     
     func didDeleteGroupLocally(groupJid: String) {
-        DispatchQueue.main.async { [weak self] in
-            self?.getRecentChat = self?.getRecentChat.filter({ $0.jid != groupJid}) ?? []
-            self?.getAllRecentChat = self?.getAllRecentChat.filter({ $0.jid != groupJid}) ?? []
-            self?.getArchiveChat = self?.getArchiveChat.filter({ $0.jid != groupJid}) ?? []
-            self?.getPrivateChats = self?.getPrivateChats.filter({ $0.jid != groupJid}) ?? []
-            self?.recentChatTableView?.reloadData()
-        }
+        deleteGroupChat(groupJid)
     }
     
     func didLeftFromGroup(groupJid: String, leftUserJid: String) {
@@ -3860,4 +3864,21 @@ extension RecentChatViewController: MuteEventDelegate {
     }
     
     
+}
+
+extension RecentChatViewController {
+    func deleteGroupChat(_ groupJid: String) {
+        DispatchQueue.main.async { [weak self] in
+            self?.getRecentChat = self?.getRecentChat.filter({ $0.jid != groupJid}) ?? []
+            self?.getAllRecentChat = self?.getAllRecentChat.filter({ $0.jid != groupJid}) ?? []
+            self?.getArchiveChat = self?.getArchiveChat.filter({ $0.jid != groupJid}) ?? []
+            self?.getPrivateChats = self?.getPrivateChats.filter({ $0.jid != groupJid}) ?? []
+            if self?.getArchiveChat.isEmpty == true {
+                self?.showArchivedChat = false
+                self?.hideArchiveHeader()
+            }
+            self?.recentChatTableView?.reloadData()
+            self?.showHideEmptyMessage()
+        }
+    }
 }

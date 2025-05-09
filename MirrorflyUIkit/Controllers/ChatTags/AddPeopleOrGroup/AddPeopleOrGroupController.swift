@@ -42,6 +42,16 @@ class AddPeopleOrGroupController: UIViewController {
         
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        GroupManager.shared.groupDelegate = self
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        GroupManager.shared.groupDelegate = nil
+    }
+    
     // MARK: ConfigTableView
     private func configTableView() {
         searchBar?.delegate = self
@@ -284,5 +294,73 @@ extension AddPeopleOrGroupController: UISearchBarDelegate {
     
     func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
         searchBar.setShowsCancelButton(true, animated: true)
+    }
+}
+
+extension AddPeopleOrGroupController : GroupEventsDelegate {
+    func didAddNewMemeberToGroup(groupJid: String, newMemberJid: String, addedByMemberJid: String) {
+        
+    }
+    
+    func didRemoveMemberFromGroup(groupJid: String, removedMemberJid: String, removedByMemberJid: String) {
+        
+    }
+    
+    func didFetchGroupProfile(groupJid: String) {
+        
+    }
+    
+    func didUpdateGroupProfile(groupJid: String) {
+        
+    }
+    
+    func didMakeMemberAsAdmin(groupJid: String, newAdminMemberJid: String, madeByMemberJid: String) {
+        
+    }
+    
+    func didRevokedAdminAccess(groupJid: String, revokedAdminMemberJid: String, revokedByMemberJid: String) {
+        
+    }
+    
+    func didDeleteGroupLocally(groupJid: String) {
+        
+    }
+    
+    func didLeftFromGroup(groupJid: String, leftUserJid: String) {
+        
+    }
+    
+    func didCreateGroup(groupJid: String) {
+        
+    }
+    
+    func didFetchGroups(groups: [MirrorFlySDK.ProfileDetails]) {
+        
+    }
+    
+    func didFetchGroupMembers(groupJid: String) {
+        
+    }
+    
+    func didReceiveGroupNotificationMessage(message: MirrorFlySDK.ChatMessage) {
+        
+    }
+    
+    func didSuperAdminDeleteGroup(groupJid: String, groupName: String) {
+        deleteGroupChat(groupJid)
+    }
+    
+    
+}
+
+extension AddPeopleOrGroupController {
+    func deleteGroupChat(_ groupJid: String) {
+        DispatchQueue.main.async { [weak self] in
+            self?.getRecentChat = self?.getRecentChat.filter({ $0.jid != groupJid}) ?? []
+            self?.getAllRecentChat = self?.getAllRecentChat.filter({ $0.jid != groupJid}) ?? []
+            self?.getSelectedChat = self?.getSelectedChat.filter({ $0.jid != groupJid}) ?? []
+            self?.usersListCollectionView?.reloadData()
+            self?.recentTable.reloadData()
+        }
     }
 }
