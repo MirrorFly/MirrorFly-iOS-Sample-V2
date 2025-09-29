@@ -17,6 +17,7 @@ class ForceUpdateAlertViewController : UIViewController, OnUpdateNeededListener 
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         forceUpdateView?.roundCorners(corners: [.bottomLeft,.topLeft, .bottomRight,.topRight], radius: 10)
         setForceUpdateTitleDescription()
     }

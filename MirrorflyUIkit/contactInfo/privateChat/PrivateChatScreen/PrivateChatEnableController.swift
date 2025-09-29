@@ -72,6 +72,7 @@ class PrivateChatEnableController: BaseViewController {
         addGestures()
         isChatPrivateChanged = false
         NotificationCenter.default.addObserver(self, selector: #selector(self.methodOfReceivedNotification(notification:)), name: Notification.Name("PrivateChatEnable"), object: nil)
+        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         selectSwitch.isOn = ChatManager.isPrivateChat(jid: chatJid)
     }
 

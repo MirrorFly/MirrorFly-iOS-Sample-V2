@@ -40,6 +40,7 @@ class PrivateChatPopupViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         addGestures()
     }
     

@@ -37,6 +37,7 @@ class SettingsViewController : BaseViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
          ChatManager.shared.availableFeaturesDelegate = self
          availableFeatures = ChatManager.getAvailableFeatures()
          getSettingsArray()
@@ -65,8 +66,8 @@ class SettingsViewController : BaseViewController {
                 if CommonDefaults.appLockenable == true{
                     let secondView = AuthenticationPINViewController(nibName: "AuthenticationPINViewController", bundle: nil)
                     secondView.logout = true
+                    secondView.disableBackCancelButton = false
                     self?.navigationController?.pushViewController(secondView, animated: true)
-                    
                 }
                 else{
                     self?.requestLogout()

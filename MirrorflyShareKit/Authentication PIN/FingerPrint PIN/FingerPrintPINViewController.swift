@@ -22,6 +22,7 @@ class FingerPrintPINViewController: ShareKitBaseViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         authenticationWithTouchID()
+        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
     }
     
     override func willCometoForeground() {

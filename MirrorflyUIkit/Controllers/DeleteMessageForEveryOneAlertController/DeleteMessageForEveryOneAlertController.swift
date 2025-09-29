@@ -36,6 +36,7 @@ class DeleteMessageForEveryOneAlertController : UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         if isClearAllPopup == true {
             deleteForEveryOneStack?.isHidden = true
             firstTitleLabel?.text = clearAll

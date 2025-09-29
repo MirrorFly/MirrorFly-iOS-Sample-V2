@@ -32,7 +32,7 @@ class AuthenticationPINViewController: BaseViewController, UITextFieldDelegate {
     var secondsRemaining = passwordResetTimer
     var timer: Timer?
     var currentBackgroundDate = Date()
-    
+    var disableBackCancelButton : Bool = true
     public var verifyOTPViewModel : VerifyOTPViewModel!
     public var otpViewModel : OTPViewModel!
     
@@ -62,6 +62,9 @@ class AuthenticationPINViewController: BaseViewController, UITextFieldDelegate {
     @IBOutlet weak var collectionview: UICollectionView!
     
     @IBOutlet weak var pinEnteredcollectionview: UICollectionView!
+    
+    @IBOutlet weak var backBtn: UIButton!
+    
 
     var isDisablePin = false
     
@@ -183,10 +186,12 @@ class AuthenticationPINViewController: BaseViewController, UITextFieldDelegate {
     
     override func viewWillAppear(_ animated: Bool) {
         self.navigationController?.setNavigationBarHidden(true, animated: false)
+        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         showAlerts()
     }
     
     func setupUI() {
+        backBtn.isHidden = disableBackCancelButton
         resendOTP.titleLabel?.font = UIFont.font14px_appRegular()
         txtFirst.font = UIFont.font16px_appSemibold()
         txtSecond.font = UIFont.font16px_appSemibold()
@@ -210,7 +215,7 @@ class AuthenticationPINViewController: BaseViewController, UITextFieldDelegate {
             self.forgotButtonoutlet.isHidden = false
         }
         else if fingerPrintLogout == true || logout == true || disableBothPIN == true || fingerPrintEnable == true {
-            self.forgotButtonoutlet.isHidden = true
+            self.forgotButtonoutlet.isHidden = false
         }
         txtFirst.delegate = self
         txtSecond.delegate = self
@@ -272,6 +277,11 @@ class AuthenticationPINViewController: BaseViewController, UITextFieldDelegate {
         txtFifth.text = ""
         txtSixth.text = ""
     }
+    
+    @IBAction func backbtn(_ sender: UIButton) {
+        self.navigationController?.popViewController(animated: true)
+    }
+    
     
     @objc override func didMoveToBackground() {
         self.currentBackgroundDate = Date()
@@ -577,6 +587,11 @@ class AuthenticationPINViewController: BaseViewController, UITextFieldDelegate {
             otpViewModel.requestOtp(phoneNumber: phoneNumber) {
                 (verificationID, error) in
                 if let error = error {
+                    let authError = error as NSError?
+                    
+                    // Log the full error details for debugging
+                    NSLog("🔥 Auth Error: code = \(authError?.code ?? -1), domain = \(authError?.domain ?? "Unknown"), description = \(authError?.localizedDescription ?? "No description")")
+                    
                     self.stopLoading()
                     DispatchQueue.main.async {
                         let authError = error as NSError?

@@ -121,7 +121,7 @@ class AppUtils: NSObject {
         let phoneNumberKit = PhoneNumberKit()
         do {
             let phoneNumber = try phoneNumberKit.parse(phoneNo)
-            splittedMobileNumber  = " +\(String(describing: phoneNumber.countryCode)) \(String(describing: phoneNumber.nationalNumber))"
+            splittedMobileNumber  = "+\(String(describing: phoneNumber.countryCode)) \(String(describing: phoneNumber.adjustedNationalNumber()))"
         } catch {
         }
         return splittedMobileNumber

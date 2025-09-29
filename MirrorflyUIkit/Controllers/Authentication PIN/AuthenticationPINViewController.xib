@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -26,6 +26,7 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="AuthenticationPINViewController" customModule="UiKitQa" customModuleProvider="target">
             <connections>
+                <outlet property="backBtn" destination="JvU-F2-VYt" id="9qn-bx-ZCU"/>
                 <outlet property="collectionview" destination="K9E-Fq-iW1" id="yTH-ce-1ji"/>
                 <outlet property="forgotButtonoutlet" destination="2GS-Hn-39V" id="5o2-1P-oLk"/>
                 <outlet property="forgotpinBottomConstraint" destination="hVo-Dw-IAs" id="Anz-op-RdM"/>
@@ -53,10 +54,10 @@
                     <rect key="frame" x="0.0" y="48" width="414" height="814"/>
                     <subviews>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tjn-zb-Wtd">
-                            <rect key="frame" x="0.0" y="0.0" width="414" height="677"/>
+                            <rect key="frame" x="0.0" y="0.0" width="414" height="814"/>
                             <subviews>
                                 <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="PIN_screen" translatesAutoresizingMaskIntoConstraints="NO" id="sJs-RB-kcq">
-                                    <rect key="frame" x="0.0" y="0.0" width="414" height="677"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="414" height="814"/>
                                 </imageView>
                                 <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="logo_blue" translatesAutoresizingMaskIntoConstraints="NO" id="QEs-vo-YkO">
                                     <rect key="frame" x="43" y="70" width="328" height="41"/>
@@ -121,21 +122,41 @@
                                         <constraint firstItem="K9E-Fq-iW1" firstAttribute="leading" secondItem="VDg-wY-Yl4" secondAttribute="leading" id="yyg-ja-DZk"/>
                                     </constraints>
                                 </view>
-                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2GS-Hn-39V">
-                                    <rect key="frame" x="157" y="607" width="100" height="30"/>
-                                    <constraints>
-                                        <constraint firstAttribute="width" constant="100" id="F6r-6y-NrK"/>
-                                        <constraint firstAttribute="height" constant="30" id="iTJ-7c-Tyz"/>
-                                    </constraints>
-                                    <fontDescription key="fontDescription" name="SFUIDisplay-Regular" family="SF UI Display" pointSize="14"/>
-                                    <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                                    <state key="normal" title="Forgot PIN?">
-                                        <color key="titleColor" red="1" green="0.11764705882352941" blue="0.11764705882352941" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
-                                    </state>
-                                    <connections>
-                                        <action selector="forgotbutton:" destination="-1" eventType="touchUpInside" id="jVJ-zG-rSX"/>
-                                    </connections>
-                                </button>
+                                <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="15" translatesAutoresizingMaskIntoConstraints="NO" id="qvG-iA-rkf">
+                                    <rect key="frame" x="157" y="607" width="100" height="75"/>
+                                    <subviews>
+                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2GS-Hn-39V">
+                                            <rect key="frame" x="0.0" y="0.0" width="100" height="30"/>
+                                            <constraints>
+                                                <constraint firstAttribute="width" constant="100" id="F6r-6y-NrK"/>
+                                                <constraint firstAttribute="height" constant="30" id="iTJ-7c-Tyz"/>
+                                            </constraints>
+                                            <fontDescription key="fontDescription" name="SFUIDisplay-Regular" family="SF UI Display" pointSize="14"/>
+                                            <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                            <state key="normal" title="Forgot PIN?">
+                                                <color key="titleColor" red="1" green="0.11764705882352941" blue="0.11764705882352941" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                                            </state>
+                                            <connections>
+                                                <action selector="forgotbutton:" destination="-1" eventType="touchUpInside" id="jVJ-zG-rSX"/>
+                                            </connections>
+                                        </button>
+                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="JvU-F2-VYt">
+                                            <rect key="frame" x="0.0" y="45" width="100" height="30"/>
+                                            <constraints>
+                                                <constraint firstAttribute="height" constant="30" id="DXq-Ir-dsv"/>
+                                                <constraint firstAttribute="width" constant="100" id="G8v-r5-1FK"/>
+                                            </constraints>
+                                            <fontDescription key="fontDescription" name="SFUIDisplay-Regular" family="SF UI Display" pointSize="14"/>
+                                            <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                            <state key="normal" title="Cancel">
+                                                <color key="titleColor" red="1" green="0.1176470588" blue="0.1176470588" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                                            </state>
+                                            <connections>
+                                                <action selector="backbtn:" destination="-1" eventType="touchUpInside" id="2Tu-Bx-8YU"/>
+                                            </connections>
+                                        </button>
+                                    </subviews>
+                                </stackView>
                             </subviews>
                             <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                             <constraints>
@@ -143,16 +164,15 @@
                                 <constraint firstAttribute="trailing" secondItem="VDg-wY-Yl4" secondAttribute="trailing" constant="70" id="9n7-go-gS9"/>
                                 <constraint firstAttribute="bottom" secondItem="sJs-RB-kcq" secondAttribute="bottom" id="EgX-Sn-oZ8"/>
                                 <constraint firstAttribute="trailing" secondItem="sJs-RB-kcq" secondAttribute="trailing" id="IaL-eA-8Vi"/>
-                                <constraint firstItem="2GS-Hn-39V" firstAttribute="centerX" secondItem="tjn-zb-Wtd" secondAttribute="centerX" id="Kbw-Zn-Tyw"/>
                                 <constraint firstItem="sJs-RB-kcq" firstAttribute="top" secondItem="tjn-zb-Wtd" secondAttribute="top" id="LRU-oM-dVg"/>
                                 <constraint firstItem="VDg-wY-Yl4" firstAttribute="top" secondItem="LDf-06-dSd" secondAttribute="bottom" constant="30" id="Mxg-WO-Hma"/>
-                                <constraint firstItem="2GS-Hn-39V" firstAttribute="top" secondItem="VDg-wY-Yl4" secondAttribute="bottom" constant="15" id="WkE-Sn-hXL"/>
                                 <constraint firstItem="LDf-06-dSd" firstAttribute="top" secondItem="CjA-NC-CpV" secondAttribute="bottom" constant="31" id="ZII-Ub-f8a"/>
                                 <constraint firstItem="CjA-NC-CpV" firstAttribute="top" secondItem="QEs-vo-YkO" secondAttribute="bottom" constant="30" id="bCk-ev-z6T"/>
                                 <constraint firstItem="LDf-06-dSd" firstAttribute="centerX" secondItem="tjn-zb-Wtd" secondAttribute="centerX" id="cBy-hg-cW2"/>
+                                <constraint firstItem="qvG-iA-rkf" firstAttribute="top" secondItem="VDg-wY-Yl4" secondAttribute="bottom" constant="15" id="cKI-HD-Z1M"/>
                                 <constraint firstAttribute="trailing" secondItem="QEs-vo-YkO" secondAttribute="trailing" constant="43" id="feY-qa-zdM"/>
                                 <constraint firstItem="sJs-RB-kcq" firstAttribute="leading" secondItem="tjn-zb-Wtd" secondAttribute="leading" id="lpT-fe-L6H"/>
-                                <constraint firstAttribute="bottom" secondItem="2GS-Hn-39V" secondAttribute="bottom" constant="40" id="qai-PJ-EN6"/>
+                                <constraint firstItem="qvG-iA-rkf" firstAttribute="centerX" secondItem="tjn-zb-Wtd" secondAttribute="centerX" id="nsB-2Y-nVe"/>
                                 <constraint firstItem="VDg-wY-Yl4" firstAttribute="leading" secondItem="tjn-zb-Wtd" secondAttribute="leading" constant="70" id="rle-kt-ZIt"/>
                                 <constraint firstItem="CjA-NC-CpV" firstAttribute="centerX" secondItem="tjn-zb-Wtd" secondAttribute="centerX" id="tnG-mc-iTs"/>
                                 <constraint firstItem="QEs-vo-YkO" firstAttribute="leading" secondItem="tjn-zb-Wtd" secondAttribute="leading" constant="43" id="zBs-9W-WAH"/>
@@ -164,6 +184,7 @@
                         <constraint firstAttribute="trailing" secondItem="tjn-zb-Wtd" secondAttribute="trailing" id="Mbh-qo-3cb"/>
                         <constraint firstAttribute="bottom" secondItem="tjn-zb-Wtd" secondAttribute="bottom" id="Qy7-nv-dxl"/>
                         <constraint firstItem="tjn-zb-Wtd" firstAttribute="width" secondItem="xWy-2z-Wr8" secondAttribute="width" id="S8a-QZ-O7F"/>
+                        <constraint firstAttribute="bottom" secondItem="qvG-iA-rkf" secondAttribute="bottom" constant="132" id="YxL-aV-Oqd"/>
                         <constraint firstItem="tjn-zb-Wtd" firstAttribute="leading" secondItem="xWy-2z-Wr8" secondAttribute="leading" id="dW7-x2-Sxp"/>
                         <constraint firstAttribute="bottom" secondItem="tjn-zb-Wtd" secondAttribute="bottom" id="ke9-RJ-be8"/>
                     </constraints>

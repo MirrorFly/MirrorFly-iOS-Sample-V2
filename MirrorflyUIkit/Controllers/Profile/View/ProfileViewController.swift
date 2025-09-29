@@ -149,6 +149,7 @@ class ProfileViewController: UIViewController,ProfileViewControllerProtocol {
         super.viewWillAppear(animated)
         setupUI()
         print("ProfileViewController ABCXYZ viewWillAppear")
+        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
          navigationController?.setNavigationBarHidden(true, animated: animated)
         handleBackgroundAndForground()
     }

@@ -218,7 +218,12 @@ class ChatViewVideoOutgoingCell: BaseTableViewCell {
                messageTypeIconView?.isHidden = true
            } else {
                messageTypeIconView?.isHidden = true
-               replyTextLabel?.attributedText = ChatUtils.getAttributedMessage(message: getReplymessage ?? "", searchText: searchText, isMessageSearch: isMessageSearch,isSystemBlue: false)
+               if (message?.messageChatType == .groupChat || isStarredMessagePage ?? false) && !(replyMessage?.mentionedUsersIds.isEmpty ?? true) {
+                   replyTextLabel?.attributedText = ChatUtils.getMentionTextContent(message: replyMessage?.messageTextContent ?? "", isMessageSentByMe: replyMessage!.isMessageSentByMe, mentionedUsers: replyMessage?.mentionedUsersIds ?? [], searchedText: searchText)
+               } else {
+                   replyTextLabel?.attributedText = ChatUtils.getAttributedMessage(message: getReplymessage ?? "", searchText: searchText, isMessageSearch: isMessageSearch,isSystemBlue: false)
+               }
+
                if replyMessage?.mediaChatMessage != nil {
                    switch replyMessage?.mediaChatMessage?.messageType {
                    case .image:

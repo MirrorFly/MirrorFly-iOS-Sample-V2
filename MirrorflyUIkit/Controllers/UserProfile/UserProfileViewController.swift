@@ -111,6 +111,7 @@ class UserProfileViewController : UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         getProfile()
+        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         navigationController?.setNavigationBarHidden(true, animated: animated)
     }
     override func viewDidAppear(_ animated: Bool) {

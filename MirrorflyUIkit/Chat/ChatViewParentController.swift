@@ -3122,6 +3122,7 @@ extension ChatViewParentController {
                                 self?.setLastMessage(messageId: chatMessage.messageId)
                                 chatMessage.mediaChatMessage?.mediaUploadStatus = .uploading
                                 self?.reloadList(message: chatMessage)
+                                self?.resetMessageTextView()
                                 self?.replyMessageId = ""
                                 self?.tableViewBottomConstraint?.constant = CGFloat(chatBottomConstant)
                                 if self?.replyJid == self?.getProfileDetails.jid {
@@ -3163,6 +3164,7 @@ extension ChatViewParentController {
                             self?.setLastMessage(messageId: chatMessage.messageId)
                             chatMessage.mediaChatMessage?.mediaUploadStatus = .uploading
                             self?.reloadList(message: chatMessage)
+                            self?.resetMessageTextView()
                             self?.replyMessageId = ""
                             self?.tableViewBottomConstraint?.constant = CGFloat(chatBottomConstant)
                             if self?.replyJid == self?.getProfileDetails.jid {
@@ -3280,16 +3282,20 @@ extension ChatViewParentController: AVAudioRecorderDelegate, AVAudioPlayerDelega
             if let cell = chatTableView.cellForRow(at: path) as? AudioSender {
                 cell.playIcon?.image = UIImage(named: ImageConstant.ic_play)
                 cell.audioPlaySlider?.value = 0
-                let totalTimeString = String(format: "%02d:%02d", 0, 0)
-                cell.autioDuration?.text = totalTimeString
+//                let totalTimeString = String(format: "%02d:%02d", 0, 0)
+//                cell.autioDuration?.text = totalTimeString
                 let message = isStarredMessagePage == true ? isStarredSearchEnabled == true ? starredSearchMessages?[path.row] : starredMessages[path.row] : chatMessages[path.section][path.row]
+                let duration = Int(message?.mediaChatMessage?.mediaDuration ?? 0)
+                cell.autioDuration?.text =  "\(duration.msToSeconds.minuteSecondMS)"
                 message?.audioTrackTime = 0
             } else if let cell = chatTableView.cellForRow(at: path) as? AudioReceiver {
                 cell.slider?.value = 0
                 let message = isStarredMessagePage == true ? isStarredSearchEnabled == true ? starredSearchMessages?[path.row] : starredMessages[path.row] : chatMessages[path.section][path.row]
                 message?.audioTrackTime = 0
-                let totalTimeString = String(format: "%02d:%02d", 0, 0)
-                cell.audioDuration?.text = totalTimeString
+//                let totalTimeString = String(format: "%02d:%02d", 0, 0)
+//                cell.audioDuration?.text = totalTimeString
+                let duration = Int(message?.mediaChatMessage?.mediaDuration ?? 0)
+                cell.audioDuration?.text =  "\(duration.msToSeconds.minuteSecondMS)"
                 cell.playImage?.image = UIImage(named: ImageConstant.ic_play_dark)
             }
         }
@@ -3781,6 +3787,9 @@ extension ChatViewParentController {
                     guard let msg = sendMessage else { return }
                     self?.reloadList(message: msg)
                     self?.tableViewBottomConstraint?.constant = CGFloat(chatBottomConstant)
+                    if !mediaData.caption.isEmpty{
+                        self?.resetMessageTextView()
+                    }
                     if self?.replyJid == self?.getProfileDetails.jid {
                         self?.replyMessageObj = nil
                         self?.isReplyViewOpen = false
@@ -3850,7 +3859,7 @@ extension ChatViewParentController {
         controller.selectedAssets = self.selectedAssets
         controller.profileName = getProfileDetails.name
         controller.groupMembers = groupMembers.filter({$0.memberJid != AppUtils.getMyJid()})
-        controller.getProfileDetails = getProfileDetails
+        controller.profileDetails = getProfileDetails
         navigationController?.navigationBar.isHidden = true
         self.navigationController?.pushViewController(controller, animated: false)
     }
@@ -4670,7 +4679,19 @@ extension ChatViewParentController : UITableViewDataSource ,UITableViewDelegate,
                         if let minuteSeconds = audioPlayer?.currentTime.minuteSecondMS {
                             cell?.autioDuration?.text = minuteSeconds
                             cell?.audioPlaySlider?.value = Float(audioPlayer?.currentTime ?? 0.0)
-                            currenAudioIndexPath = indexPath
+//                            currenAudioIndexPath = indexPath
+                            let components = minuteSeconds.split(separator: ":")
+                            if let minutes = Int(components[0]), let seconds = Int(components[1]) {
+                                let isZero = (minutes == 0 && seconds == 0)
+                                if isZero{
+                                    let duration = Int(message?.mediaChatMessage?.mediaDuration ?? 0)
+                                    cell?.autioDuration?.text =  "\(duration.msToSeconds.minuteSecondMS)"
+                                }else{
+                                    cell?.autioDuration?.text = minuteSeconds
+                                    cell?.audioPlaySlider?.value = Float(audioPlayer?.currentTime ?? 0.0)
+                                    currenAudioIndexPath = indexPath
+                                }
+                            }
                         }
                     }
                     if let mediaFileName = message?.mediaChatMessage?.mediaFileName, let duration = ChatUtils.getAudiofileDuration(mediaFileName: mediaFileName){
@@ -4735,9 +4756,21 @@ extension ChatViewParentController : UITableViewDataSource ,UITableViewDelegate,
                     }
                     if let audioUrl = currentAudioUrl, audioUrl == message?.mediaChatMessage?.mediaFileName {
                         if let minuteSeconds = audioPlayer?.currentTime.minuteSecondMS {
-                            cell?.audioDuration?.text = FlyUtils.secondsToDurationInString(seconds: Double(audioPlayer?.currentTime ?? 0.0))
-                            cell?.slider?.value = Float(audioPlayer?.currentTime ?? 0.0)
-                            currenAudioIndexPath = indexPath
+//                            cell?.audioDuration?.text = FlyUtils.secondsToDurationInString(seconds: Double(audioPlayer?.currentTime ?? 0.0))
+//                            cell?.slider?.value = Float(audioPlayer?.currentTime ?? 0.0)
+//                            currenAudioIndexPath = indexPath
+                            let components = minuteSeconds.split(separator: ":")
+                            if let minutes = Int(components[0]), let seconds = Int(components[1]) {
+                                let isZero = (minutes == 0 && seconds == 0)
+                                if isZero{
+                                    let duration = Int(message?.mediaChatMessage?.mediaDuration ?? 0)
+                                    cell?.audioDuration?.text =  "\(duration.msToSeconds.minuteSecondMS)"
+                                }else{
+                                    cell?.audioDuration?.text = minuteSeconds
+                                    cell?.slider?.value = Float(audioPlayer?.currentTime ?? 0.0)
+                                    currenAudioIndexPath = indexPath
+                                }
+                            }
                         }
                     }
                     if let mediaFileName = message?.mediaChatMessage?.mediaFileName, let duration = ChatUtils.getAudiofileDuration(mediaFileName: mediaFileName){
@@ -6227,6 +6260,7 @@ extension ChatViewParentController: ContactDelegate {
                     self?.chatTableView?.endUpdates()
                     let indexPath = IndexPath(row: 0, section: 0)
                     self?.chatTableView?.scrollToRow(at: indexPath, at: .top, animated: true)
+                    self?.resetMessageTextView()
                     self?.messageTextView?.text = ""
                     self?.replyMessageId = ""
                     self?.tableViewBottomConstraint?.constant = CGFloat(chatBottomConstant)
@@ -6285,6 +6319,7 @@ extension ChatViewParentController: LocationDelegate {
                     self?.markMessagessAsRead()
                     guard let msg = message else { return }
                     self?.reloadList(message: msg)
+                    self?.resetMessageTextView()
                     self?.messageTextView?.text = ""
                     self?.replyMessageId = ""
                     self?.tableViewBottomConstraint?.constant = CGFloat(chatBottomConstant)
@@ -6584,7 +6619,7 @@ extension ChatViewParentController: CNContactPickerDelegate {
 extension ChatViewParentController {
     func requestContactAccess()  {
         switch CNContactStore.authorizationStatus(for: .contacts) {
-        case .authorized:
+        case .authorized, .limited:
             showContactPicker()
         case .denied:
             showSettingsAlertForContacts()
@@ -6644,6 +6679,9 @@ extension ChatViewParentController {
                 guard let msg = message else { return }
                 self?.reloadList(message: msg)
                 self?.tableViewBottomConstraint?.constant = CGFloat(chatBottomConstant)
+                if !mediaData.caption.isEmpty{
+                    self?.resetMessageTextView()
+                }
                 if self?.replyJid == self?.getProfileDetails.jid {
                     self?.replyMessageObj = nil
                     self?.isReplyViewOpen = false

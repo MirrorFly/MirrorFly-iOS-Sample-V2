@@ -48,6 +48,7 @@ class MessageInfoViewController: BaseViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         self.navigationController?.navigationBar.isHidden = true
+        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         ChatViewParentController.receiveCallModeDelegate = nil
         CallUIViewController.pipModeDelegate = nil
     }

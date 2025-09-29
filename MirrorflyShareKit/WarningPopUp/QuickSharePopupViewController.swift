@@ -20,6 +20,7 @@ class QuickSharePopupViewController : ShareKitBaseViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         contentView?.roundCorners(corners: [.topLeft,.topRight,.bottomLeft,.bottomRight], radius: 10.0)
+        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
     }
     
     override func viewDidLoad() {

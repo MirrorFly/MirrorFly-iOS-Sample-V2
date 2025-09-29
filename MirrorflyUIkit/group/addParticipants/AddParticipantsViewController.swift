@@ -92,6 +92,7 @@ class AddParticipantsViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         NotificationCenter.default.addObserver(self, selector: #selector(networkChange(_:)),name:Notification.Name(NetStatus.networkNotificationObserver),object: nil)
+        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         resetSearch()
         participantTableView.reloadData()
     }

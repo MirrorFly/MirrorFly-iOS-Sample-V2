@@ -36,6 +36,7 @@ class AppLockViewController: UIViewController {
     }
     
     override func viewWillAppear(_ animated: Bool) {
+        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         if CommonDefaults.appLockPassword == "" {
             CommonDefaults.appLockenable = false
             CommonDefaults.appFingerprintenable = false
@@ -149,6 +150,7 @@ extension AppLockViewController: UITableViewDelegate,UITableViewDataSource {
         else {
             let vc = AuthenticationPINViewController(nibName:Identifiers.authenticationPINViewController, bundle: nil)
             self.navigationController?.pushViewController(vc, animated: true)
+            vc.disableBackCancelButton = false
             vc.disableBothPIN = true
         }
       
