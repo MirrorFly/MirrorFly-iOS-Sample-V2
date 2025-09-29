@@ -52,6 +52,7 @@ class ChatSettingsViewController: UIViewController {
         availableFeatures = ChatManager.getAvailableFeatures()
         getChatSettingsArray()
         self.chatSettingsTable.reloadData()
+        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         self.navigationController?.isNavigationBarHidden = true
     }
 

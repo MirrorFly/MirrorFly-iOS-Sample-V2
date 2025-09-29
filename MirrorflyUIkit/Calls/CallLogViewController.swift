@@ -90,12 +90,13 @@ class CallLogViewController: UIViewController {
         callLinkView.addGestureRecognizer(tap)
         callLogTableView.tableFooterView = createTableFooterView()
         ChatManager.shared.connectionDelegate = self
+        fetchCallLogsFromServer()
     }
    
     override func viewWillAppear(_ animated: Bool) {
         
         self.navigationController?.navigationBar.isHidden = true
-        
+        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         NotificationCenter.default.addObserver(self, selector: #selector(networkChange(_:)),
                                                name: Notification.Name(NetStatus.networkNotificationObserver), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(self.methodOfReceivedPrivateChatNotification(notification:)), name: Notification.Name("PrivateChatAlertView"), object: nil)
@@ -1116,7 +1117,17 @@ extension CallLogViewController: UIScrollViewDelegate {
                     
                     self.callLogTableView?.tableFooterView = nil
                     self.isLoadingInProgress = false
+                    // Keep a copy of old array before refreshing
+                    let oldArray = self.callLogArray
+
                     self.callLogArray = CallLogManager.getAllCallLogs()
+
+                    for i in 0..<self.callLogArray.count {
+                        if let oldLog = oldArray.first(where: { $0.callLogId == self.callLogArray[i].callLogId }) {
+                            self.callLogArray[i].isSelected = oldLog.isSelected
+                        }
+                    }
+                    
                     self.allCallLogArray = self.callLogArray
                     self.callLogTableView.reloadData()
                     
@@ -1273,6 +1284,14 @@ extension CallLogViewController : CallLogDelegate {
             self.callLogTableView.reloadData()
             self.updateButtons()
             self.noCallLogView.isHidden = !self.callLogArray.isEmpty
+            if self.callLogArray.isEmpty {
+                if NetworkReachability.shared.isConnected {
+                    executeInBackground { [weak self] in
+                        guard let self else {return}
+                        self.fetchCallLogsFromServer()
+                    }
+                }
+            }
         }
         //        }
     }

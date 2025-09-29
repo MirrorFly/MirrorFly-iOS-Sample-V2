@@ -150,6 +150,7 @@ class ForwardViewController: UIViewController {
         navigationController?.isNavigationBarHidden = true
         sendButton?.isEnabled = false
         sendButton?.alpha = 0.4
+        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         NotificationCenter.default.addObserver(self, selector: #selector(networkChange(_:)),name:Notification.Name(NetStatus.networkNotificationObserver),object: nil)
     }
     

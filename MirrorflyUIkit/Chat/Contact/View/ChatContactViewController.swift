@@ -28,6 +28,7 @@ class ChatContactViewController: UIViewController {
     }
     
     override func viewWillAppear(_ animated: Bool) {
+        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         ChatViewParentController.receiveCallModeDelegate = nil
         CallUIViewController.pipModeDelegate = nil
     }

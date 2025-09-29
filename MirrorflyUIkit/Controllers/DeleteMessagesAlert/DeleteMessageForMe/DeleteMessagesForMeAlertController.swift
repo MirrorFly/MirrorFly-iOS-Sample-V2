@@ -47,6 +47,7 @@ class DeleteMessagesForMeAlertController : UIViewController {
             } else {
                 revokeMediaStackView?.isHidden = true
             }
+        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         titleLabel?.text = deleteMessages?.count == 1 ? "Are you sure you want to delete selected Message?" : "Are you sure you want to delete selected messages?"
         checkBoxImage?.image = Utility.getBoolFromPreference(key: revokeMediaAccess) ? UIImage(named: ImageConstant.ic_checked) : UIImage(named: ImageConstant.ic_check_box)
     }

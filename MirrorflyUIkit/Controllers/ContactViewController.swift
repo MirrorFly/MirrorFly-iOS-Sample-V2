@@ -169,6 +169,7 @@ class ContactViewController: BaseViewController {
             if callLink.isNotEmpty && CallManager.getCallMode() == .MEET{
                 topBarViewHeight.constant = 0
                 bottomBtnHeight.constant = 0
+                bottomBtn.isHidden = true
             }else{
                 topBarViewHeight.constant = 48
             }
@@ -597,11 +598,11 @@ class ContactViewController: BaseViewController {
         
         let contactPermissionStatus = CNContactStore.authorizationStatus(for: CNEntityType.contacts)
         
-        if ContactSyncManager.isPermissionSkipped() && contactPermissionStatus == .authorized{
+        if ContactSyncManager.isPermissionSkipped() && contactPermissionStatus.isAuthorizedOrLimited{
             syncSkippedDialog()
         }else if ENABLE_CONTACT_SYNC {
             
-            if contactPermissionStatus == .authorized{
+            if contactPermissionStatus.isAuthorizedOrLimited{
                 if !showDialogONly{
                     refreshContacts()
                     refreshControl.endRefreshing()

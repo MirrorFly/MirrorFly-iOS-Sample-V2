@@ -206,13 +206,18 @@ class SenderDocumentsTableViewCell: BaseTableViewCell {
                                                        nickName: replyMessage?.senderNickName ?? "",
                                                        contactType: replyMessage?.isSavedContact == true ? .live : .unknown)
             }
-            if message?.replyParentChatMessage?.isMessageDeleted == true || message?.replyParentChatMessage?.isMessageRecalled == true || replyMessage == nil {
+            if replyMessage?.isMessageDeleted == true || replyMessage?.isMessageRecalled == true || replyMessage == nil {
                 replyTypeLabel?.text = "Original message not available"
                 replyMessageIconWidth?.constant = 0
                 replyMediaImageWidthCons?.constant = 0
                 replyTypeIconImageView?.isHidden = true
             } else {
-                replyTypeLabel?.attributedText = ChatUtils.getAttributedMessage(message: getReplymessage ?? "", searchText: searchText, isMessageSearch: isMessageSearch, isSystemBlue: false)
+                if (message?.messageChatType == .groupChat || isStarredMessagePage ?? false) && !(replyMessage?.mentionedUsersIds.isEmpty ?? true) {
+                    replyTypeLabel?.attributedText = ChatUtils.getMentionTextContent(message: replyMessage?.messageTextContent ?? "", isMessageSentByMe: replyMessage!.isMessageSentByMe, mentionedUsers: replyMessage?.mentionedUsersIds ?? [], searchedText: searchText)
+                } else {
+                    replyTypeLabel?.attributedText = ChatUtils.getAttributedMessage(message: getReplymessage ?? "", searchText: searchText, isMessageSearch: isMessageSearch, isSystemBlue: false)
+                }
+                
             checkFileType(url: replyMessage?.mediaChatMessage?.mediaFileUrl ?? "", typeImageView: replyTypeImageView)
                 replyMessageIconWidth?.constant = 0
             if replyMessage?.mediaChatMessage != nil {
@@ -241,7 +246,7 @@ class SenderDocumentsTableViewCell: BaseTableViewCell {
                     replyTypeIconImageView?.image = UIImage(named: (message?.isMessageSentByMe ?? false) ? "senderVideo" : "video")
                     replyTypeImageView?.isHidden = false
                     replyMediaImageWidthCons?.constant = 50
-                    if let thumImage = message?.replyParentChatMessage?.mediaChatMessage?.mediaThumbImage {
+                    if let thumImage = replyMessage?.mediaChatMessage?.mediaThumbImage {
                         let converter = ImageConverter()
                         let image =  converter.base64ToImage(thumImage)
                         replyTypeImageView?.image = image

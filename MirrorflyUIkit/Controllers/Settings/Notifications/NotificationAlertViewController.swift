@@ -40,6 +40,7 @@ class NotificationAlertViewController: UIViewController {
     }
     
     override func viewWillAppear(_ animated: Bool) {
+        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         super.viewWillAppear(animated)
         
     }

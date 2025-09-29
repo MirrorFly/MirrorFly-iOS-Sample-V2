@@ -50,7 +50,7 @@ class AuthenticationPINViewController: ShareKitBaseViewController, UITextFieldDe
     
     @IBOutlet weak var forgotButtonoutlet: UIButton! {
         didSet {
-            forgotButtonoutlet.isHidden = true
+            forgotButtonoutlet.isHidden = false
         }
     }
     
@@ -67,6 +67,8 @@ class AuthenticationPINViewController: ShareKitBaseViewController, UITextFieldDe
     
     @IBOutlet weak var pinEnteredcollectionview: UICollectionView!
 
+    @IBOutlet weak var backBtn: UIButton!
+    
     var isDisablePin = false
     
     override func viewDidLoad() {
@@ -185,6 +187,7 @@ class AuthenticationPINViewController: ShareKitBaseViewController, UITextFieldDe
     
     override func viewWillAppear(_ animated: Bool) {
         self.navigationController?.setNavigationBarHidden(true, animated: false)
+        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
     }
     
     func setupUI() {
@@ -203,7 +206,7 @@ class AuthenticationPINViewController: ShareKitBaseViewController, UITextFieldDe
             //self.forgotButtonoutlet.isHidden = false
         }
         else if fingerPrintLogout == true || logout == true || disableBothPIN == true || fingerPrintEnable == true {
-            self.forgotButtonoutlet.isHidden = true
+            self.forgotButtonoutlet.isHidden = false
         }
         txtFirst.delegate = self
         txtSecond.delegate = self
@@ -264,6 +267,11 @@ class AuthenticationPINViewController: ShareKitBaseViewController, UITextFieldDe
         txtForth.text = ""
         txtFifth.text = ""
         txtSixth.text = ""
+    }
+    
+    
+    @IBAction func backBtn(_ sender: UIButton) {
+        self.navigationController?.popViewController(animated: true)
     }
     
     @objc override func didMoveToBackground() {

@@ -72,6 +72,9 @@ class PrivateChatAuthenticationPINViewController: BaseViewController, UITextFiel
     @IBOutlet weak var collectionview: UICollectionView!
     
     @IBOutlet weak var pinEnteredcollectionview: UICollectionView!
+    
+    @IBOutlet weak var backBtn: UIButton!
+    
 
     var isDisablePin = false
     
@@ -195,6 +198,7 @@ class PrivateChatAuthenticationPINViewController: BaseViewController, UITextFiel
     
     override func viewWillAppear(_ animated: Bool) {
         self.navigationController?.setNavigationBarHidden(true, animated: false)
+        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         showAlerts()
     }
     
@@ -222,7 +226,7 @@ class PrivateChatAuthenticationPINViewController: BaseViewController, UITextFiel
             self.forgotButtonoutlet.isHidden = false
         }
         else if fingerPrintLogout == true || logout == true || disableBothPIN == true || fingerPrintEnable == true {
-            self.forgotButtonoutlet.isHidden = true
+            self.forgotButtonoutlet.isHidden = false
         }
         txtFirst.delegate = self
         txtSecond.delegate = self
@@ -284,6 +288,11 @@ class PrivateChatAuthenticationPINViewController: BaseViewController, UITextFiel
         txtFifth.text = ""
         txtSixth.text = ""
     }
+    
+    @IBAction func backbutton(_ sender: UIButton) {
+        self.navigationController?.popViewController(animated: true)
+    }
+    
     
     @objc override func didMoveToBackground() {
         self.currentBackgroundDate = Date()

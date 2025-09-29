@@ -35,6 +35,7 @@ class NotificationsViewController: UIViewController{
     }
 
     override func viewWillAppear(_ animated: Bool) {
+        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         notificationTableView.reloadData()
     }
 

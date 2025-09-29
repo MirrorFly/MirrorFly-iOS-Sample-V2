@@ -219,7 +219,11 @@ class ReceiverDocumentsTableViewCell: BaseTableViewCell {
             groupSenderNameView?.isHidden = true
             let getReplymessage = message?.replyParentChatMessage?.messageTextContent
             let replyMessage = FlyMessenger.getMessageOfId(messageId: message?.replyParentChatMessage?.messageId ?? "")
-            replyTypeLabel?.attributedText = ChatUtils.getAttributedMessage(message: getReplymessage ?? "", searchText: searchText, isMessageSearch: isMessageSearch, isSystemBlue: false)
+            if (message?.messageChatType == .groupChat || isStarredMessagePage ?? false) && !(replyMessage?.mentionedUsersIds.isEmpty ?? true) {
+                replyTypeLabel?.attributedText = ChatUtils.getMentionTextContent(message: replyMessage?.messageTextContent ?? "", isMessageSentByMe: replyMessage!.isMessageSentByMe, mentionedUsers: replyMessage?.mentionedUsersIds ?? [], searchedText: searchText)
+            } else {
+                replyTypeLabel?.attributedText = ChatUtils.getAttributedMessage(message: getReplymessage ?? "", searchText: searchText, isMessageSearch: isMessageSearch, isSystemBlue: false)
+            }
             replyTypeIconImageView?.isHidden = true
             replyTypeIconView?.isHidden = true
             if replyMessage?.isMessageSentByMe == true {
@@ -233,7 +237,7 @@ class ReceiverDocumentsTableViewCell: BaseTableViewCell {
             }
             replyTypeImageView?.isHidden = true
             replyTypeIconWidthCons?.constant = 0
-            if message?.replyParentChatMessage?.isMessageDeleted == true || message?.replyParentChatMessage?.isMessageRecalled == true || replyMessage == nil {
+            if replyMessage?.isMessageDeleted == true || replyMessage?.isMessageRecalled == true || replyMessage == nil {
                 replyTypeLabel?.text = "Original message not available"
                 replyTypeIconWidthCons?.constant = 0
                 replyTypeImageView?.isHidden = true
@@ -298,7 +302,7 @@ class ReceiverDocumentsTableViewCell: BaseTableViewCell {
                     replyTypeIconImageView?.image = UIImage(named: (message?.isMessageSentByMe ?? false) ? "document" : "document")
                     let mediaUrl = message?.mediaChatMessage?.mediaFileUrl
                     checkFileType(urlExtension: ((mediaUrl?.isEmpty ?? false ? (message?.mediaChatMessage?.mediaLocalStoragePath.components(separatedBy: ".").last as? String) : mediaUrl?.components(separatedBy: ".").last) ?? ""), typeImageView: replyTypeImageView)
-                    replyTypeLabel?.text = message?.replyParentChatMessage?.mediaChatMessage?.mediaFileName
+                    replyTypeLabel?.text = replyMessage?.mediaChatMessage?.mediaFileName
                     replyTypeImageView?.isHidden = false
                     replyStackViewTrailingCons?.constant = 54
                     replyImageWidthCons?.isActive = true

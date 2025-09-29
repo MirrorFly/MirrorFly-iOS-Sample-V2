@@ -124,6 +124,7 @@ class JoinCallViaLinkViewController: BaseViewController, CallUIDelegate {
         initJoinLink()
         CallManager.callUiDelegate = self
         ChatViewParentController.receiveCallModeDelegate = nil
+        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         CallUIViewController.pipModeDelegate = nil
     }
     

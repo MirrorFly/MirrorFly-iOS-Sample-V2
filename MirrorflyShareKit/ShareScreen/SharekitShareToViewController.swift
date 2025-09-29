@@ -176,7 +176,7 @@ class SharekitShareToViewController: ShareKitBaseViewController {
         navigationController?.isNavigationBarHidden = true
         sendButton?.isEnabled = false
         sendButton?.alpha = 0.4
-
+        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         if !selectedProfiles.isEmpty {
             sendButton?.isEnabled = true
             sendButton?.alpha = 1

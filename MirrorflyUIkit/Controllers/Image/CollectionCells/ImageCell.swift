@@ -63,6 +63,11 @@ class ImageCell: UICollectionViewCell, UIScrollViewDelegate {
     }
     
     func setUIImage(message: ChatMessage?) {
+        if message?.messageType == .video || message?.messageType == .audio {
+            zoomScroll?.maximumZoomScale = 1.0
+        }  else if message?.messageType == .image {
+            zoomScroll?.maximumZoomScale = 5.0
+        }
         if message?.messageType == .audio {
             cellImage.image = nil
             cellImage.backgroundColor = Color.color_97A5C7

@@ -23,6 +23,7 @@ class ContactUsController: UIViewController, UITextFieldDelegate, UITextViewDele
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.navigationController?.isNavigationBarHidden = true
+        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         descriptionTextView.delegate = self
         titleTextField.delegate = self
         sendBtn.titleLabel?.font =  AppFont.Bold.size(14)

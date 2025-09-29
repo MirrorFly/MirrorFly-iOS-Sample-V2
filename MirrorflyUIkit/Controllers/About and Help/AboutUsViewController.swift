@@ -33,6 +33,7 @@ All your messages are end-to-end encrypted in We Must Meet.
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         self.navigationController?.isNavigationBarHidden = true
     }
     

@@ -149,6 +149,7 @@ class MainTabBarController: UITabBarController{
         saveMyJidAsContacts()
         ChatManager.shared.connectionDelegate = self
         updateUnReadMissedCallBadgeCount()
+        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
     }
     
     override func viewDidLayoutSubviews() {

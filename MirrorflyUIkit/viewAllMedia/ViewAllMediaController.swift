@@ -60,7 +60,7 @@ class ViewAllMediaController: BaseViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         self.navigationController?.navigationBar.isHidden = true
-        
+        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         availableFeatures = ChatManager.getAvailableFeatures()
     }
     

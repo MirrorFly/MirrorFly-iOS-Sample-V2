@@ -26,7 +26,7 @@ class ContactSyncController: UIViewController {
         userName.text = ContactManager.getMyProfile().name
         
         let authorizationStatus = CNContactStore.authorizationStatus(for: .contacts)
-        if authorizationStatus == .authorized || authorizationStatus == .denied{
+        if authorizationStatus.isAuthorizedOrLimited || authorizationStatus == .denied{
             executeOnMainThread { [weak self] in
                 self?.startSyncingContacts()
             }
@@ -77,7 +77,7 @@ class ContactSyncController: UIViewController {
     
     func syncProgressUiUpdate(){
         let authorizationStatus = CNContactStore.authorizationStatus(for: .contacts)
-        if authorizationStatus == .authorized {
+        if authorizationStatus.isAuthorizedOrLimited {
             progressInfoLabel.text = "Contact sync is in progress"
             syncImage.isHidden = false
             syncImage.startRotating(duration: 1)
@@ -92,7 +92,7 @@ class ContactSyncController: UIViewController {
     
     func startSyncingContacts(initialSync : Bool = true) {
         let authorizationStatus = CNContactStore.authorizationStatus(for: .contacts)
-        if authorizationStatus == .authorized{
+        if authorizationStatus.isAuthorizedOrLimited{
             ContactSyncManager.updateContactPermission(isDeined: false)
             ContactSyncManager.needContactSync(isSync: true)
         } else if authorizationStatus == .denied{
@@ -107,7 +107,7 @@ class ContactSyncController: UIViewController {
                 executeOnMainThread {
                     if isSuccess{
                         Utility.saveInPreference(key: isLoginContactSyncDone, value: true)
-                        if authorizationStatus == .authorized{
+                        if authorizationStatus.isAuthorizedOrLimited{
                             AppAlert.shared.showToast(message: "Contacts synced successfully  ")
                             self?.progressInfoLabel.text = "Contacts Synced"
                             self?.syncImage.stopRotating()
@@ -117,7 +117,8 @@ class ContactSyncController: UIViewController {
                         Utility.saveInPreference(key: isLoginContactSyncDone, value: false)
                         self?.progressInfoLabel.text = "Contact sync failed"
                         self?.syncImage.stopRotating()
-                        AppAlert.shared.showToast(message: "Contact sync failure \(flyError?.localizedDescription)")
+                        AppAlert.shared.showToast(message: "Contact sync failed")
+                        self?.moveToDashboard()
                     }
                 }
             }

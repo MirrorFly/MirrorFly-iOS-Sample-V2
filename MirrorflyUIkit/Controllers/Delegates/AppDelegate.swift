@@ -135,7 +135,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
         }
         // Added this line so that we can start receing contact updates
         let contactPermissionStatus = CNContactStore.authorizationStatus(for: CNEntityType.contacts)
-        if contactPermissionStatus == .authorized || contactPermissionStatus == .denied{
+        if contactPermissionStatus.isAuthorizedOrLimited || contactPermissionStatus == .denied{
             ContactSyncManager.updateContactPermission(isSkipped: false)
         }
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.CNContactStoreDidChange, object: nil)
@@ -413,16 +413,43 @@ extension AppDelegate : PKPushRegistryDelegate {
 
 extension AppDelegate {
     
-    func startObservingContactChanges(){
-        contactSyncSubscription = contactSyncSubject.throttle(.seconds(3), latest: false ,scheduler: MainScheduler.instance).subscribe(onNext: { bool in
-            if bool{
-                if !ContactSyncManager.isPermissionSkipped() {
-                    ContactSyncManager.shared.syncContacts(){ isSuccess,_,_ in
-                       print("#contact Sync status => \(isSuccess)")
+    func startObservingContactChanges() {
+        // 🔹 1. Run a sync immediately if permission is already granted
+        let status = CNContactStore.authorizationStatus(for: CNEntityType.contacts)
+        if status.isAuthorizedOrLimited, !ContactSyncManager.isPermissionSkipped() {
+            ContactSyncManager.shared.syncContacts { isSuccess, _, _ in
+                print("#contact Sync (initial) => \(isSuccess)")
+            }
+        }
+        
+        // 🔹 2. Subscribe to your Rx subject for throttled sync
+        contactSyncSubscription = contactSyncSubject
+            .throttle(.seconds(3), latest: false, scheduler: MainScheduler.instance)
+            .subscribe(onNext: { bool in
+                if bool, !ContactSyncManager.isPermissionSkipped() {
+                    let status = CNContactStore.authorizationStatus(for: CNEntityType.contacts)
+                    if status.isAuthorizedOrLimited {
+                        ContactSyncManager.shared.syncContacts { isSuccess, _, _ in
+                            print("#contact Sync (subject) => \(isSuccess)")
+                        }
                     }
                 }
+            })
+        
+        // 🔹 3. Re-check whenever app comes back to foreground
+        NotificationCenter.default.addObserver(
+            forName: UIApplication.didBecomeActiveNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            guard let self = self else { return }
+            let status = CNContactStore.authorizationStatus(for: CNEntityType.contacts)
+            if status.isAuthorizedOrLimited, !ContactSyncManager.isPermissionSkipped() {
+                ContactSyncManager.shared.syncContacts { isSuccess, _, _ in
+                    print("#contact Sync (foreground) => \(isSuccess)")
+                }
             }
-        })
+        }
     }
     
     
@@ -567,10 +594,10 @@ extension AppDelegate : AdminBlockCurrentUserDelegate {
 extension AppDelegate {
     
     func logoutLocally(){
-           Utility.saveInPreference(key: isProfileSaved, value: false)
-           Utility.saveInPreference(key: isLoggedIn, value: false)
-           ChatManager.disconnect()
-           ChatManager.shared.resetFlyDefaults()
+        Utility.saveInPreference(key: isProfileSaved, value: false)
+        Utility.saveInPreference(key: isLoggedIn, value: false)
+        ChatManager.disconnect()
+        ChatManager.shared.resetFlyDefaults()
     }
     
     func navigateToBlockedScreen() {

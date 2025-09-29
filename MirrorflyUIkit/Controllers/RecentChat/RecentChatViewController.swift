@@ -335,7 +335,7 @@ class RecentChatViewController: UIViewController, UIGestureRecognizerDelegate {
         if !CommonDefaults.showAppLock || ChatManager.isPrivateChat(jid: pushChatId ?? "") {
             openChat(jid: pushChatId ?? "")
         }
-        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = true
+        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         ChatViewParentController.receiveCallModeDelegate = nil
         CallUIViewController.pipModeDelegate = nil
     }

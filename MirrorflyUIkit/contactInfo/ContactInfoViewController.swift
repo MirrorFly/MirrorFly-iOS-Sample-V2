@@ -661,7 +661,8 @@ extension ContactInfoViewController : AvailableFeaturesDelegate {
             
         }
         
-        refreshData()
+//        refreshData()
+        usersProfilesFetched()
     }
 }
 

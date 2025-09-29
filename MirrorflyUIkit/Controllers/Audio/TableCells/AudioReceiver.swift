@@ -226,40 +226,44 @@ class AudioReceiver: BaseTableViewCell, AVAudioPlayerDelegate {
            replyView?.isHidden = false
             let getReplymessage =  message?.replyParentChatMessage?.messageTextContent
            let replyMessage = FlyMessenger.getMessageOfId(messageId: message?.replyParentChatMessage?.messageId ?? "")
-           if message?.replyParentChatMessage?.isMessageDeleted == true || message?.replyParentChatMessage?.isMessageRecalled == true || replyMessage == nil {
+           if replyMessage?.isMessageDeleted == true || replyMessage?.isMessageRecalled == true || replyMessage == nil {
                replyTextLabel?.text = "Original message not available"
                mapView?.isHidden = true
            } else {
                mapView?.isHidden = true
-               replyTextLabel?.attributedText = ChatUtils.getAttributedMessage(message: getReplymessage ?? "", searchText: searchText, isMessageSearch: isMessageSearch, isSystemBlue: false)
+               if (message?.messageChatType == .groupChat || isStarredMessagePage ?? false) && !(replyMessage?.mentionedUsersIds.isEmpty ?? true) {
+                   replyTextLabel?.attributedText = ChatUtils.getMentionTextContent(message: replyMessage?.messageTextContent ?? "", isMessageSentByMe: replyMessage!.isMessageSentByMe, mentionedUsers: replyMessage?.mentionedUsersIds ?? [], searchedText: searchText)
+               } else {
+                   replyTextLabel?.attributedText = ChatUtils.getAttributedMessage(message: getReplymessage ?? "", searchText: searchText, isMessageSearch: isMessageSearch, isSystemBlue: false)
+               }
                if replyMessage?.mediaChatMessage != nil {
                    switch replyMessage?.mediaChatMessage?.messageType {
                    case .image:
                        messageTypeIcon?.image = UIImage(named: (message?.isMessageSentByMe ?? false) ? "senderCamera" : "receiverCamera")
-                       if let thumImage = message?.replyParentChatMessage?.mediaChatMessage?.mediaThumbImage {
+                       if let thumImage = replyMessage?.mediaChatMessage?.mediaThumbImage {
                            let converter = ImageConverter()
                            let image =  converter.base64ToImage(thumImage)
                            mediaMessageImageView?.image = image
                            messageTypeIconView?.isHidden = false
-                           replyTextLabel?.text = (!(message?.replyParentChatMessage?.mediaChatMessage?.mediaCaptionText.isEmpty ?? false)) ? message?.replyParentChatMessage?.mediaChatMessage?.mediaCaptionText : "Photo"
+                           replyTextLabel?.text = (!(replyMessage?.mediaChatMessage?.mediaCaptionText.isEmpty ?? false)) ? replyMessage?.mediaChatMessage?.mediaCaptionText : "Photo"
                        }
                        replyWithMediaCons?.isActive = true
                        replyWithOutMediaCons?.isActive = false
                    case .audio:
                        ChatUtils.setIconForAudio(imageView: messageTypeIcon, chatMessage: nil, replyParentMessage: message?.replyParentChatMessage)
-                       let duration = Int(message?.replyParentChatMessage?.mediaChatMessage?.mediaDuration ?? 0)
-                       replyTextLabel?.text = (!(message?.replyParentChatMessage?.mediaChatMessage?.mediaCaptionText.isEmpty ?? false)) ? message?.replyParentChatMessage?.mediaChatMessage?.mediaCaptionText : message?.replyParentChatMessage?.mediaChatMessage?.messageType.rawValue.capitalized.appending(" (\(duration.msToSeconds.minuteSecondMS))")
+                       let duration = Int(replyMessage?.mediaChatMessage?.mediaDuration ?? 0)
+                       replyTextLabel?.text = (!(replyMessage?.mediaChatMessage?.mediaCaptionText.isEmpty ?? false)) ? replyMessage?.mediaChatMessage?.mediaCaptionText : replyMessage?.mediaChatMessage?.messageType.rawValue.capitalized.appending(" (\(duration.msToSeconds.minuteSecondMS))")
                        messageTypeIconView?.isHidden = false
                        replyWithMediaCons?.isActive = false
                        replyWithOutMediaCons?.isActive = true
                    case .video:
                        messageTypeIcon?.image = UIImage(named: (message?.isMessageSentByMe ?? false) ? "senderVideo" : "video")
                        messageTypeIconView?.isHidden = false
-                       if let thumImage = message?.replyParentChatMessage?.mediaChatMessage?.mediaThumbImage {
+                       if let thumImage = replyMessage?.mediaChatMessage?.mediaThumbImage {
                            let converter = ImageConverter()
                            let image =  converter.base64ToImage(thumImage)
                            mediaMessageImageView?.image = image
-                           replyTextLabel?.text = (!(message?.replyParentChatMessage?.mediaChatMessage?.mediaCaptionText.isEmpty ?? false)) ? message?.replyParentChatMessage?.mediaChatMessage?.mediaCaptionText : message?.replyParentChatMessage?.mediaChatMessage?.messageType.rawValue.capitalized
+                           replyTextLabel?.text = (!(replyMessage?.mediaChatMessage?.mediaCaptionText.isEmpty ?? false)) ? replyMessage?.mediaChatMessage?.mediaCaptionText : replyMessage?.mediaChatMessage?.messageType.rawValue.capitalized
                        }
                        replyWithMediaCons?.isActive = true
                        replyWithOutMediaCons?.isActive = false
@@ -282,10 +286,10 @@ class AudioReceiver: BaseTableViewCell, AVAudioPlayerDelegate {
                    mapView?.isUserInteractionEnabled = false
                    messageTypeIcon?.image = UIImage(named: (message?.isMessageSentByMe ?? false) ? "map" : "receivedMap")
                    messageTypeIconView?.isHidden = false
-                   guard let latitude = message?.replyParentChatMessage?.locationChatMessage?.latitude else {
+                   guard let latitude = replyMessage?.locationChatMessage?.latitude else {
                        return nil
                    }
-                   guard let longitude = message?.replyParentChatMessage?.locationChatMessage?.longitude  else {
+                   guard let longitude = replyMessage?.locationChatMessage?.longitude  else {
                        return nil
                    }
                    
@@ -306,7 +310,7 @@ class AudioReceiver: BaseTableViewCell, AVAudioPlayerDelegate {
                    replyWithMediaCons?.isActive = true
                    replyWithOutMediaCons?.isActive = false
                } else if replyMessage?.contactChatMessage != nil {
-                   replyTextLabel?.attributedText = ChatUtils.setAttributeString(name: message?.replyParentChatMessage?.contactChatMessage?.contactName)
+                   replyTextLabel?.attributedText = ChatUtils.setAttributeString(name: replyMessage?.contactChatMessage?.contactName)
                    messageTypeIcon?.image = UIImage(named: (message?.isMessageSentByMe ?? false) ? "senderContact" : "receiverContact")
                    messageTypeIconView?.isHidden = false
                    replyWithMediaCons?.isActive = true
@@ -326,7 +330,7 @@ class AudioReceiver: BaseTableViewCell, AVAudioPlayerDelegate {
                    replyWithOutMediaCons?.isActive = false
                }
            }
-        if(message?.replyParentChatMessage?.isMessageSentByMe ?? false) {
+        if(replyMessage?.isMessageSentByMe ?? false) {
             replyUserLabel?.text = you.localized
         } else {
             replyUserLabel?.text = getUserName(jid: replyMessage?.senderUserJid ?? "" ,name: replyMessage?.senderUserName ?? "",
